@@ -395,6 +395,11 @@
                 const s = localStorage.getItem('stayfit_custom_foods');
                 return s ? JSON.parse(s) : [];
             });
+            // State mới: Lưu các món mặc định đã bị xóa
+            const [deletedCommonFoods, setDeletedCommonFoods] = useState(() => {
+                const s = localStorage.getItem('stayfit_deleted_common');
+                return s ? JSON.parse(s) : [];
+            });
 
             // Form inputs
             const [tab, setTab] = useState("quick");
@@ -403,14 +408,18 @@
             const [qty, setQty] = useState(1);
             const [searchQuery, setSearchQuery] = useState("");
             const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
+            
+            // Cửa sổ Confirm Modal thay cho hàm alert/confirm
+            const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
 
             // Tự động lưu vào LocalStorage
             useEffect(() => {
                 localStorage.setItem('stayfit_profile', JSON.stringify(profile));
                 localStorage.setItem('stayfit_history', JSON.stringify(history));
                 localStorage.setItem('stayfit_custom_foods', JSON.stringify(customFoodList));
+                localStorage.setItem('stayfit_deleted_common', JSON.stringify(deletedCommonFoods));
                 if (view !== "profile") localStorage.setItem('stayfit_setup', 'done');
-            }, [profile, history, customFoodList, view]);
+            }, [profile, history, customFoodList, deletedCommonFoods, view]);
 
             // Tính toán Target
             const calculatedTarget = useMemo(() => {
@@ -452,8 +461,12 @@
                 return { days: daysArray, monthTotalKcal: Math.round(monthTotalKcal * 10) / 10, monthName: `Tháng ${month + 1}, ${year}` };
             }, [currentDate, history]);
 
-            // Gộp thực phẩm
-            const allFoods = useMemo(() => [...customFoodList, ...COMMON_FOODS], [customFoodList]);
+            // Gộp thực phẩm (lọc bỏ các món mặc định đã bị xóa)
+            const allFoods = useMemo(() => {
+                const common = COMMON_FOODS.filter(f => !deletedCommonFoods.includes(f.name));
+                return [...customFoodList, ...common];
+            }, [customFoodList, deletedCommonFoods]);
+            
             const filteredFoods = useMemo(() => {
                 let results = allFoods;
                 if (searchQuery.trim()) {
@@ -487,6 +500,16 @@
             const addCustom = () => {
                 if (!customFood.name || !customFood.kcal) return;
                 
+                const isDuplicate = allFoods.some(food => food.name.toLowerCase().trim() === customFood.name.toLowerCase().trim());
+                if (isDuplicate) {
+                    setConfirmModal({ 
+                        isOpen: true, 
+                        foodToDelete: null, 
+                        alertMessage: "Món ăn này đã có sẵn trong danh sách. Vui lòng tìm và chọn trong mục Chọn nhanh!" 
+                    });
+                    return;
+                }
+                
                 const q = parseFloat(customFood.quantity) || 1;
                 const u = customFood.unit || "g";
                 const k = parseFloat(customFood.kcal) || 0;
@@ -508,24 +531,40 @@
                 
                 setHistory(prev => ({...prev, [currentDate]: [...(prev[currentDate] || []), newItem]}));
                 
-                const isDuplicate = allFoods.some(food => food.name.toLowerCase().trim() === customFood.name.toLowerCase().trim());
-                if (!isDuplicate) {
-                    const newQuickFood = {
-                        name: customFood.name.trim(),
-                        unit: u,
-                        per: q,
-                        kcal: k,
-                        protein: p,
-                        carb: c,
-                        fat: f
-                    };
-                    setCustomFoodList(prev => [newQuickFood, ...prev]);
-                }
+                const newQuickFood = {
+                    name: customFood.name.trim(),
+                    unit: u,
+                    per: q,
+                    kcal: k,
+                    protein: p,
+                    carb: c,
+                    fat: f
+                };
+                setCustomFoodList(prev => [newQuickFood, ...prev]);
+                
                 setCustomFood({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
+                setTab("quick"); // Tự động chuyển qua tab Chọn nhanh để người dùng thấy món vừa thêm
             };
 
             const removeFood = (id) => {
                 setHistory(prev => ({...prev, [currentDate]: (prev[currentDate] || []).filter(i => i.id !== id)}));
+            };
+
+            // Xác nhận xóa món ăn trong danh sách "Chọn nhanh"
+            const handleConfirmDelete = () => {
+                if (!confirmModal.foodToDelete) return;
+                const foodName = confirmModal.foodToDelete.name;
+                
+                // Xóa khỏi custom food (nếu có)
+                setCustomFoodList(prev => prev.filter(f => f.name !== foodName));
+                
+                // Xóa khỏi common food (nếu là món mặc định)
+                if (COMMON_FOODS.some(f => f.name === foodName)) {
+                    setDeletedCommonFoods(prev => [...prev, foodName]);
+                }
+                
+                setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" });
+                setSelectedFood(null); 
             };
 
             // Hàm Cập nhật Bữa ăn trực tiếp cho từng item
@@ -621,7 +660,7 @@
 
             // --- VIEW: NHẬT KÝ ---
             if (view === "journal") return (
-                <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300">
+                <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative">
                     <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
                         <div className="flex items-center gap-4">
                             <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="text-slate-300 p-1">◀</button>
@@ -690,10 +729,19 @@
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto no-scrollbar pb-2">
                                         {filteredFoods.map((f, idx) => (
-                                            <button key={f.name + idx} onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`p-4 rounded-2xl text-left transition-all border ${selectedFood?.name === f.name ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-transparent"} active:scale-95 group`}>
-                                                <p className="text-[9px] font-black text-slate-500 uppercase leading-tight truncate mb-1">{f.name}</p>
-                                                <p className="text-sm font-black text-slate-800">{f.kcal} <span className="text-[8px] font-normal italic opacity-40">kcal/{f.per}{f.unit}</span></p>
-                                            </button>
+                                            <div key={f.name + idx} className="relative group flex">
+                                                <button onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`w-full p-4 pr-8 rounded-2xl text-left transition-all border ${selectedFood?.name === f.name ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-transparent"} active:scale-95`}>
+                                                    <p className="text-[9px] font-black text-slate-500 uppercase leading-tight truncate mb-1">{f.name}</p>
+                                                    <p className="text-sm font-black text-slate-800">{f.kcal} <span className="text-[8px] font-normal italic opacity-40">kcal/{f.per}{f.unit}</span></p>
+                                                </button>
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} 
+                                                    className="absolute right-2 top-2 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                                    title="Xóa món ăn khỏi danh sách"
+                                                >
+                                                    <IconTrash />
+                                                </button>
+                                            </div>
                                         ))}
                                         {filteredFoods.length === 0 && <p className="col-span-2 text-center py-6 text-slate-400 text-xs italic">Không tìm thấy món ăn</p>}
                                     </div>
@@ -804,6 +852,36 @@
                             ))}
                             {dailyLog.length === 0 && <p className="text-center text-slate-300 text-[10px] uppercase font-bold italic py-8 border-2 border-dashed border-slate-100 rounded-[2.5rem] tracking-[0.2em]">Danh sách trống</p>}
                         </div>
+
+                        {/* MODAL CẢNH BÁO / XÁC NHẬN */}
+                        {confirmModal.isOpen && (
+                            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                                <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200">
+                                    {confirmModal.alertMessage ? (
+                                        <div className="text-center">
+                                            <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mx-auto mb-4">
+                                                <span className="font-black text-xl">!</span>
+                                            </div>
+                                            <h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Thông báo</h3>
+                                            <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">{confirmModal.alertMessage}</p>
+                                            <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Đã hiểu</button>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center">
+                                            <div className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4">
+                                                <IconTrash />
+                                            </div>
+                                            <h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Xác nhận xóa</h3>
+                                            <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">Bạn có chắc muốn xóa <span className="font-black text-slate-700">"{confirmModal.foodToDelete?.name}"</span> khỏi danh sách chọn nhanh?</p>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Hủy</button>
+                                                <button onClick={handleConfirmDelete} className="flex-1 py-3.5 bg-red-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all">Xóa Món</button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </main>
                     <BottomNav view={view} setView={setView} />
                 </div>
