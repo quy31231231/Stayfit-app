@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "googleapis": "^140.0.0"
+    "googleapis": "^140.0.0",
+    "@vercel/kv": "^1.0.1"
   }
 }
