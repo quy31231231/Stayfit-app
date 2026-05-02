@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StayFit - Nhật ký Sức khỏe</title>
-    <!-- Thư viện hỗ trợ -->
+    <title>StayFit - Nhật ký Calo & Lịch trình</title>
+    <!-- Thư viện React & Tailwind -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -14,70 +14,80 @@
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
 
-        // --- ICONS (SVG) ---
-        const IconUser = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
-        const IconCalendar = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
-        const IconJournal = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
-        const IconTrash = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
-
-        // --- DỮ LIỆU GỐC ---
+        // --- HẰNG SỐ VÀ DỮ LIỆU ---
         const ACTIVITY_LEVELS = [
-            { label: "Ít vận động", value: 1.2 },
-            { label: "Nhẹ (1-3 ngày/tuần)", value: 1.375 },
-            { label: "Vừa (3-5 ngày/tuần)", value: 1.55 },
-            { label: "Nhiều (6-7 ngày/tuần)", value: 1.725 },
+            { label: "Ít vận động (ngồi nhiều)", value: 1.2 },
+            { label: "Vận động nhẹ (1–3 ngày/tuần)", value: 1.375 },
+            { label: "Vận động vừa (3–5 ngày/tuần)", value: 1.55 },
+            { label: "Vận động nhiều (6–7 ngày/tuần)", value: 1.725 },
+            { label: "Vận động rất cao (2 lần/ngày)", value: 1.9 },
         ];
 
         const GOALS = [
-            { label: "Giảm cân nhanh", value: -500 },
-            { label: "Giảm cân nhẹ", value: -250 },
+            { label: "Giảm cân nhanh (−500 kcal)", value: -500 },
+            { label: "Giảm cân nhẹ (−250 kcal)", value: -250 },
             { label: "Duy trì cân nặng", value: 0 },
-            { label: "Tăng cân", value: 300 },
+            { label: "Tăng cân nhẹ (+250 kcal)", value: 250 },
+            { label: "Tăng cân nhanh (+500 kcal)", value: 500 },
         ];
 
         const COMMON_FOODS = [
             { name: "Phở bò (1 tô)", kcal: 420, protein: 25, carb: 55, fat: 10 },
-            { name: "Bún bò Huế", kcal: 450, protein: 28, carb: 58, fat: 12 },
-            { name: "Cơm trắng (1 bát)", kcal: 260, protein: 5, carb: 57, fat: 0.5 },
-            { name: "Cơm tấm sườn", kcal: 620, protein: 32, carb: 75, fat: 22 },
+            { name: "Bún bò Huế (1 tô)", kcal: 450, protein: 28, carb: 58, fat: 12 },
+            { name: "Bún riêu (1 tô)", kcal: 400, protein: 18, carb: 50, fat: 15 },
+            { name: "Cơm trắng (1 bát 200g)", kcal: 260, protein: 5, carb: 57, fat: 0.5 },
+            { name: "Cơm tấm sườn bì chả", kcal: 620, protein: 32, carb: 75, fat: 22 },
             { name: "Bánh mì thịt", kcal: 350, protein: 15, carb: 45, fat: 12 },
-            { name: "Ức gà (100g)", kcal: 165, protein: 31, carb: 0, fat: 4 },
-            { name: "Trứng luộc", kcal: 78, protein: 6, carb: 1, fat: 5 },
-            { name: "Cà phê sữa", kcal: 140, protein: 3, carb: 22, fat: 5 },
-            { name: "Trà sữa", kcal: 420, protein: 5, carb: 70, fat: 12 },
+            { name: "Bánh cuốn (1 đĩa)", kcal: 360, protein: 10, carb: 65, fat: 8 },
+            { name: "Xôi xéo (1 gói)", kcal: 450, protein: 12, carb: 82, fat: 14 },
+            { name: "Ức gà nướng (100g)", kcal: 165, protein: 31, carb: 0, fat: 4 },
+            { name: "Cá kho tộ (100g)", kcal: 180, protein: 18, carb: 4, fat: 10 },
+            { name: "Trứng luộc (1 quả)", kcal: 78, protein: 6, carb: 1, fat: 5 },
+            { name: "Chuối (1 quả)", kcal: 90, protein: 1, carb: 23, fat: 0 },
+            { name: "Cà phê sữa (1 ly)", kcal: 140, protein: 3, carb: 22, fat: 5 },
+            { name: "Trà sữa (1 ly 500ml)", kcal: 420, protein: 5, carb: 70, fat: 12 },
+            { name: "Nước mía (1 ly)", kcal: 160, protein: 0, carb: 40, fat: 0 },
         ];
 
         const formatDate = (date) => new Date(date).toISOString().split('T')[0];
 
-        // --- APP CHÍNH ---
+        // --- COMPONENTS ---
+        const IconUser = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+        const IconCalendar = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+        const IconJournal = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
+        const IconTrash = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
+
         function App() {
+            // Quản lý trạng thái màn hình và dữ liệu
             const [view, setView] = useState(() => localStorage.getItem('stayfit_setup') ? "journal" : "profile");
             const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
             const [profile, setProfile] = useState(() => {
                 const s = localStorage.getItem('stayfit_profile');
-                return s ? JSON.parse(s) : { gender: "male", age: 25, height: 165, weight: 60, activity: 1.375, goal: 0 };
+                return s ? JSON.parse(s) : { gender: "male", age: 25, height: 165, weight: 60, activity: 1.55, goal: 0 };
             });
             const [history, setHistory] = useState(() => {
                 const s = localStorage.getItem('stayfit_history');
                 return s ? JSON.parse(s) : {};
             });
 
-            // Tự động lưu vào LocalStorage
+            // Lưu dữ liệu vào máy mỗi khi có thay đổi
             useEffect(() => {
                 localStorage.setItem('stayfit_profile', JSON.stringify(profile));
                 localStorage.setItem('stayfit_history', JSON.stringify(history));
                 if (view !== "profile") localStorage.setItem('stayfit_setup', 'done');
             }, [profile, history, view]);
 
+            // Tính toán chỉ số mục tiêu
             const target = useMemo(() => {
                 const bmr = profile.gender === "male" 
                     ? 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5
@@ -88,24 +98,13 @@
             const dailyLog = history[currentDate] || [];
             const dailyKcal = dailyLog.reduce((s, i) => s + i.kcal, 0);
 
-            // Xử lý thêm món
-            const addFood = (f) => {
-                const newItem = { ...f, id: Date.now() };
-                setHistory(prev => ({...prev, [currentDate]: [...(prev[currentDate] || []), newItem]}));
-            };
-
-            const removeFood = (id) => {
-                setHistory(prev => ({...prev, [currentDate]: prev[currentDate].filter(i => i.id !== id)}));
-            };
-
-            // Dữ liệu cho Lịch
-            const calendarInfo = useMemo(() => {
+            // Logic tính lịch tháng
+            const calendarData = useMemo(() => {
                 const date = new Date(currentDate);
                 const month = date.getMonth();
                 const year = date.getFullYear();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                 const firstDay = new Date(year, month, 1).getDay();
-                
                 let monthTotal = 0;
                 const days = [];
                 for(let i=0; i<firstDay; i++) days.push(null);
@@ -115,149 +114,195 @@
                     monthTotal += kcal;
                     days.push({ day: d, key, kcal });
                 }
-                return { days, monthTotal, monthName: `Tháng ${month+1}, ${year}` };
+                return { days, monthTotal, monthName: `Tháng ${month + 1}, ${year}` };
             }, [currentDate, history]);
 
-            return (
-                <div className="max-w-md mx-auto min-h-screen bg-slate-50 flex flex-col relative pb-24 shadow-2xl">
-                    
-                    {/* --- VIEW: PROFILE --- */}
-                    {view === "profile" && (
-                        <div className="flex-1 bg-white p-6 flex flex-col justify-center space-y-6 animate-in fade-in">
-                            <div className="text-center">
-                                <h1 className="text-4xl font-black text-emerald-600 italic tracking-tighter">STAYFIT</h1>
-                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2">Thiết lập mục tiêu của bạn</p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <button onClick={() => setProfile({...profile, gender: 'male'})} className={`py-3 rounded-2xl font-bold border-2 transition-all ${profile.gender==='male' ? 'border-emerald-500 bg-emerald-50 text-emerald-600':'border-slate-100'}`}>Nam</button>
-                                <button onClick={() => setProfile({...profile, gender: 'female'})} className={`py-3 rounded-2xl font-bold border-2 transition-all ${profile.gender==='female' ? 'border-emerald-500 bg-emerald-50 text-emerald-600':'border-slate-100'}`}>Nữ</button>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input type="number" placeholder="Tuổi" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="bg-slate-50 p-4 rounded-2xl outline-none font-bold" />
-                                    <input type="number" placeholder="Cân nặng (kg)" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="bg-slate-50 p-4 rounded-2xl outline-none font-bold" />
-                                </div>
-                                <input type="number" placeholder="Chiều cao (cm)" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold" />
-                                <select value={profile.activity} onChange={e=>setProfile({...profile, activity:+e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none">
-                                    {ACTIVITY_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
-                                </select>
-                            </div>
-                            <div className="bg-slate-900 rounded-3xl p-6 text-white text-center shadow-xl">
-                                <span className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Mục tiêu ngày</span>
-                                <h2 className="text-4xl font-black text-emerald-400 mt-1">{target} kcal</h2>
-                            </div>
-                            <button onClick={() => setView("journal")} className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase shadow-lg shadow-emerald-200">Bắt đầu ngay</button>
-                        </div>
-                    )}
-
-                    {/* --- VIEW: JOURNAL --- */}
-                    {view === "journal" && (
-                        <div className="animate-in slide-in-from-right duration-300">
-                            <header className="bg-white p-6 border-b flex justify-between items-center sticky top-0 z-20">
-                                <div className="flex items-center gap-3">
-                                    <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="text-slate-300 font-black">◀</button>
-                                    <span className="font-black text-slate-800 uppercase text-xs">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</span>
-                                    <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="text-slate-300 font-black">▶</button>
-                                </div>
-                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs">🔥</div>
-                            </header>
-                            <main className="p-4 space-y-6">
-                                <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex items-center gap-6">
-                                    <div className="relative w-24 h-24 flex items-center justify-center">
-                                        <svg className="transform -rotate-90 w-24 h-24">
-                                            <circle cx="48" cy="48" r="40" stroke="#F1F5F9" strokeWidth="8" fill="transparent" />
-                                            <circle cx="48" cy="48" r="40" stroke={dailyKcal > target ? "#EF4444" : "#10B981"} strokeWidth="8" fill="transparent" 
-                                                strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - Math.min(dailyKcal/target, 1))} strokeLinecap="round" />
-                                        </svg>
-                                        <span className="absolute font-black text-lg text-slate-800">{Math.round((dailyKcal/target)*100)}%</span>
-                                    </div>
-                                    <div className="flex-1 text-right">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mục tiêu: {target}</p>
-                                        <h3 className="text-3xl font-black text-slate-800 leading-tight">{dailyKcal}</h3>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase">Kcal Đã nạp</p>
-                                    </div>
-                                </div>
-
-                                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
-                                    <h4 className="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest text-center">Gợi ý món ăn</h4>
-                                    <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto no-scrollbar">
-                                        {COMMON_FOODS.map(f => (
-                                            <button key={f.name} onClick={() => addFood(f)} className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 text-left transition-all border border-transparent hover:border-emerald-200">
-                                                <p className="text-[10px] font-bold text-slate-700 uppercase leading-tight truncate">{f.name}</p>
-                                                <p className="text-xs font-black text-emerald-600 mt-1">{f.kcal} <span className="text-[8px] font-normal italic opacity-60">kcal</span></p>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </section>
-
-                                <div className="space-y-3">
-                                    {dailyLog.map(item => (
-                                        <div key={item.id} className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-slate-50 border-l-4 border-l-emerald-400">
-                                            <span className="text-xs font-bold text-slate-700 uppercase">{item.name}</span>
-                                            <div className="flex items-center gap-4">
-                                                <span className="text-xs font-black text-slate-800">{item.kcal} kcal</span>
-                                                <button onClick={() => removeFood(item.id)} className="text-slate-200 hover:text-red-500 transition-colors"><IconTrash /></button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {dailyLog.length === 0 && <p className="text-center text-slate-300 text-[10px] uppercase font-bold italic py-8">Chưa có dữ liệu ăn uống</p>}
-                                </div>
-                            </main>
-                        </div>
-                    )}
-
-                    {/* --- VIEW: CALENDAR --- */}
-                    {view === "calendar" && (
-                        <div className="animate-in slide-in-from-left duration-300">
-                            <header className="bg-white p-6 border-b flex justify-between items-center">
-                                <h1 className="font-black uppercase tracking-widest text-slate-800 text-sm">Lịch trình tháng</h1>
-                                <button onClick={() => setView("profile")} className="p-2 bg-slate-50 rounded-full text-slate-400 text-xs font-bold">SET</button>
-                            </header>
-                            <main className="p-4 space-y-4">
-                                <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white shadow-2xl">
-                                    <p className="text-emerald-500 text-[10px] font-black uppercase mb-1">{calendarInfo.monthName}</p>
-                                    <h2 className="text-4xl font-black">{calendarInfo.monthTotal.toLocaleString()} <span className="text-sm font-normal opacity-30 italic">kcal</span></h2>
-                                    <p className="text-slate-500 text-[10px] font-bold uppercase mt-2">Tổng tiêu thụ tháng này</p>
-                                </div>
-                                <div className="bg-white rounded-[2.5rem] p-5 shadow-sm border border-slate-100">
-                                    <div className="calendar-grid text-center">
-                                        {["CN","T2","T3","T4","T5","T6","T7"].map(w => <div key={w} className="text-[10px] font-black text-slate-300 py-2">{w}</div>)}
-                                        {calendarInfo.days.map((d, i) => (
-                                            <div key={i} className="aspect-square flex items-center justify-center">
-                                                {d ? (
-                                                    <button onClick={() => { setCurrentDate(d.key); setView("journal"); }} className={`w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all ${d.key === currentDate ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-100 scale-105':'hover:bg-slate-50'}`}>
-                                                        <span className="text-[11px] font-bold">{d.day}</span>
-                                                        {d.kcal > 0 && <div className={`w-1 h-1 rounded-full mt-1 ${d.kcal > target ? 'bg-red-400':'bg-emerald-300'}`} />}
-                                                    </button>
-                                                ) : null}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100">
-                                    <h5 className="text-[10px] font-black uppercase text-slate-400 mb-2">Đang chọn: {currentDate}</h5>
-                                    <div className="flex justify-between items-center">
-                                        <p className="text-lg font-black text-slate-800">{dailyKcal} / {target} <span className="text-xs font-normal opacity-50 lowercase ml-1">kcal</span></p>
-                                        <button onClick={() => setView("journal")} className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full uppercase">Xem nhật ký</button>
-                                    </div>
-                                </div>
-                            </main>
-                        </div>
-                    )}
-
-                    {/* --- BOTTOM NAV --- */}
-                    <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-100 p-3 z-30 flex justify-around items-center">
-                        <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1 transition-all ${view==='journal' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
-                            <IconJournal /><span className="text-[9px] uppercase tracking-tighter">Nhật ký</span>
-                        </button>
-                        <button onClick={() => setView("calendar")} className={`flex flex-col items-center gap-1 transition-all ${view==='calendar' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
-                            <IconCalendar /><span className="text-[9px] uppercase tracking-tighter">Lịch tháng</span>
-                        </button>
-                        <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1 transition-all ${view==='profile' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
-                            <IconUser /><span className="text-[9px] uppercase tracking-tighter">Hồ sơ</span>
-                        </button>
+            // --- VIEW: HỒ SƠ ---
+            if (view === "profile") return (
+                <div className="max-w-md mx-auto min-h-screen bg-white p-8 flex flex-col justify-center animate-in fade-in duration-500">
+                    <div className="text-center mb-10">
+                        <h1 className="text-4xl font-black text-emerald-600 tracking-tighter italic">STAYFIT</h1>
+                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2">Cài đặt chỉ số cơ thể</p>
                     </div>
 
+                    <div className="space-y-6">
+                        <div className="flex gap-2 p-1.5 bg-slate-100 rounded-2xl">
+                            <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='male' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>Nam</button>
+                            <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='female' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>Nữ</button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="relative">
+                                <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-2">Tuổi</label>
+                                <div className="relative group">
+                                    <input type="number" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="w-full bg-slate-50 p-4 pr-12 rounded-2xl outline-none font-black text-lg focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase italic">Tuổi</span>
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-2">Cân nặng</label>
+                                <div className="relative group">
+                                    <input type="number" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl outline-none font-black text-lg focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase italic">Kg</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="relative">
+                            <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-2">Chiều cao</label>
+                            <div className="relative group">
+                                <input type="number" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl outline-none font-black text-lg focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase italic">Cm</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-[10px] font-black text-slate-400 uppercase mb-1 block ml-2">Mức độ vận động</label>
+                            <select value={profile.activity} onChange={e=>setProfile({...profile, activity:+e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none cursor-pointer">
+                                {ACTIVITY_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="bg-slate-900 rounded-3xl p-6 text-white text-center shadow-2xl transform transition-all">
+                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Ngân sách Calo mỗi ngày</p>
+                            <h2 className="text-5xl font-black text-emerald-400 mt-2 tracking-tighter">{target} <span className="text-sm font-normal text-slate-500 italic">kcal</span></h2>
+                        </div>
+
+                        <button onClick={() => setView("journal")} className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase tracking-widest shadow-xl shadow-emerald-100 hover:bg-emerald-700 active:scale-95 transition-all mt-4">Xác nhận & Bắt đầu</button>
+                    </div>
+                </div>
+            );
+
+            // --- VIEW: NHẬT KÝ & LỊCH ---
+            return (
+                <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28">
+                    {/* Header cố định */}
+                    <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+                        {view === "journal" ? (
+                            <div className="flex items-center gap-4 animate-in slide-in-from-top duration-300">
+                                <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="text-slate-300 p-1">◀</button>
+                                <div className="text-center min-w-[120px]">
+                                    <h2 className="font-black text-slate-800 uppercase text-xs tracking-tighter">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</h2>
+                                </div>
+                                <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="text-slate-300 p-1">▶</button>
+                            </div>
+                        ) : (
+                            <h2 className="font-black text-slate-800 uppercase text-xs tracking-[0.2em] animate-in slide-in-from-left duration-300">Lịch trình tiêu thụ</h2>
+                        )}
+                        <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs">SF</div>
+                    </header>
+
+                    {/* Màn hình Nhật ký */}
+                    {view === "journal" && (
+                        <main className="p-4 space-y-6 animate-in fade-in duration-500">
+                            {/* Ring Progress */}
+                            <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex items-center gap-6">
+                                <div className="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
+                                    <svg className="transform -rotate-90 w-24 h-24">
+                                        <circle cx="48" cy="48" r="40" stroke="#F1F5F9" strokeWidth="10" fill="transparent" />
+                                        <circle cx="48" cy="48" r="40" stroke={dailyKcal > target ? "#EF4444" : "#10B981"} strokeWidth="10" fill="transparent" 
+                                            strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - Math.min(dailyKcal/target, 1))} strokeLinecap="round" className="transition-all duration-1000" />
+                                    </svg>
+                                    <span className="absolute font-black text-lg text-slate-800">{Math.round((dailyKcal/target)*100)}%</span>
+                                </div>
+                                <div className="flex-1 text-right">
+                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-2">Mục tiêu: {target}</p>
+                                    <h3 className="text-4xl font-black text-slate-800 leading-none">{dailyKcal}</h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">{dailyKcal > target ? "Quá hạn mức!" : "Năng lượng nạp vào"}</p>
+                                </div>
+                            </div>
+
+                            {/* Food Selector */}
+                            <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-[0.2em] text-center">Gợi ý hôm nay</h4>
+                                <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto no-scrollbar pb-2">
+                                    {COMMON_FOODS.map(f => (
+                                        <button key={f.name} onClick={() => {
+                                            setHistory(prev => ({...prev, [currentDate]: [...(prev[currentDate] || []), {...f, id: Date.now()}]}));
+                                        }} className="p-4 rounded-2xl bg-slate-50 hover:bg-emerald-50 text-left transition-all border border-transparent hover:border-emerald-200 group active:scale-95">
+                                            <p className="text-[9px] font-black text-slate-500 uppercase leading-tight truncate mb-1 group-hover:text-emerald-700">{f.name}</p>
+                                            <p className="text-sm font-black text-slate-800 group-hover:text-emerald-600">{f.kcal} <span className="text-[8px] font-normal italic opacity-40">kcal</span></p>
+                                        </button>
+                                    ))}
+                                </div>
+                            </section>
+
+                            {/* Daily Log List */}
+                            <div className="space-y-3">
+                                {dailyLog.map(item => (
+                                    <div key={item.id} className="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-slate-50 group hover:border-red-100 transition-all border-l-4 border-l-emerald-400">
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-300 uppercase leading-none mb-1 tracking-tighter">Đã chọn</p>
+                                            <p className="text-xs font-bold text-slate-700 uppercase">{item.name}</p>
+                                        </div>
+                                        <div className="flex items-center gap-5 pl-4 border-l border-slate-50">
+                                            <span className="text-sm font-black text-slate-800 tabular-nums">{item.kcal} <span className="text-[9px] opacity-30 italic font-normal">kcal</span></span>
+                                            <button onClick={() => removeFood(item.id)} className="text-slate-200 hover:text-red-500 transition-colors p-1"><IconTrash /></button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {dailyLog.length === 0 && <p className="text-center py-10 text-slate-300 text-[10px] font-black uppercase tracking-[0.3em] italic opacity-50">Chưa có món nào được nạp</p>}
+                            </div>
+                        </main>
+                    )}
+
+                    {/* Màn hình Lịch */}
+                    {view === "calendar" && (
+                        <main className="p-4 space-y-4 animate-in fade-in duration-500">
+                            {/* Monthly Stats */}
+                            <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+                                <div className="relative z-10">
+                                    <p className="text-emerald-500 text-[10px] font-black uppercase mb-2 tracking-[0.3em]">{calendarData.monthName}</p>
+                                    <p className="text-slate-400 text-xs font-bold mb-1 italic opacity-80 uppercase tracking-tighter">Tổng tiêu thụ toàn tháng:</p>
+                                    <h2 className="text-5xl font-black tracking-tighter">{calendarData.monthTotalKcal.toLocaleString()} <span className="text-lg font-normal text-slate-600 italic ml-1">kcal</span></h2>
+                                </div>
+                                <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl"></div>
+                            </div>
+
+                            {/* Calendar Grid */}
+                            <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
+                                <div className="grid grid-cols-7 gap-1 text-center mb-2">
+                                    {["CN","T2","T3","T4","T5","T6","T7"].map(w => <div key={w} className="text-[10px] font-black text-slate-200 py-3 uppercase tracking-tighter">{w}</div>)}
+                                    {calendarData.days.map((d, i) => (
+                                        <div key={i} className="aspect-square flex items-center justify-center p-0.5">
+                                            {d ? (
+                                                <button onClick={() => { setCurrentDate(d.key); setView("journal"); }} className={`w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all ${d.key === currentDate ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 scale-105':'hover:bg-slate-50 text-slate-600'}`}>
+                                                    <span className="text-xs font-black">{d.day}</span>
+                                                    {d.kcal > 0 && <div className={`w-1 h-1 rounded-full mt-1 ${d.kcal > target ? 'bg-red-400':'bg-emerald-300'}`} />}
+                                                </button>
+                                            ) : null}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-6 pt-4 border-t border-slate-50 flex justify-center gap-6">
+                                    <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ổn định</span></div>
+                                    <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-500"></div><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Vượt mức</span></div>
+                                </div>
+                            </div>
+
+                            {/* Selected Date Summary */}
+                            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex justify-between items-center shadow-sm border-l-4 border-l-emerald-500 transition-all">
+                                <div>
+                                    <h5 className="text-[9px] font-black uppercase text-slate-300 tracking-widest mb-1">{currentDate}</h5>
+                                    <p className="text-xl font-black text-slate-800">{dailyKcal} <span className="text-xs font-normal opacity-30 italic">/ {target} kcal</span></p>
+                                </div>
+                                <button onClick={() => setView("journal")} className="px-5 py-2.5 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all hover:bg-emerald-100">Chi tiết nhật ký</button>
+                            </div>
+                        </main>
+                    )}
+
+                    {/* --- THANH ĐIỀU HƯỚNG DƯỚI (BOTTOM NAV) --- */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 p-4 z-40 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.04)]">
+                        <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='journal' ? 'text-emerald-600 scale-110 font-black':'text-slate-300'}`}>
+                            <IconJournal /><span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
+                        </button>
+                        <button onClick={() => setView("calendar")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='calendar' ? 'text-emerald-600 scale-110 font-black':'text-slate-300'}`}>
+                            <IconCalendar /><span className="text-[9px] uppercase font-bold tracking-tighter">Lịch trình</span>
+                        </button>
+                        <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='profile' ? 'text-emerald-600 scale-110 font-black':'text-slate-300'}`}>
+                            <IconUser /><span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
+                        </button>
+                    </div>
                 </div>
             );
         }
