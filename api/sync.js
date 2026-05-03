@@ -5,7 +5,8 @@ async function getSheets() {
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      // Đảm bảo private key không bị lỗi dấu xuống dòng
+      private_key: (process.env.GOOGLE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
     },
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
@@ -13,15 +14,21 @@ async function getSheets() {
 }
 
 export default async function handler(req, res) {
+  // 1. FIX LỖI SPREADSHEET_ID: Bao phủ cả 2 trường hợp tên biến
+  const SHEET_ID = process.env.SPREADSHEET_ID || process.env.GOOGLE_SHEET_ID;
+  
+  if (!SHEET_ID) {
+    return res.status(400).json({ error: "Lỗi Vercel: Chưa cài đặt SPREADSHEET_ID trong Environment Variables." });
+  }
+
   const sheets = await getSheets();
-  const SHEET_ID = process.env.GOOGLE_SHEET_ID;
   
   // === UPLOAD DỮ LIỆU TỪ APP LÊN SHEETS ===
   if (req.method === "POST" && req.body.action === "upload") {
     const { userId, profile, history, weightLog } = req.body;
     
     try {
-      // Cập nhật profile
+      // --- CẬP NHẬT PROFILE ---
       await sheets.spreadsheets.values.update({
         spreadsheetId: SHEET_ID,
         range: "Profile!A2",
@@ -29,34 +36,37 @@ export default async function handler(req, res) {
         requestBody: {
           values: [[
             userId,
-            profile.gender,
-            profile.age,
-            profile.height,
-            profile.weight,
-            profile.activity,
-            profile.goal,
+            profile.gender || "",
+            profile.age || "",
+            profile.height || "",
+            profile.weight || "",
+            profile.activity || "",
+            profile.goal || "",
             profile.manualTargetKcal || "",
             new Date().toISOString()
           ]],
         },
       });
       
-      // Cập nhật history (ghi đè toàn bộ)
-      const historyRows = Object.entries(history).flatMap(([date, items]) =>
-        items.map(item => [
-          userId, date, item.meal, item.name, item.quantity,
-          item.unit, item.kcal, item.protein, item.carb, item.fat,
-          new Date().toISOString()
-        ])
-      );
+      // --- CẬP NHẬT HISTORY ---
+      let historyRows = [];
+      if (history) {
+        historyRows = Object.entries(history).flatMap(([date, items]) =>
+          items.map(item => [
+            userId, date, item.meal, item.name, item.quantity,
+            item.unit, item.kcal, item.protein, item.carb, item.fat,
+            new Date().toISOString()
+          ])
+        );
+      }
       
-      // Xóa dữ liệu cũ của user này trước
+      // Xóa dữ liệu cũ (Tăng range lên 10000 để an toàn)
       await sheets.spreadsheets.values.clear({
         spreadsheetId: SHEET_ID,
-        range: "History!A2:K1000",
+        range: "History!A2:K10000",
       });
       
-      // Ghi dữ liệu mới
+      // Ghi lịch sử mới
       if (historyRows.length > 0) {
         await sheets.spreadsheets.values.append({
           spreadsheetId: SHEET_ID,
@@ -65,14 +75,37 @@ export default async function handler(req, res) {
           requestBody: { values: historyRows },
         });
       }
+
+      // --- 2. FIX: THÊM CẬP NHẬT TRANG WEIGHTLOG ---
+      let weightRows = [];
+      if (weightLog) {
+         weightRows = Object.entries(weightLog).map(([date, weight]) => [
+            userId, date, weight, new Date().toISOString()
+         ]);
+      }
+
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId: SHEET_ID,
+        range: "WeightLog!A2:D1000",
+      });
+
+      if (weightRows.length > 0) {
+        await sheets.spreadsheets.values.append({
+          spreadsheetId: SHEET_ID,
+          range: "WeightLog!A2",
+          valueInputOption: "USER_ENTERED",
+          requestBody: { values: weightRows },
+        });
+      }
       
       return res.status(200).json({ success: true, message: "Uploaded" });
     } catch (err) {
+      console.error(err);
       return res.status(500).json({ error: err.message });
     }
   }
   
-  // === TẾT DỮ LIỆU TỪ SHEETS VỀ APP ===
+  // === TẢI DỮ LIỆU TỪ SHEETS VỀ APP ===
   if (req.method === "GET") {
     const { userId } = req.query;
     
@@ -113,12 +146,26 @@ export default async function handler(req, res) {
           protein: parseFloat(row[7]),
           carb: parseFloat(row[8]),
           fat: parseFloat(row[9]),
-          id: Date.now() + Math.random(), // Generate ID
+          id: Date.now() + Math.random(), 
         });
       });
+
+      // --- 3. FIX: THÊM TẢI DỮ LIỆU WEIGHTLOG VỀ ---
+      const weightRes = await sheets.spreadsheets.values.get({
+        spreadsheetId: SHEET_ID,
+        range: "WeightLog!A2:D1000",
+      });
       
-      return res.status(200).json({ profile, history });
+      const weightLog = {};
+      weightRes.data.values?.filter(row => row[0] === userId).forEach(row => {
+        const date = row[1];
+        const weight = parseFloat(row[2]);
+        weightLog[date] = weight;
+      });
+      
+      return res.status(200).json({ profile, history, weightLog });
     } catch (err) {
+      console.error(err);
       return res.status(500).json({ error: err.message });
     }
   }
