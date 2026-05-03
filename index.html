@@ -11,12 +11,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        .no-scrollbar::-webkit-scrollbar { 
+            display: none; 
+        }
+        .no-scrollbar { 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
         input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 4px; 
+        }
     </style>
 </head>
 <body class="bg-slate-50">
@@ -26,13 +41,49 @@
         const { useState, useMemo, useEffect, useRef } = React;
 
         // --- ICONS (SVG) ---
-        const IconUser = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
-        const IconCalendar = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
-        const IconJournal = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
-        const IconTrash = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
-        const IconPlus = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
-        const IconSearch = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
-        const IconStats = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
+        const IconUser = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+        );
+        const IconCalendar = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        );
+        const IconJournal = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+        );
+        const IconTrash = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+        );
+        const IconPlus = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+        );
+        const IconSearch = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        );
+        const IconStats = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+        );
 
         // --- DỮ LIỆU CƠ BẢN ---
         const COMMON_FOODS = [
@@ -44,133 +95,427 @@
             { name: "Rau cải xanh", unit: "g", per: 100, kcal: 25, carb: 3.6, fat: 0.4, protein: 2.2 },
             { name: "Bông cải xanh", unit: "g", per: 100, kcal: 34, carb: 7, fat: 0.4, protein: 2.8 },
             { name: "Đậu hũ", unit: "g", per: 100, kcal: 76, carb: 1.9, fat: 4.8, protein: 8 },
-            { name: "Trứng gà sống", unit: "g", per: 100, kcal: 143, carb: 1, fat: 10, protein: 13 },
             { name: "Trứng gà luộc", unit: "g", per: 100, kcal: 155, carb: 1, fat: 11, protein: 13 },
-            { name: "Trứng gà rán", unit: "g", per: 100, kcal: 196, carb: 1, fat: 15, protein: 14 },
-            { name: "Trứng gà omelet", unit: "g", per: 100, kcal: 157, carb: 1, fat: 12, protein: 11 },
-            { name: "Trứng gà kho, rim", unit: "g", per: 100, kcal: 142, carb: 1, fat: 10, protein: 13 },
-            { name: "Trứng gà bác", unit: "g", per: 100, kcal: 167, carb: 2, fat: 12, protein: 11 },
-            { name: "Ba chỉ / ba rọi (Việt)", unit: "g", per: 100, kcal: 260, carb: 0, fat: 21.5, protein: 16.5 },
-            { name: "Thắt thăn lợn (nạc)", unit: "g", per: 100, kcal: 143, carb: 0, fat: 6, protein: 21 },
-            { name: "Đùi gà, thịt", unit: "g", per: 100, kcal: 119, carb: 0, fat: 4, protein: 20 },
-            { name: "Cánh gà, thịt", unit: "g", per: 100, kcal: 126, carb: 0, fat: 4, protein: 22 },
             { name: "Ức gà, thịt", unit: "g", per: 100, kcal: 110, carb: 0, fat: 1, protein: 23 },
-            { name: "Thịt thăn bò (phần nạc)", unit: "g", per: 100, kcal: 142, carb: 0, fat: 6, protein: 21 },
-            { name: "Thịt ức bò (phần nạc)", unit: "g", per: 100, kcal: 155, carb: 0, fat: 7, protein: 21 },
-            { name: "Gạo trắng (sống)", unit: "g", per: 100, kcal: 360, carb: 79, fat: 0.7, protein: 7 },
-            { name: "Cơm trắng (chín)", unit: "g", per: 100, kcal: 130, carb: 28, fat: 0.3, protein: 2.7 },
-            { name: "Phở bò (1 tô lớn)", unit: "tô", per: 1, kcal: 500, carb: 60, fat: 12, protein: 28 },
-            { name: "Bún bò Huế", unit: "tô", per: 1, kcal: 480, carb: 58, fat: 14, protein: 25 },
-            { name: "Bánh mì thịt", unit: "ổ", per: 1, kcal: 380, carb: 48, fat: 12, protein: 18 },
-            { name: "Bún chả", unit: "suất", per: 1, kcal: 520, carb: 55, fat: 18, protein: 30 },
-            { name: "Cá rô phi", unit: "g", per: 100, kcal: 96, carb: 0, fat: 2, protein: 20 },
-            { name: "Cá hồi", unit: "g", per: 100, kcal: 208, carb: 0, fat: 13, protein: 20 },
-            { name: "Sữa tươi", unit: "ml", per: 100, kcal: 60, carb: 5, fat: 3, protein: 3 },
-            { name: "Chuối", unit: "g", per: 100, kcal: 89, carb: 23, fat: 0, protein: 1 }
-            // Lưu ý: Đừng quên chép lại danh sách món ăn đầy đủ của bạn vào đây nhé
+            { name: "Thịt thăn bò", unit: "g", per: 100, kcal: 142, carb: 0, fat: 6, protein: 21 },
+            { name: "Cơm trắng", unit: "g", per: 100, kcal: 130, carb: 28, fat: 0.3, protein: 2.7 },
+            { name: "Sữa tươi", unit: "ml", per: 100, kcal: 60, carb: 5, fat: 3, protein: 3 }
+            // Hãy dán thêm list của bạn vào đây
         ];
 
-        const ACTIVITY_LEVELS = [{ label: "Ít vận động", value: 1.2 }, { label: "Nhẹ (1-3 buổi/tuần)", value: 1.375 }, { label: "Vừa (3-5 buổi/tuần)", value: 1.55 }, { label: "Nhiều (6-7 buổi/tuần)", value: 1.725 }];
-        const GOALS = [{ label: "Giảm cân nhanh", value: -500 }, { label: "Giảm cân nhẹ", value: -250 }, { label: "Duy trì", value: 0 }, { label: "Tăng cân", value: 300 }];
+        const ACTIVITY_LEVELS = [
+            { label: "Ít vận động", value: 1.2 }, 
+            { label: "Nhẹ (1-3 buổi/tuần)", value: 1.375 }, 
+            { label: "Vừa (3-5 buổi/tuần)", value: 1.55 }, 
+            { label: "Nhiều (6-7 buổi/tuần)", value: 1.725 }
+        ];
+
+        const GOALS = [
+            { label: "Giảm cân nhanh", value: -500 }, 
+            { label: "Giảm cân nhẹ", value: -250 }, 
+            { label: "Duy trì", value: 0 }, 
+            { label: "Tăng cân", value: 300 }
+        ];
+
         const MEAL_TYPES = ["Bữa sáng", "Bữa trưa", "Bữa tối", "Ăn vặt"];
 
-        const formatDate = (date) => { const d = new Date(date); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
-        const calcMacro = (val, per, q) => Math.round((val / per) * q * 10) / 10;
-        const removeAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+        const formatDate = (date) => { 
+            const d = new Date(date); 
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; 
+        };
 
+        const calcMacro = (val, per, q) => {
+            return Math.round((val / per) * q * 10) / 10;
+        };
+
+        const removeAccents = (str) => {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+        };
+
+        // --- COMPONENTS ---
         function MacroProgressBar({ label, current, target, colorClass }) {
             const pct = Math.min((current / target) * 100, 100) || 0;
             return (
                 <div className="w-full">
-                    <div className="flex justify-between text-[10px] font-black uppercase mb-1.5"><span className="text-slate-400">{label}</span><span className="text-slate-700">{current}g <span className="opacity-40">/ {target}g</span></span></div>
-                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden"><div className={`h-full ${colorClass} transition-all duration-700 ease-out`} style={{ width: `${pct}%` }}></div></div>
+                    <div className="flex justify-between text-[10px] font-black uppercase mb-1.5">
+                        <span className="text-slate-400">{label}</span>
+                        <span className="text-slate-700">
+                            {current}g <span className="opacity-40">/ {target}g</span>
+                        </span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div 
+                            className={`h-full ${colorClass} transition-all duration-700 ease-out`} 
+                            style={{ width: `${pct}%` }}
+                        ></div>
+                    </div>
                 </div>
             );
         }
         
         function StatsView({ history, profile, setProfile, target, setView, view }) {
-            const [weightLog, setWeightLog] = useState(() => { const s = localStorage.getItem('stayfit_weight_log'); return s ? JSON.parse(s) : {}; });
+            const [weightLog, setWeightLog] = useState(() => { 
+                const s = localStorage.getItem('stayfit_weight_log'); 
+                return s ? JSON.parse(s) : {}; 
+            });
             const [weightInput, setWeightInput] = useState("");
-            const weightChartRef = useRef(null); const kcalChartRef = useRef(null); const macroChartRef = useRef(null);
-            const weightChartInstance = useRef(null); const kcalChartInstance = useRef(null); const macroChartInstance = useRef(null);
+            
+            const weightChartRef = useRef(null); 
+            const kcalChartRef = useRef(null); 
+            const macroChartRef = useRef(null);
+            
+            const weightChartInstance = useRef(null); 
+            const kcalChartInstance = useRef(null); 
+            const macroChartInstance = useRef(null);
+            
             const todayStr = formatDate(new Date());
 
-            const getWeekLabel = (dateStr) => { const d = new Date(dateStr); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; };
-            const getLast56Days = () => { const days = []; const today = new Date(); for (let i = 55; i >= 0; i--) { const d = new Date(today); d.setDate(today.getDate() - i); days.push(formatDate(d)); } return days; };
-            const sumDayMacro = (dayLog, field) => { if (!dayLog || !Array.isArray(dayLog)) return 0; return dayLog.reduce((sum, item) => sum + (item[field] || 0), 0); };
+            const getWeekLabel = (dateStr) => { 
+                const d = new Date(dateStr); 
+                return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`; 
+            };
+
+            const getLast56Days = () => { 
+                const days = []; 
+                const today = new Date(); 
+                for (let i = 55; i >= 0; i--) { 
+                    const d = new Date(today); 
+                    d.setDate(today.getDate() - i); 
+                    days.push(formatDate(d)); 
+                } 
+                return days; 
+            };
+
+            const sumDayMacro = (dayLog, field) => { 
+                if (!dayLog || !Array.isArray(dayLog)) return 0; 
+                return dayLog.reduce((sum, item) => sum + (item[field] || 0), 0); 
+            };
 
             const saveWeight = () => {
                 const inputVal = parseFloat(weightInput);
                 if (!inputVal || inputVal <= 0) return alert("Vui lòng nhập số kg hợp lệ!");
                 const newLog = { ...weightLog, [todayStr]: inputVal };
-                setWeightLog(newLog); localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog));
-                setProfile({...profile, weight: inputVal}); setWeightInput("");
+                setWeightLog(newLog); 
+                localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog));
+                setProfile({...profile, weight: inputVal}); 
+                setWeightInput("");
             };
 
-            const deleteWeight = (date) => { const newLog = { ...weightLog }; delete newLog[date]; setWeightLog(newLog); localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog)); };
+            const deleteWeight = (date) => { 
+                const newLog = { ...weightLog }; 
+                delete newLog[date]; 
+                setWeightLog(newLog); 
+                localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog)); 
+            };
 
             useEffect(() => {
-                Chart.defaults.font.family = "'Inter', sans-serif"; Chart.defaults.color = '#94a3b8';
-                if (weightChartInstance.current) weightChartInstance.current.destroy();
+                Chart.defaults.font.family = "'Inter', sans-serif"; 
+                Chart.defaults.color = '#94a3b8';
+
+                // 1. BIỂU ĐỒ CÂN NẶNG
+                if (weightChartInstance.current) {
+                    weightChartInstance.current.destroy();
+                }
                 const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(a) - new Date(b));
                 if (sortedDates.length > 0 && weightChartRef.current) {
                     const ctx = weightChartRef.current.getContext('2d');
-                    const labels = sortedDates.map(d => getWeekLabel(d)); const data = sortedDates.map(d => weightLog[d]);
-                    const minWeight = Math.floor(Math.min(...data)) - 2; const maxWeight = Math.ceil(Math.max(...data)) + 2;
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)'); gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-                    weightChartInstance.current = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Cân nặng (kg)', data, borderColor: '#10B981', backgroundColor: gradient, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#10B981', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ` ${c.parsed.y} kg` }, backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12, displayColors: false } }, scales: { y: { min: minWeight, max: maxWeight, grid: { color: '#f1f5f9', borderDash: [5, 5] }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } } } });
+                    const labels = sortedDates.map(d => getWeekLabel(d)); 
+                    const data = sortedDates.map(d => weightLog[d]);
+                    const minWeight = Math.floor(Math.min(...data)) - 2; 
+                    const maxWeight = Math.ceil(Math.max(...data)) + 2;
+                    
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); 
+                    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)'); 
+                    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+                    weightChartInstance.current = new Chart(ctx, { 
+                        type: 'line', 
+                        data: { 
+                            labels: labels, 
+                            datasets: [{ 
+                                label: 'Cân nặng (kg)', 
+                                data: data, 
+                                borderColor: '#10B981', 
+                                backgroundColor: gradient, 
+                                borderWidth: 3, 
+                                pointBackgroundColor: '#ffffff', 
+                                pointBorderColor: '#10B981', 
+                                pointBorderWidth: 2, 
+                                pointRadius: 4, 
+                                pointHoverRadius: 6, 
+                                fill: true, 
+                                tension: 0.3 
+                            }] 
+                        }, 
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false, 
+                            plugins: { 
+                                legend: { display: false }, 
+                                tooltip: { 
+                                    callbacks: { 
+                                        label: function(context) {
+                                            return " " + context.parsed.y + " kg";
+                                        } 
+                                    }, 
+                                    backgroundColor: '#0F172A', 
+                                    titleFont: { size: 11, family: 'Inter', weight: '800' }, 
+                                    bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, 
+                                    padding: 10, 
+                                    cornerRadius: 12, 
+                                    displayColors: false 
+                                } 
+                            }, 
+                            scales: { 
+                                y: { 
+                                    min: minWeight, 
+                                    max: maxWeight, 
+                                    grid: { color: '#f1f5f9', borderDash: [5, 5] }, 
+                                    border: { display: false }, 
+                                    ticks: { font: { weight: 'bold', size: 10 } } 
+                                }, 
+                                x: { 
+                                    grid: { display: false }, 
+                                    border: { display: false }, 
+                                    ticks: { font: { weight: 'bold', size: 10 } } 
+                                } 
+                            } 
+                        } 
+                    });
                 }
 
-                if (kcalChartInstance.current) kcalChartInstance.current.destroy();
+                // 2. BIỂU ĐỒ KCAL
+                if (kcalChartInstance.current) {
+                    kcalChartInstance.current.destroy();
+                }
                 if (kcalChartRef.current) {
                     const ctx = kcalChartRef.current.getContext('2d');
-                    const last56Days = getLast56Days(); const labels = last56Days.map(d => getWeekLabel(d));
-                    const dataKcal = last56Days.map(d => Math.round(sumDayMacro(history[d], 'kcal'))); const targetLine = new Array(56).fill(target);
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)'); gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
-                    kcalChartInstance.current = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Kcal nạp', data: dataKcal, borderColor: '#3B82F6', backgroundColor: gradient, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, { label: 'Mục tiêu', data: targetLine, borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 8 } } } });
+                    const last56Days = getLast56Days(); 
+                    const labels = last56Days.map(d => getWeekLabel(d));
+                    const dataKcal = last56Days.map(d => Math.round(sumDayMacro(history[d], 'kcal'))); 
+                    const targetLine = new Array(56).fill(target);
+                    
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); 
+                    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)'); 
+                    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+                    kcalChartInstance.current = new Chart(ctx, { 
+                        type: 'line', 
+                        data: { 
+                            labels: labels, 
+                            datasets: [
+                                { 
+                                    label: 'Kcal nạp', 
+                                    data: dataKcal, 
+                                    borderColor: '#3B82F6', 
+                                    backgroundColor: gradient, 
+                                    borderWidth: 2, 
+                                    pointRadius: 0, 
+                                    pointHoverRadius: 4, 
+                                    fill: true, 
+                                    tension: 0.4 
+                                }, 
+                                { 
+                                    label: 'Mục tiêu', 
+                                    data: targetLine, 
+                                    borderColor: '#cbd5e1', 
+                                    borderWidth: 2, 
+                                    borderDash: [5, 5], 
+                                    pointRadius: 0, 
+                                    fill: false, 
+                                    tension: 0 
+                                }
+                            ] 
+                        }, 
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false, 
+                            interaction: { mode: 'index', intersect: false }, 
+                            plugins: { 
+                                legend: { display: false }, 
+                                tooltip: { 
+                                    backgroundColor: '#0F172A', 
+                                    titleFont: { size: 11, family: 'Inter', weight: '800' }, 
+                                    bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, 
+                                    padding: 10, 
+                                    cornerRadius: 12 
+                                } 
+                            }, 
+                            scales: { 
+                                y: { 
+                                    beginAtZero: true, 
+                                    grid: { color: '#f1f5f9' }, 
+                                    border: { display: false }, 
+                                    ticks: { font: { weight: 'bold', size: 10 } } 
+                                }, 
+                                x: { 
+                                    grid: { display: false }, 
+                                    border: { display: false }, 
+                                    ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 8 } 
+                                } 
+                            } 
+                        } 
+                    });
                 }
 
-                if (macroChartInstance.current) macroChartInstance.current.destroy();
+                // 3. BIỂU ĐỒ MACRO
+                if (macroChartInstance.current) {
+                    macroChartInstance.current.destroy();
+                }
                 if (macroChartRef.current) {
                     const ctx = macroChartRef.current.getContext('2d');
-                    const last28Days = getLast56Days().slice(28); const labels = last28Days.map(d => getWeekLabel(d));
-                    const dataProtein = last28Days.map(d => Math.round(sumDayMacro(history[d], 'protein'))); const dataFat = last28Days.map(d => Math.round(sumDayMacro(history[d], 'fat')));
-                    macroChartInstance.current = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Protein (g)', data: dataProtein, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, { label: 'Fat (g)', data: dataFat, borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 10, family: 'Inter', weight: 'bold' } } }, tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 7 } } } });
+                    const last28Days = getLast56Days().slice(28); 
+                    const labels = last28Days.map(d => getWeekLabel(d));
+                    const dataProtein = last28Days.map(d => Math.round(sumDayMacro(history[d], 'protein'))); 
+                    const dataFat = last28Days.map(d => Math.round(sumDayMacro(history[d], 'fat')));
+
+                    macroChartInstance.current = new Chart(ctx, { 
+                        type: 'line', 
+                        data: { 
+                            labels: labels, 
+                            datasets: [
+                                { 
+                                    label: 'Protein (g)', 
+                                    data: dataProtein, 
+                                    borderColor: '#10B981', 
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+                                    borderWidth: 2.5, 
+                                    pointRadius: 0, 
+                                    pointHoverRadius: 4, 
+                                    fill: true, 
+                                    tension: 0.4 
+                                }, 
+                                { 
+                                    label: 'Fat (g)', 
+                                    data: dataFat, 
+                                    borderColor: '#F59E0B', 
+                                    backgroundColor: 'rgba(245, 158, 11, 0.1)', 
+                                    borderWidth: 2.5, 
+                                    pointRadius: 0, 
+                                    pointHoverRadius: 4, 
+                                    fill: true, 
+                                    tension: 0.4 
+                                }
+                            ] 
+                        }, 
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false, 
+                            interaction: { mode: 'index', intersect: false }, 
+                            plugins: { 
+                                legend: { 
+                                    display: true, 
+                                    position: 'top', 
+                                    align: 'end', 
+                                    labels: { 
+                                        boxWidth: 10, 
+                                        boxHeight: 10, 
+                                        usePointStyle: true, 
+                                        font: { size: 10, family: 'Inter', weight: 'bold' } 
+                                    } 
+                                }, 
+                                tooltip: { 
+                                    backgroundColor: '#0F172A', 
+                                    titleFont: { size: 11, family: 'Inter', weight: '800' }, 
+                                    bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, 
+                                    padding: 10, 
+                                    cornerRadius: 12 
+                                } 
+                            }, 
+                            scales: { 
+                                y: { 
+                                    beginAtZero: true, 
+                                    grid: { color: '#f1f5f9' }, 
+                                    border: { display: false }, 
+                                    ticks: { font: { weight: 'bold', size: 10 } } 
+                                }, 
+                                x: { 
+                                    grid: { display: false }, 
+                                    border: { display: false }, 
+                                    ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 7 } 
+                                } 
+                            } 
+                        } 
+                    });
                 }
-                return () => { if (weightChartInstance.current) weightChartInstance.current.destroy(); if (kcalChartInstance.current) kcalChartInstance.current.destroy(); if (macroChartInstance.current) macroChartInstance.current.destroy(); };
+                
+                return () => { 
+                    if (weightChartInstance.current) weightChartInstance.current.destroy(); 
+                    if (kcalChartInstance.current) kcalChartInstance.current.destroy(); 
+                    if (macroChartInstance.current) macroChartInstance.current.destroy(); 
+                };
             }, [history, weightLog, target]);
 
             const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
 
             return (
                 <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative text-slate-800">
-                    <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shadow-sm sticky top-0 z-20"><h1 className="font-black uppercase tracking-widest text-slate-800 text-xs">Thống kê & Biểu đồ</h1></header>
+                    <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shadow-sm sticky top-0 z-20">
+                        <h1 className="font-black uppercase tracking-widest text-slate-800 text-xs">Thống kê & Biểu đồ</h1>
+                    </header>
+
                     <main className="p-4 space-y-6">
                         <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                             <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cập nhật cân nặng</h3>
                             <div className="flex gap-2 mb-4">
-                                <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder="Hôm nay bao nhiêu kg?" className="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
-                                <button onClick={saveWeight} className="px-6 bg-emerald-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-200">Ghi</button>
+                                <input 
+                                    type="number" 
+                                    value={weightInput} 
+                                    onChange={e=>setWeightInput(e.target.value)} 
+                                    step="0.1" 
+                                    placeholder="Hôm nay bao nhiêu kg?" 
+                                    className="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" 
+                                />
+                                <button 
+                                    onClick={saveWeight} 
+                                    className="px-6 bg-emerald-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-200"
+                                >
+                                    Ghi
+                                </button>
                             </div>
-                            <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-300 mb-2 mt-6">Lịch sử (8 tuần gần nhất)</h4>
+
+                            <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-300 mb-2 mt-6">Lịch sử (8 tuần)</h4>
                             <div className="max-h-32 overflow-y-auto no-scrollbar bg-slate-50 rounded-2xl p-2 border border-slate-100">
-                                {sortedDates.length === 0 ? <p className="text-center text-slate-400 text-[10px] uppercase font-bold italic py-4">Chưa có bản ghi nào</p> : sortedDates.slice(0, 56).map(date => (
-                                    <div key={date} className="flex justify-between items-center p-3 bg-white rounded-xl mb-1 shadow-sm border border-slate-50">
-                                        <div className="flex items-center gap-3"><span className="text-[10px] font-black uppercase text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">{getWeekLabel(date)}/{date.split('-')[0]}</span><span className="text-sm font-black text-slate-800">{weightLog[date]} <span className="text-[10px] font-bold italic opacity-40">kg</span></span></div>
-                                        <button onClick={() => deleteWeight(date)} className="p-2 text-slate-200 hover:text-red-500 bg-slate-50 rounded-lg transition-colors group"><IconTrash /></button>
-                                    </div>
-                                ))}
+                                {sortedDates.length === 0 ? (
+                                    <p className="text-center text-slate-400 text-[10px] uppercase font-bold italic py-4">Chưa có bản ghi</p>
+                                ) : (
+                                    sortedDates.slice(0, 56).map(date => (
+                                        <div key={date} className="flex justify-between items-center p-3 bg-white rounded-xl mb-1 shadow-sm border border-slate-50">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-[10px] font-black uppercase text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">
+                                                    {getWeekLabel(date)}/{date.split('-')[0]}
+                                                </span>
+                                                <span className="text-sm font-black text-slate-800">
+                                                    {weightLog[date]} <span className="text-[10px] font-bold italic opacity-40">kg</span>
+                                                </span>
+                                            </div>
+                                            <button 
+                                                onClick={() => deleteWeight(date)} 
+                                                className="p-2 text-slate-200 hover:text-red-500 bg-slate-50 rounded-lg transition-colors group"
+                                            >
+                                                <IconTrash />
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </section>
+
                         <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 relative">
                             <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Biểu đồ cân nặng</h3>
-                            {sortedDates.length === 0 && <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-[2.5rem] z-10"><p className="text-xs font-bold text-slate-400 italic">Chưa có dữ liệu</p></div>}
+                            {sortedDates.length === 0 && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-[2.5rem] z-10">
+                                    <p className="text-xs font-bold text-slate-400 italic">Chưa có dữ liệu</p>
+                                </div>
+                            )}
                             <div className="h-48 relative w-full"><canvas ref={weightChartRef}></canvas></div>
                         </section>
+
                         <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                             <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Calo nạp vào (8 Tuần)</h3>
                             <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
                         </section>
+
                         <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                             <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Protein & Fat (4 Tuần)</h3>
                             <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
@@ -184,10 +529,37 @@
         function BottomNav({view, setView}) {
             return (
                 <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 p-4 z-40 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] max-w-md mx-auto">
-                    <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='journal' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}><IconJournal /><span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span></button>
-                    <button onClick={() => setView("calendar")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='calendar' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}><IconCalendar /><span className="text-[9px] uppercase font-bold tracking-tighter">Lịch trình</span></button>
-                    <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='stats' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}><IconStats /><span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span></button>
-                    <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='profile' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}><IconUser /><span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span></button>
+                    <button 
+                        onClick={() => setView("journal")} 
+                        className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='journal' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}
+                    >
+                        <IconJournal />
+                        <span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
+                    </button>
+                    
+                    <button 
+                        onClick={() => setView("calendar")} 
+                        className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='calendar' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}
+                    >
+                        <IconCalendar />
+                        <span className="text-[9px] uppercase font-bold tracking-tighter">Lịch trình</span>
+                    </button>
+                    
+                    <button 
+                        onClick={() => setView("stats")} 
+                        className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='stats' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}
+                    >
+                        <IconStats />
+                        <span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
+                    </button>
+                    
+                    <button 
+                        onClick={() => setView("profile")} 
+                        className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='profile' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}
+                    >
+                        <IconUser />
+                        <span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
+                    </button>
                 </div>
             );
         }
@@ -199,18 +571,38 @@
             const [view, setView] = useState(() => localStorage.getItem('stayfit_setup') ? "journal" : "profile");
             const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
             
-            const [profile, setProfile] = useState(() => { const s = localStorage.getItem('stayfit_profile'); return s ? JSON.parse(s) : { gender: "male", age: 25, height: 165, weight: 60, activity: 1.375, goal: 0, isManualTarget: false, manualTargetKcal: 2000 }; });
-            const [history, setHistory] = useState(() => { const s = localStorage.getItem('stayfit_history'); return s ? JSON.parse(s) : {}; });
-            const [customFoodList, setCustomFoodList] = useState(() => { const s = localStorage.getItem('stayfit_custom_foods'); return s ? JSON.parse(s) : []; });
-            const [deletedCommonFoods, setDeletedCommonFoods] = useState(() => { const s = localStorage.getItem('stayfit_deleted_common'); return s ? JSON.parse(s) : []; });
+            const [profile, setProfile] = useState(() => { 
+                const s = localStorage.getItem('stayfit_profile'); 
+                return s ? JSON.parse(s) : { gender: "male", age: 25, height: 165, weight: 60, activity: 1.375, goal: 0, isManualTarget: false, manualTargetKcal: 2000 }; 
+            });
+            
+            const [history, setHistory] = useState(() => { 
+                const s = localStorage.getItem('stayfit_history'); 
+                return s ? JSON.parse(s) : {}; 
+            });
+            
+            const [customFoodList, setCustomFoodList] = useState(() => { 
+                const s = localStorage.getItem('stayfit_custom_foods'); 
+                return s ? JSON.parse(s) : []; 
+            });
+            
+            const [deletedCommonFoods, setDeletedCommonFoods] = useState(() => { 
+                const s = localStorage.getItem('stayfit_deleted_common'); 
+                return s ? JSON.parse(s) : []; 
+            });
 
             const [tab, setTab] = useState("quick");
             const [selectedMeal, setSelectedMeal] = useState("Bữa sáng");
             const [selectedFood, setSelectedFood] = useState(null);
             const [qty, setQty] = useState(1);
             const [searchQuery, setSearchQuery] = useState("");
-            const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
-            const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
+            
+            const [customFood, setCustomFood] = useState({ 
+                name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" 
+            });
+            const [confirmModal, setConfirmModal] = useState({ 
+                isOpen: false, foodToDelete: null, alertMessage: "" 
+            });
 
             const [inputUser, setInputUser] = useState("");
             const [inputPass, setInputPass] = useState("");
@@ -221,7 +613,9 @@
                 localStorage.setItem('stayfit_history', JSON.stringify(history));
                 localStorage.setItem('stayfit_custom_foods', JSON.stringify(customFoodList));
                 localStorage.setItem('stayfit_deleted_common', JSON.stringify(deletedCommonFoods));
-                if (view !== "profile" && userId) localStorage.setItem('stayfit_setup', 'done');
+                if (view !== "profile" && userId) {
+                    localStorage.setItem('stayfit_setup', 'done');
+                }
             }, [profile, history, customFoodList, deletedCommonFoods, view, userId]);
 
             const syncToCloud = async () => {
@@ -236,7 +630,9 @@
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            action: "upload", userId, password, 
+                            action: "upload", 
+                            userId: userId, 
+                            password: password, 
                             profile: profileToSave,
                             history: JSON.parse(localStorage.getItem("stayfit_history") || "{}"),
                             weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
@@ -244,7 +640,9 @@
                     });
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error);
-                } catch (err) { console.error("Lỗi lưu ngầm:", err.message); }
+                } catch (err) { 
+                    console.error("Lỗi lưu ngầm:", err.message); 
+                }
             };
 
             const syncFromCloud = async () => {
@@ -271,13 +669,19 @@
                         sessionStorage.setItem(`sync_done_${userId}`, 'true');
                         window.location.reload();
                     }
-                } catch (err) { console.error("Lỗi tải ngầm:", err.message); }
+                } catch (err) { 
+                    console.error("Lỗi tải ngầm:", err.message); 
+                }
             };
 
             const handleLogin = async () => {
                 const uid = inputUser.trim().toLowerCase();
                 const pwd = inputPass.trim();
-                if (!uid || !pwd) { alert("Vui lòng nhập cả ID và Mật khẩu!"); return; }
+                
+                if (!uid || !pwd) { 
+                    alert("Vui lòng nhập cả ID và Mật khẩu!"); 
+                    return; 
+                }
 
                 setLoginLoading(true);
                 try {
@@ -297,7 +701,11 @@
                     if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
 
                     window.location.reload();
-                } catch (err) { alert("❌ Lỗi: " + err.message); } finally { setLoginLoading(false); }
+                } catch (err) { 
+                    alert("❌ Lỗi: " + err.message); 
+                } finally { 
+                    setLoginLoading(false); 
+                }
             };
 
             useEffect(() => {
@@ -311,50 +719,90 @@
 
             const isFirstRender = useRef(true);
             useEffect(() => {
-                if (isFirstRender.current) { isFirstRender.current = false; return; }
+                if (isFirstRender.current) { 
+                    isFirstRender.current = false; 
+                    return; 
+                }
                 const timeoutId = setTimeout(() => { syncToCloud(); }, 2500);
                 return () => clearTimeout(timeoutId);
             }, [history, profile]); 
 
             useEffect(() => {
-                const handleVisibilityChange = () => { if (document.visibilityState === 'hidden') syncToCloud(); };
+                const handleVisibilityChange = () => { 
+                    if (document.visibilityState === 'hidden') syncToCloud(); 
+                };
                 document.addEventListener('visibilitychange', handleVisibilityChange);
                 const now = new Date();
                 const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999) - now;
                 const midnightTimer = setTimeout(() => { syncToCloud(); }, millisTillMidnight);
-                return () => { document.removeEventListener('visibilitychange', handleVisibilityChange); clearTimeout(midnightTimer); };
+                return () => { 
+                    document.removeEventListener('visibilitychange', handleVisibilityChange); 
+                    clearTimeout(midnightTimer); 
+                };
             }, []);
 
             const calculatedTarget = useMemo(() => {
-                const bmr = profile.gender === "male" ? 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5 : 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
+                let bmr;
+                if (profile.gender === "male") {
+                    bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5;
+                } else {
+                    bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
+                }
                 return Math.round(bmr * profile.activity) + profile.goal;
             }, [profile.gender, profile.weight, profile.height, profile.age, profile.activity, profile.goal]);
 
             const target = profile.isManualTarget ? profile.manualTargetKcal : calculatedTarget;
             const dailyLog = history[currentDate] || [];
+            
             const dailyKcal = Math.round(dailyLog.reduce((s, i) => s + (i.kcal || 0), 0) * 10) / 10;
             const dailyProtein = Math.round(dailyLog.reduce((s, i) => s + (i.protein || 0), 0) * 10) / 10;
             const dailyCarb = Math.round(dailyLog.reduce((s, i) => s + (i.carb || 0), 0) * 10) / 10;
             const dailyFat = Math.round(dailyLog.reduce((s, i) => s + (i.fat || 0), 0) * 10) / 10;
+            
             const targetProtein = Math.round((target * 0.25 / 4) * 10) / 10;
             const targetCarb = Math.round((target * 0.50 / 4) * 10) / 10;
             const targetFat = Math.round((target * 0.25 / 9) * 10) / 10;
 
             const calendarData = useMemo(() => {
-                const baseDate = new Date(currentDate); const year = baseDate.getFullYear(); const month = baseDate.getMonth();
-                const firstDayOfMonth = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
-                let monthTotalKcal = 0; const daysArray = [];
-                for(let i = 0; i < firstDayOfMonth; i++) daysArray.push(null);
-                for(let d = 1; d <= daysInMonth; d++) {
-                    const key = formatDate(new Date(year, month, d)); const kcal = (history[key] || []).reduce((s, i) => s + (i.kcal || 0), 0);
-                    monthTotalKcal += kcal; daysArray.push({ day: d, key, kcal: Math.round(kcal * 10) / 10 });
+                const baseDate = new Date(currentDate); 
+                const year = baseDate.getFullYear(); 
+                const month = baseDate.getMonth();
+                const firstDayOfMonth = new Date(year, month, 1).getDay(); 
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                let monthTotalKcal = 0; 
+                const daysArray = [];
+                
+                for(let i = 0; i < firstDayOfMonth; i++) {
+                    daysArray.push(null);
                 }
-                return { days: daysArray, monthTotalKcal: Math.round(monthTotalKcal * 10) / 10, monthName: `Tháng ${month + 1}, ${year}` };
+                
+                for(let d = 1; d <= daysInMonth; d++) {
+                    const key = formatDate(new Date(year, month, d)); 
+                    const kcal = (history[key] || []).reduce((s, i) => s + (i.kcal || 0), 0);
+                    monthTotalKcal += kcal; 
+                    daysArray.push({ day: d, key: key, kcal: Math.round(kcal * 10) / 10 });
+                }
+                
+                return { 
+                    days: daysArray, 
+                    monthTotalKcal: Math.round(monthTotalKcal * 10) / 10, 
+                    monthName: `Tháng ${month + 1}, ${year}` 
+                };
             }, [currentDate, history]);
 
             const mealBreakdown = useMemo(() => {
-                const meals = [ { name: "Bữa sáng", icon: "☀️", color: "bg-orange-400" }, { name: "Bữa trưa", icon: "🌤️", color: "bg-emerald-500" }, { name: "Bữa tối", icon: "🌙", color: "bg-blue-500" }, { name: "Ăn vặt", icon: "⭐", color: "bg-purple-400" } ];
-                return meals.map(meal => ({ ...meal, kcal: Math.round(dailyLog.filter(item => item.meal === meal.name).reduce((sum, item) => sum + (item.kcal || 0), 0) * 10) / 10 }));
+                const meals = [ 
+                    { name: "Bữa sáng", icon: "☀️", color: "bg-orange-400" }, 
+                    { name: "Bữa trưa", icon: "🌤️", color: "bg-emerald-500" }, 
+                    { name: "Bữa tối", icon: "🌙", color: "bg-blue-500" }, 
+                    { name: "Ăn vặt", icon: "⭐", color: "bg-purple-400" } 
+                ];
+                return meals.map(meal => {
+                    const mealTotal = dailyLog
+                        .filter(item => item.meal === meal.name)
+                        .reduce((sum, item) => sum + (item.kcal || 0), 0);
+                    return { ...meal, kcal: Math.round(mealTotal * 10) / 10 };
+                });
             }, [dailyLog]);
 
             const maxMealKcal = Math.max(...mealBreakdown.map(m => m.kcal), 1);
@@ -376,21 +824,46 @@
 
             const handleAddSelectedFood = () => {
                 if (!selectedFood) return;
+                
                 const quantity = parseFloat(qty) || 0;
                 const newItem = { 
-                    name: selectedFood.name, quantity, unit: selectedFood.unit,
-                    kcal: calcMacro(selectedFood.kcal, selectedFood.per, quantity), protein: calcMacro(selectedFood.protein, selectedFood.per, quantity),
-                    carb: calcMacro(selectedFood.carb, selectedFood.per, quantity), fat: calcMacro(selectedFood.fat, selectedFood.per, quantity),
-                    meal: selectedMeal, id: Date.now() 
+                    name: selectedFood.name, 
+                    quantity: quantity, 
+                    unit: selectedFood.unit,
+                    kcal: calcMacro(selectedFood.kcal, selectedFood.per, quantity), 
+                    protein: calcMacro(selectedFood.protein, selectedFood.per, quantity),
+                    carb: calcMacro(selectedFood.carb, selectedFood.per, quantity), 
+                    fat: calcMacro(selectedFood.fat, selectedFood.per, quantity),
+                    meal: selectedMeal, 
+                    id: Date.now() 
                 };
-                setHistory(prev => ({...prev, [currentDate]: [...(prev[currentDate] || []), newItem]}));
-                setSelectedFood(null); setSearchQuery(""); setQty(1);
+                
+                setHistory(prev => ({
+                    ...prev, 
+                    [currentDate]: [...(prev[currentDate] || []), newItem]
+                }));
+                
+                setSelectedFood(null); 
+                setSearchQuery(""); 
+                setQty(1);
             };
 
             const addCustom = () => {
                 if (!customFood.name || !customFood.kcal) return;
-                const isDuplicate = allFoods.some(food => food.name.toLowerCase().trim() === customFood.name.toLowerCase().trim());
-                if (isDuplicate) { setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: "Món ăn này đã có sẵn. Vui lòng chọn trong Chọn nhanh!" }); return; }
+                
+                const foodName = customFood.name.trim();
+                const isDuplicate = allFoods.some(food => {
+                    return food.name.toLowerCase().trim() === foodName.toLowerCase();
+                });
+                
+                if (isDuplicate) { 
+                    setConfirmModal({ 
+                        isOpen: true, 
+                        foodToDelete: null, 
+                        alertMessage: "Món ăn này đã có sẵn. Vui lòng chọn trong Chọn nhanh!" 
+                    }); 
+                    return; 
+                }
                 
                 const q = parseFloat(customFood.quantity) || 1; 
                 const u = (customFood.unit || "g").toLowerCase();
@@ -399,9 +872,9 @@
                 const c = parseFloat(customFood.carb) || 0; 
                 const f = parseFloat(customFood.fat) || 0;
 
-                // 1. Lưu chính xác 100% con số người dùng nhập vào Lịch sử nạp (Nhật ký)
+                // 1. LƯU VÀO NHẬT KÝ (Giữ nguyên con số nhập vào)
                 const newItem = {
-                    name: customFood.name.trim(), 
+                    name: foodName, 
                     quantity: q, 
                     unit: u, 
                     kcal: Math.round(k * 10) / 10,
@@ -412,25 +885,41 @@
                     id: Date.now()
                 };
                 
-                setHistory(prev => ({...prev, [currentDate]: [...(prev[currentDate] || []), newItem]}));
+                setHistory(prev => ({
+                    ...prev, 
+                    [currentDate]: [...(prev[currentDate] || []), newItem]
+                }));
 
-                // 2. Tính toán quy đổi ngầm ra hệ quy chiếu 100g (hoặc 100ml) để đưa vào kho "Chọn nhanh"
+                // 2. QUY ĐỔI VỀ 100G ĐỂ LƯU VÀO KHO (Chọn nhanh)
                 let weightInGrams = q;
                 let baseUnit = 'g';
 
-                if (['kg'].includes(u)) { weightInGrams = q * 1000; }
-                else if (['l', 'lít'].includes(u)) { weightInGrams = q * 1000; baseUnit = 'ml'; }
-                else if (['ml'].includes(u)) { weightInGrams = q; baseUnit = 'ml'; }
-                else if (['g', 'gram'].includes(u)) { weightInGrams = q; }
+                if (['kg'].includes(u)) { 
+                    weightInGrams = q * 1000; 
+                }
+                else if (['l', 'lít'].includes(u)) { 
+                    weightInGrams = q * 1000; 
+                    baseUnit = 'ml'; 
+                }
+                else if (['ml'].includes(u)) { 
+                    weightInGrams = q; 
+                    baseUnit = 'ml'; 
+                }
+                else if (['g', 'gram'].includes(u)) { 
+                    weightInGrams = q; 
+                }
                 else {
-                    const mockWeights = { 'tô': 400, 'bát': 400, 'suất': 400, 'phần': 300, 'ly': 250, 'ổ': 150, 'quả': 100, 'trái': 100, 'cái': 100 };
+                    const mockWeights = { 
+                        'tô': 400, 'bát': 400, 'suất': 400, 'phần': 300, 
+                        'ly': 250, 'ổ': 150, 'quả': 100, 'trái': 100, 'cái': 100 
+                    };
                     weightInGrams = q * (mockWeights[u] || 100);
                 }
 
                 const factor100g = weightInGrams > 0 ? (100 / weightInGrams) : 1;
                 
                 const newQuickFood = { 
-                    name: customFood.name.trim(), 
+                    name: foodName, 
                     unit: baseUnit, 
                     per: 100, 
                     kcal: Math.round(k * factor100g), 
@@ -441,18 +930,28 @@
                 
                 setCustomFoodList(prev => [newQuickFood, ...prev]);
                 
-                // Reset lại form nhập tay
+                // Reset form
                 setCustomFood({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
                 setTab("quick");
             };
 
-            const removeFood = (id) => setHistory(prev => ({...prev, [currentDate]: (prev[currentDate] || []).filter(i => i.id !== id)}));
+            const removeFood = (id) => {
+                setHistory(prev => {
+                    const filteredLog = (prev[currentDate] || []).filter(i => i.id !== id);
+                    return { ...prev, [currentDate]: filteredLog };
+                });
+            };
 
             const handleConfirmDelete = () => {
                 if (!confirmModal.foodToDelete) return;
                 const foodName = confirmModal.foodToDelete.name;
+                
                 setCustomFoodList(prev => prev.filter(f => f.name !== foodName));
-                if (COMMON_FOODS.some(f => f.name === foodName)) setDeletedCommonFoods(prev => [...prev, foodName]);
+                
+                if (COMMON_FOODS.some(f => f.name === foodName)) {
+                    setDeletedCommonFoods(prev => [...prev, foodName]);
+                }
+                
                 setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" });
                 setSelectedFood(null); 
             };
@@ -460,7 +959,12 @@
             const updateItemMeal = (id, newMeal) => {
                 setHistory(prev => {
                     const currentDayLog = prev[currentDate] || [];
-                    const updatedLog = currentDayLog.map(item => item.id === id ? { ...item, meal: newMeal } : item);
+                    const updatedLog = currentDayLog.map(item => {
+                        if (item.id === id) {
+                            return { ...item, meal: newMeal };
+                        }
+                        return item;
+                    });
                     return { ...prev, [currentDate]: updatedLog };
                 });
             };
@@ -476,294 +980,716 @@
                             <h1 className="text-4xl font-black tracking-tighter italic mb-8">STAYFIT</h1>
                             
                             <div className="space-y-3 mb-6">
-                                <input type="text" value={inputUser} onChange={e=>setInputUser(e.target.value)} placeholder="Tên ID (vd: quy2026)" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" />
-                                <input type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="Mật khẩu" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }} />
+                                <input 
+                                    type="text" 
+                                    value={inputUser} 
+                                    onChange={e=>setInputUser(e.target.value)} 
+                                    placeholder="Tên ID (vd: quy2026)" 
+                                    className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" 
+                                />
+                                <input 
+                                    type="password" 
+                                    value={inputPass} 
+                                    onChange={e=>setInputPass(e.target.value)} 
+                                    placeholder="Mật khẩu" 
+                                    className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" 
+                                    onKeyDown={(e) => { 
+                                        if (e.key === 'Enter') handleLogin(); 
+                                    }} 
+                                />
                             </div>
 
-                            <button onClick={handleLogin} disabled={loginLoading} className="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">
+                            <button 
+                                onClick={handleLogin} 
+                                disabled={loginLoading} 
+                                className="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50"
+                            >
                                 {loginLoading ? "Đang kết nối..." : "Đăng Nhập"}
                             </button>
-                            <p className="text-[9px] text-white/50 font-bold mt-4 px-4 leading-relaxed">Nếu chưa có tài khoản, hãy nhập ID & Mật khẩu mới để tự động đăng ký.</p>
+                            <p className="text-[9px] text-white/50 font-bold mt-4 px-4 leading-relaxed">
+                                Nếu chưa có tài khoản, hãy nhập ID & Mật khẩu mới để tự động đăng ký.
+                            </p>
                         </div>
                     </div>
                 );
             }
 
             // === 2. MÀN HÌNH THỐNG KÊ ===
-            if (view === "stats") return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} setView={setView} view={view} />;
+            if (view === "stats") {
+                return (
+                    <StatsView 
+                        history={history} 
+                        profile={profile} 
+                        setProfile={setProfile} 
+                        target={target} 
+                        setView={setView} 
+                        view={view} 
+                    />
+                );
+            }
             
             // === 3. MÀN HÌNH HỒ SƠ ===
-            if (view === "profile") return (
-                <div className="max-w-md mx-auto min-h-screen bg-white p-8 flex flex-col justify-center space-y-6 animate-in fade-in duration-500 pb-28 relative">
-                    <div className="text-center mb-4"><h1 className="text-4xl font-black text-emerald-600 tracking-tighter italic">STAYFIT</h1><p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Hồ sơ cá nhân</p></div>
-                    <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl">
-                        <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='male' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>Nam</button>
-                        <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='female' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>Nữ</button>
-                    </div>
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="relative"><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Tuổi</label><div className="relative group"><input type="number" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="w-full bg-slate-50 p-4 pr-12 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">tuổi</span></div></div>
-                            <div className="relative"><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Cân nặng</label><div className="relative group"><input type="number" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">kg</span></div></div>
-                        </div>
-                        <div className="relative"><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Chiều cao</label><div className="relative group"><input type="number" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">cm</span></div></div>
-                        <div><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Mức độ vận động</label><select value={profile.activity} onChange={e=>{setProfile({...profile, activity:+e.target.value, isManualTarget: false});}} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{ACTIVITY_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}</select></div>
-                        <div><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Mục tiêu cân nặng</label><select value={profile.goal} onChange={e=>{setProfile({...profile, goal:+e.target.value, isManualTarget: false});}} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{GOALS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}</select></div>
-                    </div>
-                    <div className="bg-slate-900 rounded-3xl p-6 text-white text-center shadow-xl flex flex-col items-center">
-                        <span className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Ngân sách Calo/Ngày</span>
-                        <div className="flex justify-center items-end mt-1"><input type="number" value={target} onChange={e => setProfile({...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0})} className="text-4xl font-black text-emerald-400 tracking-tighter bg-transparent text-center outline-none w-32 border-b-2 border-dashed border-slate-700 hover:border-emerald-400 focus:border-emerald-400 transition-colors" /><span className="text-lg font-normal text-slate-500 italic mb-1 ml-1">kcal</span></div>
-                        {profile.isManualTarget && <button onClick={() => setProfile({...profile, isManualTarget: false})} className="text-[9px] text-emerald-500/80 mt-3 font-bold uppercase tracking-widest hover:text-emerald-400 transition-colors">⟲ Trở về Mức Tính Tự Động ({calculatedTarget})</button>}
-                    </div>
-                    <div className="space-y-3 mt-2">
-                        <button onClick={() => setView("journal")} className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase shadow-lg shadow-emerald-200 active:scale-95 transition-all">Bắt đầu ngay</button>
-                        <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-4 bg-slate-100 text-slate-500 rounded-3xl font-black uppercase tracking-widest hover:bg-slate-200 active:scale-95 transition-all">Đăng xuất</button>
-                    </div>
-                    <BottomNav view={view} setView={setView} />
-                </div>
-            );
-
-            // === 4. MÀN HÌNH NHẬT KÝ ===
-            if (view === "journal") return (
-                <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative">
-                    <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
-                        <div className="flex items-center gap-4">
-                            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="text-slate-300 p-1">◀</button>
-                            <div className="text-center min-w-[100px]"><span className="font-black text-slate-800 uppercase text-[11px] tracking-widest">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</span></div>
-                            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="text-slate-300 p-1">▶</button>
-                        </div>
-                        <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs shadow-sm">SF</div>
-                    </header>
-                    <main className="p-4 space-y-6">
-                        <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex flex-col gap-6">
-                            <div className="flex items-center justify-between">
-                                <div className="relative w-24 h-24 flex items-center justify-center"><svg className="transform -rotate-90 w-24 h-24"><circle cx="48" cy="48" r="40" stroke="#F1F5F9" strokeWidth="10" fill="transparent" /><circle cx="48" cy="48" r="40" stroke={dailyKcal > target ? "#EF4444" : "#10B981"} strokeWidth="10" fill="transparent" strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - Math.min(dailyKcal/target, 1.2))} strokeLinecap="round" className="transition-all duration-1000" /></svg><span className="absolute font-black text-xl text-slate-800">{Math.round((dailyKcal/target)*100) || 0}%</span></div>
-                                <div className="flex-1 text-right"><p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Mục tiêu: {target}</p><h3 className="text-4xl font-black text-slate-800 leading-none">{dailyKcal}</h3><p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Calo đã nạp</p></div>
-                            </div>
-                            <div className="border-t border-slate-50 pt-5 space-y-3">
-                                <MacroProgressBar label="Protein" current={dailyProtein} target={targetProtein} colorClass="bg-emerald-500" />
-                                <MacroProgressBar label="Carb" current={dailyCarb} target={targetCarb} colorClass="bg-blue-500" />
-                                <MacroProgressBar label="Fat" current={dailyFat} target={targetFat} colorClass="bg-yellow-400" />
-                            </div>
-                            <div className="border-t border-slate-50 pt-5 mt-1">
-                                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Theo bữa ăn</h3>
-                                {isDailyLogEmpty ? <p className="text-center text-[11px] italic text-slate-300 py-2">Chưa có dữ liệu hôm nay</p> : (
-                                    <div className="space-y-3">
-                                        {mealBreakdown.map(meal => (
-                                            <div key={meal.name} className="flex items-center justify-between gap-3">
-                                                <div className="flex items-center gap-2 w-24"><span className="w-5 h-5 flex items-center justify-center text-sm">{meal.icon}</span><span className="font-bold text-xs text-slate-700 uppercase">{meal.name}</span></div>
-                                                <div className="flex-1 bg-slate-100 rounded-full h-[3px]"><div className={`h-full rounded-full transition-all duration-500 ${meal.color}`} style={{ width: `${meal.kcal > 0 ? (meal.kcal / maxMealKcal) * 100 : 0}%` }}></div></div>
-                                                <div className="text-right min-w-[56px]">{meal.kcal > 0 ? <span className="font-black text-sm text-slate-800">{meal.kcal} <span className="text-[8px] text-slate-400 font-bold ml-0.5">KCAL</span></span> : <span className="font-black text-sm text-slate-300">—</span>}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+            if (view === "profile") {
+                return (
+                    <div className="max-w-md mx-auto min-h-screen bg-white p-8 flex flex-col justify-center space-y-6 animate-in fade-in duration-500 pb-28 relative">
+                        <div className="text-center mb-4">
+                            <h1 className="text-4xl font-black text-emerald-600 tracking-tighter italic">STAYFIT</h1>
+                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Hồ sơ cá nhân</p>
                         </div>
 
-                        <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
-                            <div className="flex justify-between items-center mb-6"><h4 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2"><IconPlus /> Thêm món</h4><select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="bg-slate-50 text-[9px] font-black text-slate-500 py-1.5 px-3 rounded-full outline-none uppercase tracking-widest cursor-pointer">{MEAL_TYPES.map(m => <option key={m} value={m}>{m}</option>)}</select></div>
-                            <div className="flex p-1 bg-slate-100 rounded-xl mb-4"><button onClick={() => setTab("quick")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "quick" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}>Chọn nhanh</button><button onClick={() => setTab("custom")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "custom" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}>Nhập tay</button></div>
-                            {tab === "quick" ? (
-                                <div>
-                                    <div className="relative mb-4"><div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div><input type="text" placeholder="Tìm nguyên liệu hoặc món ăn..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 pl-10 pr-4 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/20" /></div>
-                                    <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto no-scrollbar pb-2">
-                                        {filteredFoods.map((f, idx) => (
-                                            <div key={f.name + idx} className="relative group flex">
-                                                <button onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`w-full p-4 pr-8 rounded-2xl text-left transition-all border ${selectedFood?.name === f.name ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-transparent"} active:scale-95`}><p className="text-[9px] font-black text-slate-500 uppercase leading-tight truncate mb-1">{f.name}</p><p className="text-sm font-black text-slate-800">{f.kcal} <span className="text-[8px] font-normal italic opacity-40">kcal/{f.per}{f.unit}</span></p></button>
-                                                <button onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} className="absolute right-2 top-2 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"><IconTrash /></button>
-                                            </div>
-                                        ))}
-                                        {filteredFoods.length === 0 && <p className="col-span-2 text-center py-6 text-slate-400 text-xs italic">Không tìm thấy món ăn</p>}
-                                    </div>
-                                    
-                                    {/* MỤC CHỌN NHANH */}
-                                    {selectedFood && (() => {
-                                        let weightInGrams = qty;
-                                        const u = selectedFood.unit.toLowerCase();
-                                        if (['kg', 'l', 'lít'].includes(u)) weightInGrams = qty * 1000;
-                                        else if (['ml', 'g', 'gram'].includes(u)) weightInGrams = qty;
-                                        else {
-                                            const mockWeights = { 'tô': 400, 'bát': 400, 'suất': 400, 'phần': 300, 'ly': 250, 'ổ': 150, 'quả': 100, 'trái': 100, 'cái': 100 };
-                                            weightInGrams = qty * (mockWeights[u] || 100);
-                                        }
+                        <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl">
+                            <button 
+                                onClick={() => setProfile({...profile, gender: 'male'})} 
+                                className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='male' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}
+                            >
+                                Nam
+                            </button>
+                            <button 
+                                onClick={() => setProfile({...profile, gender: 'female'})} 
+                                className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='female' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}
+                            >
+                                Nữ
+                            </button>
+                        </div>
 
-                                        const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty);
-                                        const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty);
-                                        const totalCarb = calcMacro(selectedFood.carb, selectedFood.per, qty);
-                                        const totalFat = calcMacro(selectedFood.fat, selectedFood.per, qty);
-
-                                        const factor100g = weightInGrams > 0 ? (100 / weightInGrams) : 0;
-                                        const per100Kcal = Math.round(totalKcal * factor100g);
-                                        const per100Pro = (totalPro * factor100g).toFixed(1);
-                                        const per100Carb = (totalCarb * factor100g).toFixed(1);
-                                        const per100Fat = (totalFat * factor100g).toFixed(1);
-
-                                        return (
-                                        <div className="mt-4 pt-5 border-t border-slate-100 animate-in slide-in-from-top-2">
-                                            <div className="bg-slate-900 rounded-2xl p-4 mb-4 text-white shadow-xl relative overflow-hidden">
-                                                <div className="absolute top-0 right-0 p-4 opacity-10"><IconJournal /></div>
-                                                <div className="relative z-10 flex justify-between items-start mb-3">
-                                                    <div>
-                                                        <h5 className="font-black text-lg text-emerald-400 leading-tight">{selectedFood.name}</h5>
-                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{qty} {selectedFood.unit} (~{Math.round(weightInGrams)}g)</p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <span className="text-2xl font-black text-white">{totalKcal}</span>
-                                                        <span className="text-[9px] text-slate-400 font-bold ml-1">KCAL</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex justify-between items-center bg-white/10 rounded-xl p-2 mb-3">
-                                                    <div className="text-center w-1/3 border-r border-white/10">
-                                                        <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Protein</p>
-                                                        <p className="text-xs font-black text-emerald-400">{totalPro}g</p>
-                                                    </div>
-                                                    <div className="text-center w-1/3 border-r border-white/10">
-                                                        <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Carb</p>
-                                                        <p className="text-xs font-black text-blue-400">{totalCarb}g</p>
-                                                    </div>
-                                                    <div className="text-center w-1/3">
-                                                        <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Fat</p>
-                                                        <p className="text-xs font-black text-yellow-400">{totalFat}g</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex justify-between items-center text-[9px] font-bold">
-                                                    <span className="text-slate-500 uppercase tracking-widest bg-black/20 px-2 py-1 rounded">Dinh dưỡng trên 100g</span>
-                                                    <span className="text-slate-300">
-                                                        🔥 {per100Kcal} kcal <span className="text-slate-600 mx-1">|</span> P: {per100Pro}g <span className="text-slate-600 mx-1">|</span> C: {per100Carb}g <span className="text-slate-600 mx-1">|</span> F: {per100Fat}g
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-24 relative">
-                                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Số lượng</label>
-                                                    <input type="number" value={qty} step="any" min="0.1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-slate-100 text-slate-800 p-3 rounded-xl text-sm outline-none font-black text-center focus:ring-2 focus:ring-emerald-500/20 transition-all" />
-                                                </div>
-                                                <button onClick={() => handleAddSelectedFood()} className="flex-1 mt-4 h-12 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase shadow-xl shadow-emerald-100 flex items-center justify-center gap-1 active:scale-95 transition-all">Ghi vào nhật ký <IconPlus /></button>
-                                                <button onClick={() => { setSelectedFood(null); setQty(1); }} className="mt-4 p-3 text-slate-300 hover:text-red-500 bg-slate-50 rounded-xl transition-colors"><IconTrash /></button>
-                                            </div>
-                                        </div>
-                                        );
-                                    })()}
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    <input 
-                                        placeholder="Tên món ăn (vd: Gà rán...)" 
-                                        value={customFood.name} 
-                                        onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} 
-                                        className="w-full bg-slate-50 p-4 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 transition-all" 
-                                    />
-                                    
-                                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="relative">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Tuổi</label>
+                                    <div className="relative group">
                                         <input 
                                             type="number" 
-                                            placeholder="Số lượng nhập" 
-                                            value={customFood.quantity} 
-                                            onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} 
-                                            className="bg-slate-50 p-4 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 transition-all" 
+                                            value={profile.age} 
+                                            onChange={e=>setProfile({...profile, age:+e.target.value})} 
+                                            className="w-full bg-slate-50 p-4 pr-12 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" 
                                         />
-                                        <select 
-                                            value={customFood.unit} 
-                                            onChange={e => setCustomFood(p=>({...p, unit:e.target.value}))} 
-                                            className="bg-slate-50 p-4 rounded-2xl text-sm outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                                        >
-                                            <option value="g">g</option>
-                                            <option value="kg">kg</option>
-                                            <option value="ml">ml</option>
-                                            <option value="lít">lít</option>
-                                            <option value="phần">phần</option>
-                                            <option value="ly">ly</option>
-                                            <option value="tô">tô</option>
-                                            <option value="quả">quả</option>
-                                        </select>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">tuổi</span>
                                     </div>
-
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="relative group">
-                                            <input type="number" placeholder="Kcal" value={customFood.kcal} onChange={e => setCustomFood(p=>({...p, kcal:e.target.value}))} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" />
-                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-orange-400 uppercase">kcal</span>
-                                        </div>
-                                        <div className="relative group">
-                                            <input type="number" placeholder="Protein" value={customFood.protein} onChange={e => setCustomFood(p=>({...p, protein:e.target.value}))} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
-                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-emerald-400 uppercase">Pro</span>
-                                        </div>
-                                        <div className="relative group">
-                                            <input type="number" placeholder="Carb" value={customFood.carb} onChange={e => setCustomFood(p=>({...p, carb:e.target.value}))} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-blue-500/20" />
-                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-blue-400 uppercase">Carb</span>
-                                        </div>
-                                        <div className="relative group">
-                                            <input type="number" placeholder="Fat" value={customFood.fat} onChange={e => setCustomFood(p=>({...p, fat:e.target.value}))} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-yellow-500/20" />
-                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-yellow-400 uppercase">Fat</span>
-                                        </div>
-                                    </div>
-
-                                    <button onClick={addCustom} className="w-full bg-slate-900 text-white p-4 rounded-2xl font-black uppercase text-[10px] tracking-widest mt-2 active:scale-95 transition-all shadow-xl">Xác nhận thêm</button>
                                 </div>
-                            )}
-                        </section>
-
-                        <div className="space-y-3 pb-4">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Danh sách nạp vào</h3>
-                            {dailyLog.map(item => (
-                                <div key={item.id} className="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-slate-50 border-l-4 border-l-emerald-400 animate-in slide-in-from-left duration-300 group">
-                                    <div className="flex-1 pr-3">
-                                        <div className="inline-flex items-center bg-slate-100 hover:bg-emerald-50 px-2 py-0.5 rounded transition-colors cursor-pointer mb-1.5 border border-transparent hover:border-emerald-200">
-                                            <select value={item.meal || "Bữa sáng"} onChange={(e) => updateItemMeal(item.id, e.target.value)} className="text-[9px] font-black text-slate-500 hover:text-emerald-600 uppercase tracking-widest bg-transparent outline-none cursor-pointer appearance-none pr-1">{MEAL_TYPES.map(m => <option key={m} value={m}>{m}</option>)}</select>
-                                            <svg className="w-2 h-2 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg>
-                                        </div>
-                                        <p className="text-xs font-bold text-slate-800 uppercase truncate mb-1.5">{item.name} &mdash; {item.quantity}{item.unit}</p>
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1.5 flex-wrap"><span className="text-orange-500 font-black">{item.kcal} kcal</span><span className="text-slate-200">|</span> P: {item.protein}g <span className="text-slate-200">|</span> C: {item.carb}g <span className="text-slate-200">|</span> F: {item.fat}g</p>
+                                <div className="relative">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Cân nặng</label>
+                                    <div className="relative group">
+                                        <input 
+                                            type="number" 
+                                            value={profile.weight} 
+                                            onChange={e=>setProfile({...profile, weight:+e.target.value})} 
+                                            className="w-full bg-slate-50 p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" 
+                                        />
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">kg</span>
                                     </div>
-                                    <div className="flex items-center"><button onClick={() => removeFood(item.id)} className="text-slate-200 hover:text-red-500 transition-colors p-2 bg-slate-50 rounded-xl group-hover:bg-red-50"><IconTrash /></button></div>
                                 </div>
-                            ))}
-                            {dailyLog.length === 0 && <p className="text-center text-slate-300 text-[10px] uppercase font-bold italic py-8 border-2 border-dashed border-slate-100 rounded-[2.5rem] tracking-[0.2em]">Danh sách trống</p>}
+                            </div>
+
+                            <div className="relative">
+                                <label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Chiều cao</label>
+                                <div className="relative group">
+                                    <input 
+                                        type="number" 
+                                        value={profile.height} 
+                                        onChange={e=>setProfile({...profile, height:+e.target.value})} 
+                                        className="w-full bg-slate-50 p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" 
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">cm</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Mức độ vận động</label>
+                                <select 
+                                    value={profile.activity} 
+                                    onChange={e=>{
+                                        setProfile({...profile, activity:+e.target.value, isManualTarget: false});
+                                    }} 
+                                    className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none"
+                                >
+                                    {ACTIVITY_LEVELS.map(l => (
+                                        <option key={l.value} value={l.value}>{l.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Mục tiêu cân nặng</label>
+                                <select 
+                                    value={profile.goal} 
+                                    onChange={e=>{
+                                        setProfile({...profile, goal:+e.target.value, isManualTarget: false});
+                                    }} 
+                                    className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none"
+                                >
+                                    {GOALS.map(l => (
+                                        <option key={l.value} value={l.value}>{l.label}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
-                        {confirmModal.isOpen && (
-                            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-                                <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200">
-                                    {confirmModal.alertMessage ? (
-                                        <div className="text-center"><div className="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mx-auto mb-4"><span className="font-black text-xl">!</span></div><h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Thông báo</h3><p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">{confirmModal.alertMessage}</p><button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Đã hiểu</button></div>
+                        <div className="bg-slate-900 rounded-3xl p-6 text-white text-center shadow-xl flex flex-col items-center">
+                            <span className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Ngân sách Calo/Ngày</span>
+                            <div className="flex justify-center items-end mt-1">
+                                <input 
+                                    type="number" 
+                                    value={target} 
+                                    onChange={e => {
+                                        setProfile({
+                                            ...profile, 
+                                            isManualTarget: true, 
+                                            manualTargetKcal: parseInt(e.target.value) || 0
+                                        });
+                                    }} 
+                                    className="text-4xl font-black text-emerald-400 tracking-tighter bg-transparent text-center outline-none w-32 border-b-2 border-dashed border-slate-700 hover:border-emerald-400 focus:border-emerald-400 transition-colors" 
+                                />
+                                <span className="text-lg font-normal text-slate-500 italic mb-1 ml-1">kcal</span>
+                            </div>
+                            
+                            {profile.isManualTarget && (
+                                <button 
+                                    onClick={() => setProfile({...profile, isManualTarget: false})} 
+                                    className="text-[9px] text-emerald-500/80 mt-3 font-bold uppercase tracking-widest hover:text-emerald-400 transition-colors"
+                                >
+                                    ⟲ Trở về Mức Tính Tự Động ({calculatedTarget})
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="space-y-3 mt-2">
+                            <button 
+                                onClick={() => setView("journal")} 
+                                className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase shadow-lg shadow-emerald-200 active:scale-95 transition-all"
+                            >
+                                Bắt đầu ngay
+                            </button>
+                            
+                            <button 
+                                onClick={() => { 
+                                    setUserId(""); 
+                                    setPassword(""); 
+                                    localStorage.removeItem('stayfit_userid'); 
+                                    localStorage.removeItem('stayfit_password'); 
+                                }} 
+                                className="w-full py-4 bg-slate-100 text-slate-500 rounded-3xl font-black uppercase tracking-widest hover:bg-slate-200 active:scale-95 transition-all"
+                            >
+                                Đăng xuất
+                            </button>
+                        </div>
+                        
+                        <BottomNav view={view} setView={setView} />
+                    </div>
+                );
+            }
+
+            // === 4. MÀN HÌNH NHẬT KÝ ===
+            if (view === "journal") {
+                return (
+                    <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative">
+                        <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+                            <div className="flex items-center gap-4">
+                                <button 
+                                    onClick={() => { 
+                                        const d = new Date(currentDate); 
+                                        d.setDate(d.getDate()-1); 
+                                        setCurrentDate(formatDate(d)); 
+                                    }} 
+                                    className="text-slate-300 p-1"
+                                >
+                                    ◀
+                                </button>
+                                
+                                <div className="text-center min-w-[100px]">
+                                    <span className="font-black text-slate-800 uppercase text-[11px] tracking-widest">
+                                        {currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}
+                                    </span>
+                                </div>
+                                
+                                <button 
+                                    onClick={() => { 
+                                        const d = new Date(currentDate); 
+                                        d.setDate(d.getDate()+1); 
+                                        setCurrentDate(formatDate(d)); 
+                                    }} 
+                                    className="text-slate-300 p-1"
+                                >
+                                    ▶
+                                </button>
+                            </div>
+                            
+                            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs shadow-sm">
+                                SF
+                            </div>
+                        </header>
+
+                        <main className="p-4 space-y-6">
+                            <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex flex-col gap-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="relative w-24 h-24 flex items-center justify-center">
+                                        <svg className="transform -rotate-90 w-24 h-24">
+                                            <circle cx="48" cy="48" r="40" stroke="#F1F5F9" strokeWidth="10" fill="transparent" />
+                                            <circle 
+                                                cx="48" cy="48" r="40" 
+                                                stroke={dailyKcal > target ? "#EF4444" : "#10B981"} 
+                                                strokeWidth="10" fill="transparent" 
+                                                strokeDasharray={2 * Math.PI * 40} 
+                                                strokeDashoffset={2 * Math.PI * 40 * (1 - Math.min(dailyKcal/target, 1.2))} 
+                                                strokeLinecap="round" 
+                                                className="transition-all duration-1000" 
+                                            />
+                                        </svg>
+                                        <span className="absolute font-black text-xl text-slate-800">
+                                            {Math.round((dailyKcal/target)*100) || 0}%
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="flex-1 text-right">
+                                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Mục tiêu: {target}</p>
+                                        <h3 className="text-4xl font-black text-slate-800 leading-none">{dailyKcal}</h3>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Calo đã nạp</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="border-t border-slate-50 pt-5 space-y-3">
+                                    <MacroProgressBar label="Protein" current={dailyProtein} target={targetProtein} colorClass="bg-emerald-500" />
+                                    <MacroProgressBar label="Carb" current={dailyCarb} target={targetCarb} colorClass="bg-blue-500" />
+                                    <MacroProgressBar label="Fat" current={dailyFat} target={targetFat} colorClass="bg-yellow-400" />
+                                </div>
+                                
+                                <div className="border-t border-slate-50 pt-5 mt-1">
+                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Theo bữa ăn</h3>
+                                    {isDailyLogEmpty ? (
+                                        <p className="text-center text-[11px] italic text-slate-300 py-2">Chưa có dữ liệu hôm nay</p>
                                     ) : (
-                                        <div className="text-center">
-                                            <div className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4"><IconTrash /></div><h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Xác nhận xóa</h3><p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">Bạn có chắc muốn xóa <span className="font-black text-slate-700">"{confirmModal.foodToDelete?.name}"</span>?</p>
-                                            <div className="flex gap-2"><button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Hủy</button><button onClick={handleConfirmDelete} className="flex-1 py-3.5 bg-red-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all">Xóa Món</button></div>
+                                        <div className="space-y-3">
+                                            {mealBreakdown.map(meal => (
+                                                <div key={meal.name} className="flex items-center justify-between gap-3">
+                                                    <div className="flex items-center gap-2 w-24">
+                                                        <span className="w-5 h-5 flex items-center justify-center text-sm">{meal.icon}</span>
+                                                        <span className="font-bold text-xs text-slate-700 uppercase">{meal.name}</span>
+                                                    </div>
+                                                    <div className="flex-1 bg-slate-100 rounded-full h-[3px]">
+                                                        <div 
+                                                            className={`h-full rounded-full transition-all duration-500 ${meal.color}`} 
+                                                            style={{ width: `${meal.kcal > 0 ? (meal.kcal / maxMealKcal) * 100 : 0}%` }}
+                                                        ></div>
+                                                    </div>
+                                                    <div className="text-right min-w-[56px]">
+                                                        {meal.kcal > 0 ? (
+                                                            <span className="font-black text-sm text-slate-800">
+                                                                {meal.kcal} <span className="text-[8px] text-slate-400 font-bold ml-0.5">KCAL</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="font-black text-sm text-slate-300">—</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
                             </div>
-                        )}
-                    </main>
-                    <BottomNav view={view} setView={setView} />
-                </div>
-            );
 
-            // === 5. MÀN HÌNH LỊCH TRÌNH ===
-            if (view === "calendar") return (
-                <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300">
-                    <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shadow-sm sticky top-0 z-20"><h1 className="font-black uppercase tracking-widest text-slate-800 text-xs">Lịch trình tiêu thụ</h1><button onClick={() => setView("profile")} className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-[10px] font-black text-slate-400">⚙️</button></header>
-                    <main className="p-4 space-y-4">
-                        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-center"><p className="text-emerald-500 text-[10px] font-black uppercase mb-1 tracking-widest">{calendarData.monthName}</p><p className="text-slate-500 text-xs font-bold mb-2 uppercase tracking-tighter">Tổng tiêu thụ tháng này:</p><h2 className="text-5xl font-black tracking-tighter">{(calendarData.monthTotalKcal || 0).toLocaleString()} <span className="text-lg font-normal text-slate-600 italic ml-1">kcal</span></h2></div>
-                        <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 transition-all">
-                            <div className="calendar-grid text-center">
-                                {["CN","T2","T3","T4","T5","T6","T7"].map(w => <div key={w} className="text-[10px] font-black text-slate-200 py-3 uppercase">{w}</div>)}
-                                {calendarData.days.map((d, i) => (
-                                    <div key={i} className="aspect-square flex items-center justify-center p-0.5">
-                                        {d ? <button onClick={() => { setCurrentDate(d.key); setView("journal"); }} className={`w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all ${d.key === currentDate ? 'bg-emerald-600 text-white shadow-lg scale-110':'hover:bg-slate-50 text-slate-600'}`}><span className="text-xs font-black">{d.day}</span>{d.kcal > 0 && <div className={`w-1 h-1 rounded-full mt-1 ${d.kcal > target ? 'bg-red-400':'bg-emerald-300'}`} />}</button> : <div className="w-full h-full opacity-0" />}
+                            <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <IconPlus /> Thêm món
+                                    </h4>
+                                    <select 
+                                        value={selectedMeal} 
+                                        onChange={e=>setSelectedMeal(e.target.value)} 
+                                        className="bg-slate-50 text-[9px] font-black text-slate-500 py-1.5 px-3 rounded-full outline-none uppercase tracking-widest cursor-pointer"
+                                    >
+                                        {MEAL_TYPES.map(m => (
+                                            <option key={m} value={m}>{m}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="flex p-1 bg-slate-100 rounded-xl mb-4">
+                                    <button 
+                                        onClick={() => setTab("quick")} 
+                                        className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "quick" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}
+                                    >
+                                        Chọn nhanh
+                                    </button>
+                                    <button 
+                                        onClick={() => setTab("custom")} 
+                                        className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "custom" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}
+                                    >
+                                        Nhập tay
+                                    </button>
+                                </div>
+
+                                {tab === "quick" ? (
+                                    <div>
+                                        <div className="relative mb-4">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                                <IconSearch />
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                placeholder="Tìm món ăn..." 
+                                                value={searchQuery} 
+                                                onChange={e => setSearchQuery(e.target.value)} 
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 pl-10 pr-4 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/20" 
+                                            />
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto no-scrollbar pb-2">
+                                            {filteredFoods.map((f, idx) => (
+                                                <div key={f.name + idx} className="relative group flex">
+                                                    <button 
+                                                        onClick={() => { setSelectedFood(f); setQty(f.per); }} 
+                                                        className={`w-full p-4 pr-8 rounded-2xl text-left transition-all border ${selectedFood?.name === f.name ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-transparent"} active:scale-95`}
+                                                    >
+                                                        <p className="text-[9px] font-black text-slate-500 uppercase leading-tight truncate mb-1">{f.name}</p>
+                                                        <p className="text-sm font-black text-slate-800">
+                                                            {f.kcal} <span className="text-[8px] font-normal italic opacity-40">kcal/{f.per}{f.unit}</span>
+                                                        </p>
+                                                    </button>
+                                                    <button 
+                                                        onClick={(e) => { 
+                                                            e.stopPropagation(); 
+                                                            setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); 
+                                                        }} 
+                                                        className="absolute right-2 top-2 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                                    >
+                                                        <IconTrash />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            {filteredFoods.length === 0 && (
+                                                <p className="col-span-2 text-center py-6 text-slate-400 text-xs italic">Không tìm thấy món ăn</p>
+                                            )}
+                                        </div>
+                                        
+                                        {/* PHẦN CHỌN NHANH */}
+                                        {selectedFood && (() => {
+                                            let weightInGrams = qty;
+                                            const u = selectedFood.unit.toLowerCase();
+                                            
+                                            if (['kg', 'l', 'lít'].includes(u)) {
+                                                weightInGrams = qty * 1000;
+                                            } else if (['ml', 'g', 'gram'].includes(u)) {
+                                                weightInGrams = qty;
+                                            } else {
+                                                const mockWeights = { 'tô': 400, 'bát': 400, 'suất': 400, 'phần': 300, 'ly': 250, 'ổ': 150, 'quả': 100, 'trái': 100, 'cái': 100 };
+                                                weightInGrams = qty * (mockWeights[u] || 100);
+                                            }
+
+                                            const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty);
+                                            const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty);
+                                            const totalCarb = calcMacro(selectedFood.carb, selectedFood.per, qty);
+                                            const totalFat = calcMacro(selectedFood.fat, selectedFood.per, qty);
+
+                                            return (
+                                            <div className="mt-4 pt-5 border-t border-slate-100 animate-in slide-in-from-top-2">
+                                                <div className="bg-slate-900 rounded-2xl p-4 mb-4 text-white shadow-xl relative overflow-hidden">
+                                                    <div className="absolute top-0 right-0 p-4 opacity-10"><IconJournal /></div>
+                                                    <div className="relative z-10 flex justify-between items-start mb-3">
+                                                        <div>
+                                                            <h5 className="font-black text-lg text-emerald-400 leading-tight">{selectedFood.name}</h5>
+                                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{qty} {selectedFood.unit} (~{Math.round(weightInGrams)}g)</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className="text-2xl font-black text-white">{totalKcal}</span>
+                                                            <span className="text-[9px] text-slate-400 font-bold ml-1">KCAL</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex justify-between items-center bg-white/10 rounded-xl p-2 mb-3">
+                                                        <div className="text-center w-1/3 border-r border-white/10">
+                                                            <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Protein</p>
+                                                            <p className="text-xs font-black text-emerald-400">{totalPro}g</p>
+                                                        </div>
+                                                        <div className="text-center w-1/3 border-r border-white/10">
+                                                            <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Carb</p>
+                                                            <p className="text-xs font-black text-blue-400">{totalCarb}g</p>
+                                                        </div>
+                                                        <div className="text-center w-1/3">
+                                                            <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Fat</p>
+                                                            <p className="text-xs font-black text-yellow-400">{totalFat}g</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-24 relative">
+                                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Số lượng</label>
+                                                        <input 
+                                                            type="number" 
+                                                            value={qty} 
+                                                            step="any" 
+                                                            min="0.1" 
+                                                            onChange={e => setQty(parseFloat(e.target.value) || 0)} 
+                                                            className="w-full bg-slate-100 text-slate-800 p-3 rounded-xl text-sm outline-none font-black text-center focus:ring-2 focus:ring-emerald-500/20 transition-all" 
+                                                        />
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => handleAddSelectedFood()} 
+                                                        className="flex-1 mt-4 h-12 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase shadow-xl shadow-emerald-100 flex items-center justify-center gap-1 active:scale-95 transition-all"
+                                                    >
+                                                        Ghi vào nhật ký <IconPlus />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => { setSelectedFood(null); setQty(1); }} 
+                                                        className="mt-4 p-3 text-slate-300 hover:text-red-500 bg-slate-50 rounded-xl transition-colors"
+                                                    >
+                                                        <IconTrash />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            );
+                                        })()}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <input 
+                                            placeholder="Tên món ăn (vd: Gà rán...)" 
+                                            value={customFood.name} 
+                                            onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} 
+                                            className="w-full bg-slate-50 p-4 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 transition-all" 
+                                        />
+                                        
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <input 
+                                                type="number" 
+                                                placeholder="Số lượng nhập" 
+                                                value={customFood.quantity} 
+                                                onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} 
+                                                className="bg-slate-50 p-4 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 transition-all" 
+                                            />
+                                            <select 
+                                                value={customFood.unit} 
+                                                onChange={e => setCustomFood(p=>({...p, unit:e.target.value}))} 
+                                                className="bg-slate-50 p-4 rounded-2xl text-sm outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                                            >
+                                                <option value="g">g</option>
+                                                <option value="kg">kg</option>
+                                                <option value="ml">ml</option>
+                                                <option value="lít">lít</option>
+                                                <option value="phần">phần</option>
+                                                <option value="ly">ly</option>
+                                                <option value="tô">tô</option>
+                                                <option value="quả">quả</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="relative group">
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="Kcal" 
+                                                    value={customFood.kcal} 
+                                                    onChange={e => setCustomFood(p=>({...p, kcal:e.target.value}))} 
+                                                    className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" 
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-orange-400 uppercase">kcal</span>
+                                            </div>
+                                            <div className="relative group">
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="Protein" 
+                                                    value={customFood.protein} 
+                                                    onChange={e => setCustomFood(p=>({...p, protein:e.target.value}))} 
+                                                    className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" 
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-emerald-400 uppercase">Pro</span>
+                                            </div>
+                                            <div className="relative group">
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="Carb" 
+                                                    value={customFood.carb} 
+                                                    onChange={e => setCustomFood(p=>({...p, carb:e.target.value}))} 
+                                                    className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-blue-500/20" 
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-blue-400 uppercase">Carb</span>
+                                            </div>
+                                            <div className="relative group">
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="Fat" 
+                                                    value={customFood.fat} 
+                                                    onChange={e => setCustomFood(p=>({...p, fat:e.target.value}))} 
+                                                    className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-yellow-500/20" 
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-yellow-400 uppercase">Fat</span>
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            onClick={addCustom} 
+                                            className="w-full bg-slate-900 text-white p-4 rounded-2xl font-black uppercase text-[10px] tracking-widest mt-2 active:scale-95 transition-all shadow-xl"
+                                        >
+                                            Xác nhận thêm
+                                        </button>
+                                    </div>
+                                )}
+                            </section>
+
+                            <div className="space-y-3 pb-4">
+                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Danh sách nạp vào</h3>
+                                {dailyLog.map(item => (
+                                    <div key={item.id} className="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-slate-50 border-l-4 border-l-emerald-400 animate-in slide-in-from-left duration-300 group">
+                                        <div className="flex-1 pr-3">
+                                            <div className="inline-flex items-center bg-slate-100 hover:bg-emerald-50 px-2 py-0.5 rounded transition-colors cursor-pointer mb-1.5 border border-transparent hover:border-emerald-200">
+                                                <select 
+                                                    value={item.meal || "Bữa sáng"} 
+                                                    onChange={(e) => updateItemMeal(item.id, e.target.value)} 
+                                                    className="text-[9px] font-black text-slate-500 hover:text-emerald-600 uppercase tracking-widest bg-transparent outline-none cursor-pointer appearance-none pr-1"
+                                                >
+                                                    {MEAL_TYPES.map(m => (
+                                                        <option key={m} value={m}>{m}</option>
+                                                    ))}
+                                                </select>
+                                                <svg className="w-2 h-2 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/>
+                                                </svg>
+                                            </div>
+                                            <p className="text-xs font-bold text-slate-800 uppercase truncate mb-1.5">
+                                                {item.name} &mdash; {item.quantity}{item.unit}
+                                            </p>
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1.5 flex-wrap">
+                                                <span className="text-orange-500 font-black">{item.kcal} kcal</span>
+                                                <span className="text-slate-200">|</span> P: {item.protein}g 
+                                                <span className="text-slate-200">|</span> C: {item.carb}g 
+                                                <span className="text-slate-200">|</span> F: {item.fat}g
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <button 
+                                                onClick={() => removeFood(item.id)} 
+                                                className="text-slate-200 hover:text-red-500 transition-colors p-2 bg-slate-50 rounded-xl group-hover:bg-red-50"
+                                            >
+                                                <IconTrash />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
+                                {dailyLog.length === 0 && (
+                                    <p className="text-center text-slate-300 text-[10px] uppercase font-bold italic py-8 border-2 border-dashed border-slate-100 rounded-[2.5rem] tracking-[0.2em]">
+                                        Danh sách trống
+                                    </p>
+                                )}
                             </div>
-                        </div>
-                        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex justify-between items-center shadow-sm border-l-4 border-l-emerald-500">
-                            <div><h5 className="text-[9px] font-black uppercase text-slate-300 tracking-widest mb-1 italic leading-none">{currentDate}</h5><p className="text-xl font-black text-slate-800 leading-none">{dailyKcal} <span className="text-[10px] font-normal opacity-30 italic">/ {target} kcal</span></p></div>
-                            <button onClick={() => setView("journal")} className="px-5 py-2.5 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">Chi tiết</button>
-                        </div>
-                    </main>
-                    <BottomNav view={view} setView={setView} />
-                </div>
-            );
+
+                            {confirmModal.isOpen && (
+                                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                                    <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200">
+                                        {confirmModal.alertMessage ? (
+                                            <div className="text-center">
+                                                <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mx-auto mb-4">
+                                                    <span className="font-black text-xl">!</span>
+                                                </div>
+                                                <h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Thông báo</h3>
+                                                <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">{confirmModal.alertMessage}</p>
+                                                <button 
+                                                    onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} 
+                                                    className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all"
+                                                >
+                                                    Đã hiểu
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center">
+                                                <div className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4">
+                                                    <IconTrash />
+                                                </div>
+                                                <h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Xác nhận xóa</h3>
+                                                <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">
+                                                    Bạn có chắc muốn xóa <span className="font-black text-slate-700">"{confirmModal.foodToDelete?.name}"</span>?
+                                                </p>
+                                                <div className="flex gap-2">
+                                                    <button 
+                                                        onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} 
+                                                        className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all"
+                                                    >
+                                                        Hủy
+                                                    </button>
+                                                    <button 
+                                                        onClick={handleConfirmDelete} 
+                                                        className="flex-1 py-3.5 bg-red-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all"
+                                                    >
+                                                        Xóa Món
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </main>
+                        <BottomNav view={view} setView={setView} />
+                    </div>
+                );
+            }
+
+            // === 5. MÀN HÌNH LỊCH TRÌNH ===
+            if (view === "calendar") {
+                return (
+                    <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300">
+                        <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shadow-sm sticky top-0 z-20">
+                            <h1 className="font-black uppercase tracking-widest text-slate-800 text-xs">Lịch trình tiêu thụ</h1>
+                            <button 
+                                onClick={() => setView("profile")} 
+                                className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-[10px] font-black text-slate-400"
+                            >
+                                ⚙️
+                            </button>
+                        </header>
+                        
+                        <main className="p-4 space-y-4">
+                            <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-center">
+                                <p className="text-emerald-500 text-[10px] font-black uppercase mb-1 tracking-widest">{calendarData.monthName}</p>
+                                <p className="text-slate-500 text-xs font-bold mb-2 uppercase tracking-tighter">Tổng tiêu thụ tháng này:</p>
+                                <h2 className="text-5xl font-black tracking-tighter">
+                                    {(calendarData.monthTotalKcal || 0).toLocaleString()} 
+                                    <span className="text-lg font-normal text-slate-600 italic ml-1">kcal</span>
+                                </h2>
+                            </div>
+                            
+                            <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 transition-all">
+                                <div className="calendar-grid text-center">
+                                    {["CN","T2","T3","T4","T5","T6","T7"].map(w => (
+                                        <div key={w} className="text-[10px] font-black text-slate-200 py-3 uppercase">{w}</div>
+                                    ))}
+                                    {calendarData.days.map((d, i) => (
+                                        <div key={i} className="aspect-square flex items-center justify-center p-0.5">
+                                            {d ? (
+                                                <button 
+                                                    onClick={() => { setCurrentDate(d.key); setView("journal"); }} 
+                                                    className={`w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all ${d.key === currentDate ? 'bg-emerald-600 text-white shadow-lg scale-110':'hover:bg-slate-50 text-slate-600'}`}
+                                                >
+                                                    <span className="text-xs font-black">{d.day}</span>
+                                                    {d.kcal > 0 && (
+                                                        <div className={`w-1 h-1 rounded-full mt-1 ${d.kcal > target ? 'bg-red-400':'bg-emerald-300'}`} />
+                                                    )}
+                                                </button>
+                                            ) : (
+                                                <div className="w-full h-full opacity-0" />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex justify-between items-center shadow-sm border-l-4 border-l-emerald-500">
+                                <div>
+                                    <h5 className="text-[9px] font-black uppercase text-slate-300 tracking-widest mb-1 italic leading-none">{currentDate}</h5>
+                                    <p className="text-xl font-black text-slate-800 leading-none">
+                                        {dailyKcal} <span className="text-[10px] font-normal opacity-30 italic">/ {target} kcal</span>
+                                    </p>
+                                </div>
+                                <button 
+                                    onClick={() => setView("journal")} 
+                                    className="px-5 py-2.5 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                                >
+                                    Chi tiết
+                                </button>
+                            </div>
+                        </main>
+                        <BottomNav view={view} setView={setView} />
+                    </div>
+                );
+            }
             
             return null;
         }
