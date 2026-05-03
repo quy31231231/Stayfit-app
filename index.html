@@ -592,7 +592,23 @@
             });
 
             const [tab, setTab] = useState("quick");
-            const [selectedMeal, setSelectedMeal] = useState("Bữa sáng");
+            
+            // --- TÍNH NĂNG: TỰ ĐỘNG CHỌN BỮA THEO GIỜ VIỆT NAM (CHẠY 1 LẦN) ---
+            const [selectedMeal, setSelectedMeal] = useState(() => {
+                try {
+                    const vnTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
+                    const hour = new Date(vnTimeStr).getHours();
+                    
+                    if (hour >= 4 && hour < 10) return "Bữa sáng";
+                    if (hour >= 10 && hour < 14) return "Bữa trưa";
+                    if (hour >= 14 && hour < 17) return "Ăn vặt";
+                    if (hour >= 17 && hour < 21) return "Bữa tối";
+                    return "Ăn vặt"; 
+                } catch (error) {
+                    return "Bữa sáng";
+                }
+            });
+
             const [selectedFood, setSelectedFood] = useState(null);
             const [qty, setQty] = useState(1);
             const [searchQuery, setSearchQuery] = useState("");
@@ -890,7 +906,7 @@
                     [currentDate]: [...(prev[currentDate] || []), newItem]
                 }));
 
-                // 2. QUY ĐỔI VỀ 100G ĐỂ LƯU VÀO KHO (Chọn nhanh)
+                // 2. QUY ĐỔI VỀ 100G ĐỂ LƯU VÀO KHO CHỌN NHANH (ẨN HẬU TRƯỜNG)
                 let weightInGrams = q;
                 let baseUnit = 'g';
 
@@ -1360,7 +1376,6 @@
                                             )}
                                         </div>
                                         
-                                        {/* PHẦN CHỌN NHANH */}
                                         {selectedFood && (() => {
                                             let weightInGrams = qty;
                                             const u = selectedFood.unit.toLowerCase();
