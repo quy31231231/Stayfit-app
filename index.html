@@ -110,152 +110,34 @@
             const deleteWeight = (date) => { const newLog = { ...weightLog }; delete newLog[date]; setWeightLog(newLog); localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog)); };
 
             useEffect(() => {
-                Chart.defaults.font.family = "'Inter', sans-serif"; 
-                Chart.defaults.color = '#94a3b8';
-
-                // 1. BIỂU ĐỒ CÂN NẶNG
+                Chart.defaults.font.family = "'Inter', sans-serif"; Chart.defaults.color = '#94a3b8';
                 if (weightChartInstance.current) weightChartInstance.current.destroy();
                 const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(a) - new Date(b));
                 if (sortedDates.length > 0 && weightChartRef.current) {
                     const ctx = weightChartRef.current.getContext('2d');
-                    const labels = sortedDates.map(d => getWeekLabel(d)); 
-                    const data = sortedDates.map(d => weightLog[d]);
-                    const minWeight = Math.floor(Math.min(...data)) - 2; 
-                    const maxWeight = Math.ceil(Math.max(...data)) + 2;
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); 
-                    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)'); 
-                    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-
-                    weightChartInstance.current = new Chart(ctx, { 
-                        type: 'line', 
-                        data: { 
-                            labels: labels, 
-                            datasets: [{ 
-                                label: 'Cân nặng (kg)', 
-                                data: data, 
-                                borderColor: '#10B981', 
-                                backgroundColor: gradient, 
-                                borderWidth: 3, 
-                                pointBackgroundColor: '#ffffff', 
-                                pointBorderColor: '#10B981', 
-                                pointBorderWidth: 2, 
-                                pointRadius: 4, 
-                                pointHoverRadius: 6, 
-                                fill: true, 
-                                tension: 0.3 
-                            }] 
-                        }, 
-                        options: { 
-                            responsive: true, 
-                            maintainAspectRatio: false, 
-                            plugins: { 
-                                legend: { display: false }, 
-                                tooltip: { 
-                                    callbacks: { 
-                                        label: function(c) { return " " + c.parsed.y + " kg"; } 
-                                    }, 
-                                    backgroundColor: '#0F172A', 
-                                    titleFont: { size: 11, family: 'Inter', weight: '800' }, 
-                                    bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, 
-                                    padding: 10, 
-                                    cornerRadius: 12, 
-                                    displayColors: false 
-                                } 
-                            }, 
-                            scales: { 
-                                y: { 
-                                    min: minWeight, 
-                                    max: maxWeight, 
-                                    grid: { color: '#f1f5f9', borderDash: [5, 5] }, 
-                                    border: { display: false }, 
-                                    ticks: { font: { weight: 'bold', size: 10 } } 
-                                }, 
-                                x: { 
-                                    grid: { display: false }, 
-                                    border: { display: false }, 
-                                    ticks: { font: { weight: 'bold', size: 10 } } 
-                                } 
-                            } 
-                        } 
-                    });
+                    const labels = sortedDates.map(d => getWeekLabel(d)); const data = sortedDates.map(d => weightLog[d]);
+                    const minWeight = Math.floor(Math.min(...data)) - 2; const maxWeight = Math.ceil(Math.max(...data)) + 2;
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)'); gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+                    weightChartInstance.current = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Cân nặng (kg)', data, borderColor: '#10B981', backgroundColor: gradient, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#10B981', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ` ${c.parsed.y} kg` }, backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12, displayColors: false } }, scales: { y: { min: minWeight, max: maxWeight, grid: { color: '#f1f5f9', borderDash: [5, 5] }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } } } });
                 }
 
-                // 2. BIỂU ĐỒ KCAL
                 if (kcalChartInstance.current) kcalChartInstance.current.destroy();
                 if (kcalChartRef.current) {
                     const ctx = kcalChartRef.current.getContext('2d');
-                    const last56Days = getLast56Days(); 
-                    const labels = last56Days.map(d => getWeekLabel(d));
-                    const dataKcal = last56Days.map(d => Math.round(sumDayMacro(history[d], 'kcal'))); 
-                    const targetLine = new Array(56).fill(target);
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); 
-                    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)'); 
-                    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
-
-                    kcalChartInstance.current = new Chart(ctx, { 
-                        type: 'line', 
-                        data: { 
-                            labels: labels, 
-                            datasets: [
-                                { label: 'Kcal nạp', data: dataKcal, borderColor: '#3B82F6', backgroundColor: gradient, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, 
-                                { label: 'Mục tiêu', data: targetLine, borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0 }
-                            ] 
-                        }, 
-                        options: { 
-                            responsive: true, 
-                            maintainAspectRatio: false, 
-                            interaction: { mode: 'index', intersect: false }, 
-                            plugins: { 
-                                legend: { display: false }, 
-                                tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } 
-                            }, 
-                            scales: { 
-                                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, 
-                                x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 8 } } 
-                            } 
-                        } 
-                    });
+                    const last56Days = getLast56Days(); const labels = last56Days.map(d => getWeekLabel(d));
+                    const dataKcal = last56Days.map(d => Math.round(sumDayMacro(history[d], 'kcal'))); const targetLine = new Array(56).fill(target);
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)'); gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+                    kcalChartInstance.current = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Kcal nạp', data: dataKcal, borderColor: '#3B82F6', backgroundColor: gradient, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, { label: 'Mục tiêu', data: targetLine, borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 8 } } } });
                 }
 
-                // 3. BIỂU ĐỒ MACRO
                 if (macroChartInstance.current) macroChartInstance.current.destroy();
                 if (macroChartRef.current) {
                     const ctx = macroChartRef.current.getContext('2d');
-                    const last28Days = getLast56Days().slice(28); 
-                    const labels = last28Days.map(d => getWeekLabel(d));
-                    const dataProtein = last28Days.map(d => Math.round(sumDayMacro(history[d], 'protein'))); 
-                    const dataFat = last28Days.map(d => Math.round(sumDayMacro(history[d], 'fat')));
-
-                    macroChartInstance.current = new Chart(ctx, { 
-                        type: 'line', 
-                        data: { 
-                            labels: labels, 
-                            datasets: [
-                                { label: 'Protein (g)', data: dataProtein, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, 
-                                { label: 'Fat (g)', data: dataFat, borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }
-                            ] 
-                        }, 
-                        options: { 
-                            responsive: true, 
-                            maintainAspectRatio: false, 
-                            interaction: { mode: 'index', intersect: false }, 
-                            plugins: { 
-                                legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 10, family: 'Inter', weight: 'bold' } } }, 
-                                tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } 
-                            }, 
-                            scales: { 
-                                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, 
-                                x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 7 } } 
-                            } 
-                        } 
-                    });
+                    const last28Days = getLast56Days().slice(28); const labels = last28Days.map(d => getWeekLabel(d));
+                    const dataProtein = last28Days.map(d => Math.round(sumDayMacro(history[d], 'protein'))); const dataFat = last28Days.map(d => Math.round(sumDayMacro(history[d], 'fat')));
+                    macroChartInstance.current = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Protein (g)', data: dataProtein, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, { label: 'Fat (g)', data: dataFat, borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 10, family: 'Inter', weight: 'bold' } } }, tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 7 } } } });
                 }
-                
-                return () => { 
-                    if (weightChartInstance.current) weightChartInstance.current.destroy(); 
-                    if (kcalChartInstance.current) kcalChartInstance.current.destroy(); 
-                    if (macroChartInstance.current) macroChartInstance.current.destroy(); 
-                };
+                return () => { if (weightChartInstance.current) weightChartInstance.current.destroy(); if (kcalChartInstance.current) kcalChartInstance.current.destroy(); if (macroChartInstance.current) macroChartInstance.current.destroy(); };
             }, [history, weightLog, target]);
 
             const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
@@ -509,19 +391,57 @@
                 if (!customFood.name || !customFood.kcal) return;
                 const isDuplicate = allFoods.some(food => food.name.toLowerCase().trim() === customFood.name.toLowerCase().trim());
                 if (isDuplicate) { setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: "Món ăn này đã có sẵn. Vui lòng chọn trong Chọn nhanh!" }); return; }
-                const q = parseFloat(customFood.quantity) || 1; const u = customFood.unit || "g";
-                const k = parseFloat(customFood.kcal) || 0; const p = parseFloat(customFood.protein) || 0;
-                const c = parseFloat(customFood.carb) || 0; const f = parseFloat(customFood.fat) || 0;
+                
+                const q = parseFloat(customFood.quantity) || 1; 
+                const u = (customFood.unit || "g").toLowerCase();
+                const k = parseFloat(customFood.kcal) || 0; 
+                const p = parseFloat(customFood.protein) || 0;
+                const c = parseFloat(customFood.carb) || 0; 
+                const f = parseFloat(customFood.fat) || 0;
 
+                // 1. Lưu chính xác 100% con số người dùng nhập vào Lịch sử nạp (Nhật ký)
                 const newItem = {
-                    name: customFood.name.trim(), quantity: q, unit: u, kcal: Math.round(k * 10) / 10,
-                    protein: Math.round(p * 10) / 10, carb: Math.round(c * 10) / 10, fat: Math.round(f * 10) / 10,
-                    meal: selectedMeal, id: Date.now()
+                    name: customFood.name.trim(), 
+                    quantity: q, 
+                    unit: u, 
+                    kcal: Math.round(k * 10) / 10,
+                    protein: Math.round(p * 10) / 10, 
+                    carb: Math.round(c * 10) / 10, 
+                    fat: Math.round(f * 10) / 10,
+                    meal: selectedMeal, 
+                    id: Date.now()
                 };
                 
                 setHistory(prev => ({...prev, [currentDate]: [...(prev[currentDate] || []), newItem]}));
-                const newQuickFood = { name: customFood.name.trim(), unit: u, per: q, kcal: k, protein: p, carb: c, fat: f };
+
+                // 2. Tính toán quy đổi ngầm ra hệ quy chiếu 100g (hoặc 100ml) để đưa vào kho "Chọn nhanh"
+                let weightInGrams = q;
+                let baseUnit = 'g';
+
+                if (['kg'].includes(u)) { weightInGrams = q * 1000; }
+                else if (['l', 'lít'].includes(u)) { weightInGrams = q * 1000; baseUnit = 'ml'; }
+                else if (['ml'].includes(u)) { weightInGrams = q; baseUnit = 'ml'; }
+                else if (['g', 'gram'].includes(u)) { weightInGrams = q; }
+                else {
+                    const mockWeights = { 'tô': 400, 'bát': 400, 'suất': 400, 'phần': 300, 'ly': 250, 'ổ': 150, 'quả': 100, 'trái': 100, 'cái': 100 };
+                    weightInGrams = q * (mockWeights[u] || 100);
+                }
+
+                const factor100g = weightInGrams > 0 ? (100 / weightInGrams) : 1;
+                
+                const newQuickFood = { 
+                    name: customFood.name.trim(), 
+                    unit: baseUnit, 
+                    per: 100, 
+                    kcal: Math.round(k * factor100g), 
+                    protein: Math.round((p * factor100g) * 10) / 10, 
+                    carb: Math.round((c * factor100g) * 10) / 10, 
+                    fat: Math.round((f * factor100g) * 10) / 10 
+                };
+                
                 setCustomFoodList(prev => [newQuickFood, ...prev]);
+                
+                // Reset lại form nhập tay
                 setCustomFood({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
                 setTab("quick");
             };
@@ -656,7 +576,7 @@
                                         {filteredFoods.length === 0 && <p className="col-span-2 text-center py-6 text-slate-400 text-xs italic">Không tìm thấy món ăn</p>}
                                     </div>
                                     
-                                    {/* MỤC CHỌN NHANH: AUTO CALCULATE 100G */}
+                                    {/* MỤC CHỌN NHANH */}
                                     {selectedFood && (() => {
                                         let weightInGrams = qty;
                                         const u = selectedFood.unit.toLowerCase();
@@ -777,51 +697,6 @@
                                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-yellow-400 uppercase">Fat</span>
                                         </div>
                                     </div>
-
-                                    {/* MỤC NHẬP TAY: AUTO CALCULATE 100G REALTIME */}
-                                    {(() => {
-                                        const q = parseFloat(customFood.quantity) || 0;
-                                        const u = (customFood.unit || "g").toLowerCase();
-                                        const k = parseFloat(customFood.kcal) || 0;
-                                        const p = parseFloat(customFood.protein) || 0;
-                                        const c = parseFloat(customFood.carb) || 0;
-                                        const f = parseFloat(customFood.fat) || 0;
-
-                                        let weightInGrams = q;
-                                        if (['kg', 'l', 'lít'].includes(u)) weightInGrams = q * 1000;
-                                        else if (['ml', 'g', 'gram'].includes(u)) weightInGrams = q;
-                                        else {
-                                            const mockWeights = { 'tô': 400, 'bát': 400, 'suất': 400, 'phần': 300, 'ly': 250, 'ổ': 150, 'quả': 100, 'trái': 100, 'cái': 100 };
-                                            weightInGrams = q * (mockWeights[u] || 100);
-                                        }
-
-                                        if (weightInGrams > 0 && (k > 0 || p > 0 || c > 0 || f > 0)) {
-                                            const factor100g = 100 / weightInGrams;
-                                            const p100Kcal = Math.round(k * factor100g);
-                                            const p100Pro = (p * factor100g).toFixed(1);
-                                            const p100Carb = (c * factor100g).toFixed(1);
-                                            const p100Fat = (f * factor100g).toFixed(1);
-
-                                            return (
-                                                <div className="bg-slate-900 rounded-2xl p-4 mt-2 text-white shadow-xl relative overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-700">
-                                                    <div className="flex justify-between items-center text-[10px] font-bold mb-3 pb-2 border-b border-white/10">
-                                                        <span className="text-emerald-400 uppercase tracking-widest flex items-center gap-1">⚡ Tự động quy đổi</span>
-                                                        <span className="text-slate-400 bg-white/5 px-2 py-0.5 rounded">Input: {q}{u} = {Math.round(weightInGrams)}g</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center text-[9px] font-bold">
-                                                        <span className="text-slate-500 uppercase tracking-widest bg-black/30 px-2 py-1.5 rounded">Dinh dưỡng/100g</span>
-                                                        <span className="text-slate-200 flex items-center gap-1.5">
-                                                            <span className="text-orange-400">{p100Kcal} kcal</span> <span className="text-slate-600">|</span> 
-                                                            <span className="text-emerald-400">P:{p100Pro}g</span> <span className="text-slate-600">|</span> 
-                                                            <span className="text-blue-400">C:{p100Carb}g</span> <span className="text-slate-600">|</span> 
-                                                            <span className="text-yellow-400">F:{p100Fat}g</span>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        }
-                                        return null;
-                                    })()}
 
                                     <button onClick={addCustom} className="w-full bg-slate-900 text-white p-4 rounded-2xl font-black uppercase text-[10px] tracking-widest mt-2 active:scale-95 transition-all shadow-xl">Xác nhận thêm</button>
                                 </div>
