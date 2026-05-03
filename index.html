@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- === THÊM MỚI: IMPORT CHART.JS === -->
+    <!-- IMPORT CHART.JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -36,8 +36,6 @@
         const IconTrash = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
         const IconPlus = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
         const IconSearch = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
-        
-        {/* === THÊM MỚI: ICON THỐNG KÊ === */}
         const IconStats = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
 
         // --- DỮ LIỆU ---
@@ -374,7 +372,7 @@
             );
         }
         
-        {/* === THÊM MỚI: VIEW THỐNG KÊ (COMPONENT ĐỘC LẬP) === */}
+        // === THÊM MỚI: VIEW THỐNG KÊ (COMPONENT ĐỘC LẬP) ===
         function StatsView({ history, profile, setProfile, target, setView }) {
             const [weightLog, setWeightLog] = useState(() => {
                 const s = localStorage.getItem('stayfit_weight_log');
@@ -627,7 +625,7 @@
                 </div>
             );
         }
-        {/* === KẾT THÚC THÊM MỚI (STATS VIEW) === */}
+        // === KẾT THÚC THÊM MỚI (STATS VIEW) ===
 
         // --- APP CHÍNH ---
         function App() {
@@ -677,7 +675,7 @@
 
             const target = profile.isManualTarget ? profile.manualTargetKcal : calculatedTarget;
 
-            // Render điều hướng StatsView (Phải đặt trước các tính toán giao diện Journal để tránh tính thừa)
+            // Render điều hướng StatsView
             if (view === "stats") {
                 return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} setView={setView} />;
             }
@@ -1191,7 +1189,6 @@
                         <IconCalendar /><span className="text-[9px] uppercase font-bold tracking-tighter">Lịch trình</span>
                     </button>
 
-                    {/* === CẬP NHẬT: NÚT THỐNG KÊ DÙNG REACT STATE === */}
                     <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='stats' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
                         <IconStats /><span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
                     </button>
