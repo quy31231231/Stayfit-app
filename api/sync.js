@@ -1,6 +1,5 @@
 import { google } from "googleapis";
 
-// Khởi tạo Google Sheets client
 async function getSheets() {
   const auth = new google.auth.GoogleAuth({
     credentials: {
@@ -18,53 +17,54 @@ export default async function handler(req, res) {
 
   const sheets = await getSheets();
   
-  // === UPLOAD DỮ LIỆU TỪ APP LÊN SHEETS (HỖ TRỢ ĐA NGƯỜI DÚNG) ===
+  // === UPLOAD DỮ LIỆU TỪ APP LÊN SHEETS ===
   if (req.method === "POST" && req.body.action === "upload") {
-    const { userId, profile, history, weightLog } = req.body;
+    const { userId, password, profile, history, weightLog } = req.body;
     if (!userId) return res.status(400).json({ error: "Không tìm thấy UserID" });
 
     try {
-      // ----------------------------------------------------
-      // 1. CẬP NHẬT PROFILE (Tìm đúng dòng của User để sửa)
-      // ----------------------------------------------------
-      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:I" });
+      // 1. KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE
+      // Tăng range lên A:J (Cột J là mật khẩu)
+      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:J" });
       const profileRows = profileRes.data.values || [];
-      const profileIndex = profileRows.findIndex(row => row[0] === userId); // Tìm xem user này nằm ở dòng nào
+      const profileIndex = profileRows.findIndex(row => row[0] === userId);
 
+      // Nếu user đã tồn tại, kiểm tra mật khẩu ở Cột J (index 9)
+      if (profileIndex !== -1) {
+        const storedPass = profileRows[profileIndex][9];
+        // Nếu trên sheet đã có pass mà người dùng truyền lên sai pass -> Chặn lại
+        if (storedPass && storedPass !== password) {
+          return res.status(401).json({ error: "Sai mật khẩu bảo mật!" });
+        }
+      }
+
+      // Tạo dòng profile mới kèm theo mật khẩu
       const newProfileRow = [
         userId, profile.gender || "", profile.age || "", profile.height || "",
         profile.weight || "", profile.activity || "", profile.goal || "",
-        profile.manualTargetKcal || "", new Date().toISOString()
+        profile.manualTargetKcal || "", new Date().toISOString(), password || ""
       ];
 
       if (profileIndex !== -1) {
-        // Đã có user này -> Cập nhật đúng dòng đó
         await sheets.spreadsheets.values.update({
           spreadsheetId: SHEET_ID,
-          range: `Profile!A${profileIndex + 1}:I${profileIndex + 1}`,
+          range: `Profile!A${profileIndex + 1}:J${profileIndex + 1}`,
           valueInputOption: "USER_ENTERED",
           requestBody: { values: [newProfileRow] },
         });
       } else {
-        // User mới -> Thêm dòng mới xuống cuối bảng
         await sheets.spreadsheets.values.append({
           spreadsheetId: SHEET_ID,
-          range: "Profile!A:I",
+          range: "Profile!A:J",
           valueInputOption: "USER_ENTERED",
           requestBody: { values: [newProfileRow] },
         });
       }
       
-      // ----------------------------------------------------
-      // 2. CẬP NHẬT HISTORY (Giữ nguyên lịch sử của user khác)
-      // ----------------------------------------------------
+      // 2. CẬP NHẬT HISTORY
       const historyRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "History!A:K" });
       const allHistoryRows = historyRes.data.values || [];
-      
-      // Lấy dòng tiêu đề (Dòng 1)
       const headerHistory = allHistoryRows.length > 0 && allHistoryRows[0][0] === "UserID" ? [allHistoryRows[0]] : [];
-      
-      // LỌC: CHỈ GIỮ LẠI DỮ LIỆU CỦA CÁC USER KHÁC
       const otherUsersHistory = allHistoryRows.filter((row, i) => (i > 0 || row[0] !== "UserID") && row[0] !== userId);
 
       let currentUserHistoryRows = [];
@@ -78,10 +78,7 @@ export default async function handler(req, res) {
         );
       }
 
-      // Gộp dòng tiêu đề + Lịch sử người khác + Lịch sử mới của người hiện tại
       const combinedHistory = [...headerHistory, ...otherUsersHistory, ...currentUserHistoryRows];
-
-      // Xóa trang và ghi lại toàn bộ
       await sheets.spreadsheets.values.clear({ spreadsheetId: SHEET_ID, range: "History!A:K" });
       if (combinedHistory.length > 0) {
         await sheets.spreadsheets.values.update({
@@ -92,12 +89,9 @@ export default async function handler(req, res) {
         });
       }
 
-      // ----------------------------------------------------
-      // 3. CẬP NHẬT WEIGHTLOG (Giữ nguyên cân nặng của user khác)
-      // ----------------------------------------------------
+      // 3. CẬP NHẬT WEIGHTLOG
       const weightRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "WeightLog!A:D" });
       const allWeightRows = weightRes.data.values || [];
-      
       const headerWeight = allWeightRows.length > 0 && allWeightRows[0][0] === "UserID" ? [allWeightRows[0]] : [];
       const otherUsersWeight = allWeightRows.filter((row, i) => (i > 0 || row[0] !== "UserID") && row[0] !== userId);
 
@@ -109,7 +103,6 @@ export default async function handler(req, res) {
       }
 
       const combinedWeight = [...headerWeight, ...otherUsersWeight, ...currentUserWeightRows];
-
       await sheets.spreadsheets.values.clear({ spreadsheetId: SHEET_ID, range: "WeightLog!A:D" });
       if (combinedWeight.length > 0) {
         await sheets.spreadsheets.values.update({
@@ -120,21 +113,30 @@ export default async function handler(req, res) {
         });
       }
       
-      return res.status(200).json({ success: true, message: "Đã đồng bộ đa người dùng thành công!" });
+      return res.status(200).json({ success: true });
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: err.message });
     }
   }
   
-  // === TẢI DỮ LIỆU TỪ SHEETS VỀ APP (Giữ nguyên vì đoạn này đã chuẩn rồi) ===
+  // === TẢI DỮ LIỆU TỪ SHEETS VỀ APP ===
   if (req.method === "GET") {
-    const { userId } = req.query;
+    const { userId, password } = req.query;
     if (!userId) return res.status(400).json({ error: "Thiếu userId" });
     
     try {
-      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:I" });
+      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:J" });
       const profileRow = profileRes.data.values?.find(row => row[0] === userId);
+      
+      // KIỂM TRA MẬT KHẨU LÚC ĐĂNG NHẬP (TẢI VỀ)
+      if (profileRow) {
+          const storedPass = profileRow[9]; // Mật khẩu nằm ở cột J
+          if (storedPass && storedPass !== password) {
+              return res.status(401).json({ error: "Sai mật khẩu!" });
+          }
+      }
+
       const profile = profileRow ? {
         gender: profileRow[1], age: parseInt(profileRow[2]), height: parseInt(profileRow[3]),
         weight: parseFloat(profileRow[4]), activity: parseFloat(profileRow[5]), goal: parseInt(profileRow[6]),
