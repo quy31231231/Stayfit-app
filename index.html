@@ -689,14 +689,14 @@
                 if (view !== "profile") localStorage.setItem('stayfit_setup', 'done');
             }, [profile, history, customFoodList, deletedCommonFoods, view]);
 
-            // ==========================================
-            // HÀM ĐỒNG BỘ DỮ LIỆU
+// ==========================================
+            // HÀM ĐỒNG BỘ DỮ LIỆU (ĐÃ FIX LỖI THÀNH CÔNG ẢO)
             // ==========================================
             const syncToCloud = async () => {
                 const userId = "user001";
                 setIsSyncing(true);
                 try {
-                    await fetch("/api/sync", {
+                    const res = await fetch("/api/sync", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -707,6 +707,11 @@
                             weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
                         }),
                     });
+                    
+                    // Bắt lỗi nếu API trả về mã lỗi (4xx, 5xx)
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || "Lỗi máy chủ Vercel");
+                    
                     alert("✅ Đã đồng bộ dữ liệu lên cloud thành công!");
                 } catch (err) {
                     alert("❌ Lỗi đồng bộ: " + err.message);
@@ -720,7 +725,10 @@
                 setIsSyncing(true);
                 try {
                     const res = await fetch(`/api/sync?userId=${userId}`);
+                    
+                    // Bắt lỗi nếu API trả về mã lỗi
                     const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || "Lỗi máy chủ Vercel");
                     
                     if (data.profile) localStorage.setItem("stayfit_profile", JSON.stringify(data.profile));
                     if (data.history) localStorage.setItem("stayfit_history", JSON.stringify(data.history));
