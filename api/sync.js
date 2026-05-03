@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       const newProfileRow = [
         userId, profile.gender || "", profile.age || "", profile.height || "",
         profile.weight || "", profile.activity || "", profile.goal || "",
-        profile.manualTargetKcal || "", new Date().toISOString(), password || ""
+        profile.manualTargetKcal || "", new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" }), password || ""
       ];
 
       if (profileIndex !== -1) {
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
           items.map(item => [
             userId, date, item.meal, item.name, item.quantity,
             item.unit, item.kcal, item.protein, item.carb, item.fat,
-            new Date().toISOString()
+            new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })
           ])
         );
       }
@@ -98,7 +98,7 @@ export default async function handler(req, res) {
       let currentUserWeightRows = [];
       if (weightLog) {
          currentUserWeightRows = Object.entries(weightLog).map(([date, weight]) => [
-            userId, date, weight, new Date().toISOString()
+            userId, date, weight, new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })
          ]);
       }
 
