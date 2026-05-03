@@ -651,7 +651,7 @@
 
         // --- APP CHÍNH ---
         function App() {
-            // STATE NAVIGATION: view có thể là 'journal', 'calendar', 'profile', hoặc 'stats'
+            // STATE NAVIGATION
             const [view, setView] = useState(() => localStorage.getItem('stayfit_setup') ? "journal" : "profile");
             const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
             
@@ -679,6 +679,7 @@
             const [searchQuery, setSearchQuery] = useState("");
             const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
             const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
+            const [isSyncing, setIsSyncing] = useState(false);
 
             useEffect(() => {
                 localStorage.setItem('stayfit_profile', JSON.stringify(profile));
@@ -687,6 +688,53 @@
                 localStorage.setItem('stayfit_deleted_common', JSON.stringify(deletedCommonFoods));
                 if (view !== "profile") localStorage.setItem('stayfit_setup', 'done');
             }, [profile, history, customFoodList, deletedCommonFoods, view]);
+
+            // ==========================================
+            // HÀM ĐỒNG BỘ DỮ LIỆU
+            // ==========================================
+            const syncToCloud = async () => {
+                const userId = "user001";
+                setIsSyncing(true);
+                try {
+                    await fetch("/api/sync", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            action: "upload",
+                            userId,
+                            profile: JSON.parse(localStorage.getItem("stayfit_profile")),
+                            history: JSON.parse(localStorage.getItem("stayfit_history")),
+                            weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
+                        }),
+                    });
+                    alert("✅ Đã đồng bộ dữ liệu lên cloud thành công!");
+                } catch (err) {
+                    alert("❌ Lỗi đồng bộ: " + err.message);
+                } finally {
+                    setIsSyncing(false);
+                }
+            };
+
+            const syncFromCloud = async () => {
+                const userId = "user001";
+                setIsSyncing(true);
+                try {
+                    const res = await fetch(`/api/sync?userId=${userId}`);
+                    const data = await res.json();
+                    
+                    if (data.profile) localStorage.setItem("stayfit_profile", JSON.stringify(data.profile));
+                    if (data.history) localStorage.setItem("stayfit_history", JSON.stringify(data.history));
+                    if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
+                    
+                    alert("✅ Đã tải dữ liệu từ cloud về máy thành công!");
+                    window.location.reload(); 
+                } catch (err) {
+                    alert("❌ Lỗi tải dữ liệu: " + err.message);
+                } finally {
+                    setIsSyncing(false);
+                }
+            };
+            // ==========================================
 
             const calculatedTarget = useMemo(() => {
                 const bmr = profile.gender === "male" 
@@ -697,7 +745,6 @@
 
             const target = profile.isManualTarget ? profile.manualTargetKcal : calculatedTarget;
 
-            // ĐÃ FIX: Chuyển các lệnh useMemo lên trước khi thực hiện return giao diện
             const dailyLog = history[currentDate] || [];
             const dailyKcal = Math.round(dailyLog.reduce((s, i) => s + (i.kcal || 0), 0) * 10) / 10;
             const dailyProtein = Math.round(dailyLog.reduce((s, i) => s + (i.protein || 0), 0) * 10) / 10;
@@ -840,7 +887,7 @@
                 });
             };
 
-            // === TẤT CẢ RENDER ĐIỀU HƯỚNG ĐƯỢC CHUYỂN XUỐNG DƯỚI CÙNG ===
+            // === TẤT CẢ RENDER ĐIỀU HƯỚNG ===
             
             if (view === "stats") return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} setView={setView} view={view} />;
             
@@ -917,6 +964,17 @@
 
                     <button onClick={() => setView("journal")} className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase shadow-lg shadow-emerald-200 active:scale-95 transition-all">Bắt đầu ngay</button>
                     
+                    {/* BẮT ĐẦU ĐOẠN CODE BẠN YÊU CẦU */}
+                    <div className="space-y-3 mt-6">
+                        <button onClick={syncToCloud} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase">
+                            ☁️ Đồng bộ lên Cloud
+                        </button>
+                        <button onClick={syncFromCloud} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase">
+                            ⬇️ Tải về từ Cloud
+                        </button>
+                    </div>
+                    {/* KẾT THÚC ĐOẠN CODE BẠN YÊU CẦU */}
+
                     <BottomNav view={view} setView={setView} />
                 </div>
             );
