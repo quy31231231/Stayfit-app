@@ -679,7 +679,6 @@
             const [searchQuery, setSearchQuery] = useState("");
             const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
             const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
-            const [isSyncing, setIsSyncing] = useState(false);
 
             useEffect(() => {
                 localStorage.setItem('stayfit_profile', JSON.stringify(profile));
@@ -689,12 +688,11 @@
                 if (view !== "profile") localStorage.setItem('stayfit_setup', 'done');
             }, [profile, history, customFoodList, deletedCommonFoods, view]);
 
-// ==========================================
-            // HÀM ĐỒNG BỘ DỮ LIỆU (ĐÃ FIX LỖI THÀNH CÔNG ẢO)
+            // ==========================================
+            // HÀM ĐỒNG BỘ DỮ LIỆU (HOÀN TOÀN TÀNG HÌNH)
             // ==========================================
             const syncToCloud = async () => {
                 const userId = "user001";
-                setIsSyncing(true);
                 try {
                     const res = await fetch("/api/sync", {
                         method: "POST",
@@ -702,46 +700,87 @@
                         body: JSON.stringify({
                             action: "upload",
                             userId,
-                            profile: JSON.parse(localStorage.getItem("stayfit_profile")),
-                            history: JSON.parse(localStorage.getItem("stayfit_history")),
+                            profile: JSON.parse(localStorage.getItem("stayfit_profile") || "{}"),
+                            history: JSON.parse(localStorage.getItem("stayfit_history") || "{}"),
                             weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
                         }),
                     });
-                    
-                    // Bắt lỗi nếu API trả về mã lỗi (4xx, 5xx)
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || "Lỗi máy chủ Vercel");
-                    
-                    alert("✅ Đã đồng bộ dữ liệu lên cloud thành công!");
+                    if (!res.ok) throw new Error(data.error);
+                    console.log("✅ Đã lưu ngầm lên Cloud");
                 } catch (err) {
-                    alert("❌ Lỗi đồng bộ: " + err.message);
-                } finally {
-                    setIsSyncing(false);
+                    console.error("❌ Lỗi lưu ngầm:", err.message);
                 }
             };
 
             const syncFromCloud = async () => {
                 const userId = "user001";
-                setIsSyncing(true);
                 try {
                     const res = await fetch(`/api/sync?userId=${userId}`);
-                    
-                    // Bắt lỗi nếu API trả về mã lỗi
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || "Lỗi máy chủ Vercel");
+                    if (!res.ok) throw new Error(data.error);
                     
+                    const isCloudEmpty = Object.keys(data).length === 0 || (!data.profile && !data.history);
+                    if (isCloudEmpty) return;
+
                     if (data.profile) localStorage.setItem("stayfit_profile", JSON.stringify(data.profile));
                     if (data.history) localStorage.setItem("stayfit_history", JSON.stringify(data.history));
                     if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
                     
-                    alert("✅ Đã tải dữ liệu từ cloud về máy thành công!");
+                    console.log("✅ Đã tải ngầm từ Cloud");
                     window.location.reload(); 
                 } catch (err) {
-                    alert("❌ Lỗi tải dữ liệu: " + err.message);
-                } finally {
-                    setIsSyncing(false);
+                    console.error("❌ Lỗi tải ngầm:", err.message);
                 }
             };
+
+            // --- 3 LỚP BẢO VỆ ĐỒNG BỘ AUTO-SYNC ---
+
+            // LỚP 1: Tải dữ liệu khi vừa mở App lên (1 lần duy nhất)
+            useEffect(() => {
+                const hasInitialSync = sessionStorage.getItem('stayfit_initial_sync');
+                if (!hasInitialSync) {
+                    sessionStorage.setItem('stayfit_initial_sync', 'true');
+                    syncFromCloud();
+                }
+            }, []);
+
+            // LỚP 2: LƯU TỨC THÌ (Sau khi dừng thao tác 2.5 giây)
+            const isFirstRender = useRef(true);
+            useEffect(() => {
+                if (isFirstRender.current) {
+                    isFirstRender.current = false;
+                    return;
+                }
+                const timeoutId = setTimeout(() => {
+                    syncToCloud(); 
+                }, 2500);
+                return () => clearTimeout(timeoutId);
+            }, [history, profile]); 
+
+            // LỚP 3: LƯU CUỐI NGÀY HOẶC KHI TẮT TRÌNH DUYỆT
+            useEffect(() => {
+                // Kích hoạt khi chuyển tab hoặc tắt máy
+                const handleVisibilityChange = () => {
+                    if (document.visibilityState === 'hidden') {
+                        syncToCloud();
+                    }
+                };
+                document.addEventListener('visibilitychange', handleVisibilityChange);
+
+                // Kích hoạt chuẩn xác lúc 23:59:59 nếu vẫn đang cắm máy
+                const now = new Date();
+                const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999) - now;
+                const midnightTimer = setTimeout(() => {
+                    console.log("⏰ Kích hoạt lưu dữ liệu cuối ngày!");
+                    syncToCloud();
+                }, millisTillMidnight);
+
+                return () => {
+                    document.removeEventListener('visibilitychange', handleVisibilityChange);
+                    clearTimeout(midnightTimer);
+                };
+            }, []);
             // ==========================================
 
             const calculatedTarget = useMemo(() => {
@@ -972,17 +1011,6 @@
 
                     <button onClick={() => setView("journal")} className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase shadow-lg shadow-emerald-200 active:scale-95 transition-all">Bắt đầu ngay</button>
                     
-                    {/* BẮT ĐẦU ĐOẠN CODE BẠN YÊU CẦU */}
-                    <div className="space-y-3 mt-6">
-                        <button onClick={syncToCloud} className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase">
-                            ☁️ Đồng bộ lên Cloud
-                        </button>
-                        <button onClick={syncFromCloud} className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase">
-                            ⬇️ Tải về từ Cloud
-                        </button>
-                    </div>
-                    {/* KẾT THÚC ĐOẠN CODE BẠN YÊU CẦU */}
-
                     <BottomNav view={view} setView={setView} />
                 </div>
             );
