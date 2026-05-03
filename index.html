@@ -41,18 +41,32 @@
             { name: "Cà chua", unit: "g", per: 100, kcal: 18, carb: 3.9, fat: 0.2, protein: 0.9 },
             { name: "Khoai tây", unit: "g", per: 100, kcal: 77, carb: 17, fat: 0.1, protein: 2 },
             { name: "Cà rốt", unit: "g", per: 100, kcal: 41, carb: 10, fat: 0.2, protein: 0.9 },
+            { name: "Rau cải xanh", unit: "g", per: 100, kcal: 25, carb: 3.6, fat: 0.4, protein: 2.2 },
+            { name: "Bông cải xanh", unit: "g", per: 100, kcal: 34, carb: 7, fat: 0.4, protein: 2.8 },
             { name: "Đậu hũ", unit: "g", per: 100, kcal: 76, carb: 1.9, fat: 4.8, protein: 8 },
+            { name: "Trứng gà sống", unit: "g", per: 100, kcal: 143, carb: 1, fat: 10, protein: 13 },
             { name: "Trứng gà luộc", unit: "g", per: 100, kcal: 155, carb: 1, fat: 11, protein: 13 },
             { name: "Trứng gà rán", unit: "g", per: 100, kcal: 196, carb: 1, fat: 15, protein: 14 },
-            { name: "Thịt lợn nạc", unit: "g", per: 100, kcal: 143, carb: 0, fat: 6, protein: 21 },
-            { name: "Ức gà", unit: "g", per: 100, kcal: 110, carb: 0, fat: 1, protein: 23 },
-            { name: "Thịt bò nạc", unit: "g", per: 100, kcal: 250, carb: 0, fat: 15, protein: 26 },
-            { name: "Cơm trắng", unit: "g", per: 100, kcal: 130, carb: 28, fat: 0.3, protein: 2.7 },
-            { name: "Phở bò (1 tô)", unit: "tô", per: 1, kcal: 500, carb: 60, fat: 12, protein: 28 },
+            { name: "Trứng gà omelet", unit: "g", per: 100, kcal: 157, carb: 1, fat: 12, protein: 11 },
+            { name: "Trứng gà kho, rim", unit: "g", per: 100, kcal: 142, carb: 1, fat: 10, protein: 13 },
+            { name: "Trứng gà bác", unit: "g", per: 100, kcal: 167, carb: 2, fat: 12, protein: 11 },
+            { name: "Ba chỉ / ba rọi (Việt)", unit: "g", per: 100, kcal: 260, carb: 0, fat: 21.5, protein: 16.5 },
+            { name: "Thắt thăn lợn (nạc)", unit: "g", per: 100, kcal: 143, carb: 0, fat: 6, protein: 21 },
+            { name: "Đùi gà, thịt", unit: "g", per: 100, kcal: 119, carb: 0, fat: 4, protein: 20 },
+            { name: "Cánh gà, thịt", unit: "g", per: 100, kcal: 126, carb: 0, fat: 4, protein: 22 },
+            { name: "Ức gà, thịt", unit: "g", per: 100, kcal: 110, carb: 0, fat: 1, protein: 23 },
+            { name: "Thịt thăn bò (phần nạc)", unit: "g", per: 100, kcal: 142, carb: 0, fat: 6, protein: 21 },
+            { name: "Thịt ức bò (phần nạc)", unit: "g", per: 100, kcal: 155, carb: 0, fat: 7, protein: 21 },
+            { name: "Gạo trắng (sống)", unit: "g", per: 100, kcal: 360, carb: 79, fat: 0.7, protein: 7 },
+            { name: "Cơm trắng (chín)", unit: "g", per: 100, kcal: 130, carb: 28, fat: 0.3, protein: 2.7 },
+            { name: "Phở bò (1 tô lớn)", unit: "tô", per: 1, kcal: 500, carb: 60, fat: 12, protein: 28 },
+            { name: "Bún bò Huế", unit: "tô", per: 1, kcal: 480, carb: 58, fat: 14, protein: 25 },
             { name: "Bánh mì thịt", unit: "ổ", per: 1, kcal: 380, carb: 48, fat: 12, protein: 18 },
+            { name: "Bún chả", unit: "suất", per: 1, kcal: 520, carb: 55, fat: 18, protein: 30 },
+            { name: "Cá rô phi", unit: "g", per: 100, kcal: 96, carb: 0, fat: 2, protein: 20 },
+            { name: "Cá hồi", unit: "g", per: 100, kcal: 208, carb: 0, fat: 13, protein: 20 },
             { name: "Sữa tươi", unit: "ml", per: 100, kcal: 60, carb: 5, fat: 3, protein: 3 },
             { name: "Chuối", unit: "g", per: 100, kcal: 89, carb: 23, fat: 0, protein: 1 }
-            // Lưu ý: Hãy tự dán lại danh sách món ăn đầy đủ của bạn vào đây nhé
         ];
 
         const ACTIVITY_LEVELS = [{ label: "Ít vận động", value: 1.2 }, { label: "Nhẹ (1-3 buổi/tuần)", value: 1.375 }, { label: "Vừa (3-5 buổi/tuần)", value: 1.55 }, { label: "Nhiều (6-7 buổi/tuần)", value: 1.725 }];
@@ -73,6 +87,7 @@
             );
         }
         
+        // === VIEW THỐNG KÊ (ĐÃ FIX LỖI DẤU NGOẶC) ===
         function StatsView({ history, profile, setProfile, target, setView, view }) {
             const [weightLog, setWeightLog] = useState(() => { const s = localStorage.getItem('stayfit_weight_log'); return s ? JSON.parse(s) : {}; });
             const [weightInput, setWeightInput] = useState("");
@@ -95,34 +110,116 @@
             const deleteWeight = (date) => { const newLog = { ...weightLog }; delete newLog[date]; setWeightLog(newLog); localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog)); };
 
             useEffect(() => {
-                Chart.defaults.font.family = "'Inter', sans-serif"; Chart.defaults.color = '#94a3b8';
+                Chart.defaults.font.family = "'Inter', sans-serif"; 
+                Chart.defaults.color = '#94a3b8';
+
+                // 1. Biểu đồ Cân nặng
                 if (weightChartInstance.current) weightChartInstance.current.destroy();
                 const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(a) - new Date(b));
                 if (sortedDates.length > 0 && weightChartRef.current) {
                     const ctx = weightChartRef.current.getContext('2d');
-                    const labels = sortedDates.map(d => getWeekLabel(d)); const data = sortedDates.map(d => weightLog[d]);
-                    const minWeight = Math.floor(Math.min(...data)) - 2; const maxWeight = Math.ceil(Math.max(...data)) + 2;
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)'); gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-                    weightChartInstance.current = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Cân nặng (kg)', data, borderColor: '#10B981', backgroundColor: gradient, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#10B981', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ` ${c.parsed.y} kg` }, backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12, displayColors: false } }, scales: { y: { min: minWeight, max: maxWeight, grid: { color: '#f1f5f9', borderDash: [5, 5] }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } } } });
+                    const labels = sortedDates.map(d => getWeekLabel(d)); 
+                    const data = sortedDates.map(d => weightLog[d]);
+                    const minWeight = Math.floor(Math.min(...data)) - 2; 
+                    const maxWeight = Math.ceil(Math.max(...data)) + 2;
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); 
+                    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)'); 
+                    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+                    weightChartInstance.current = new Chart(ctx, { 
+                        type: 'line', 
+                        data: { 
+                            labels: labels, 
+                            datasets: [{ 
+                                label: 'Cân nặng (kg)', data: data, borderColor: '#10B981', backgroundColor: gradient, borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#10B981', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, fill: true, tension: 0.3 
+                            }] 
+                        }, 
+                        options: { 
+                            responsive: true, maintainAspectRatio: false, 
+                            plugins: { 
+                                legend: { display: false }, 
+                                tooltip: { callbacks: { label: (c) => ` ${c.parsed.y} kg` }, backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12, displayColors: false } 
+                            }, 
+                            scales: { 
+                                y: { min: minWeight, max: maxWeight, grid: { color: '#f1f5f9', borderDash: [5, 5] }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, 
+                                x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } } 
+                            } 
+                        } 
+                    });
                 }
 
+                // 2. Biểu đồ Kcal
                 if (kcalChartInstance.current) kcalChartInstance.current.destroy();
                 if (kcalChartRef.current) {
                     const ctx = kcalChartRef.current.getContext('2d');
-                    const last56Days = getLast56Days(); const labels = last56Days.map(d => getWeekLabel(d));
-                    const dataKcal = last56Days.map(d => Math.round(sumDayMacro(history[d], 'kcal'))); const targetLine = new Array(56).fill(target);
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)'); gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
-                    kcalChartInstance.current = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Kcal nạp', data: dataKcal, borderColor: '#3B82F6', backgroundColor: gradient, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, { label: 'Mục tiêu', data: targetLine, borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 8 } } } });
+                    const last56Days = getLast56Days(); 
+                    const labels = last56Days.map(d => getWeekLabel(d));
+                    const dataKcal = last56Days.map(d => Math.round(sumDayMacro(history[d], 'kcal'))); 
+                    const targetLine = new Array(56).fill(target);
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 200); 
+                    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)'); 
+                    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+                    kcalChartInstance.current = new Chart(ctx, { 
+                        type: 'line', 
+                        data: { 
+                            labels: labels, 
+                            datasets: [
+                                { label: 'Kcal nạp', data: dataKcal, borderColor: '#3B82F6', backgroundColor: gradient, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, 
+                                { label: 'Mục tiêu', data: targetLine, borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0 }
+                            ] 
+                        }, 
+                        options: { 
+                            responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, 
+                            plugins: { 
+                                legend: { display: false }, 
+                                tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } 
+                            }, 
+                            scales: { 
+                                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, 
+                                x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 8 } } 
+                            } 
+                        } 
+                    });
                 }
 
+                // 3. Biểu đồ Macro
                 if (macroChartInstance.current) macroChartInstance.current.destroy();
                 if (macroChartRef.current) {
                     const ctx = macroChartRef.current.getContext('2d');
-                    const last28Days = getLast56Days().slice(28); const labels = last28Days.map(d => getWeekLabel(d));
-                    const dataProtein = last28Days.map(d => Math.round(sumDayMacro(history[d], 'protein'))); const dataFat = last28Days.map(d => Math.round(sumDayMacro(history[d], 'fat')));
-                    macroChartInstance.current = new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: 'Protein (g)', data: dataProtein, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, { label: 'Fat (g)', data: dataFat, borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 10, family: 'Inter', weight: 'bold' } } }, tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 7 } } } });
+                    const last28Days = getLast56Days().slice(28); 
+                    const labels = last28Days.map(d => getWeekLabel(d));
+                    const dataProtein = last28Days.map(d => Math.round(sumDayMacro(history[d], 'protein'))); 
+                    const dataFat = last28Days.map(d => Math.round(sumDayMacro(history[d], 'fat')));
+
+                    macroChartInstance.current = new Chart(ctx, { 
+                        type: 'line', 
+                        data: { 
+                            labels: labels, 
+                            datasets: [
+                                { label: 'Protein (g)', data: dataProtein, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }, 
+                                { label: 'Fat (g)', data: dataFat, borderColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }
+                            ] 
+                        }, 
+                        options: { 
+                            responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, 
+                            plugins: { 
+                                legend: { display: true, position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: { size: 10, family: 'Inter', weight: 'bold' } } }, 
+                                tooltip: { backgroundColor: '#0F172A', titleFont: { size: 11, family: 'Inter', weight: '800' }, bodyFont: { size: 12, family: 'Inter', weight: 'bold' }, padding: 10, cornerRadius: 12 } 
+                            }, 
+                            scales: { 
+                                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }, 
+                                x: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 9 }, maxTicksLimit: 7 } } 
+                            } 
+                        } 
+                    });
                 }
-                return () => { if (weightChartInstance.current) weightChartInstance.current.destroy(); if (kcalChartInstance.current) kcalChartInstance.current.destroy(); if (macroChartInstance.current) macroChartInstance.current.destroy(); };
+                
+                return () => { 
+                    if (weightChartInstance.current) weightChartInstance.current.destroy(); 
+                    if (kcalChartInstance.current) kcalChartInstance.current.destroy(); 
+                    if (macroChartInstance.current) macroChartInstance.current.destroy(); 
+                };
             }, [history, weightLog, target]);
 
             const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
@@ -178,7 +275,6 @@
         }
 
         function App() {
-            // STATE BẢO MẬT
             const [userId, setUserId] = useState(() => localStorage.getItem('stayfit_userid') || "");
             const [password, setPassword] = useState(() => localStorage.getItem('stayfit_password') || "");
             
@@ -198,7 +294,6 @@
             const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
             const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
 
-            // State UI cho màn hình Đăng Nhập
             const [inputUser, setInputUser] = useState("");
             const [inputPass, setInputPass] = useState("");
             const [loginLoading, setLoginLoading] = useState(false);
@@ -211,9 +306,6 @@
                 if (view !== "profile" && userId) localStorage.setItem('stayfit_setup', 'done');
             }, [profile, history, customFoodList, deletedCommonFoods, view, userId]);
 
-            // ==========================================
-            // HÀM ĐỒNG BỘ CÓ MẬT KHẨU
-            // ==========================================
             const syncToCloud = async () => {
                 if (!userId || !password) return; 
                 try {
@@ -221,9 +313,7 @@
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            action: "upload",
-                            userId, 
-                            password, // Gửi pass lên để kiểm duyệt
+                            action: "upload", userId, password, 
                             profile: JSON.parse(localStorage.getItem("stayfit_profile") || "{}"),
                             history: JSON.parse(localStorage.getItem("stayfit_history") || "{}"),
                             weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
@@ -231,10 +321,7 @@
                     });
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error);
-                    console.log(`✅ Đã lưu ngầm lên Cloud`);
-                } catch (err) {
-                    console.error("❌ Lỗi lưu ngầm:", err.message);
-                }
+                } catch (err) { console.error("Lỗi lưu ngầm:", err.message); }
             };
 
             const syncFromCloud = async () => {
@@ -256,12 +343,9 @@
                         sessionStorage.setItem(`sync_done_${userId}`, 'true');
                         window.location.reload();
                     }
-                } catch (err) {
-                    console.error("❌ Lỗi tải ngầm:", err.message);
-                }
+                } catch (err) { console.error("Lỗi tải ngầm:", err.message); }
             };
 
-            // Hàm xử lý Đăng Nhập
             const handleLogin = async () => {
                 const uid = inputUser.trim().toLowerCase();
                 const pwd = inputPass.trim();
@@ -269,29 +353,21 @@
 
                 setLoginLoading(true);
                 try {
-                    // Gọi API kiểm tra trước khi cho vào
                     const res = await fetch(`/api/sync?userId=${uid}&password=${pwd}`);
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error);
 
-                    // Lưu cất thông tin đăng nhập
                     localStorage.setItem('stayfit_userid', uid);
                     localStorage.setItem('stayfit_password', pwd);
                     
-                    // Nếu Cloud có dữ liệu, đè vào máy tính hiện tại
                     if (data.profile) localStorage.setItem("stayfit_profile", JSON.stringify(data.profile));
                     if (data.history) localStorage.setItem("stayfit_history", JSON.stringify(data.history));
                     if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
 
                     window.location.reload();
-                } catch (err) {
-                    alert("❌ Lỗi: " + err.message);
-                } finally {
-                    setLoginLoading(false);
-                }
+                } catch (err) { alert("❌ Lỗi: " + err.message); } finally { setLoginLoading(false); }
             };
 
-            // LỚP 1: Tải dữ liệu khi vừa đăng nhập
             useEffect(() => {
                 if (!userId || !password) return;
                 const hasInitialSync = sessionStorage.getItem(`stayfit_initial_sync_${userId}`);
@@ -301,7 +377,6 @@
                 }
             }, [userId, password]);
 
-            // LỚP 2: LƯU TỨC THÌ
             const isFirstRender = useRef(true);
             useEffect(() => {
                 if (isFirstRender.current) { isFirstRender.current = false; return; }
@@ -309,7 +384,6 @@
                 return () => clearTimeout(timeoutId);
             }, [history, profile]); 
 
-            // LỚP 3: LƯU KHI TẮT TRÌNH DUYỆT / NỬA ĐÊM
             useEffect(() => {
                 const handleVisibilityChange = () => { if (document.visibilityState === 'hidden') syncToCloud(); };
                 document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -433,26 +507,14 @@
                             <p className="text-[10px] uppercase font-bold tracking-widest opacity-80 mb-8">Đồng bộ Cloud</p>
                             
                             <div className="space-y-3 mb-6">
-                                <input 
-                                    type="text" value={inputUser} onChange={e=>setInputUser(e.target.value)} placeholder="Tên ID (vd: quy2026)" 
-                                    className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all"
-                                />
-                                <input 
-                                    type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="Mật khẩu" 
-                                    className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all"
-                                    onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
-                                />
+                                <input type="text" value={inputUser} onChange={e=>setInputUser(e.target.value)} placeholder="Tên ID (vd: quy2026)" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" />
+                                <input type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="Mật khẩu" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }} />
                             </div>
 
-                            <button 
-                                onClick={handleLogin} disabled={loginLoading}
-                                className="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50"
-                            >
+                            <button onClick={handleLogin} disabled={loginLoading} className="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">
                                 {loginLoading ? "Đang kết nối..." : "Đăng Nhập"}
                             </button>
-                            <p className="text-[9px] text-white/50 font-bold mt-4 px-4 leading-relaxed">
-                                Nếu chưa có tài khoản, hãy nhập ID & Mật khẩu mới để đăng ký tự động.
-                            </p>
+                            <p className="text-[9px] text-white/50 font-bold mt-4 px-4 leading-relaxed">Nếu chưa có tài khoản, hãy nhập ID & Mật khẩu mới để tự động đăng ký.</p>
                         </div>
                     </div>
                 );
@@ -464,16 +526,11 @@
             // === 3. MÀN HÌNH HỒ SƠ ===
             if (view === "profile") return (
                 <div className="max-w-md mx-auto min-h-screen bg-white p-8 flex flex-col justify-center space-y-6 animate-in fade-in duration-500 pb-28 relative">
-                    <div className="text-center mb-4">
-                        <h1 className="text-4xl font-black text-emerald-600 tracking-tighter italic">STAYFIT</h1>
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Hồ sơ cá nhân của bạn</p>
-                    </div>
-
+                    <div className="text-center mb-4"><h1 className="text-4xl font-black text-emerald-600 tracking-tighter italic">STAYFIT</h1><p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Hồ sơ cá nhân</p></div>
                     <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl">
                         <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='male' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>Nam</button>
                         <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='female' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>Nữ</button>
                     </div>
-
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                             <div className="relative"><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Tuổi</label><div className="relative group"><input type="number" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="w-full bg-slate-50 p-4 pr-12 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">tuổi</span></div></div>
@@ -483,32 +540,14 @@
                         <div><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Mức độ vận động</label><select value={profile.activity} onChange={e=>{setProfile({...profile, activity:+e.target.value, isManualTarget: false});}} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{ACTIVITY_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}</select></div>
                         <div><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Mục tiêu cân nặng</label><select value={profile.goal} onChange={e=>{setProfile({...profile, goal:+e.target.value, isManualTarget: false});}} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{GOALS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}</select></div>
                     </div>
-
                     <div className="bg-slate-900 rounded-3xl p-6 text-white text-center shadow-xl flex flex-col items-center">
                         <span className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Ngân sách Calo/Ngày</span>
-                        <div className="flex justify-center items-end mt-1">
-                            <input type="number" value={target} onChange={e => setProfile({...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0})} className="text-4xl font-black text-emerald-400 tracking-tighter bg-transparent text-center outline-none w-32 border-b-2 border-dashed border-slate-700 hover:border-emerald-400 focus:border-emerald-400 transition-colors" />
-                            <span className="text-lg font-normal text-slate-500 italic mb-1 ml-1">kcal</span>
-                        </div>
+                        <div className="flex justify-center items-end mt-1"><input type="number" value={target} onChange={e => setProfile({...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0})} className="text-4xl font-black text-emerald-400 tracking-tighter bg-transparent text-center outline-none w-32 border-b-2 border-dashed border-slate-700 hover:border-emerald-400 focus:border-emerald-400 transition-colors" /><span className="text-lg font-normal text-slate-500 italic mb-1 ml-1">kcal</span></div>
                         {profile.isManualTarget && <button onClick={() => setProfile({...profile, isManualTarget: false})} className="text-[9px] text-emerald-500/80 mt-3 font-bold uppercase tracking-widest hover:text-emerald-400 transition-colors">⟲ Trở về Mức Tính Tự Động ({calculatedTarget})</button>}
                     </div>
-
                     <div className="space-y-3 mt-2">
                         <button onClick={() => setView("journal")} className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase shadow-lg shadow-emerald-200 active:scale-95 transition-all">Bắt đầu ngay</button>
-                        
-                        {/* NÚT ĐĂNG XUẤT AN TOÀN */}
-                        <button 
-                            onClick={() => {
-                                // CHỈ Xóa "Thẻ tên" (Session), KHÔNG XÓA Data Calo (stayfit_history) hay Hồ sơ (stayfit_profile)
-                                setUserId("");
-                                setPassword("");
-                                localStorage.removeItem('stayfit_userid');
-                                localStorage.removeItem('stayfit_password');
-                            }} 
-                            className="w-full py-4 bg-slate-100 text-slate-500 rounded-3xl font-black uppercase tracking-widest hover:bg-slate-200 active:scale-95 transition-all"
-                        >
-                            Đăng xuất
-                        </button>
+                        <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-4 bg-slate-100 text-slate-500 rounded-3xl font-black uppercase tracking-widest hover:bg-slate-200 active:scale-95 transition-all">Đăng xuất</button>
                     </div>
                     <BottomNav view={view} setView={setView} />
                 </div>
@@ -525,23 +564,17 @@
                         </div>
                         <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs shadow-sm">SF</div>
                     </header>
-
                     <main className="p-4 space-y-6">
                         <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex flex-col gap-6">
                             <div className="flex items-center justify-between">
-                                <div className="relative w-24 h-24 flex items-center justify-center">
-                                    <svg className="transform -rotate-90 w-24 h-24"><circle cx="48" cy="48" r="40" stroke="#F1F5F9" strokeWidth="10" fill="transparent" /><circle cx="48" cy="48" r="40" stroke={dailyKcal > target ? "#EF4444" : "#10B981"} strokeWidth="10" fill="transparent" strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - Math.min(dailyKcal/target, 1.2))} strokeLinecap="round" className="transition-all duration-1000" /></svg>
-                                    <span className="absolute font-black text-xl text-slate-800">{Math.round((dailyKcal/target)*100) || 0}%</span>
-                                </div>
+                                <div className="relative w-24 h-24 flex items-center justify-center"><svg className="transform -rotate-90 w-24 h-24"><circle cx="48" cy="48" r="40" stroke="#F1F5F9" strokeWidth="10" fill="transparent" /><circle cx="48" cy="48" r="40" stroke={dailyKcal > target ? "#EF4444" : "#10B981"} strokeWidth="10" fill="transparent" strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - Math.min(dailyKcal/target, 1.2))} strokeLinecap="round" className="transition-all duration-1000" /></svg><span className="absolute font-black text-xl text-slate-800">{Math.round((dailyKcal/target)*100) || 0}%</span></div>
                                 <div className="flex-1 text-right"><p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Mục tiêu: {target}</p><h3 className="text-4xl font-black text-slate-800 leading-none">{dailyKcal}</h3><p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Calo đã nạp</p></div>
                             </div>
-                            
                             <div className="border-t border-slate-50 pt-5 space-y-3">
                                 <MacroProgressBar label="Protein" current={dailyProtein} target={targetProtein} colorClass="bg-emerald-500" />
                                 <MacroProgressBar label="Carb" current={dailyCarb} target={targetCarb} colorClass="bg-blue-500" />
                                 <MacroProgressBar label="Fat" current={dailyFat} target={targetFat} colorClass="bg-yellow-400" />
                             </div>
-
                             <div className="border-t border-slate-50 pt-5 mt-1">
                                 <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Theo bữa ăn</h3>
                                 {isDailyLogEmpty ? <p className="text-center text-[11px] italic text-slate-300 py-2">Chưa có dữ liệu hôm nay</p> : (
@@ -559,16 +592,8 @@
                         </div>
 
                         <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
-                            <div className="flex justify-between items-center mb-6">
-                                <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2"><IconPlus /> Thêm món</h4>
-                                <select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="bg-slate-50 text-[9px] font-black text-slate-500 py-1.5 px-3 rounded-full outline-none uppercase tracking-widest cursor-pointer">{MEAL_TYPES.map(m => <option key={m} value={m}>{m}</option>)}</select>
-                            </div>
-
-                            <div className="flex p-1 bg-slate-100 rounded-xl mb-4">
-                                <button onClick={() => setTab("quick")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "quick" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}>Chọn nhanh</button>
-                                <button onClick={() => setTab("custom")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "custom" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}>Nhập tay</button>
-                            </div>
-
+                            <div className="flex justify-between items-center mb-6"><h4 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2"><IconPlus /> Thêm món</h4><select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="bg-slate-50 text-[9px] font-black text-slate-500 py-1.5 px-3 rounded-full outline-none uppercase tracking-widest cursor-pointer">{MEAL_TYPES.map(m => <option key={m} value={m}>{m}</option>)}</select></div>
+                            <div className="flex p-1 bg-slate-100 rounded-xl mb-4"><button onClick={() => setTab("quick")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "quick" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}>Chọn nhanh</button><button onClick={() => setTab("custom")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "custom" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}>Nhập tay</button></div>
                             {tab === "quick" ? (
                                 <div>
                                     <div className="relative mb-4"><div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div><input type="text" placeholder="Tìm nguyên liệu hoặc món ăn..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 pl-10 pr-4 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/20" /></div>
@@ -581,7 +606,6 @@
                                         ))}
                                         {filteredFoods.length === 0 && <p className="col-span-2 text-center py-6 text-slate-400 text-xs italic">Không tìm thấy món ăn</p>}
                                     </div>
-                                    
                                     {selectedFood && (
                                         <div className="mt-4 pt-5 border-t border-slate-100 animate-in slide-in-from-top-2">
                                             <div className="flex items-center gap-3 mb-4">
@@ -638,21 +662,11 @@
                             <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                                 <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200">
                                     {confirmModal.alertMessage ? (
-                                        <div className="text-center">
-                                            <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mx-auto mb-4"><span className="font-black text-xl">!</span></div>
-                                            <h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Thông báo</h3>
-                                            <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">{confirmModal.alertMessage}</p>
-                                            <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Đã hiểu</button>
-                                        </div>
+                                        <div className="text-center"><div className="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mx-auto mb-4"><span className="font-black text-xl">!</span></div><h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Thông báo</h3><p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">{confirmModal.alertMessage}</p><button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Đã hiểu</button></div>
                                     ) : (
                                         <div className="text-center">
-                                            <div className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4"><IconTrash /></div>
-                                            <h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Xác nhận xóa</h3>
-                                            <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">Bạn có chắc muốn xóa <span className="font-black text-slate-700">"{confirmModal.foodToDelete?.name}"</span>?</p>
-                                            <div className="flex gap-2">
-                                                <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Hủy</button>
-                                                <button onClick={handleConfirmDelete} className="flex-1 py-3.5 bg-red-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all">Xóa Món</button>
-                                            </div>
+                                            <div className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4"><IconTrash /></div><h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Xác nhận xóa</h3><p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">Bạn có chắc muốn xóa <span className="font-black text-slate-700">"{confirmModal.foodToDelete?.name}"</span>?</p>
+                                            <div className="flex gap-2"><button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Hủy</button><button onClick={handleConfirmDelete} className="flex-1 py-3.5 bg-red-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all">Xóa Món</button></div>
                                         </div>
                                     )}
                                 </div>
@@ -666,27 +680,15 @@
             // === 5. MÀN HÌNH LỊCH TRÌNH ===
             if (view === "calendar") return (
                 <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300">
-                    <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shadow-sm sticky top-0 z-20">
-                        <h1 className="font-black uppercase tracking-widest text-slate-800 text-xs">Lịch trình tiêu thụ</h1>
-                        <button onClick={() => setView("profile")} className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-[10px] font-black text-slate-400">⚙️</button>
-                    </header>
+                    <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shadow-sm sticky top-0 z-20"><h1 className="font-black uppercase tracking-widest text-slate-800 text-xs">Lịch trình tiêu thụ</h1><button onClick={() => setView("profile")} className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-[10px] font-black text-slate-400">⚙️</button></header>
                     <main className="p-4 space-y-4">
-                        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-center">
-                            <p className="text-emerald-500 text-[10px] font-black uppercase mb-1 tracking-widest">{calendarData.monthName}</p>
-                            <p className="text-slate-500 text-xs font-bold mb-2 uppercase tracking-tighter">Tổng tiêu thụ tháng này:</p>
-                            <h2 className="text-5xl font-black tracking-tighter">{(calendarData.monthTotalKcal || 0).toLocaleString()} <span className="text-lg font-normal text-slate-600 italic ml-1">kcal</span></h2>
-                        </div>
+                        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-center"><p className="text-emerald-500 text-[10px] font-black uppercase mb-1 tracking-widest">{calendarData.monthName}</p><p className="text-slate-500 text-xs font-bold mb-2 uppercase tracking-tighter">Tổng tiêu thụ tháng này:</p><h2 className="text-5xl font-black tracking-tighter">{(calendarData.monthTotalKcal || 0).toLocaleString()} <span className="text-lg font-normal text-slate-600 italic ml-1">kcal</span></h2></div>
                         <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 transition-all">
                             <div className="calendar-grid text-center">
                                 {["CN","T2","T3","T4","T5","T6","T7"].map(w => <div key={w} className="text-[10px] font-black text-slate-200 py-3 uppercase">{w}</div>)}
                                 {calendarData.days.map((d, i) => (
                                     <div key={i} className="aspect-square flex items-center justify-center p-0.5">
-                                        {d ? (
-                                            <button onClick={() => { setCurrentDate(d.key); setView("journal"); }} className={`w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all ${d.key === currentDate ? 'bg-emerald-600 text-white shadow-lg scale-110':'hover:bg-slate-50 text-slate-600'}`}>
-                                                <span className="text-xs font-black">{d.day}</span>
-                                                {d.kcal > 0 && <div className={`w-1 h-1 rounded-full mt-1 ${d.kcal > target ? 'bg-red-400':'bg-emerald-300'}`} />}
-                                            </button>
-                                        ) : <div className="w-full h-full opacity-0" />}
+                                        {d ? <button onClick={() => { setCurrentDate(d.key); setView("journal"); }} className={`w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all ${d.key === currentDate ? 'bg-emerald-600 text-white shadow-lg scale-110':'hover:bg-slate-50 text-slate-600'}`}><span className="text-xs font-black">{d.day}</span>{d.kcal > 0 && <div className={`w-1 h-1 rounded-full mt-1 ${d.kcal > target ? 'bg-red-400':'bg-emerald-300'}`} />}</button> : <div className="w-full h-full opacity-0" />}
                                     </div>
                                 ))}
                             </div>
