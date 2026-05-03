@@ -35,7 +35,6 @@
 
         // --- DỮ LIỆU ---
         const COMMON_FOODS = [
-            // Nguyên liệu cơ bản
             { name: "Tỏi", unit: "g", per: 100, kcal: 149, carb: 33, fat: 0.5, protein: 6.4 },
             { name: "Hành tây", unit: "g", per: 100, kcal: 40, carb: 9, fat: 0.1, protein: 1.1 },
             { name: "Cà chua", unit: "g", per: 100, kcal: 18, carb: 3.9, fat: 0.2, protein: 0.9 },
@@ -44,8 +43,7 @@
             { name: "Rau cải xanh", unit: "g", per: 100, kcal: 25, carb: 3.6, fat: 0.4, protein: 2.2 },
             { name: "Bông cải xanh", unit: "g", per: 100, kcal: 34, carb: 7, fat: 0.4, protein: 2.8 },
             { name: "Đậu hũ", unit: "g", per: 100, kcal: 76, carb: 1.9, fat: 4.8, protein: 8 },
-            // Trứng 
-             { name: "Trứng gà sống", unit: "g", per: 100, kcal: 143, carb: 1, fat: 10, protein: 13 },
+            { name: "Trứng gà sống", unit: "g", per: 100, kcal: 143, carb: 1, fat: 10, protein: 13 },
             { name: "Trứng gà luộc", unit: "g", per: 100, kcal: 155, carb: 1, fat: 11, protein: 13 },
             { name: "Trứng gà rán", unit: "g", per: 100, kcal: 196, carb: 1, fat: 15, protein: 14 },
             { name: "Trứng gà omelet", unit: "g", per: 100, kcal: 157, carb: 1, fat: 12, protein: 11 },
@@ -58,7 +56,6 @@
             { name: "Trứng ngỗng sống", unit: "g", per: 100, kcal: 185, carb: 1, fat: 13, protein: 14 },
             { name: "Trứng chim cút sống", unit: "g", per: 100, kcal: 158, carb: 0, fat: 11, protein: 13 },
             { name: "Trứng gà tây", unit: "g", per: 100, kcal: 171, carb: 1, fat: 12, protein: 12 },
-            // Thịt lợn
             { name: "Ba chỉ / ba rọi (Việt)", unit: "g", per: 100, kcal: 260, carb: 0, fat: 21.5, protein: 16.5 },
             { name: "Ba chỉ / ba rọi (nước ngoài)", unit: "g", per: 100, kcal: 518, carb: 0, fat: 53, protein: 9 },
             { name: "Thắt thăn lợn (nạc)", unit: "g", per: 100, kcal: 143, carb: 0, fat: 6, protein: 21 },
@@ -84,7 +81,6 @@
             { name: "Đuôi lợn", unit: "g", per: 100, kcal: 378, carb: 0, fat: 33, protein: 18 },
             { name: "Lưỡi lợn", unit: "g", per: 100, kcal: 225, carb: 0, fat: 17, protein: 16 },
             { name: "Ruột non", unit: "g", per: 100, kcal: 182, carb: 0, fat: 17, protein: 8 },
-             // Thịt gà 
             { name: "Đùi gà, thịt", unit: "g", per: 100, kcal: 119, carb: 0, fat: 4, protein: 20 },
             { name: "Đùi gà, thịt và da", unit: "g", per: 100, kcal: 211, carb: 0, fat: 15, protein: 17 },
             { name: "Cánh gà, thịt", unit: "g", per: 100, kcal: 126, carb: 0, fat: 4, protein: 22 },
@@ -103,12 +99,10 @@
             { name: "Gan gà", unit: "g", per: 100, kcal: 116, carb: 0, fat: 5, protein: 17 },
             { name: "Thịt gà xay", unit: "g", per: 100, kcal: 143, carb: 0, fat: 8, protein: 17 },
             { name: "Da gà", unit: "g", per: 100, kcal: 349, carb: 0, fat: 32, protein: 13 },
-            // Thịt vịt 
             { name: "Vịt nuôi, thịt", unit: "g", per: 100, kcal: 132, carb: 0, fat: 6, protein: 18 },
             { name: "Vịt nuôi, thịt và da", unit: "g", per: 100, kcal: 404, carb: 0, fat: 39, protein: 11 },
             { name: "Vịt hoang dã, thịt và da", unit: "g", per: 100, kcal: 211, carb: 0, fat: 15, protein: 17 },
             { name: "Gan vịt", unit: "g", per: 100, kcal: 136, carb: 4, fat: 5, protein: 19 },
-            // Thịt bò 
             { name: "Thịt thăn bò (phần nạc)", unit: "g", per: 100, kcal: 142, carb: 0, fat: 6, protein: 21 },
             { name: "Thịt bò tươi (cả con - cả nạc)", unit: "g", per: 100, kcal: 278, carb: 0, fat: 22.5, protein: 17.5 },
             { name: "Thịt ức bò (phần nạc)", unit: "g", per: 100, kcal: 155, carb: 0, fat: 7, protein: 21 },
@@ -123,18 +117,15 @@
             { name: "Thận bò", unit: "g", per: 100, kcal: 103, carb: 0, fat: 3, protein: 18 },
             { name: "Tim bò", unit: "g", per: 100, kcal: 112, carb: 0, fat: 3.5, protein: 18 },
             { name: "Óc bò", unit: "g", per: 100, kcal: 143, carb: 1, fat: 11, protein: 11 },
-            // Cơm & Tinh bột
             { name: "Gạo trắng (sống)", unit: "g", per: 100, kcal: 360, carb: 79, fat: 0.7, protein: 7 },
             { name: "Cơm trắng (chín)", unit: "g", per: 100, kcal: 130, carb: 28, fat: 0.3, protein: 2.7 },
             { name: "Bún tươi", unit: "g", per: 100, kcal: 109, carb: 24, fat: 0.2, protein: 2 },
             { name: "Phở (bánh)", unit: "g", per: 100, kcal: 108, carb: 24, fat: 0.2, protein: 2.2 },
-            // Món ăn hoàn chỉnh
             { name: "Phở bò (1 tô lớn)", unit: "tô", per: 1, kcal: 500, carb: 60, fat: 12, protein: 28 },
             { name: "Bún bò Huế", unit: "tô", per: 1, kcal: 480, carb: 58, fat: 14, protein: 25 },
             { name: "Cơm tấm sườn bì", unit: "đĩa", per: 1, kcal: 650, carb: 75, fat: 22, protein: 35 },
             { name: "Bánh mì thịt", unit: "ổ", per: 1, kcal: 380, carb: 48, fat: 12, protein: 18 },
             { name: "Bún chả", unit: "suất", per: 1, kcal: 520, carb: 55, fat: 18, protein: 30 },
-            // Hải sản
             { name: "Cá chép", unit: "g", per: 100, kcal: 127, carb: 0, fat: 5.5, protein: 18 },
             { name: "Cá đối", unit: "g", per: 100, kcal: 117, carb: 0, fat: 4, protein: 19 },
             { name: "Cá thu đại tây dương", unit: "g", per: 100, kcal: 205, carb: 0, fat: 14, protein: 19 },
@@ -162,7 +153,6 @@
             { name: "Hến", unit: "g", per: 100, kcal: 86, carb: 4, fat: 2, protein: 12 },
             { name: "Sò", unit: "g", per: 100, kcal: 79, carb: 5, fat: 0, protein: 13 },
             { name: "Nghêu", unit: "g", per: 100, kcal: 74, carb: 3, fat: 1, protein: 13 },
-            // Rau củ quả 
             { name: "Bí đao", unit: "g", per: 100, kcal: 14, carb: 3, fat: 0, protein: 0 },
             { name: "Bí xanh (mùa hè)", unit: "g", per: 100, kcal: 16, carb: 3, fat: 0, protein: 1 },
             { name: "Bí xanh (baby)", unit: "g", per: 100, kcal: 21, carb: 3, fat: 0, protein: 3 },
@@ -438,11 +428,11 @@
             const dailyCarb = Math.round(dailyLog.reduce((s, i) => s + (i.carb || 0), 0) * 10) / 10;
             const dailyFat = Math.round(dailyLog.reduce((s, i) => s + (i.fat || 0), 0) * 10) / 10;
 
-           const targetProtein = Math.round((target * 0.25 / 4) * 10) / 10;
+            const targetProtein = Math.round((target * 0.25 / 4) * 10) / 10;
             const targetCarb = Math.round((target * 0.50 / 4) * 10) / 10;
             const targetFat = Math.round((target * 0.25 / 9) * 10) / 10;
 
-            // === THÊM MỚI BƯỚC 1: LOGIC BREAKDOWN THEO BỮA ĂN ===
+            {/* === THÊM MỚI: BREAKDOWN THEO BỮA ĂN === */}
             const mealBreakdown = useMemo(() => {
                 const meals = [
                     { name: "Bữa sáng", icon: "☀️", color: "bg-orange-400" },
@@ -462,7 +452,8 @@
 
             const maxMealKcal = Math.max(...mealBreakdown.map(m => m.kcal), 1);
             const isDailyLogEmpty = mealBreakdown.every(m => m.kcal === 0);
-            // === KẾT THÚC THÊM MỚI BƯỚC 1 ===
+            {/* === KẾT THÚC PHẦN THÊM MỚI === */}
+
             // Tính toán Lịch
             const calendarData = useMemo(() => {
                 const baseDate = new Date(currentDate);
@@ -713,13 +704,13 @@
                             </div>
                             
                             {/* Macro Progress Bars */}
-                           <div className="border-t border-slate-50 pt-5 space-y-3">
+                            <div className="border-t border-slate-50 pt-5 space-y-3">
                                 <MacroProgressBar label="Protein" current={dailyProtein} target={targetProtein} colorClass="bg-emerald-500" />
                                 <MacroProgressBar label="Carb" current={dailyCarb} target={targetCarb} colorClass="bg-blue-500" />
                                 <MacroProgressBar label="Fat" current={dailyFat} target={targetFat} colorClass="bg-yellow-400" />
                             </div>
 
-                            {/* === THÊM MỚI BƯỚC 2: UI BREAKDOWN THEO BỮA ĂN === */}
+                            {/* === THÊM MỚI: BREAKDOWN THEO BỮA ĂN === */}
                             <div className="border-t border-slate-50 pt-5 mt-1">
                                 <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Theo bữa ăn</h3>
                                 
@@ -751,7 +742,9 @@
                                     </div>
                                 )}
                             </div>
-                            {/* === KẾT THÚC THÊM MỚI BƯỚC 2 === *
+                            {/* === KẾT THÚC PHẦN THÊM MỚI === */}
+                        </div>
+
                         {/* Thêm món ăn Section */}
                         <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                             <div className="flex justify-between items-center mb-6">
@@ -940,7 +933,7 @@
                 </div>
             );
 
-      // --- VIEW: CALENDAR ---
+            // --- VIEW: CALENDAR ---
             if (view === "calendar") return (
                 <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300">
                     <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shadow-sm sticky top-0 z-20">
@@ -981,7 +974,7 @@
                     <BottomNav view={view} setView={setView} />
                 </div>
             );
-        } // ĐÓNG HÀM APP() TẠI ĐÂY
+        }
 
         // --- SUB-COMPONENT: NAV ---
         function BottomNav({view, setView}) {
@@ -990,17 +983,13 @@
                     <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='journal' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
                         <IconJournal /><span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
                     </button>
-                    
                     <button onClick={() => setView("calendar")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='calendar' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
                         <IconCalendar /><span className="text-[9px] uppercase font-bold tracking-tighter">Lịch trình</span>
                     </button>
-
-                    {/* NÚT THỐNG KÊ MỚI */}
                     <a href="stayfit-stats.html" className="flex flex-col items-center gap-1.5 transition-all duration-300 text-slate-300 opacity-60 hover:text-emerald-600">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                         <span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
                     </a>
-                    
                     <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='profile' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
                         <IconUser /><span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
                     </button>
