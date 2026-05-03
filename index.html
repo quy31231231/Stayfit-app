@@ -439,7 +439,6 @@
                 Chart.defaults.font.family = "'Inter', sans-serif";
                 Chart.defaults.color = '#94a3b8';
 
-                // 1. Biểu đồ cân nặng
                 if (weightChartInstance.current) weightChartInstance.current.destroy();
                 const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(a) - new Date(b));
                 
@@ -483,7 +482,6 @@
                     });
                 }
 
-                // 2. Biểu đồ Kcal
                 if (kcalChartInstance.current) kcalChartInstance.current.destroy();
                 if (kcalChartRef.current) {
                     const ctx = kcalChartRef.current.getContext('2d');
@@ -519,7 +517,6 @@
                     });
                 }
 
-                // 3. Biểu đồ Macro
                 if (macroChartInstance.current) macroChartInstance.current.destroy();
                 if (macroChartRef.current) {
                     const ctx = macroChartRef.current.getContext('2d');
@@ -651,7 +648,9 @@
 
         // --- APP CHÍNH ---
         function App() {
-            // STATE NAVIGATION
+            // STATE NAVIGATION: THÊM USER ID NGAY TẠI ĐÂY
+            const [userId, setUserId] = useState(() => localStorage.getItem('stayfit_userid') || "");
+            
             const [view, setView] = useState(() => localStorage.getItem('stayfit_setup') ? "journal" : "profile");
             const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
             
@@ -689,17 +688,17 @@
             }, [profile, history, customFoodList, deletedCommonFoods, view]);
 
             // ==========================================
-            // HÀM ĐỒNG BỘ DỮ LIỆU (HOÀN TOÀN TÀNG HÌNH)
+            // HÀM ĐỒNG BỘ DỮ LIỆU (HOÀN TOÀN TÀNG HÌNH & MULTI-USER)
             // ==========================================
             const syncToCloud = async () => {
-                const userId = "user001";
+                if (!userId) return; // Không có User ID thì không lưu
                 try {
                     const res = await fetch("/api/sync", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             action: "upload",
-                            userId,
+                            userId, // Lấy ID động từ State
                             profile: JSON.parse(localStorage.getItem("stayfit_profile") || "{}"),
                             history: JSON.parse(localStorage.getItem("stayfit_history") || "{}"),
                             weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
@@ -707,14 +706,14 @@
                     });
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error);
-                    console.log("✅ Đã lưu ngầm lên Cloud");
+                    console.log(`✅ Đã lưu ngầm lên Cloud cho: ${userId}`);
                 } catch (err) {
                     console.error("❌ Lỗi lưu ngầm:", err.message);
                 }
             };
 
             const syncFromCloud = async () => {
-                const userId = "user001";
+                if (!userId) return; // Không có User ID thì không tải
                 try {
                     const res = await fetch(`/api/sync?userId=${userId}`);
                     const data = await res.json();
@@ -727,8 +726,14 @@
                     if (data.history) localStorage.setItem("stayfit_history", JSON.stringify(data.history));
                     if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
                     
-                    console.log("✅ Đã tải ngầm từ Cloud");
-                    window.location.reload(); 
+                    console.log(`✅ Đã tải ngầm từ Cloud cho: ${userId}`);
+                    
+                    // Để tránh bị loop tải lại trang liên tục, dùng cờ đánh dấu
+                    const syncFlag = sessionStorage.getItem(`sync_done_${userId}`);
+                    if (!syncFlag) {
+                        sessionStorage.setItem(`sync_done_${userId}`, 'true');
+                        window.location.reload();
+                    }
                 } catch (err) {
                     console.error("❌ Lỗi tải ngầm:", err.message);
                 }
@@ -736,14 +741,15 @@
 
             // --- 3 LỚP BẢO VỆ ĐỒNG BỘ AUTO-SYNC ---
 
-            // LỚP 1: Tải dữ liệu khi vừa mở App lên (1 lần duy nhất)
+            // LỚP 1: Tải dữ liệu khi vừa đăng nhập (1 lần duy nhất)
             useEffect(() => {
-                const hasInitialSync = sessionStorage.getItem('stayfit_initial_sync');
+                if (!userId) return;
+                const hasInitialSync = sessionStorage.getItem(`stayfit_initial_sync_${userId}`);
                 if (!hasInitialSync) {
-                    sessionStorage.setItem('stayfit_initial_sync', 'true');
+                    sessionStorage.setItem(`stayfit_initial_sync_${userId}`, 'true');
                     syncFromCloud();
                 }
-            }, []);
+            }, [userId]);
 
             // LỚP 2: LƯU TỨC THÌ (Sau khi dừng thao tác 2.5 giây)
             const isFirstRender = useRef(true);
@@ -760,15 +766,11 @@
 
             // LỚP 3: LƯU CUỐI NGÀY HOẶC KHI TẮT TRÌNH DUYỆT
             useEffect(() => {
-                // Kích hoạt khi chuyển tab hoặc tắt máy
                 const handleVisibilityChange = () => {
-                    if (document.visibilityState === 'hidden') {
-                        syncToCloud();
-                    }
+                    if (document.visibilityState === 'hidden') syncToCloud();
                 };
                 document.addEventListener('visibilitychange', handleVisibilityChange);
 
-                // Kích hoạt chuẩn xác lúc 23:59:59 nếu vẫn đang cắm máy
                 const now = new Date();
                 const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999) - now;
                 const midnightTimer = setTimeout(() => {
@@ -934,10 +936,56 @@
                 });
             };
 
-            // === TẤT CẢ RENDER ĐIỀU HƯỚNG ===
+            // === TẤT CẢ RENDER GIAO DIỆN ===
             
+            // 1. MÀN HÌNH ĐĂNG NHẬP (Chỉ hiện khi người dùng chưa có ID)
+            if (!userId) {
+                return (
+                    <div className="max-w-md mx-auto min-h-screen bg-emerald-600 flex flex-col items-center justify-center p-8 text-white relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-700 rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/3"></div>
+                        
+                        <div className="bg-white/10 p-8 rounded-[2.5rem] w-full backdrop-blur-xl border border-white/20 text-center shadow-2xl relative z-10">
+                            <h1 className="text-4xl font-black tracking-tighter italic mb-2">STAYFIT</h1>
+                            <p className="text-[10px] uppercase font-bold tracking-widest opacity-80 mb-8">Nhập mã cá nhân để đồng bộ</p>
+                            
+                            <input 
+                                type="text" 
+                                id="loginInput"
+                                placeholder="Ví dụ: quy2026..." 
+                                className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center mb-4 focus:ring-2 focus:ring-white transition-all"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && e.target.value.trim()) {
+                                        const newId = e.target.value.trim().toLowerCase();
+                                        setUserId(newId);
+                                        localStorage.setItem('stayfit_userid', newId);
+                                        window.location.reload(); 
+                                    }
+                                }}
+                            />
+                            <button 
+                                onClick={() => {
+                                    const inputVal = document.getElementById('loginInput').value.trim();
+                                    if (inputVal) {
+                                        const newId = inputVal.toLowerCase();
+                                        setUserId(newId);
+                                        localStorage.setItem('stayfit_userid', newId);
+                                        window.location.reload();
+                                    }
+                                }}
+                                className="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl"
+                            >
+                                Truy cập
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // 2. MÀN HÌNH THỐNG KÊ
             if (view === "stats") return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} setView={setView} view={view} />;
             
+            // 3. MÀN HÌNH HỒ SƠ (Đã xóa 2 nút Đồng bộ)
             if (view === "profile") return (
                 <div className="max-w-md mx-auto min-h-screen bg-white p-8 flex flex-col justify-center space-y-6 animate-in fade-in duration-500 pb-28 relative">
                     <div className="text-center mb-4">
@@ -1015,6 +1063,7 @@
                 </div>
             );
 
+            // 4. MÀN HÌNH NHẬT KÝ
             if (view === "journal") return (
                 <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative">
                     <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
@@ -1247,6 +1296,7 @@
                 </div>
             );
 
+            // 5. MÀN HÌNH LỊCH TRÌNH
             if (view === "calendar") return (
                 <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300">
                     <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shadow-sm sticky top-0 z-20">
