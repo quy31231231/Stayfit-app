@@ -438,10 +438,31 @@
             const dailyCarb = Math.round(dailyLog.reduce((s, i) => s + (i.carb || 0), 0) * 10) / 10;
             const dailyFat = Math.round(dailyLog.reduce((s, i) => s + (i.fat || 0), 0) * 10) / 10;
 
-            const targetProtein = Math.round((target * 0.25 / 4) * 10) / 10;
+           const targetProtein = Math.round((target * 0.25 / 4) * 10) / 10;
             const targetCarb = Math.round((target * 0.50 / 4) * 10) / 10;
             const targetFat = Math.round((target * 0.25 / 9) * 10) / 10;
 
+            // === THÊM MỚI BƯỚC 1: LOGIC BREAKDOWN THEO BỮA ĂN ===
+            const mealBreakdown = useMemo(() => {
+                const meals = [
+                    { name: "Bữa sáng", icon: "☀️", color: "bg-orange-400" },
+                    { name: "Bữa trưa", icon: "🌤️", color: "bg-emerald-500" },
+                    { name: "Bữa tối", icon: "🌙", color: "bg-blue-500" },
+                    { name: "Ăn vặt", icon: "⭐", color: "bg-purple-400" }
+                ];
+                return meals.map(meal => ({
+                    ...meal,
+                    kcal: Math.round(
+                        dailyLog
+                            .filter(item => item.meal === meal.name)
+                            .reduce((sum, item) => sum + (item.kcal || 0), 0)
+                        * 10) / 10
+                }));
+            }, [dailyLog]);
+
+            const maxMealKcal = Math.max(...mealBreakdown.map(m => m.kcal), 1);
+            const isDailyLogEmpty = mealBreakdown.every(m => m.kcal === 0);
+            // === KẾT THÚC THÊM MỚI BƯỚC 1 ===
             // Tính toán Lịch
             const calendarData = useMemo(() => {
                 const baseDate = new Date(currentDate);
@@ -692,13 +713,45 @@
                             </div>
                             
                             {/* Macro Progress Bars */}
-                            <div className="border-t border-slate-50 pt-5 space-y-3">
+                           <div className="border-t border-slate-50 pt-5 space-y-3">
                                 <MacroProgressBar label="Protein" current={dailyProtein} target={targetProtein} colorClass="bg-emerald-500" />
                                 <MacroProgressBar label="Carb" current={dailyCarb} target={targetCarb} colorClass="bg-blue-500" />
                                 <MacroProgressBar label="Fat" current={dailyFat} target={targetFat} colorClass="bg-yellow-400" />
                             </div>
-                        </div>
 
+                            {/* === THÊM MỚI BƯỚC 2: UI BREAKDOWN THEO BỮA ĂN === */}
+                            <div className="border-t border-slate-50 pt-5 mt-1">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Theo bữa ăn</h3>
+                                
+                                {isDailyLogEmpty ? (
+                                    <p className="text-center text-[11px] italic text-slate-300 py-2">Chưa có dữ liệu hôm nay</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {mealBreakdown.map(meal => (
+                                            <div key={meal.name} className="flex items-center justify-between gap-3">
+                                                <div className="flex items-center gap-2 w-24">
+                                                    <span className="w-5 h-5 flex items-center justify-center text-sm">{meal.icon}</span>
+                                                    <span className="font-bold text-xs text-slate-700 uppercase">{meal.name}</span>
+                                                </div>
+                                                <div className="flex-1 bg-slate-100 rounded-full h-[3px]">
+                                                    <div 
+                                                        className={`h-full rounded-full transition-all duration-500 ${meal.color}`} 
+                                                        style={{ width: `${meal.kcal > 0 ? (meal.kcal / maxMealKcal) * 100 : 0}%` }}
+                                                    ></div>
+                                                </div>
+                                                <div className="text-right min-w-[56px]">
+                                                    {meal.kcal > 0 ? (
+                                                        <span className="font-black text-sm text-slate-800">{meal.kcal} <span className="text-[8px] text-slate-400 font-bold ml-0.5">KCAL</span></span>
+                                                    ) : (
+                                                        <span className="font-black text-sm text-slate-300">—</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            {/* === KẾT THÚC THÊM MỚI BƯỚC 2 === *
                         {/* Thêm món ăn Section */}
                         <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                             <div className="flex justify-between items-center mb-6">
