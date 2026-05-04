@@ -800,6 +800,28 @@
             const [inputUser, setInputUser] = useState("");
             const [inputPass, setInputPass] = useState("");
             const [loginLoading, setLoginLoading] = useState(false);
+            
+            // State cho modal chọn chế độ ăn
+            const [showMacroModal, setShowMacroModal] = useState(false);
+            
+            // Dữ liệu các chế độ ăn
+            const dietPlans = {
+                balanced: [
+                    { name: "Tiêu chuẩn (Standard)", protein: 88, carb: 225, fat: 56, desc: "45-65% Carb, 10-35% Protein, 20-35% Fat" },
+                    { name: "Địa Trung Hải", protein: 66, carb: 230, fat: 66, desc: "50-55% Carb, 15% Protein, 30-35% Fat" },
+                    { name: "DASH", protein: 79, carb: 242, fat: 61, desc: "55% Carb, 18% Protein, 27% Fat" }
+                ],
+                weightLoss: [
+                    { name: "Keto", protein: 88, carb: 44, fat: 110, desc: "5-10% Carb, 15-20% Protein, 70-75% Fat" },
+                    { name: "Low Carb", protein: 110, carb: 110, fat: 110, desc: "20-30% Carb, 25-35% Protein, 35-50% Fat" },
+                    { name: "Zone (40:30:30)", protein: 110, carb: 220, fat: 73, desc: "40% Carb, 30% Protein, 30% Fat" }
+                ],
+                special: [
+                    { name: "Paleo", protein: 99, carb: 154, fat: 95, desc: "22-40% Carb, 19-35% Protein, 28-58% Fat" },
+                    { name: "Bodybuilding", protein: 132, carb: 242, fat: 61, desc: "40-60% Carb, 25-35% Protein, 15-25% Fat" },
+                    { name: "Low Fat", protein: 110, carb: 330, fat: 33, desc: "60% Carb, 25% Protein, 15% Fat" }
+                ]
+            };
 
             useEffect(() => {
                 localStorage.setItem('stayfit_profile', JSON.stringify(profile));
@@ -1219,6 +1241,102 @@
                 return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} setView={setView} view={view} />;
             }
             
+            // === MODAL CHỌN CHẾ ĐỘ ĂN ===
+            const MacroModal = () => (
+                showMacroModal && (
+                    <div className="fixed inset-0 bg-black/30 z-50 flex items-end animate-in fade-in duration-200">
+                        <div className="w-full bg-white rounded-t-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom-5">
+                            <div className="text-center mb-6 sticky top-0 bg-white pb-4">
+                                <h2 className="text-xl font-black text-slate-800 mb-2">Chọn Chế Độ Ăn</h2>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tự động cập nhật Macro</p>
+                            </div>
+                            
+                            {/* Danh mục 1: Cân bằng & Lành mạnh */}
+                            <div className="mb-6">
+                                <h3 className="text-xs font-black text-emerald-600 uppercase mb-3 tracking-wider">1️⃣ Cân Bằng & Lành Mạnh</h3>
+                                <div className="space-y-2">
+                                    {dietPlans.balanced.map((plan, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                setProfile({...profile, manualProtein: plan.protein, manualCarb: plan.carb, manualFat: plan.fat});
+                                                setShowMacroModal(false);
+                                            }}
+                                            className="w-full text-left p-3 bg-emerald-50 border-2 border-emerald-200 rounded-xl hover:bg-emerald-100 hover:border-emerald-400 transition-all active:scale-95"
+                                        >
+                                            <p className="font-black text-sm text-emerald-700">{plan.name}</p>
+                                            <p className="text-[9px] text-emerald-600 font-semibold">{plan.desc}</p>
+                                            <p className="text-[8px] text-emerald-500 mt-1">🔹 P:{plan.protein}g | C:{plan.carb}g | F:{plan.fat}g</p>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            {/* Danh mục 2: Giảm cân & Chuyển hóa mỡ */}
+                            <div className="mb-6">
+                                <h3 className="text-xs font-black text-orange-600 uppercase mb-3 tracking-wider">2️⃣ Giảm Cân & Chuyển Hóa Mỡ</h3>
+                                <div className="space-y-2">
+                                    {dietPlans.weightLoss.map((plan, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                setProfile({...profile, manualProtein: plan.protein, manualCarb: plan.carb, manualFat: plan.fat});
+                                                setShowMacroModal(false);
+                                            }}
+                                            className="w-full text-left p-3 bg-orange-50 border-2 border-orange-200 rounded-xl hover:bg-orange-100 hover:border-orange-400 transition-all active:scale-95"
+                                        >
+                                            <p className="font-black text-sm text-orange-700">{plan.name}</p>
+                                            <p className="text-[9px] text-orange-600 font-semibold">{plan.desc}</p>
+                                            <p className="text-[8px] text-orange-500 mt-1">🔹 P:{plan.protein}g | C:{plan.carb}g | F:{plan.fat}g</p>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            {/* Danh mục 3: Đặc thù khác */}
+                            <div className="mb-6">
+                                <h3 className="text-xs font-black text-violet-600 uppercase mb-3 tracking-wider">3️⃣ Đặc Thù Khác</h3>
+                                <div className="space-y-2">
+                                    {dietPlans.special.map((plan, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                setProfile({...profile, manualProtein: plan.protein, manualCarb: plan.carb, manualFat: plan.fat});
+                                                setShowMacroModal(false);
+                                            }}
+                                            className="w-full text-left p-3 bg-violet-50 border-2 border-violet-200 rounded-xl hover:bg-violet-100 hover:border-violet-400 transition-all active:scale-95"
+                                        >
+                                            <p className="font-black text-sm text-violet-700">{plan.name}</p>
+                                            <p className="text-[9px] text-violet-600 font-semibold">{plan.desc}</p>
+                                            <p className="text-[8px] text-violet-500 mt-1">🔹 P:{plan.protein}g | C:{plan.carb}g | F:{plan.fat}g</p>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            {/* Tùy chỉnh */}
+                            <div className="mb-6">
+                                <h3 className="text-xs font-black text-blue-600 uppercase mb-3 tracking-wider">4️⃣ Tùy Chỉnh Thủ Công</h3>
+                                <button
+                                    onClick={() => setShowMacroModal(false)}
+                                    className="w-full p-3 bg-blue-50 border-2 border-blue-200 rounded-xl hover:bg-blue-100 hover:border-blue-400 transition-all active:scale-95 text-left"
+                                >
+                                    <p className="font-black text-sm text-blue-700">Nhập Giá Trị Thủ Công</p>
+                                    <p className="text-[9px] text-blue-600 font-semibold">Đóng modal và điều chỉnh trực tiếp các trường Protein, Carb, Fat</p>
+                                </button>
+                            </div>
+                            
+                            <button
+                                onClick={() => setShowMacroModal(false)}
+                                className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm uppercase active:scale-95 transition-all"
+                            >
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                )
+            );
+            
             // === 3. MÀN HÌNH HỒ SƠ ===
             if (view === "profile") {
                 return (
@@ -1348,23 +1466,31 @@
                             </div>
                             
                             {profile.isManualMacro ? (
-                                <div className="grid grid-cols-3 gap-2 animate-in fade-in slide-in-from-top-2">
-                                    <div className="text-center relative">
-                                        <label className="text-[9px] font-black text-emerald-500 uppercase block mb-1">Protein</label>
-                                        <input type="number" value={profile.manualProtein} onChange={e => setProfile({...profile, manualProtein: e.target.value})} className="w-full bg-slate-50 py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-500/20" />
-                                        <span className="text-[9px] text-slate-400 italic absolute bottom-3 right-3 pointer-events-none">g</span>
+                                <>
+                                    <button
+                                        onClick={() => setShowMacroModal(true)}
+                                        className="w-full py-2 mb-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:shadow-lg active:scale-95 transition-all"
+                                    >
+                                        📋 Chọn Chế Độ Ăn
+                                    </button>
+                                    <div className="grid grid-cols-3 gap-2 animate-in fade-in slide-in-from-top-2">
+                                        <div className="text-center relative">
+                                            <label className="text-[9px] font-black text-emerald-500 uppercase block mb-1">Protein</label>
+                                            <input type="number" value={profile.manualProtein} onChange={e => setProfile({...profile, manualProtein: e.target.value})} className="w-full bg-slate-50 py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-500/20" />
+                                            <span className="text-[9px] text-slate-400 italic absolute bottom-3 right-3 pointer-events-none">g</span>
+                                        </div>
+                                        <div className="text-center relative">
+                                            <label className="text-[9px] font-black text-blue-500 uppercase block mb-1">Carb</label>
+                                            <input type="number" value={profile.manualCarb} onChange={e => setProfile({...profile, manualCarb: e.target.value})} className="w-full bg-slate-50 py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20" />
+                                            <span className="text-[9px] text-slate-400 italic absolute bottom-3 right-3 pointer-events-none">g</span>
+                                        </div>
+                                        <div className="text-center relative">
+                                            <label className="text-[9px] font-black text-yellow-500 uppercase block mb-1">Fat</label>
+                                            <input type="number" value={profile.manualFat} onChange={e => setProfile({...profile, manualFat: e.target.value})} className="w-full bg-slate-50 py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-yellow-500/20" />
+                                            <span className="text-[9px] text-slate-400 italic absolute bottom-3 right-3 pointer-events-none">g</span>
+                                        </div>
                                     </div>
-                                    <div className="text-center relative">
-                                        <label className="text-[9px] font-black text-blue-500 uppercase block mb-1">Carb</label>
-                                        <input type="number" value={profile.manualCarb} onChange={e => setProfile({...profile, manualCarb: e.target.value})} className="w-full bg-slate-50 py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20" />
-                                        <span className="text-[9px] text-slate-400 italic absolute bottom-3 right-3 pointer-events-none">g</span>
-                                    </div>
-                                    <div className="text-center relative">
-                                        <label className="text-[9px] font-black text-yellow-500 uppercase block mb-1">Fat</label>
-                                        <input type="number" value={profile.manualFat} onChange={e => setProfile({...profile, manualFat: e.target.value})} className="w-full bg-slate-50 py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-yellow-500/20" />
-                                        <span className="text-[9px] text-slate-400 italic absolute bottom-3 right-3 pointer-events-none">g</span>
-                                    </div>
-                                </div>
+                                </>
                             ) : (
                                 <div className="flex justify-between items-center text-center opacity-50">
                                     <div><p className="text-[9px] font-black text-emerald-500 uppercase">Protein</p><p className="text-xs font-bold">{Math.round((target * 0.25 / 4) * 10) / 10}g</p></div>
@@ -1394,6 +1520,8 @@
                                 Đăng xuất
                             </button>
                         </div>
+                        
+                        <MacroModal />
                         
                         <BottomNav view={view} setView={setView} />
                     </div>
