@@ -28,7 +28,8 @@ export default async function handler(req, res) {
     }
 
     try {
-      // 1.1 KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE
+      // 1. KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE
+      // Tăng range lên A:J (Cột J là mật khẩu)
       const profileRes = await sheets.spreadsheets.values.get({ 
         spreadsheetId: SHEET_ID, 
         range: "Profile!A:J" 
@@ -73,81 +74,88 @@ export default async function handler(req, res) {
         });
       }
       
-      // 1.2 CẬP NHẬT HISTORY (Chỉ Append dòng mới, Dedup bằng Timestamp)
+      // 2. CẬP NHẬT HISTORY
       const historyRes = await sheets.spreadsheets.values.get({ 
         spreadsheetId: SHEET_ID, 
         range: "History!A:K" 
       });
       const allHistoryRows = historyRes.data.values || [];
+      const headerHistory = allHistoryRows.length > 0 && allHistoryRows[0][0] === "UserID" ? [allHistoryRows[0]] : [];
+      const otherUsersHistory = allHistoryRows.filter((row, i) => (i > 0 || row[0] !== "UserID") && row[0] !== userId);
 
-      const existingTimestamps = new Set(
-        allHistoryRows
-          .filter(row => row[0] === userId)
-          .map(row => row[10]) 
-      );
-
-      let newHistoryRows = [];
+      let currentUserHistoryRows = [];
       if (history) {
-        newHistoryRows = Object.entries(history).flatMap(([date, items]) =>
-          items
-            .filter(item => {
-              const ts = item.timestamp || "";
-              return ts && !existingTimestamps.has(ts); 
-            })
-            .map(item => {
-              const ts = item.timestamp || new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
-              return [userId, date, item.meal, item.name, item.quantity, item.unit, item.kcal, item.protein, item.carb, item.fat, ts];
-            })
+        currentUserHistoryRows = Object.entries(history).flatMap(([date, items]) =>
+          items.map(item => {
+            // ƯU TIÊN LẤY TIMESTAMP TỪ APP TRUYỀN LÊN (nếu có), NẾU KHÔNG CÓ THÌ TẠO MỚI
+            const timeStampToSave = item.timestamp || new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
+            
+            return [
+              userId, 
+              date, 
+              item.meal, 
+              item.name, 
+              item.quantity,
+              item.unit, 
+              item.kcal, 
+              item.protein, 
+              item.carb, 
+              item.fat,
+              timeStampToSave
+            ];
+          })
         );
       }
 
-      newHistoryRows.sort((a, b) => new Date(a[10]) - new Date(b[10]));
-
-      if (newHistoryRows.length > 0) {
-        await sheets.spreadsheets.values.append({
+      const combinedHistory = [...headerHistory, ...otherUsersHistory, ...currentUserHistoryRows];
+      
+      await sheets.spreadsheets.values.clear({ 
+        spreadsheetId: SHEET_ID, 
+        range: "History!A:K" 
+      });
+      
+      if (combinedHistory.length > 0) {
+        await sheets.spreadsheets.values.update({
           spreadsheetId: SHEET_ID,
           range: "History!A:K",
           valueInputOption: "USER_ENTERED",
-          insertDataOption: "INSERT_ROWS",
-          requestBody: { values: newHistoryRows },
+          requestBody: { values: combinedHistory },
         });
       }
 
-      // 1.3 CẬP NHẬT WEIGHTLOG (Upsert theo ngày)
+      // 3. CẬP NHẬT WEIGHTLOG
       const weightRes = await sheets.spreadsheets.values.get({ 
         spreadsheetId: SHEET_ID, 
         range: "WeightLog!A:D" 
       });
       const allWeightRows = weightRes.data.values || [];
+      const headerWeight = allWeightRows.length > 0 && allWeightRows[0][0] === "UserID" ? [allWeightRows[0]] : [];
+      const otherUsersWeight = allWeightRows.filter((row, i) => (i > 0 || row[0] !== "UserID") && row[0] !== userId);
 
-      const existingWeightDates = new Map(
-        allWeightRows
-          .map((row, i) => row[0] === userId ? [row[1], i + 1] : null) 
-          .filter(Boolean)
-      );
-
+      let currentUserWeightRows = [];
       if (weightLog) {
-        for (const [date, weight] of Object.entries(weightLog)) {
-          const newRow = [userId, date, weight, new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })];
-          
-          if (existingWeightDates.has(date)) {
-            const rowNum = existingWeightDates.get(date);
-            await sheets.spreadsheets.values.update({
-              spreadsheetId: SHEET_ID,
-              range: `WeightLog!A${rowNum}:D${rowNum}`,
-              valueInputOption: "USER_ENTERED",
-              requestBody: { values: [newRow] },
-            });
-          } else {
-            await sheets.spreadsheets.values.append({
-              spreadsheetId: SHEET_ID,
-              range: "WeightLog!A:D",
-              valueInputOption: "USER_ENTERED",
-              insertDataOption: "INSERT_ROWS",
-              requestBody: { values: [newRow] },
-            });
-          }
-        }
+         currentUserWeightRows = Object.entries(weightLog).map(([date, weight]) => [
+            userId, 
+            date, 
+            weight, 
+            new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })
+         ]);
+      }
+
+      const combinedWeight = [...headerWeight, ...otherUsersWeight, ...currentUserWeightRows];
+      
+      await sheets.spreadsheets.values.clear({ 
+        spreadsheetId: SHEET_ID, 
+        range: "WeightLog!A:D" 
+      });
+      
+      if (combinedWeight.length > 0) {
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: SHEET_ID,
+          range: "WeightLog!A1",
+          valueInputOption: "USER_ENTERED",
+          requestBody: { values: combinedWeight },
+        });
       }
       
       return res.status(200).json({ success: true });
