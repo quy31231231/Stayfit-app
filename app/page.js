@@ -240,14 +240,21 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
 
     return (
         <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative text-slate-800">
-            <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center shadow-sm sticky top-0 z-20">
-                <h1 className="font-black uppercase tracking-widest text-slate-800 text-xs">Thống kê & Biểu đồ</h1>
+            <header className="bg-white p-6 border-b border-slate-100 flex justify-center items-center shadow-sm sticky top-0 z-20">
+                <h1 className="font-black uppercase tracking-widest text-slate-800 text-xs text-center w-full">Thống kê & Biểu đồ</h1>
             </header>
             <main className="p-4 space-y-6">
                 <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cập nhật cân nặng</h3>
                     <div className="flex gap-2 mb-4">
-                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder="Hôm nay bao nhiêu kg?" className="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                        <input 
+    type="number" 
+    value={weightInput} 
+    onChange={e=>setWeightInput(e.target.value)} 
+    step="0.1" 
+    placeholder={weightLog[todayStr] ? `Hôm nay: ${weightLog[todayStr]} kg` : "Cân nặng của ngày hôm nay?"} 
+    className="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" 
+ />
                         <button onClick={saveWeight} className="px-6 bg-emerald-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-200">Ghi</button>
                     </div>
                     <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-300 mb-2 mt-6">Lịch sử (Gần nhất)</h4>
@@ -281,11 +288,15 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
                     <div className="flex justify-between items-center mb-1"><h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Calo nạp vào</h3><span className="text-[8px] italic text-slate-300">Nhấn vào cột để xem</span></div>
                     <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
                 </section>
-                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
+               <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                     <div className="flex justify-between items-center mb-4"><h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Protein, Carb & Fat</h3><span className="text-[8px] italic text-slate-300">Nhấn vào điểm để xem</span></div>
                     <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
                 </section>
             </main>
+            
+            {/* THÊM DÒNG NÀY ĐỂ HIỆN THANH MENU ĐIỀU HƯỚNG */}
+            <BottomNav view={view} setView={setView} />
+            
         </div>
     );
 }
@@ -346,12 +357,12 @@ export default function App() {
             setView(localStorage.getItem('stayfit_setup') ? "journal" : "profile");
             
             try {
-                const vnTimeStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
-                const hour = new Date(vnTimeStr).getHours();
+                const hour = new Date().getHours();
                 if (hour >= 4 && hour < 10) setSelectedMeal("Bữa sáng");
                 else if (hour >= 10 && hour < 14) setSelectedMeal("Bữa trưa");
                 else if (hour >= 14 && hour < 17) setSelectedMeal("Ăn vặt");
-                else setSelectedMeal("Bữa tối");
+                else if (hour >= 17 && hour < 21) setSelectedMeal("Bữa tối");
+                else setSelectedMeal("Ăn vặt"); // Khuya muộn và rạng sáng (21h đêm - 4h sáng) mặc định là Ăn vặt
             } catch (e) {}
         }
     }, []);
@@ -670,10 +681,20 @@ export default function App() {
         return (
             <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative font-sans text-slate-800">
                 <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="text-slate-300 p-1">◀</button>
-                        <div className="text-center min-w-[100px]"><span className="font-black text-slate-800 uppercase text-[11px] tracking-widest">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</span></div>
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="text-slate-300 p-1">▶</button>
+                    <div className="flex items-center gap-3">
+                        {/* Nút lùi ngày: Tròn, có viền, icon tam giác đặc */}
+                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 rounded-full border border-slate-200 transition-all shadow-sm active:scale-95">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
+                        </button>
+                        
+                        <div className="text-center min-w-[90px]">
+                            <span className="font-black text-slate-800 uppercase text-[11px] tracking-widest">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</span>
+                        </div>
+                        
+                        {/* Nút tiến ngày: Tròn, có viền, icon tam giác đặc */}
+                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 rounded-full border border-slate-200 transition-all shadow-sm active:scale-95">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
+                        </button>
                     </div>
                     <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs shadow-sm">SF</div>
                 </header>
