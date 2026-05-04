@@ -1,4 +1,4 @@
-const { google } = require("googleapis");
+import { google } from "googleapis";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,9 +8,8 @@ export default async function handler(req, res) {
   try {
     const auth = new google.auth.GoogleAuth({
       credentials: {
-        // Đã sửa lại thành GOOGLE_SERVICE_ACCOUNT_EMAIL cho khớp với Vercel
         client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        private_key: (process.env.GOOGLE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
       },
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
