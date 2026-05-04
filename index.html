@@ -1592,10 +1592,10 @@
                                     <select 
                                         value={selectedMeal} 
                                         onChange={e=>setSelectedMeal(e.target.value)} 
-                                        className="bg-slate-50 text-[9px] font-black text-slate-500 py-1.5 px-3 rounded-full outline-none uppercase tracking-widest cursor-pointer"
-                                    >
+                                        className="bg-slate-50 hover:bg-emerald-50 text-[10px] font-black text-slate-600 py-2 px-4 rounded-full outline-none uppercase tracking-widest cursor-pointer border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 focus:text-emerald-700 transition-all shadow-sm"
+>
                                         {MEAL_TYPES.map(m => (
-                                            <option key={m} value={m}>{m}</option>
+                                        <option key={m} value={m} className="font-bold text-slate-700">{m}</option>
                                         ))}
                                     </select>
                                 </div>
