@@ -1242,100 +1242,155 @@
             }
             
             // === MODAL CHỌN CHẾ ĐỘ ĂN ===
-            const MacroModal = () => (
-                showMacroModal && (
-                    <div className="fixed inset-0 bg-black/30 z-50 flex items-end animate-in fade-in duration-200">
-                        <div className="w-full bg-white rounded-t-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom-5">
-                            <div className="text-center mb-6 sticky top-0 bg-white pb-4">
-                                <h2 className="text-xl font-black text-slate-800 mb-2">Chọn Chế Độ Ăn</h2>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tự động cập nhật Macro</p>
+            const MacroModal = () => {
+                const [touchStart, setTouchStart] = useState(null);
+                const [touchEnd, setTouchEnd] = useState(null);
+                
+                const onTouchStart = (e) => setTouchStart(e.targetTouches[0].clientY);
+                const onTouchEnd = (e) => {
+                    setTouchEnd(e.changedTouches[0].clientY);
+                    if (touchStart && e.changedTouches[0].clientY - touchStart > 100) {
+                        setShowMacroModal(false);
+                    }
+                };
+                
+                return showMacroModal && (
+                    <div 
+                        className="fixed inset-0 bg-black/40 z-50 flex flex-col animate-in fade-in duration-200"
+                        onClick={() => setShowMacroModal(false)}
+                    >
+                        <div 
+                            className="w-full bg-white flex flex-col h-full animate-in slide-in-from-bottom-5"
+                            onClick={(e) => e.stopPropagation()}
+                            onTouchStart={onTouchStart}
+                            onTouchEnd={onTouchEnd}
+                        >
+                            {/* Header với Handle Bar */}
+                            <div className="sticky top-0 bg-gradient-to-b from-white to-slate-50 px-6 pt-4 pb-6 border-b border-slate-100 rounded-t-3xl">
+                                {/* Handle Bar */}
+                                <div className="flex justify-center mb-4">
+                                    <div className="w-10 h-1 bg-slate-300 rounded-full" />
+                                </div>
+                                <h2 className="text-2xl font-black text-slate-900">Chọn Chế Độ Ăn</h2>
+                                <p className="text-xs text-slate-500 font-semibold uppercase tracking-widest mt-1">Tự động cập nhật Macro</p>
+                                <p className="text-[11px] text-slate-400 mt-2">💡 Kéo xuống để đóng</p>
                             </div>
                             
-                            {/* Danh mục 1: Cân bằng & Lành mạnh */}
-                            <div className="mb-6">
-                                <h3 className="text-xs font-black text-emerald-600 uppercase mb-3 tracking-wider">1️⃣ Cân Bằng & Lành Mạnh</h3>
-                                <div className="space-y-2">
-                                    {dietPlans.balanced.map((plan, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => {
-                                                setProfile({...profile, manualProtein: plan.protein, manualCarb: plan.carb, manualFat: plan.fat});
-                                                setShowMacroModal(false);
-                                            }}
-                                            className="w-full text-left p-3 bg-emerald-50 border-2 border-emerald-200 rounded-xl hover:bg-emerald-100 hover:border-emerald-400 transition-all active:scale-95"
-                                        >
-                                            <p className="font-black text-sm text-emerald-700">{plan.name}</p>
-                                            <p className="text-[9px] text-emerald-600 font-semibold">{plan.desc}</p>
-                                            <p className="text-[8px] text-emerald-500 mt-1">🔹 P:{plan.protein}g | C:{plan.carb}g | F:{plan.fat}g</p>
-                                        </button>
-                                    ))}
+                            {/* Content - Scrollable */}
+                            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-7">
+                                {/* Danh mục 1: Cân bằng & Lành mạnh */}
+                                <div>
+                                    <h3 className="text-sm font-black text-emerald-700 uppercase mb-4 tracking-wider flex items-center gap-2">
+                                        <span className="text-xl">1️⃣</span>
+                                        Cân Bằng & Lành Mạnh
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {dietPlans.balanced.map((plan, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => {
+                                                    setProfile({...profile, manualProtein: plan.protein, manualCarb: plan.carb, manualFat: plan.fat});
+                                                    setShowMacroModal(false);
+                                                }}
+                                                className="w-full text-left p-4 bg-emerald-50 border-2 border-emerald-200 rounded-2xl hover:bg-emerald-100 hover:border-emerald-400 transition-all active:scale-95"
+                                            >
+                                                <p className="font-black text-base text-emerald-900">{plan.name}</p>
+                                                <p className="text-sm text-emerald-700 font-semibold mt-2 leading-relaxed">{plan.desc}</p>
+                                                <div className="flex gap-4 mt-3 text-emerald-600 font-bold text-sm">
+                                                    <span className="bg-white px-3 py-1 rounded-lg border border-emerald-300">P: {plan.protein}g</span>
+                                                    <span className="bg-white px-3 py-1 rounded-lg border border-emerald-300">C: {plan.carb}g</span>
+                                                    <span className="bg-white px-3 py-1 rounded-lg border border-emerald-300">F: {plan.fat}g</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                {/* Danh mục 2: Giảm cân & Chuyển hóa mỡ */}
+                                <div>
+                                    <h3 className="text-sm font-black text-orange-700 uppercase mb-4 tracking-wider flex items-center gap-2">
+                                        <span className="text-xl">2️⃣</span>
+                                        Giảm Cân & Chuyển Hóa Mỡ
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {dietPlans.weightLoss.map((plan, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => {
+                                                    setProfile({...profile, manualProtein: plan.protein, manualCarb: plan.carb, manualFat: plan.fat});
+                                                    setShowMacroModal(false);
+                                                }}
+                                                className="w-full text-left p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl hover:bg-orange-100 hover:border-orange-400 transition-all active:scale-95"
+                                            >
+                                                <p className="font-black text-base text-orange-900">{plan.name}</p>
+                                                <p className="text-sm text-orange-700 font-semibold mt-2 leading-relaxed">{plan.desc}</p>
+                                                <div className="flex gap-4 mt-3 text-orange-600 font-bold text-sm">
+                                                    <span className="bg-white px-3 py-1 rounded-lg border border-orange-300">P: {plan.protein}g</span>
+                                                    <span className="bg-white px-3 py-1 rounded-lg border border-orange-300">C: {plan.carb}g</span>
+                                                    <span className="bg-white px-3 py-1 rounded-lg border border-orange-300">F: {plan.fat}g</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                {/* Danh mục 3: Đặc thù khác */}
+                                <div>
+                                    <h3 className="text-sm font-black text-violet-700 uppercase mb-4 tracking-wider flex items-center gap-2">
+                                        <span className="text-xl">3️⃣</span>
+                                        Đặc Thù Khác
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {dietPlans.special.map((plan, idx) => (
+                                            <button
+                                                key={idx}
+                                                onClick={() => {
+                                                    setProfile({...profile, manualProtein: plan.protein, manualCarb: plan.carb, manualFat: plan.fat});
+                                                    setShowMacroModal(false);
+                                                }}
+                                                className="w-full text-left p-4 bg-violet-50 border-2 border-violet-200 rounded-2xl hover:bg-violet-100 hover:border-violet-400 transition-all active:scale-95"
+                                            >
+                                                <p className="font-black text-base text-violet-900">{plan.name}</p>
+                                                <p className="text-sm text-violet-700 font-semibold mt-2 leading-relaxed">{plan.desc}</p>
+                                                <div className="flex gap-4 mt-3 text-violet-600 font-bold text-sm">
+                                                    <span className="bg-white px-3 py-1 rounded-lg border border-violet-300">P: {plan.protein}g</span>
+                                                    <span className="bg-white px-3 py-1 rounded-lg border border-violet-300">C: {plan.carb}g</span>
+                                                    <span className="bg-white px-3 py-1 rounded-lg border border-violet-300">F: {plan.fat}g</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                {/* Tùy chỉnh */}
+                                <div>
+                                    <h3 className="text-sm font-black text-blue-700 uppercase mb-4 tracking-wider flex items-center gap-2">
+                                        <span className="text-xl">4️⃣</span>
+                                        Tùy Chỉnh Thủ Công
+                                    </h3>
+                                    <button
+                                        onClick={() => setShowMacroModal(false)}
+                                        className="w-full p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl hover:bg-blue-100 hover:border-blue-400 transition-all active:scale-95 text-left"
+                                    >
+                                        <p className="font-black text-base text-blue-900">Nhập Giá Trị Thủ Công</p>
+                                        <p className="text-sm text-blue-700 font-semibold mt-2">Đóng modal và điều chỉnh trực tiếp các trường Protein, Carb, Fat</p>
+                                    </button>
                                 </div>
                             </div>
                             
-                            {/* Danh mục 2: Giảm cân & Chuyển hóa mỡ */}
-                            <div className="mb-6">
-                                <h3 className="text-xs font-black text-orange-600 uppercase mb-3 tracking-wider">2️⃣ Giảm Cân & Chuyển Hóa Mỡ</h3>
-                                <div className="space-y-2">
-                                    {dietPlans.weightLoss.map((plan, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => {
-                                                setProfile({...profile, manualProtein: plan.protein, manualCarb: plan.carb, manualFat: plan.fat});
-                                                setShowMacroModal(false);
-                                            }}
-                                            className="w-full text-left p-3 bg-orange-50 border-2 border-orange-200 rounded-xl hover:bg-orange-100 hover:border-orange-400 transition-all active:scale-95"
-                                        >
-                                            <p className="font-black text-sm text-orange-700">{plan.name}</p>
-                                            <p className="text-[9px] text-orange-600 font-semibold">{plan.desc}</p>
-                                            <p className="text-[8px] text-orange-500 mt-1">🔹 P:{plan.protein}g | C:{plan.carb}g | F:{plan.fat}g</p>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {/* Danh mục 3: Đặc thù khác */}
-                            <div className="mb-6">
-                                <h3 className="text-xs font-black text-violet-600 uppercase mb-3 tracking-wider">3️⃣ Đặc Thù Khác</h3>
-                                <div className="space-y-2">
-                                    {dietPlans.special.map((plan, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => {
-                                                setProfile({...profile, manualProtein: plan.protein, manualCarb: plan.carb, manualFat: plan.fat});
-                                                setShowMacroModal(false);
-                                            }}
-                                            className="w-full text-left p-3 bg-violet-50 border-2 border-violet-200 rounded-xl hover:bg-violet-100 hover:border-violet-400 transition-all active:scale-95"
-                                        >
-                                            <p className="font-black text-sm text-violet-700">{plan.name}</p>
-                                            <p className="text-[9px] text-violet-600 font-semibold">{plan.desc}</p>
-                                            <p className="text-[8px] text-violet-500 mt-1">🔹 P:{plan.protein}g | C:{plan.carb}g | F:{plan.fat}g</p>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {/* Tùy chỉnh */}
-                            <div className="mb-6">
-                                <h3 className="text-xs font-black text-blue-600 uppercase mb-3 tracking-wider">4️⃣ Tùy Chỉnh Thủ Công</h3>
+                            {/* Footer - Sticky */}
+                            <div className="sticky bottom-0 bg-gradient-to-t from-white to-slate-50 px-6 py-6 border-t border-slate-100 space-y-3">
                                 <button
                                     onClick={() => setShowMacroModal(false)}
-                                    className="w-full p-3 bg-blue-50 border-2 border-blue-200 rounded-xl hover:bg-blue-100 hover:border-blue-400 transition-all active:scale-95 text-left"
+                                    className="w-full py-4 bg-slate-200 text-slate-700 rounded-2xl font-black text-base uppercase active:scale-95 transition-all hover:bg-slate-300"
                                 >
-                                    <p className="font-black text-sm text-blue-700">Nhập Giá Trị Thủ Công</p>
-                                    <p className="text-[9px] text-blue-600 font-semibold">Đóng modal và điều chỉnh trực tiếp các trường Protein, Carb, Fat</p>
+                                    Đóng
                                 </button>
                             </div>
-                            
-                            <button
-                                onClick={() => setShowMacroModal(false)}
-                                className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-sm uppercase active:scale-95 transition-all"
-                            >
-                                Đóng
-                            </button>
                         </div>
                     </div>
-                )
-            );
+                );
+            };
             
             // === 3. MÀN HÌNH HỒ SƠ ===
             if (view === "profile") {
