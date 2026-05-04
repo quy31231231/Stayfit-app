@@ -499,15 +499,6 @@ export default function App() {
         return results.slice(0, 50);
     }, [searchQuery, allFoods]);
 
-    const updateItemMeal = (itemId, newMeal) => {
-        setHistory(prev => ({
-            ...prev,
-            [currentDate]: (prev[currentDate] || []).map(item =>
-                item.id === itemId ? { ...item, meal: newMeal } : item
-            )
-        }));
-    };
-
     const handleAddSelectedFood = () => {
         if (!selectedFood) return;
         const quantity = parseFloat(qty) || 0;
