@@ -247,10 +247,39 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
             <main className="p-4 space-y-6">
                 <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cập nhật cân nặng</h3>
-                    <div className="flex gap-2 mb-4">
-                        <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[125px] bg-slate-50 p-3 rounded-2xl outline-none font-bold text-xs text-slate-500 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer" />
-                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]} kg` : "Số kg..."} className="flex-1 bg-slate-50 p-3 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
-                        <button onClick={saveWeight} className="px-5 bg-emerald-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-200">Ghi</button>
+                    <div className="flex items-center bg-slate-50 p-1.5 rounded-[1.25rem] mb-4 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all border border-slate-100 shadow-inner">
+                        {/* Khu vực chọn ngày */}
+                        <div className="relative flex items-center">
+                            <svg className="w-4 h-4 text-emerald-500 absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <input 
+                                type="date" 
+                                value={weightDate} 
+                                max={todayStr} 
+                                onChange={e=>setWeightDate(e.target.value)} 
+                                className="w-[115px] bg-transparent py-3 pl-9 pr-1 outline-none font-black text-[10px] uppercase text-slate-600 cursor-pointer tracking-wider [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
+                            />
+                        </div>
+                        
+                        {/* Vạch ngăn cách */}
+                        <div className="w-px h-6 bg-slate-200 mx-1 shrink-0"></div>
+                        
+                        {/* Khu vực nhập số kg */}
+                        <input 
+                            type="number" 
+                            value={weightInput} 
+                            onChange={e=>setWeightInput(e.target.value)} 
+                            step="0.1" 
+                            placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} 
+                            className="flex-1 bg-transparent p-3 outline-none font-bold text-sm text-slate-800 placeholder:text-slate-300 w-full min-w-[60px]" 
+                        />
+                        
+                        {/* Nút GHI tích hợp bên trong */}
+                        <button 
+                            onClick={saveWeight} 
+                            className="h-10 px-5 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-md shadow-emerald-200 shrink-0"
+                        >
+                            Ghi
+                        </button>
                     </div>
                     <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-300 mb-2 mt-6">Lịch sử (Gần nhất)</h4>
                     <div className="max-h-32 overflow-y-auto no-scrollbar bg-slate-50 rounded-2xl p-2 border border-slate-100">
