@@ -87,20 +87,12 @@
 
         // --- DỮ LIỆU CƠ BẢN ---
         const COMMON_FOODS = [
-            { name: "Tỏi", unit: "g", per: 100, kcal: 149, carb: 33, fat: 0.5, protein: 6.4 },
-            { name: "Hành tây", unit: "g", per: 100, kcal: 40, carb: 9, fat: 0.1, protein: 1.1 },
-            { name: "Cà chua", unit: "g", per: 100, kcal: 18, carb: 3.9, fat: 0.2, protein: 0.9 },
-            { name: "Khoai tây", unit: "g", per: 100, kcal: 77, carb: 17, fat: 0.1, protein: 2 },
-            { name: "Cà rốt", unit: "g", per: 100, kcal: 41, carb: 10, fat: 0.2, protein: 0.9 },
-            { name: "Rau cải xanh", unit: "g", per: 100, kcal: 25, carb: 3.6, fat: 0.4, protein: 2.2 },
-            { name: "Bông cải xanh", unit: "g", per: 100, kcal: 34, carb: 7, fat: 0.4, protein: 2.8 },
-            { name: "Đậu hũ", unit: "g", per: 100, kcal: 76, carb: 1.9, fat: 4.8, protein: 8 },
-            { name: "Trứng gà luộc", unit: "g", per: 100, kcal: 155, carb: 1, fat: 11, protein: 13 },
-            { name: "Ức gà, thịt", unit: "g", per: 100, kcal: 110, carb: 0, fat: 1, protein: 23 },
-            { name: "Thịt thăn bò", unit: "g", per: 100, kcal: 142, carb: 0, fat: 6, protein: 21 },
-            { name: "Cơm trắng", unit: "g", per: 100, kcal: 130, carb: 28, fat: 0.3, protein: 2.7 },
-            { name: "Sữa tươi", unit: "ml", per: 100, kcal: 60, carb: 5, fat: 3, protein: 3 }
-            // Hãy dán thêm list của bạn vào đây
+            { name: "Highland Coffee", unit: "ly", per: 1, kcal: 300, protein: 0, carb: 0, fat: 0 },
+            { name: "Cacao", unit: "g", per: 100, kcal: 228, protein: 20, carb: 58, fat: 14 },
+            { name: "Thịt dải", unit: "g", per: 100, kcal: 250, protein: 18, carb: 0, fat: 19 },
+            { name: "Lòng lợn", unit: "g", per: 100, kcal: 150, protein: 15, carb: 0, fat: 10 },
+            { name: "Ức gà", unit: "g", per: 100, kcal: 110, protein: 23, carb: 0, fat: 1 },
+            { name: "Cơm trắng", unit: "g", per: 100, kcal: 130, protein: 2.7, carb: 28, fat: 0.3 }
         ];
 
         const ACTIVITY_LEVELS = [
@@ -133,6 +125,7 @@
         };
 
         // --- COMPONENTS ---
+        // CHÚ Ý: ĐÂY LÀ COMPONENT RENDER THANH TIẾN TRÌNH
         function MacroProgressBar({ label, current, target, colorClass }) {
             const pct = Math.min((current / target) * 100, 100) || 0;
             return (
@@ -493,7 +486,7 @@
                                                 onClick={() => deleteWeight(date)} 
                                                 className="p-2 text-slate-200 hover:text-red-500 bg-slate-50 rounded-lg transition-colors group"
                                             >
-                                                <IconTrash/>
+                                                <IconTrash />
                                             </button>
                                         </div>
                                     ))
@@ -521,7 +514,7 @@
                             <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
                         </section>
                     </main>
-                    <BottomNav view="{view}" setView="{setView}"/>
+                    <BottomNav view={view} setView={setView} />
                 </div>
             );
         }
@@ -533,7 +526,7 @@
                         onClick={() => setView("journal")} 
                         className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='journal' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}
                     >
-                        <IconJournal/>
+                        <IconJournal />
                         <span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
                     </button>
                     
@@ -541,7 +534,7 @@
                         onClick={() => setView("calendar")} 
                         className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='calendar' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}
                     >
-                        <IconCalendar/>
+                        <IconCalendar />
                         <span className="text-[9px] uppercase font-bold tracking-tighter">Lịch trình</span>
                     </button>
                     
@@ -549,7 +542,7 @@
                         onClick={() => setView("stats")} 
                         className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='stats' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}
                     >
-                        <IconStats/>
+                        <IconStats />
                         <span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
                     </button>
                     
@@ -557,7 +550,7 @@
                         onClick={() => setView("profile")} 
                         className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${view==='profile' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}
                     >
-                        <IconUser/>
+                        <IconUser />
                         <span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
                     </button>
                 </div>
@@ -897,7 +890,7 @@
                 // Lấy giờ Việt Nam ngay lúc bấm nút
                 const vnTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
 
-                // 1. LƯU VÀO NHẬT KÝ (Giữ nguyên con số nhập vào)
+                // 1. LƯU VÀO NHẬT KÝ
                 const newItem = {
                     name: foodName, 
                     quantity: q, 
@@ -1043,7 +1036,14 @@
             // === 2. MÀN HÌNH THỐNG KÊ ===
             if (view === "stats") {
                 return (
-                    <StatsView history="{history}" profile="{profile}" setProfile="{setProfile}" target="{target}" setView="{setView}" view="{view}"/>
+                    <StatsView 
+                        history={history} 
+                        profile={profile} 
+                        setProfile={setProfile} 
+                        target={target} 
+                        setView={setView} 
+                        view={view} 
+                    />
                 );
             }
             
@@ -1192,7 +1192,7 @@
                             </button>
                         </div>
                         
-                        <BottomNav view="{view}" setView="{setView}"/>
+                        <BottomNav view={view} setView={setView} />
                     </div>
                 );
             }
@@ -1266,9 +1266,10 @@
                                 </div>
                                 
                                 <div className="border-t border-slate-50 pt-5 space-y-3">
-                                    <MacroProgressBar label="Protein" current="{dailyProtein}" target="{targetProtein}" colorClass="bg-emerald-500"/>
-                                    <MacroProgressBar label="Carb" current="{dailyCarb}" target="{targetCarb}" colorClass="bg-blue-500"/>
-                                    <MacroProgressBar label="Fat" current="{dailyFat}" target="{targetFat}" colorClass="bg-yellow-400"/>
+                                    {/* Component MacroProgressBar đã được sửa lỗi */}
+                                    <MacroProgressBar label="Protein" current={dailyProtein} target={targetProtein} colorClass="bg-emerald-500" />
+                                    <MacroProgressBar label="Carb" current={dailyCarb} target={targetCarb} colorClass="bg-blue-500" />
+                                    <MacroProgressBar label="Fat" current={dailyFat} target={targetFat} colorClass="bg-yellow-400" />
                                 </div>
                                 
                                 <div className="border-t border-slate-50 pt-5 mt-1">
@@ -1308,7 +1309,7 @@
                             <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                                 <div className="flex justify-between items-center mb-6">
                                     <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2">
-                                        <IconPlus/> Thêm món
+                                        <IconPlus /> Thêm món
                                     </h4>
                                     <select 
                                         value={selectedMeal} 
@@ -1340,7 +1341,7 @@
                                     <div>
                                         <div className="relative mb-4">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                                                <IconSearch/>
+                                                <IconSearch />
                                             </div>
                                             <input 
                                                 type="text" 
@@ -1370,7 +1371,7 @@
                                                         }} 
                                                         className="absolute right-2 top-2 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
                                                     >
-                                                        <IconTrash/>
+                                                        <IconTrash />
                                                     </button>
                                                 </div>
                                             ))}
@@ -1379,7 +1380,7 @@
                                             )}
                                         </div>
                                         
-                                        
+                                        {/* PHẦN CHỌN NHANH */}
                                         {selectedFood && (() => {
                                             let weightInGrams = qty;
                                             const u = selectedFood.unit.toLowerCase();
@@ -1401,7 +1402,7 @@
                                             return (
                                             <div className="mt-4 pt-5 border-t border-slate-100 animate-in slide-in-from-top-2">
                                                 <div className="bg-slate-900 rounded-2xl p-4 mb-4 text-white shadow-xl relative overflow-hidden">
-                                                    <div className="absolute top-0 right-0 p-4 opacity-10"><IconJournal/></div>
+                                                    <div className="absolute top-0 right-0 p-4 opacity-10"><IconJournal /></div>
                                                     <div className="relative z-10 flex justify-between items-start mb-3">
                                                         <div>
                                                             <h5 className="font-black text-lg text-emerald-400 leading-tight">{selectedFood.name}</h5>
@@ -1445,13 +1446,13 @@
                                                         onClick={() => handleAddSelectedFood()} 
                                                         className="flex-1 mt-4 h-12 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase shadow-xl shadow-emerald-100 flex items-center justify-center gap-1 active:scale-95 transition-all"
                                                     >
-                                                        Ghi vào nhật ký <IconPlus/>
+                                                        Ghi vào nhật ký <IconPlus />
                                                     </button>
                                                     <button 
                                                         onClick={() => { setSelectedFood(null); setQty(1); }} 
                                                         className="mt-4 p-3 text-slate-300 hover:text-red-500 bg-slate-50 rounded-xl transition-colors"
                                                     >
-                                                        <IconTrash/>
+                                                        <IconTrash />
                                                     </button>
                                                 </div>
                                             </div>
@@ -1534,7 +1535,7 @@
                                             </div>
                                         </div>
 
-                                        
+                                        {/* ẨN NÚT XÁC NHẬN - CHỈ HIỆN KHI NHẬP ĐỦ THÔNG TIN */}
                                         {customFood.name.trim() !== "" && parseFloat(customFood.kcal) > 0 && (
                                             <button 
                                                 onClick={addCustom} 
@@ -1581,7 +1582,7 @@
                                                 onClick={() => removeFood(item.id)} 
                                                 className="text-slate-200 hover:text-red-500 transition-colors p-2 bg-slate-50 rounded-xl group-hover:bg-red-50"
                                             >
-                                                <IconTrash/>
+                                                <IconTrash />
                                             </button>
                                         </div>
                                     </div>
@@ -1613,7 +1614,7 @@
                                         ) : (
                                             <div className="text-center">
                                                 <div className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4">
-                                                    <IconTrash/>
+                                                    <IconTrash />
                                                 </div>
                                                 <h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Xác nhận xóa</h3>
                                                 <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">
@@ -1639,7 +1640,7 @@
                                 </div>
                             )}
                         </main>
-                        <BottomNav view="{view}" setView="{setView}"/>
+                        <BottomNav view={view} setView={setView} />
                     </div>
                 );
             }
@@ -1708,7 +1709,7 @@
                                 </button>
                             </div>
                         </main>
-                        <BottomNav view="{view}" setView="{setView}"/>
+                        <BottomNav view={view} setView={setView} />
                     </div>
                 );
             }
@@ -1717,7 +1718,7 @@
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App/>);
+        root.render(<App />);
     </script>
 </body>
 </html>
