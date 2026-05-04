@@ -29,7 +29,6 @@ export default async function handler(req, res) {
 
     try {
       // 1. KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE
-      // Tăng range lên A:J (Cột J là mật khẩu)
       const profileRes = await sheets.spreadsheets.values.get({ 
         spreadsheetId: SHEET_ID, 
         range: "Profile!A:J" 
@@ -37,16 +36,13 @@ export default async function handler(req, res) {
       const profileRows = profileRes.data.values || [];
       const profileIndex = profileRows.findIndex(row => row[0] === userId);
 
-      // Nếu user đã tồn tại, kiểm tra mật khẩu ở Cột J (index 9)
       if (profileIndex !== -1) {
         const storedPass = profileRows[profileIndex][9];
-        // Nếu trên sheet đã có pass mà người dùng truyền lên sai pass -> Chặn lại
         if (storedPass && storedPass !== password) {
           return res.status(401).json({ error: "Sai mật khẩu bảo mật!" });
         }
       }
 
-      // Tạo dòng profile mới kèm theo mật khẩu
       const newProfileRow = [
         userId, 
         profile.gender || "", 
@@ -76,88 +72,85 @@ export default async function handler(req, res) {
         });
       }
       
-      // 2. CẬP NHẬT HISTORY
+      // ✅ FIX: CẬP NHẬT HISTORY - chỉ APPEND dòng mới, không xóa
       const historyRes = await sheets.spreadsheets.values.get({ 
         spreadsheetId: SHEET_ID, 
         range: "History!A:K" 
       });
       const allHistoryRows = historyRes.data.values || [];
-      const headerHistory = allHistoryRows.length > 0 && allHistoryRows[0][0] === "UserID" ? [allHistoryRows[0]] : [];
-      const otherUsersHistory = allHistoryRows.filter((row, i) => (i > 0 || row[0] !== "UserID") && row[0] !== userId);
 
-      let currentUserHistoryRows = [];
+      // Tập hợp tất cả timestamp đã có của user này → dùng để dedup
+      const existingTimestamps = new Set(
+        allHistoryRows
+          .filter(row => row[0] === userId)
+          .map(row => row[10]) // cột K = timestamp
+      );
+
+      // Chỉ lấy các dòng thực sự mới (chưa có timestamp trên sheet)
+      let newHistoryRows = [];
       if (history) {
-        currentUserHistoryRows = Object.entries(history).flatMap(([date, items]) =>
-          items.map(item => {
-            // ƯU TIÊN LẤY TIMESTAMP TỪ APP TRUYỀN LÊN (nếu có), NẾU KHÔNG CÓ THÌ TẠO MỚI
-            const timeStampToSave = item.timestamp || new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
-            
-            return [
-              userId, 
-              date, 
-              item.meal, 
-              item.name, 
-              item.quantity,
-              item.unit, 
-              item.kcal, 
-              item.protein, 
-              item.carb, 
-              item.fat,
-              timeStampToSave
-            ];
-          })
+        newHistoryRows = Object.entries(history).flatMap(([date, items]) =>
+          items
+            .filter(item => {
+              const ts = item.timestamp || "";
+              return ts && !existingTimestamps.has(ts); // bỏ qua nếu đã tồn tại
+            })
+            .map(item => {
+              const ts = item.timestamp || new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
+              return [userId, date, item.meal, item.name, item.quantity, item.unit, item.kcal, item.protein, item.carb, item.fat, ts];
+            })
         );
       }
 
-      const combinedHistory = [...headerHistory, ...otherUsersHistory, ...currentUserHistoryRows];
-      
-      await sheets.spreadsheets.values.clear({ 
-        spreadsheetId: SHEET_ID, 
-        range: "History!A:K" 
-      });
-      
-      if (combinedHistory.length > 0) {
-        await sheets.spreadsheets.values.update({
+      // Sắp xếp theo timestamp trước khi append
+      newHistoryRows.sort((a, b) => new Date(a[10]) - new Date(b[10]));
+
+      // Chỉ append dòng mới — KHÔNG clear, KHÔNG rewrite
+      if (newHistoryRows.length > 0) {
+        await sheets.spreadsheets.values.append({
           spreadsheetId: SHEET_ID,
-          range: "History!A1",
+          range: "History!A:K",
           valueInputOption: "USER_ENTERED",
-          requestBody: { values: combinedHistory },
+          requestBody: { values: newHistoryRows },
         });
       }
 
-      // 3. CẬP NHẬT WEIGHTLOG
+      // ✅ FIX: CẬP NHẬT WEIGHTLOG - upsert theo ngày
       const weightRes = await sheets.spreadsheets.values.get({ 
         spreadsheetId: SHEET_ID, 
         range: "WeightLog!A:D" 
       });
       const allWeightRows = weightRes.data.values || [];
-      const headerWeight = allWeightRows.length > 0 && allWeightRows[0][0] === "UserID" ? [allWeightRows[0]] : [];
-      const otherUsersWeight = allWeightRows.filter((row, i) => (i > 0 || row[0] !== "UserID") && row[0] !== userId);
 
-      let currentUserWeightRows = [];
+      // Map ngày → row index (để update đúng dòng nếu đã có)
+      const existingWeightDates = new Map(
+        allWeightRows
+          .map((row, i) => row[0] === userId ? [row[1], i + 1] : null) // 1-indexed
+          .filter(Boolean)
+      );
+
       if (weightLog) {
-         currentUserWeightRows = Object.entries(weightLog).map(([date, weight]) => [
-            userId, 
-            date, 
-            weight, 
-            new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })
-         ]);
-      }
-
-      const combinedWeight = [...headerWeight, ...otherUsersWeight, ...currentUserWeightRows];
-      
-      await sheets.spreadsheets.values.clear({ 
-        spreadsheetId: SHEET_ID, 
-        range: "WeightLog!A:D" 
-      });
-      
-      if (combinedWeight.length > 0) {
-        await sheets.spreadsheets.values.update({
-          spreadsheetId: SHEET_ID,
-          range: "WeightLog!A1",
-          valueInputOption: "USER_ENTERED",
-          requestBody: { values: combinedWeight },
-        });
+        for (const [date, weight] of Object.entries(weightLog)) {
+          const newRow = [userId, date, weight, new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })];
+          
+          if (existingWeightDates.has(date)) {
+            // Cập nhật đúng dòng đó thay vì xóa tất cả
+            const rowNum = existingWeightDates.get(date);
+            await sheets.spreadsheets.values.update({
+              spreadsheetId: SHEET_ID,
+              range: `WeightLog!A${rowNum}:D${rowNum}`,
+              valueInputOption: "USER_ENTERED",
+              requestBody: { values: [newRow] },
+            });
+          } else {
+            await sheets.spreadsheets.values.append({
+              spreadsheetId: SHEET_ID,
+              range: "WeightLog!A:D",
+              valueInputOption: "USER_ENTERED",
+              requestBody: { values: [newRow] },
+            });
+          }
+        }
       }
       
       return res.status(200).json({ success: true });
@@ -183,9 +176,8 @@ export default async function handler(req, res) {
       });
       const profileRow = profileRes.data.values?.find(row => row[0] === userId);
       
-      // KIỂM TRA MẬT KHẨU LÚC ĐĂNG NHẬP (TẢI VỀ)
       if (profileRow) {
-          const storedPass = profileRow[9]; // Mật khẩu nằm ở cột J
+          const storedPass = profileRow[9]; 
           if (storedPass && storedPass !== password) {
               return res.status(401).json({ error: "Sai mật khẩu!" });
           }
@@ -222,7 +214,6 @@ export default async function handler(req, res) {
           protein: parseFloat(row[7]), 
           carb: parseFloat(row[8]),
           fat: parseFloat(row[9]), 
-          // Nếu có timestamp từ file sheets, truyền về. Nếu không, gán bừa một cái ID để render list.
           timestamp: row[10] || new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" }),
           id: Date.now() + Math.random(), 
         });
