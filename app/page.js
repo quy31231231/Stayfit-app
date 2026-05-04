@@ -97,6 +97,7 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
         return {};
     });
     const [weightInput, setWeightInput] = useState("");
+    const [weightDate, setWeightDate] = useState(() => formatDate(new Date()));
     const [chartOffset, setChartOffset] = useState(0);
     const daysPerPage = 14;
     
@@ -128,10 +129,10 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
         return dayLog.reduce((sum, item) => sum + (item[field] || 0), 0); 
     };
 
-    const saveWeight = () => {
+   const saveWeight = () => {
         const inputVal = parseFloat(weightInput);
         if (!inputVal || inputVal <= 0) return alert("Vui lòng nhập số kg hợp lệ!");
-        const newLog = { ...weightLog, [todayStr]: inputVal };
+        const newLog = { ...weightLog, [weightDate]: inputVal };
         setWeightLog(newLog); 
         localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog));
         setProfile({...profile, weight: inputVal}); setWeightInput("");
@@ -213,13 +214,13 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
             const dataCarb = currentChartDates.map(d => Math.round(sumDayMacro(history[d], 'carb')));
             const dataFat = currentChartDates.map(d => Math.round(sumDayMacro(history[d], 'fat')));
 
-            macroChartInstance.current = new Chart(ctx, { 
+           macroChartInstance.current = new Chart(ctx, { 
                 type: 'line', 
                 data: { labels: labels, datasets: [
-                    { label: 'Protein', data: dataProtein, borderColor: '#10B981', backgroundColor: '#10B981', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { align: 'top', color: '#10B981', font: { size: 8, weight: 'bold' }, formatter: (v) => v>0?v:'' } }, 
-                    { label: 'Carb', data: dataCarb, borderColor: '#3B82F6', backgroundColor: '#3B82F6', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { align: 'top', color: '#3B82F6', font: { size: 8, weight: 'bold' }, formatter: (v) => v>0?v:'' } },
-                    { label: 'Fat', data: dataFat, borderColor: '#F59E0B', backgroundColor: '#F59E0B', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { align: 'bottom', color: '#F59E0B', font: { size: 8, weight: 'bold' }, formatter: (v) => v>0?v:'' } }
-                ]}, 
+                    { label: 'Protein', data: dataProtein, borderColor: '#10B981', backgroundColor: '#10B981', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } }, 
+                    { label: 'Carb', data: dataCarb, borderColor: '#3B82F6', backgroundColor: '#3B82F6', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } },
+                    { label: 'Fat', data: dataFat, borderColor: '#F59E0B', backgroundColor: '#F59E0B', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } }
+                ]},
                 options: { 
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25, bottom: 15 } },
                     onClick: handleChartClick, onHover: handleChartHover,
@@ -247,15 +248,9 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
                 <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cập nhật cân nặng</h3>
                     <div className="flex gap-2 mb-4">
-                        <input 
-    type="number" 
-    value={weightInput} 
-    onChange={e=>setWeightInput(e.target.value)} 
-    step="0.1" 
-    placeholder={weightLog[todayStr] ? `Hôm nay: ${weightLog[todayStr]} kg` : "Cân nặng của ngày hôm nay?"} 
-    className="w-full bg-slate-50 p-4 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" 
- />
-                        <button onClick={saveWeight} className="px-6 bg-emerald-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-200">Ghi</button>
+                        <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[125px] bg-slate-50 p-3 rounded-2xl outline-none font-bold text-xs text-slate-500 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer" />
+                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]} kg` : "Số kg..."} className="flex-1 bg-slate-50 p-3 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                        <button onClick={saveWeight} className="px-5 bg-emerald-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-200">Ghi</button>
                     </div>
                     <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-300 mb-2 mt-6">Lịch sử (Gần nhất)</h4>
                     <div className="max-h-32 overflow-y-auto no-scrollbar bg-slate-50 rounded-2xl p-2 border border-slate-100">
@@ -281,7 +276,9 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
                 </section>
                 <div className="flex justify-between items-center bg-white p-2 rounded-2xl shadow-sm border border-slate-100 sticky top-[80px] z-10">
                     <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-xl text-[10px] font-black uppercase transition-colors">◀ 14 Ngày Trước</button>
-                    <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest text-center px-1">{getWeekLabel(currentChartDates[0])} <br/> {getWeekLabel(currentChartDates[currentChartDates.length-1])}</span>
+                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest text-center px-2">
+                        {getWeekLabel(currentChartDates[0])} - {getWeekLabel(currentChartDates[currentChartDates.length-1])}
+                    </span>                    
                     <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase transition-colors ${chartOffset === 0 ? 'bg-transparent text-slate-200' : 'bg-slate-50 hover:bg-slate-100 text-slate-500'}`}>Tiếp Theo ▶</button>
                 </div>
                 <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
@@ -680,20 +677,20 @@ export default function App() {
     if (view === "journal") {
         return (
             <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative font-sans text-slate-800">
-                <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        {/* Nút lùi ngày: Tròn, có viền, icon tam giác đặc */}
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 rounded-full border border-slate-200 transition-all shadow-sm active:scale-95">
-                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
+             <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+                    <div className="flex items-center gap-2">
+                        {/* Nút lùi ngày: Không viền, mờ 50%, phát sáng mờ khi hover/chạm */}
+                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="p-2 text-slate-300 opacity-50 hover:opacity-100 hover:text-emerald-500 hover:bg-emerald-50 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-full transition-all duration-300 active:scale-95">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
                         </button>
                         
                         <div className="text-center min-w-[90px]">
                             <span className="font-black text-slate-800 uppercase text-[11px] tracking-widest">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</span>
                         </div>
                         
-                        {/* Nút tiến ngày: Tròn, có viền, icon tam giác đặc */}
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 rounded-full border border-slate-200 transition-all shadow-sm active:scale-95">
-                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
+                        {/* Nút tiến ngày: Không viền, mờ 50%, phát sáng mờ khi hover/chạm */}
+                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="p-2 text-slate-300 opacity-50 hover:opacity-100 hover:text-emerald-500 hover:bg-emerald-50 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-full transition-all duration-300 active:scale-95">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
                         </button>
                     </div>
                     <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs shadow-sm">SF</div>
