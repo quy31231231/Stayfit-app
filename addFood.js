@@ -33,14 +33,14 @@ async function saveToSheets(item, date, meal) {
 }
 
 // 2. Hàm xử lý sự kiện khi người dùng bấm nút thêm món ăn
-function addFood(item) {
+function addFood(item, mealType = "Bữa chính") {
   // Lấy ngày hiện tại theo giờ Việt Nam
   const selectedDate = new Date().toLocaleDateString("vi-VN"); 
   
-  // Bạn có thể sửa "Bữa chính" thành giá trị lấy từ giao diện (ví dụ: Sáng, Trưa, Tối)
-  const currentMeal = "Bữa chính"; 
+  // Sử dụng meal type được truyền vào hoặc mặc định là "Bữa chính"
+  const currentMeal = mealType;
 
-  console.log("Đang xử lý thêm món:", item.name);
+  console.log("Đang xử lý thêm món:", item.name, "- Bữa:", currentMeal);
 
   // Kích hoạt tiến trình lưu ngầm vào Google Sheets
   saveToSheets(item, selectedDate, currentMeal);
