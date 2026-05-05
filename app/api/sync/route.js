@@ -179,21 +179,21 @@ export async function GET(req) {
     const history = {};
 
     historyRows.slice(1).forEach(row => {
-      // Skip empty rows (created by delete operations)
-      if (!row[0] || !row[1] || !row[10]) return;
+      // Skip only completely empty rows
+      if (!row || row.length === 0 || !row[0] || !row[1]) return;
       
       if (row[0] === userId) {
         const date = row[1];
         const meal = {
-          meal: row[2],
-          name: row[3],
-          quantity: parseFloat(row[4]),
-          unit: row[5],
-          kcal: parseFloat(row[6]),
-          protein: parseFloat(row[7]),
-          carb: parseFloat(row[8]),
-          fat: parseFloat(row[9]),
-          timestamp: row[10],
+          meal: row[2] || "",
+          name: row[3] || "",
+          quantity: parseFloat(row[4]) || 0,
+          unit: row[5] || "g",
+          kcal: parseFloat(row[6]) || 0,
+          protein: parseFloat(row[7]) || 0,
+          carb: parseFloat(row[8]) || 0,
+          fat: parseFloat(row[9]) || 0,
+          timestamp: row[10] || `${date}-${Date.now()}`, // Generate timestamp if missing
           id: row[10] || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         };
         if (!history[date]) history[date] = [];
