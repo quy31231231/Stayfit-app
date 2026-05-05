@@ -839,7 +839,34 @@ export default function App() {
             return prev;
         });
     }, [target, isClient]);
-    const dailyLog = history[currentDate] || [];
+    const dailyLogRaw = history[currentDate] || [];
+    const dailyLog = useMemo(() => {
+        return [...dailyLogRaw].sort((a, b) => {
+            const getWeight = (item) => {
+                if (item.meal === "Bữa sáng") return 10;
+                if (item.meal === "Bữa trưa") return 30;
+                if (item.meal === "Bữa tối") return 50;
+                if (item.meal === "Ăn vặt") {
+                    // Tìm tất cả các bữa chính đã được nhập TRƯỚC thời điểm của món ăn vặt này
+                    const mains = dailyLogRaw.filter(m => m.meal !== "Ăn vặt" && (m.timestamp || String(m.id)) <= (item.timestamp || String(item.id)));
+                    if (mains.length === 0) return 20; // Nếu chưa có bữa chính nào, mặc định xếp sau Bữa sáng
+                    
+                    const lastMain = mains[mains.length - 1].meal;
+                    if (lastMain === "Bữa sáng") return 20;
+                    if (lastMain === "Bữa trưa") return 40;
+                    if (lastMain === "Bữa tối") return 60;
+                }
+                return 70;
+            };
+            
+            const wA = getWeight(a);
+            const wB = getWeight(b);
+            if (wA !== wB) return wA - wB; // Sắp xếp theo nhóm Bữa ăn
+            
+            // Nếu cùng một bữa, sắp xếp theo đúng thời gian nhập trước/sau
+            return (a.timestamp || String(a.id)).localeCompare(b.timestamp || String(b.id));
+        });
+    }, [dailyLogRaw]);
     
     const dailyKcal = Math.round(dailyLog.reduce((s, i) => s + (i.kcal || 0), 0) * 10) / 10;
     const dailyProtein = Math.round(dailyLog.reduce((s, i) => s + (i.protein || 0), 0) * 10) / 10;
@@ -1296,17 +1323,12 @@ export default function App() {
                     </section>
                     
                     <div className="space-y-3 pb-4">
-                        <div className="flex justify-between items-center px-2 mb-2 h-8">
+                       <div className="flex justify-between items-center px-2 mb-2 h-8">
                             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Danh sách nạp vào</h3>
-                            {/* VẤN ĐỀ 3: NÚT HÌNH TRÒN, CHỈ CÓ ICON, VIỀN XANH KHI HOVER */}
                             {undoStack.length > 0 && (
-                                <div className="relative group">
-                                    <button onClick={handleUndo} className="w-8 h-8 flex items-center justify-center rounded-full text-emerald-600 bg-emerald-50 border-2 border-transparent hover:border-emerald-500 hover:bg-emerald-100 transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
-                                        <IconUndo />
-                                    </button>
-                                    {/* Hiển thị số lượng món có thể hoàn tác khi hover */}
-                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full shadow-sm pointer-events-none">{undoStack.length}</span>
-                                </div>
+                                <button onClick={handleUndo} className="w-8 h-8 flex items-center justify-center rounded-full text-emerald-600 bg-emerald-50 border-2 border-transparent hover:border-emerald-500 hover:bg-emerald-100 transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
+                                    <IconUndo />
+                                </button>
                             )}
                         </div>
                         {dailyLog.map(item => (
