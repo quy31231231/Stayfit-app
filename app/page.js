@@ -825,6 +825,25 @@ export default function App() {
         return results.slice(0, 50);
     }, [searchQuery, allFoods]);
 
+    // [AUTO-SYNC] Ghi 1 meal entry thẳng lên Sheets ngay khi người dùng thêm món
+    // Không chờ sync thủ công — dùng route POST /api/sync với action="push_single"
+    const pushMealToSheet = async (item, date) => {
+        if (!userId || !password) return;
+        try {
+            await fetch("/api/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "push_single",
+                    userId, password,
+                    meal: { ...item, date },
+                }),
+            });
+        } catch (err) {
+            console.warn("[StayFit] Auto-sync thất bại, sẽ sync lại lần sau:", err.message);
+        }
+    };
+
     const handleAddSelectedFood = () => {
         if (!selectedFood) return;
         const quantity = parseFloat(qty) || 0;
@@ -835,6 +854,7 @@ export default function App() {
             meal: selectedMeal, id: Date.now(), timestamp: generateUniqueTimestamp()
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
+        pushMealToSheet(newItem, currentDate); // ← ghi ngay lên Sheets
         setSelectedFood(null); setSearchQuery(""); setQty(1);
     };
 
@@ -854,8 +874,7 @@ export default function App() {
             meal: selectedMeal, id: Date.now(), timestamp: generateUniqueTimestamp()
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
-
-        let weightInGrams = q; let baseUnit = 'g';
+        pushMealToSheet(newItem, currentDate); // ← ghi ngay lên Sheets = q; let baseUnit = 'g';
         if (['kg'].includes(u)) { weightInGrams = q * 1000; } else if (['l', 'lít'].includes(u)) { weightInGrams = q * 1000; baseUnit = 'ml'; }
         else if (['ml'].includes(u)) { weightInGrams = q; baseUnit = 'ml'; } else if (['g', 'gram'].includes(u)) { weightInGrams = q; }
         else { const mockWeights = { 'tô': 400, 'bát': 400, 'ly': 250, 'quả': 100 }; weightInGrams = q * (mockWeights[u] || 100); }

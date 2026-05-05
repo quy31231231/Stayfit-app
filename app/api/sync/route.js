@@ -23,8 +23,49 @@ export async function POST(req) {
   if (!SHEET_ID) return Response.json({ error: "Missing SPREADSHEET_ID" }, { status: 400 });
 
   const sheets = await getSheets();
-  const { action, userId, password, profile, history, weightLog } = await req.json();
+  const { action, userId, password, profile, history, weightLog, meal: singleMeal } = await req.json();
   
+  // === GHI NGAY 1 MEAL KHI NGƯỜI DÙNG THÊM MÓN ===
+  if (action === "push_single") {
+    if (!userId || !password) return Response.json({ error: "Missing userId or password" }, { status: 400 });
+    if (!singleMeal || !singleMeal.timestamp) return Response.json({ error: "Invalid meal data" }, { status: 400 });
+
+    try {
+      const hashedPassword = hashPassword(password);
+
+      // Xác thực mật khẩu
+      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:J" });
+      const profileRows = profileRes.data.values || [];
+      const profileRow = profileRows.find(row => row[0] === userId);
+      if (profileRow && profileRow[9] && profileRow[9] !== hashedPassword) {
+        return Response.json({ error: "Sai mật khẩu bảo mật!" }, { status: 401 });
+      }
+
+      // Kiểm tra trùng trước khi ghi (userId + timestamp là unique key)
+      const existingRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "History!A:K" });
+      const alreadyExists = (existingRes.data.values || []).some(
+        row => row[0] === userId && row[10] === singleMeal.timestamp
+      );
+
+      if (!alreadyExists) {
+        const m = singleMeal;
+        await sheets.spreadsheets.values.append({
+          spreadsheetId: SHEET_ID,
+          range: "History!A:K",
+          valueInputOption: "USER_ENTERED",
+          requestBody: {
+            values: [[userId, m.date, m.meal, m.name, m.quantity, m.unit, m.kcal, m.protein, m.carb, m.fat, m.timestamp]]
+          }
+        });
+      }
+
+      return Response.json({ status: "push_success" });
+    } catch (err) {
+      console.error(err);
+      return Response.json({ error: err.message }, { status: 500 });
+    }
+  }
+
   // === UPLOAD DỮ LIỆU TỪ APP LÊN SHEETS ===
   if (action === "upload") {
     if (!userId) return Response.json({ error: "Không tìm thấy UserID" }, { status: 400 });
