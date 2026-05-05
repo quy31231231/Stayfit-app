@@ -14,292 +14,293 @@ const IconTrash = () => (<svg xmlns="http://www.w3.org/2000/svg" width="14" heig
 const IconPlus = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>);
 const IconSearch = () => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>);
 const IconStats = () => (<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>);
+const IconEdit = () => (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>);
 
 // --- DỮ LIỆU CƠ BẢN ---
 const COMMON_FOODS = [
-                { name: "Tỏi", unit: "g", per: 100, kcal: 149, carb: 33, fat: 0.5, protein: 6.4 },
-            { name: "Hành tây", unit: "g", per: 100, kcal: 40, carb: 9, fat: 0.1, protein: 1.1 },
-            { name: "Cà chua", unit: "g", per: 100, kcal: 18, carb: 3.9, fat: 0.2, protein: 0.9 },
-            { name: "Khoai tây", unit: "g", per: 100, kcal: 77, carb: 17, fat: 0.1, protein: 2 },
-            { name: "Cà rốt", unit: "g", per: 100, kcal: 41, carb: 10, fat: 0.2, protein: 0.9 },
-            { name: "Rau cải xanh", unit: "g", per: 100, kcal: 25, carb: 3.6, fat: 0.4, protein: 2.2 },
-            { name: "Bông cải xanh", unit: "g", per: 100, kcal: 34, carb: 7, fat: 0.4, protein: 2.8 },
-            { name: "Đậu hũ", unit: "g", per: 100, kcal: 76, carb: 1.9, fat: 4.8, protein: 8 },
-            { name: "Trứng gà sống", unit: "g", per: 100, kcal: 143, carb: 1, fat: 10, protein: 13 },
-            { name: "Trứng gà luộc", unit: "g", per: 100, kcal: 155, carb: 1, fat: 11, protein: 13 },
-            { name: "Trứng gà rán", unit: "g", per: 100, kcal: 196, carb: 1, fat: 15, protein: 14 },
-            { name: "Trứng gà omelet", unit: "g", per: 100, kcal: 157, carb: 1, fat: 12, protein: 11 },
-            { name: "Trứng gà kho, rim", unit: "g", per: 100, kcal: 142, carb: 1, fat: 10, protein: 13 },
-            { name: "Trứng gà bác", unit: "g", per: 100, kcal: 167, carb: 2, fat: 12, protein: 11 },
-            { name: "Trứng gà sống, lòng trắng", unit: "g", per: 100, kcal: 47, carb: 1, fat: 0, protein: 10 },
-            { name: "Trứng gà sống, lòng đỏ", unit: "g", per: 100, kcal: 317, carb: 4, fat: 27, protein: 16 },
-            { name: "Trứng vịt lộn", unit: "g", per: 100, kcal: 226, carb: 1, fat: 12, protein: 17 },
-            { name: "Trứng vịt sống", unit: "g", per: 100, kcal: 185, carb: 1, fat: 14, protein: 13 },
-            { name: "Trứng ngỗng sống", unit: "g", per: 100, kcal: 185, carb: 1, fat: 13, protein: 14 },
-            { name: "Trứng chim cút sống", unit: "g", per: 100, kcal: 158, carb: 0, fat: 11, protein: 13 },
-            { name: "Trứng gà tây", unit: "g", per: 100, kcal: 171, carb: 1, fat: 12, protein: 12 },
-            { name: "Ba chỉ / ba rọi (Việt)", unit: "g", per: 100, kcal: 260, carb: 0, fat: 21.5, protein: 16.5 },
-            { name: "Ba chỉ / ba rọi (nước ngoài)", unit: "g", per: 100, kcal: 518, carb: 0, fat: 53, protein: 9 },
-            { name: "Thắt thăn lợn (nạc)", unit: "g", per: 100, kcal: 143, carb: 0, fat: 6, protein: 21 },
-            { name: "Thắt thăn lợn (nạc và mỡ)", unit: "g", per: 100, kcal: 198, carb: 0, fat: 13, protein: 20 },
-            { name: "Thịt vai (nạc)", unit: "g", per: 100, kcal: 148, carb: 0, fat: 7, protein: 20 },
-            { name: "Thịt vai (nạc và mỡ)", unit: "g", per: 100, kcal: 236, carb: 0, fat: 18, protein: 17 },
-            { name: "Thịt chân lợn (nạc)", unit: "g", per: 100, kcal: 136, carb: 0, fat: 5.5, protein: 20.5 },
-            { name: "Thịt chân lợn (nạc và mỡ)", unit: "g", per: 100, kcal: 245, carb: 0, fat: 19, protein: 17.5 },
-            { name: "Thịt chân lợn (nạc - phần phi)", unit: "g", per: 100, kcal: 137, carb: 0, fat: 5, protein: 21 },
-            { name: "Thịt chân lợn (nạc và mỡ - phần phi)", unit: "g", per: 100, kcal: 222, carb: 0, fat: 16, protein: 19 },
-            { name: "Thịt sườn (nạc và mỡ)", unit: "g", per: 100, kcal: 277, carb: 0, fat: 23, protein: 15.5 },
-            { name: "Móng lợn", unit: "g", per: 100, kcal: 212, carb: 0, fat: 13, protein: 23 },
-            { name: "Óc lợn", unit: "g", per: 100, kcal: 127, carb: 0, fat: 9, protein: 10 },
-            { name: "Tai lợn", unit: "g", per: 100, kcal: 234, carb: 1, fat: 15, protein: 22 },
-            { name: "Tim lợn", unit: "g", per: 100, kcal: 118, carb: 1, fat: 4, protein: 17 },
-            { name: "Thịt má lợn", unit: "g", per: 100, kcal: 655, carb: 0, fat: 70, protein: 6 },
-            { name: "Mỡ lá lợn", unit: "g", per: 100, kcal: 857, carb: 0, fat: 94, protein: 2 },
-            { name: "Thận lợn", unit: "g", per: 100, kcal: 100, carb: 0, fat: 3, protein: 16 },
-            { name: "Gan lợn", unit: "g", per: 100, kcal: 134, carb: 2, fat: 4, protein: 21 },
-            { name: "Phổi lợn", unit: "g", per: 100, kcal: 85, carb: 0, fat: 3, protein: 14 },   
-            { name: "Lá lách", unit: "g", per: 100, kcal: 100, carb: 0, fat: 3, protein: 18 },  
-            { name: "Dạ dày lợn", unit: "g", per: 100, kcal: 159, carb: 0, fat: 10, protein: 17 },     
-            { name: "Đuôi lợn", unit: "g", per: 100, kcal: 378, carb: 0, fat: 33, protein: 18 },
-            { name: "Lưỡi lợn", unit: "g", per: 100, kcal: 225, carb: 0, fat: 17, protein: 16 },
-            { name: "Ruột non", unit: "g", per: 100, kcal: 182, carb: 0, fat: 17, protein: 8 },
-            { name: "Đùi gà, thịt", unit: "g", per: 100, kcal: 119, carb: 0, fat: 4, protein: 20 },
-            { name: "Đùi gà, thịt và da", unit: "g", per: 100, kcal: 211, carb: 0, fat: 15, protein: 17 },
-            { name: "Cánh gà, thịt", unit: "g", per: 100, kcal: 126, carb: 0, fat: 4, protein: 22 },
-            { name: "Cánh gà, thịt và da", unit: "g", per: 100, kcal: 222, carb: 0, fat: 16, protein: 18 },
-            { name: "Cẳng gà, thịt", unit: "g", per: 100, kcal: 119, carb: 0, fat: 3, protein: 21 },
-            { name: "Cẳng gà, thịt và da", unit: "g", per: 100, kcal: 161, carb: 0, fat: 9, protein: 19 },
-            { name: "Chân gà, thịt", unit: "g", per: 100, kcal: 120, carb: 0, fat: 4, protein: 20 },
-            { name: "Chân gà, thịt và da", unit: "g", per: 100, kcal: 187, carb: 0, fat: 12, protein: 18 },
-            { name: "Cổ gà, thịt", unit: "g", per: 100, kcal: 154, carb: 0, fat: 9, protein: 18 },
-            { name: "Cổ gà, thịt và da", unit: "g", per: 100, kcal: 297, carb: 0, fat: 26, protein: 14 },
-            { name: "Ức gà, thịt", unit: "g", per: 100, kcal: 110, carb: 0, fat: 1, protein: 23 },
-            { name: "Ức gà, thịt và da", unit: "g", per: 100, kcal: 172, carb: 0, fat: 9, protein: 21 },
-            { name: "Lưng gà, thịt", unit: "g", per: 100, kcal: 137, carb: 0, fat: 6, protein: 20 },
-            { name: "Lưng gà, thịt và mỡ", unit: "g", per: 100, kcal: 319, carb: 0, fat: 29, protein: 14 },
-            { name: "Tim gà", unit: "g", per: 100, kcal: 153, carb: 1, fat: 9, protein: 16 },
-            { name: "Gan gà", unit: "g", per: 100, kcal: 116, carb: 0, fat: 5, protein: 17 },
-            { name: "Thịt gà xay", unit: "g", per: 100, kcal: 143, carb: 0, fat: 8, protein: 17 },
-            { name: "Da gà", unit: "g", per: 100, kcal: 349, carb: 0, fat: 32, protein: 13 },
-            { name: "Vịt nuôi, thịt", unit: "g", per: 100, kcal: 132, carb: 0, fat: 6, protein: 18 },
-            { name: "Vịt nuôi, thịt và da", unit: "g", per: 100, kcal: 404, carb: 0, fat: 39, protein: 11 },
-            { name: "Vịt hoang dã, thịt và da", unit: "g", per: 100, kcal: 211, carb: 0, fat: 15, protein: 17 },
-            { name: "Gan vịt", unit: "g", per: 100, kcal: 136, carb: 4, fat: 5, protein: 19 },
-            { name: "Thịt thăn bò (phần nạc)", unit: "g", per: 100, kcal: 142, carb: 0, fat: 6, protein: 21 },
-            { name: "Thịt bò tươi (cả con - cả nạc)", unit: "g", per: 100, kcal: 278, carb: 0, fat: 22.5, protein: 17.5 },
-            { name: "Thịt ức bò (phần nạc)", unit: "g", per: 100, kcal: 155, carb: 0, fat: 7, protein: 21 },
-            { name: "Thịt ức bò (nạc và mỡ)", unit: "g", per: 100, kcal: 251, carb: 0, fat: 19, protein: 18.5 },
-            { name: "Sườn bò (nạc và mỡ)", unit: "g", per: 100, kcal: 306, carb: 0, fat: 26, protein: 17 },
-            { name: "Bắp bò", unit: "g", per: 100, kcal: 201, carb: 0, fat: 6, protein: 34 },
-            { name: "Lưỡi bò", unit: "g", per: 100, kcal: 224, carb: 4, fat: 16, protein: 15 },
-            { name: "Dạ dày bò", unit: "g", per: 100, kcal: 85, carb: 0, fat: 3.5, protein: 12.5 },
-            { name: "Mỡ bò", unit: "g", per: 100, kcal: 854, carb: 0, fat: 94, protein: 2 },
-            { name: "Phổi bò", unit: "g", per: 100, kcal: 92, carb: 0, fat: 3, protein: 16 },
-            { name: "Gan bò", unit: "g", per: 100, kcal: 135, carb: 4, fat: 4, protein: 20 },
-            { name: "Thận bò", unit: "g", per: 100, kcal: 103, carb: 0, fat: 3, protein: 18 },
-            { name: "Tim bò", unit: "g", per: 100, kcal: 112, carb: 0, fat: 3.5, protein: 18 },
-            { name: "Óc bò", unit: "g", per: 100, kcal: 143, carb: 1, fat: 11, protein: 11 },
-            { name: "Gạo trắng (sống)", unit: "g", per: 100, kcal: 360, carb: 79, fat: 0.7, protein: 7 },
-            { name: "Cơm trắng (chín)", unit: "g", per: 100, kcal: 130, carb: 28, fat: 0.3, protein: 2.7 },
-            { name: "Bún tươi", unit: "g", per: 100, kcal: 109, carb: 24, fat: 0.2, protein: 2 },
-            { name: "Phở (bánh)", unit: "g", per: 100, kcal: 108, carb: 24, fat: 0.2, protein: 2.2 },
-            { name: "Phở bò (1 tô lớn)", unit: "tô", per: 1, kcal: 500, carb: 60, fat: 12, protein: 28 },
-            { name: "Bún bò Huế", unit: "tô", per: 1, kcal: 480, carb: 58, fat: 14, protein: 25 },
-            { name: "Cơm tấm sườn bì", unit: "đĩa", per: 1, kcal: 650, carb: 75, fat: 22, protein: 35 },
-            { name: "Bánh mì thịt", unit: "ổ", per: 1, kcal: 380, carb: 48, fat: 12, protein: 18 },
-            { name: "Bún chả", unit: "suất", per: 1, kcal: 520, carb: 55, fat: 18, protein: 30 },
-            { name: "Cá chép", unit: "g", per: 100, kcal: 127, carb: 0, fat: 5.5, protein: 18 },
-            { name: "Cá đối", unit: "g", per: 100, kcal: 117, carb: 0, fat: 4, protein: 19 },
-            { name: "Cá thu đại tây dương", unit: "g", per: 100, kcal: 205, carb: 0, fat: 14, protein: 19 },
-            { name: "Cá thu thái bình dương", unit: "g", per: 100, kcal: 158, carb: 0, fat: 8, protein: 20 },
-            { name: "Cá thu tây ban nha", unit: "g", per: 100, kcal: 139, carb: 0, fat: 6, protein: 19 },
-            { name: "Cá thu vua", unit: "g", per: 100, kcal: 105, carb: 0, fat: 2, protein: 20 },
-            { name: "Cá rô phi", unit: "g", per: 100, kcal: 96, carb: 0, fat: 2, protein: 20 },
-            { name: "Cá nục", unit: "g", per: 100, kcal: 114, carb: 0.5, fat: 7, protein: 24 },
-            { name: "Cá Tra/basa", unit: "g", per: 100, kcal: 147.5, carb: 0, fat: 5, protein: 25.5 }, 
-            { name: "Cá mè", unit: "g", per: 100, kcal: 127, carb: 0, fat: 6, protein: 18 },
-            { name: "Cá chim", unit: "g", per: 100, kcal: 146, carb: 0, fat: 8, protein: 17 },
-            { name: "Cá mú", unit: "g", per: 100, kcal: 92, carb: 0, fat: 1, protein: 19 },
-            { name: "Cá cơm", unit: "g", per: 100, kcal: 131, carb: 0, fat: 4.8, protein: 20.4 },
-            { name: "Lươn, cá chình", unit: "g", per: 100, kcal: 184, carb: 0, fat: 12, protein: 19 },
-            { name: "Trứng cá", unit: "g", per: 100, kcal: 252, carb: 4, fat: 18, protein: 25 },
-            { name: "Tôm", unit: "g", per: 100, kcal: 100, carb: 0, fat: 0, protein: 16 },
-            { name: "Tôm hùm phương bắc", unit: "g", per: 100, kcal: 90, carb: 0.7, fat: 0.7, protein: 19 },
-            { name: "Tôm hùm gai", unit: "g", per: 100, kcal: 112, carb: 2.4, fat: 1.5, protein: 20.5 },
-            { name: "Cua biển (xanh)", unit: "g", per: 100, kcal: 87, carb: 0, fat: 2, protein: 18 },
-            { name: "Cua vua Alaska", unit: "g", per: 100, kcal: 84, carb: 0, fat: 0.6, protein: 18 },
-            { name: "Cua nữ hoàng", unit: "g", per: 100, kcal: 91, carb: 0, fat: 1, protein: 19 },
-            { name: "Mực ống", unit: "g", per: 100, kcal: 93, carb: 3.5, fat: 0, protein: 14 },
-            { name: "Mực nang", unit: "g", per: 100, kcal: 79, carb: 1.2, fat: 1.2, protein: 16.5 },
-            { name: "Ốc", unit: "g", per: 100, kcal: 89, carb: 3.5, fat: 0, protein: 18 },
-            { name: "Hến", unit: "g", per: 100, kcal: 86, carb: 4, fat: 2, protein: 12 },
-            { name: "Sò", unit: "g", per: 100, kcal: 79, carb: 5, fat: 0, protein: 13 },
-            { name: "Nghêu", unit: "g", per: 100, kcal: 74, carb: 3, fat: 1, protein: 13 },
-            { name: "Bí đao", unit: "g", per: 100, kcal: 14, carb: 3, fat: 0, protein: 0 },
-            { name: "Bí xanh (mùa hè)", unit: "g", per: 100, kcal: 16, carb: 3, fat: 0, protein: 1 },
-            { name: "Bí xanh (baby)", unit: "g", per: 100, kcal: 21, carb: 3, fat: 0, protein: 3 },
-            { name: "Bưởi", unit: "g", per: 100, kcal: 38, carb: 10, fat: 0, protein: 1 },
-            { name: "Bưởi chùm", unit: "g", per: 100, kcal: 33, carb: 8, fat: 0, protein: 1 },
-            { name: "Bắp ngô ngọt", unit: "g", per: 100, kcal: 86, carb: 19, fat: 1, protein: 3 },
-            { name: "Bầu", unit: "g", per: 100, kcal: 20, carb: 4, fat: 0, protein: 1 },
-            { name: "Bông hẹ", unit: "g", per: 100, kcal: 30, carb: 4, fat: 1, protein: 3 },
-            { name: "Củ hành", unit: "g", per: 100, kcal: 40, carb: 9, fat: 0, protein: 1 },
-            { name: "Cần tây", unit: "g", per: 100, kcal: 16, carb: 4, fat: 0, protein: 1 },
-            { name: "Cây bạc hà lục", unit: "g", per: 100, kcal: 44, carb: 8, fat: 1, protein: 3 },
-            { name: "Cây bạc hà cay", unit: "g", per: 100, kcal: 70, carb: 15, fat: 1, protein: 4 },
-            { name: "Củ diếp xoắn", unit: "g", per: 100, kcal: 73, carb: 18, fat: 0, protein: 1 },
-            { name: "Cải thìa", unit: "g", per: 100, kcal: 9, carb: 2, fat: 0, protein: 1 },
-            { name: "Cải bắp", unit: "g", per: 100, kcal: 25, carb: 6, fat: 0, protein: 1 },
-            { name: "Cải thảo", unit: "g", per: 100, kcal: 16, carb: 3, fat: 0, protein: 1 },
-            { name: "Cải xoong / xà lách xoong", unit: "g", per: 100, kcal: 11, carb: 1, fat: 0, protein: 2 },
-            { name: "Cải cúc / rau tần ô", unit: "g", per: 100, kcal: 24, carb: 3, fat: 1, protein: 3 },
-            { name: "Cải xoăn Kale", unit: "g", per: 100, kcal: 49, carb: 10.5, fat: 0, protein: 3 },
-            { name: "Cải ngồng / cải rổ", unit: "g", per: 100, kcal: 22, carb: 4, fat: 1, protein: 1 },
-            { name: "Cải xanh turnips", unit: "g", per: 100, kcal: 32, carb: 7, fat: 0, protein: 1 },
-            { name: "Cà tím", unit: "g", per: 100, kcal: 24, carb: 6, fat: 0, protein: 1 },
-            { name: "Cây đại hoàng", unit: "g", per: 100, kcal: 21, carb: 5, fat: 0, protein: 0.8 },
-            { name: "Cây atisô", unit: "g", per: 100, kcal: 47, carb: 11, fat: 0, protein: 3 },
-            { name: "Củ đậu", unit: "g", per: 100, kcal: 38, carb: 9, fat: 0, protein: 0.8 },
-            { name: "Cà chua xanh", unit: "g", per: 100, kcal: 23, carb: 5, fat: 0, protein: 1 },
-            { name: "Cà chua vàng / cam", unit: "g", per: 100, kcal: 15, carb: 3, fat: 0, protein: 1 },
-            { name: "Củ cải trắng", unit: "g", per: 100, kcal: 14, carb: 3, fat: 0, protein: 1 },
-            { name: "Chanh (quả)", unit: "g", per: 100, kcal: 30, carb: 11, fat: 0, protein: 1 },
-            { name: "Chanh dây", unit: "g", per: 100, kcal: 97, carb: 23, fat: 1, protein: 2 },
-            { name: "Cam (quả)", unit: "g", per: 100, kcal: 47, carb: 12, fat: 0, protein: 1 },
-            { name: "Chuối", unit: "g", per: 100, kcal: 89, carb: 23, fat: 0, protein: 1 },
-            { name: "Chôm chôm", unit: "g", per: 100, kcal: 82, carb: 21, fat: 0, protein: 1 },
-            { name: "Củ nghệ (gia vị)", unit: "g", per: 100, kcal: 354, carb: 65, fat: 10, protein: 8 },
-            { name: "Củ dền", unit: "g", per: 100, kcal: 43, carb: 10, fat: 0, protein: 2 },
-            { name: "Cà rốt", unit: "g", per: 100, kcal: 41, carb: 10, fat: 0, protein: 1 },
-            { name: "Củ từ", unit: "g", per: 100, kcal: 118, carb: 28, fat: 0, protein: 2 },
-            { name: "Dọc mùng", unit: "g", per: 100, kcal: 14, carb: 3.8, fat: 0, protein: 0.25 },
-            { name: "Dưa cải bệ", unit: "g", per: 100, kcal: 17, carb: 4.5, fat: 0, protein: 2 },
-            { name: "Dưa chuột gọt vỏ", unit: "g", per: 100, kcal: 12, carb: 2, fat: 0, protein: 1 },
-            { name: "Dưa chuột có vỏ", unit: "g", per: 100, kcal: 15, carb: 4, fat: 0, protein: 1 },
-            { name: "Dứa", unit: "g", per: 100, kcal: 50, carb: 13, fat: 0, protein: 1 },
-            { name: "Dưa hấu", unit: "g", per: 100, kcal: 30, carb: 8, fat: 0, protein: 1 },
-            { name: "Dưa vàng (casaba)", unit: "g", per: 100, kcal: 28, carb: 7, fat: 0, protein: 1 },
-            { name: "Dưa lưới (honeydew)", unit: "g", per: 100, kcal: 36, carb: 9, fat: 0, protein: 1 },
-            { name: "Dưa ruột vàng (cantaloupe)", unit: "g", per: 100, kcal: 34, carb: 9, fat: 0, protein: 1 },
-            { name: "Dừa, cùi", unit: "g", per: 100, kcal: 354, carb: 15, fat: 33, protein: 3 },
-            { name: "Dừa, nước", unit: "g", per: 100, kcal: 19, carb: 4, fat: 0, protein: 1 },
-            { name: "Dưa gang", unit: "g", per: 100, kcal: 28, carb: 7, fat: 0, protein: 1 },
-            { name: "Diếp Lô Lô", unit: "g", per: 100, kcal: 12, carb: 3, fat: 0, protein: 1.5 },
-            { name: "Dâu tây", unit: "g", per: 100, kcal: 32, carb: 8, fat: 0, protein: 1 },
-            { name: "Dưa cải bắp", unit: "g", per: 100, kcal: 25, carb: 5, fat: 0, protein: 1 },
-            { name: "Đậu phộng, lạc sống", unit: "g", per: 100, kcal: 567, carb: 16, fat: 49, protein: 26 },
-            { name: "Đậu nành (xanh)", unit: "g", per: 100, kcal: 147, carb: 11, fat: 7, protein: 13 },
-            { name: "Đậu cô ve / đậu đũa", unit: "g", per: 100, kcal: 31, carb: 7, fat: 0, protein: 2 },
-            { name: "Đậu / đỗ đen", unit: "g", per: 100, kcal: 341, carb: 62, fat: 1, protein: 22 },
-            { name: "Đậu / đỗ đỏ", unit: "g", per: 100, kcal: 337, carb: 61, fat: 1, protein: 23 },
-            { name: "Đậu / đỗ xanh", unit: "g", per: 100, kcal: 347, carb: 63, fat: 1, protein: 24 },
-            { name: "Đậu / đỗ trắng nhỏ", unit: "g", per: 100, kcal: 336, carb: 62, fat: 1, protein: 21 },
-            { name: "Đậu / đỗ trắng", unit: "g", per: 100, kcal: 333, carb: 60, fat: 1, protein: 23 },
-            { name: "Đậu rồng (hạt)", unit: "g", per: 100, kcal: 409, carb: 42, fat: 16, protein: 30 },
-            { name: "Đậu rồng (lá)", unit: "g", per: 100, kcal: 74, carb: 14, fat: 1, protein: 6 },
-            { name: "Đậu phụ lụa mềm", unit: "g", per: 100, kcal: 55, carb: 3, fat: 3, protein: 5 },
-            { name: "Đậu phụ lụa rắn", unit: "g", per: 100, kcal: 62, carb: 2, fat: 3, protein: 7 },
-            { name: "Đậu phụ okara", unit: "g", per: 100, kcal: 77, carb: 13, fat: 2, protein: 3 },
-            { name: "Đậu phụ rán", unit: "g", per: 100, kcal: 271, carb: 10, fat: 20, protein: 17 },
-            { name: "Đu đủ", unit: "g", per: 100, kcal: 39, carb: 10, fat: 0, protein: 1 },
-            { name: "Giá đỗ", unit: "g", per: 100, kcal: 44, carb: 7.5, fat: 0, protein: 5.5 },
-            { name: "Gừng", unit: "g", per: 100, kcal: 80, carb: 18, fat: 1, protein: 2 },
-            { name: "Gạo nâu / gạo lức", unit: "g", per: 100, kcal: 370, carb: 77, fat: 3, protein: 8 },
-            { name: "Gạo nếp", unit: "g", per: 100, kcal: 370, carb: 82, fat: 1, protein: 7 },
-            { name: "Gạo trắng", unit: "g", per: 100, kcal: 360, carb: 79, fat: 1, protein: 6 },
-            { name: "Húng quế", unit: "g", per: 100, kcal: 23, carb: 3, fat: 1, protein: 3 },
-            { name: "Hoa chuối", unit: "g", per: 100, kcal: 20, carb: 5.5, fat: 0, protein: 1.5 },
-            { name: "Hẹ lá", unit: "g", per: 100, kcal: 16, carb: 3, fat: 0, protein: 2 },
-            { name: "Hồng xiêm / Sa bô chê", unit: "g", per: 100, kcal: 83, carb: 20, fat: 1, protein: 0 },
-            { name: "Hành lá", unit: "g", per: 100, kcal: 3, carb: 7, fat: 0, protein: 2 },
-            { name: "Hạt điều", unit: "g", per: 100, kcal: 553, carb: 33, fat: 44, protein: 8 },
-            { name: "Hạnh nhân", unit: "g", per: 100, kcal: 575, carb: 22, fat: 49, protein: 21 },
-            { name: "Hạt sen", unit: "g", per: 100, kcal: 89, carb: 17, fat: 1, protein: 4 },
-            { name: "Hạt hướng dương (phơi khô)", unit: "g", per: 100, kcal: 584, carb: 20, fat: 51, protein: 21 },
-            { name: "Hột é", unit: "g", per: 100, kcal: 490, carb: 44, fat: 31, protein: 16 },
-            { name: "Khoai sọ", unit: "g", per: 100, kcal: 112, carb: 26, fat: 0, protein: 1 },
-            { name: "Khế", unit: "g", per: 100, kcal: 31, carb: 7, fat: 0, protein: 1 },
-            { name: "Khổ qua (quả)", unit: "g", per: 100, kcal: 17, carb: 4, fat: 0, protein: 1 },
-            { name: "Khổ qua (lá)", unit: "g", per: 100, kcal: 30, carb: 3, fat: 1, protein: 5 },
-            { name: "Kiwi", unit: "g", per: 100, kcal: 61, carb: 15, fat: 1, protein: 1 },
-            { name: "Khoai tây", unit: "g", per: 100, kcal: 77, carb: 18, fat: 0, protein: 2 },
-            { name: "Khoai lang", unit: "g", per: 100, kcal: 86, carb: 20, fat: 0, protein: 2 },
-            { name: "Lá diếp xoắn", unit: "g", per: 100, kcal: 23, carb: 5, fat: 0, protein: 2 },
-            { name: "Lê", unit: "g", per: 100, kcal: 42, carb: 11, fat: 0, protein: 0 },
-            { name: "Lạc", unit: "g", per: 100, kcal: 567, carb: 16, fat: 49, protein: 26 },
-            { name: "Me chua", unit: "g", per: 100, kcal: 27, carb: 7, fat: 0, protein: 2 },
-            { name: "Mướp", unit: "g", per: 100, kcal: 16, carb: 3.5, fat: 0, protein: 1 },
-            { name: "Mướp tây / đậu bắp", unit: "g", per: 100, kcal: 31, carb: 7, fat: 0, protein: 2 },
-            { name: "Măng tre", unit: "g", per: 100, kcal: 14, carb: 6, fat: 0, protein: 2 },
-            { name: "Mít", unit: "g", per: 100, kcal: 94, carb: 24, fat: 0, protein: 1 },
-            { name: "Măng tây", unit: "g", per: 100, kcal: 20, carb: 4, fat: 0, protein: 2 },
-            { name: "Mận", unit: "g", per: 100, kcal: 46, carb: 11, fat: 0, protein: 1 },
-            { name: "Mộc nhĩ", unit: "g", per: 100, kcal: 312, carb: 72, fat: 0, protein: 11 },
-            { name: "Ngó sen", unit: "g", per: 100, kcal: 74, carb: 17.2, fat: 0.1, protein: 2.6 },
-            { name: "Nấm thường tươi", unit: "g", per: 100, kcal: 35, carb: 5.7, fat: 0.8, protein: 4.6 },
-            { name: "Nấm mỡ", unit: "g", per: 100, kcal: 33, carb: 4.5, fat: 0.3, protein: 4 },
-            { name: "Nấm rơm", unit: "g", per: 100, kcal: 31, carb: 4.5, fat: 0.3, protein: 4 },
-            { name: "Nấm hương tươi", unit: "g", per: 100, kcal: 40, carb: 6, fat: 0.5, protein: 5.5 },
-            { name: "Ngải cứu", unit: "g", per: 100, kcal: 55, carb: 8, fat: 0, protein: 5 },
-            { name: "Ngọn xu xu", unit: "g", per: 100, kcal: 18, carb: 6, fat: 0.4, protein: 0.3 },
-            { name: "Nho", unit: "g", per: 100, kcal: 69, carb: 18, fat: 0, protein: 1 },
-            { name: "Nước chanh", unit: "g", per: 100, kcal: 25, carb: 9, fat: 0, protein: 0 },
-            { name: "Nước cam", unit: "g", per: 100, kcal: 45, carb: 10, fat: 0, protein: 1 },
-            { name: "Ớt xanh", unit: "g", per: 100, kcal: 40, carb: 9, fat: 0, protein: 2 },
-            { name: "Ớt xanh ngọt", unit: "g", per: 100, kcal: 20, carb: 5, fat: 0, protein: 1 },
-            { name: "Ớt đỏ ngọt", unit: "g", per: 100, kcal: 31, carb: 6, fat: 0, protein: 1 },
-            { name: "Ớt vàng ngọt", unit: "g", per: 100, kcal: 27, carb: 6, fat: 0, protein: 1 },
-            { name: "Ớt phơi khô", unit: "g", per: 100, kcal: 324, carb: 70, fat: 6, protein: 11 },
-            { name: "Ổi", unit: "g", per: 100, kcal: 68, carb: 14, fat: 1, protein: 3 },
-            { name: "Quả bí ngô (pumpkin)", unit: "g", per: 100, kcal: 26, carb: 6, fat: 0, protein: 1 },
-            { name: "Quả bí đỏ (acorn squash)", unit: "g", per: 100, kcal: 40, carb: 10, fat: 0, protein: 1 },
-            { name: "Quả bí đỏ (butternut squash)", unit: "g", per: 100, kcal: 45, carb: 12, fat: 0, protein: 1 },
-            { name: "Quả na", unit: "g", per: 100, kcal: 101, carb: 25, fat: 1, protein: 2 },
-            { name: "Quả nhãn", unit: "g", per: 100, kcal: 60, carb: 15, fat: 0, protein: 1 },
-            { name: "Quả bơ", unit: "g", per: 100, kcal: 160, carb: 9, fat: 15, protein: 2 },
-            { name: "Quất / trái tắc", unit: "g", per: 100, kcal: 71, carb: 16, fat: 1, protein: 2 },
-            { name: "Quả đào", unit: "g", per: 100, kcal: 39, carb: 10, fat: 0, protein: 1 },
-            { name: "Quả quýt", unit: "g", per: 100, kcal: 53, carb: 13, fat: 0, protein: 1 },
-            { name: "Quả hồng (khô/ngọt)", unit: "g", per: 100, kcal: 127, carb: 33, fat: 0, protein: 1 },
-            { name: "Quả lựu", unit: "g", per: 100, kcal: 83, carb: 19, fat: 1, protein: 2 },
-            { name: "Quả hồng (tươi)", unit: "g", per: 100, kcal: 70, carb: 19, fat: 0, protein: 1 },
-            { name: "Quả hồng bì", unit: "g", per: 100, kcal: 35, carb: 10, fat: 0, protein: 2 },
-            { name: "Rau muống", unit: "g", per: 100, kcal: 30, carb: 3.5, fat: 0, protein: 3 },
-            { name: "Rau đay", unit: "g", per: 100, kcal: 25, carb: 5, fat: 0, protein: 2.8 },
-            { name: "Rau mồng tơi", unit: "g", per: 100, kcal: 14, carb: 4, fat: 0, protein: 2 },
-            { name: "Rau ngót", unit: "g", per: 100, kcal: 36, carb: 6, fat: 0, protein: 5.3 },
-            { name: "Rau bí", unit: "g", per: 100, kcal: 18, carb: 3.5, fat: 0, protein: 2.7 },
-            { name: "Rau húng", unit: "g", per: 100, kcal: 18, carb: 5.5, fat: 0, protein: 2.2 },
-            { name: "Rau khoai lang", unit: "g", per: 100, kcal: 22, carb: 4, fat: 0, protein: 2.6 },
-            { name: "Rau kinh giới", unit: "g", per: 100, kcal: 23, carb: 6.5, fat: 0, protein: 2.7 },
-            { name: "Rau ngổ", unit: "g", per: 100, kcal: 16, carb: 4.5, fat: 0, protein: 1.5 },
-            { name: "Rau diếp xanh (xà lách xanh)", unit: "g", per: 100, kcal: 15, carb: 3, fat: 0, protein: 0 },
-            { name: "Rau diếp đỏ (xà lách đỏ)", unit: "g", per: 100, kcal: 16, carb: 2, fat: 0, protein: 1 },
-            { name: "Rau mùi tây (ngò tây)", unit: "g", per: 100, kcal: 36, carb: 6, fat: 1, protein: 3 },
-            { name: "Rau bina (bó xôi)", unit: "g", per: 100, kcal: 23, carb: 4, fat: 0, protein: 3 },
-            { name: "Rau thì là", unit: "g", per: 100, kcal: 43, carb: 7, fat: 1, protein: 3 },
-            { name: "Rong biển/thạch trắng agar tươi", unit: "g", per: 100, kcal: 26, carb: 7, fat: 0, protein: 1 },
-            { name: "Rong biển agar khô", unit: "g", per: 100, kcal: 306, carb: 81, fat: 0, protein: 6 },
-            { name: "Rong biển xoắn ốc tươi", unit: "g", per: 100, kcal: 26, carb: 2, fat: 0, protein: 6 },
-            { name: "Rong biển xoắn ốc khô", unit: "g", per: 100, kcal: 290, carb: 24, fat: 8, protein: 57 },
-            { name: "Rong biển kelp (tảo biển) tươi", unit: "g", per: 100, kcal: 43, carb: 10, fat: 1, protein: 2 },
-            { name: "Rong biển laver (đỏ) tươi", unit: "g", per: 100, kcal: 35, carb: 5, fat: 0, protein: 6 },
-            { name: "Rong biển irishmoss tươi", unit: "g", per: 100, kcal: 49, carb: 12, fat: 0, protein: 2 },
-            { name: "Rau dền", unit: "g", per: 100, kcal: 23, carb: 4, fat: 0, protein: 2 },
-            { name: "Su su/Xu xu", unit: "g", per: 100, kcal: 19, carb: 5, fat: 0, protein: 1 },
-            { name: "Su hào", unit: "g", per: 100, kcal: 27, carb: 6, fat: 0, protein: 2 },
-            { name: "Sả", unit: "g", per: 100, kcal: 99, carb: 25, fat: 0, protein: 1.5 },
-            { name: "Súp lơ", unit: "g", per: 100, kcal: 25, carb: 5, fat: 0, protein: 2 },
-            { name: "Sầu riêng", unit: "g", per: 100, kcal: 147, carb: 27, fat: 5, protein: 1 },
-            { name: "Tỏi tây", unit: "g", per: 100, kcal: 61, carb: 14, fat: 0, protein: 1 },
-            { name: "Trái cóc", unit: "g", per: 100, kcal: 57, carb: 13, fat: 1, protein: 1 },
-            { name: "Thanh long", unit: "g", per: 100, kcal: 60, carb: 9, fat: 1.5, protein: 2 },
-            { name: "Tía tô", unit: "g", per: 100, kcal: 26, carb: 7, fat: 0, protein: 3 },
-            { name: "Vải", unit: "g", per: 100, kcal: 66, carb: 17, fat: 0, protein: 1 },
-            { name: "Vải khô", unit: "g", per: 100, kcal: 277, carb: 71, fat: 1, protein: 4 },
-            { name: "Xà lách búp Mỹ", unit: "g", per: 100, kcal: 14, carb: 3, fat: 0, protein: 1 },
-            { name: "Yến mạch", unit: "g", per: 100, kcal: 389, carb: 66, fat: 7, protein: 17 },
-            { name: "Bánh mì đen", unit: "g", per: 100, kcal: 250, carb: 48, fat: 3, protein: 9 }
+    { name: "Tỏi", unit: "g", per: 100, kcal: 149, carb: 33, fat: 0.5, protein: 6.4 },
+    { name: "Hành tây", unit: "g", per: 100, kcal: 40, carb: 9, fat: 0.1, protein: 1.1 },
+    { name: "Cà chua", unit: "g", per: 100, kcal: 18, carb: 3.9, fat: 0.2, protein: 0.9 },
+    { name: "Khoai tây", unit: "g", per: 100, kcal: 77, carb: 17, fat: 0.1, protein: 2 },
+    { name: "Cà rốt", unit: "g", per: 100, kcal: 41, carb: 10, fat: 0.2, protein: 0.9 },
+    { name: "Rau cải xanh", unit: "g", per: 100, kcal: 25, carb: 3.6, fat: 0.4, protein: 2.2 },
+    { name: "Bông cải xanh", unit: "g", per: 100, kcal: 34, carb: 7, fat: 0.4, protein: 2.8 },
+    { name: "Đậu hũ", unit: "g", per: 100, kcal: 76, carb: 1.9, fat: 4.8, protein: 8 },
+    { name: "Trứng gà sống", unit: "g", per: 100, kcal: 143, carb: 1, fat: 10, protein: 13 },
+    { name: "Trứng gà luộc", unit: "g", per: 100, kcal: 155, carb: 1, fat: 11, protein: 13 },
+    { name: "Trứng gà rán", unit: "g", per: 100, kcal: 196, carb: 1, fat: 15, protein: 14 },
+    { name: "Trứng gà omelet", unit: "g", per: 100, kcal: 157, carb: 1, fat: 12, protein: 11 },
+    { name: "Trứng gà kho, rim", unit: "g", per: 100, kcal: 142, carb: 1, fat: 10, protein: 13 },
+    { name: "Trứng gà bác", unit: "g", per: 100, kcal: 167, carb: 2, fat: 12, protein: 11 },
+    { name: "Trứng gà sống, lòng trắng", unit: "g", per: 100, kcal: 47, carb: 1, fat: 0, protein: 10 },
+    { name: "Trứng gà sống, lòng đỏ", unit: "g", per: 100, kcal: 317, carb: 4, fat: 27, protein: 16 },
+    { name: "Trứng vịt lộn", unit: "g", per: 100, kcal: 226, carb: 1, fat: 12, protein: 17 },
+    { name: "Trứng vịt sống", unit: "g", per: 100, kcal: 185, carb: 1, fat: 14, protein: 13 },
+    { name: "Trứng ngỗng sống", unit: "g", per: 100, kcal: 185, carb: 1, fat: 13, protein: 14 },
+    { name: "Trứng chim cút sống", unit: "g", per: 100, kcal: 158, carb: 0, fat: 11, protein: 13 },
+    { name: "Trứng gà tây", unit: "g", per: 100, kcal: 171, carb: 1, fat: 12, protein: 12 },
+    { name: "Ba chỉ / ba rọi (Việt)", unit: "g", per: 100, kcal: 260, carb: 0, fat: 21.5, protein: 16.5 },
+    { name: "Ba chỉ / ba rọi (nước ngoài)", unit: "g", per: 100, kcal: 518, carb: 0, fat: 53, protein: 9 },
+    { name: "Thắt thăn lợn (nạc)", unit: "g", per: 100, kcal: 143, carb: 0, fat: 6, protein: 21 },
+    { name: "Thắt thăn lợn (nạc và mỡ)", unit: "g", per: 100, kcal: 198, carb: 0, fat: 13, protein: 20 },
+    { name: "Thịt vai (nạc)", unit: "g", per: 100, kcal: 148, carb: 0, fat: 7, protein: 20 },
+    { name: "Thịt vai (nạc và mỡ)", unit: "g", per: 100, kcal: 236, carb: 0, fat: 18, protein: 17 },
+    { name: "Thịt chân lợn (nạc)", unit: "g", per: 100, kcal: 136, carb: 0, fat: 5.5, protein: 20.5 },
+    { name: "Thịt chân lợn (nạc và mỡ)", unit: "g", per: 100, kcal: 245, carb: 0, fat: 19, protein: 17.5 },
+    { name: "Thịt chân lợn (nạc - phần phi)", unit: "g", per: 100, kcal: 137, carb: 0, fat: 5, protein: 21 },
+    { name: "Thịt chân lợn (nạc và mỡ - phần phi)", unit: "g", per: 100, kcal: 222, carb: 0, fat: 16, protein: 19 },
+    { name: "Thịt sườn (nạc và mỡ)", unit: "g", per: 100, kcal: 277, carb: 0, fat: 23, protein: 15.5 },
+    { name: "Móng lợn", unit: "g", per: 100, kcal: 212, carb: 0, fat: 13, protein: 23 },
+    { name: "Óc lợn", unit: "g", per: 100, kcal: 127, carb: 0, fat: 9, protein: 10 },
+    { name: "Tai lợn", unit: "g", per: 100, kcal: 234, carb: 1, fat: 15, protein: 22 },
+    { name: "Tim lợn", unit: "g", per: 100, kcal: 118, carb: 1, fat: 4, protein: 17 },
+    { name: "Thịt má lợn", unit: "g", per: 100, kcal: 655, carb: 0, fat: 70, protein: 6 },
+    { name: "Mỡ lá lợn", unit: "g", per: 100, kcal: 857, carb: 0, fat: 94, protein: 2 },
+    { name: "Thận lợn", unit: "g", per: 100, kcal: 100, carb: 0, fat: 3, protein: 16 },
+    { name: "Gan lợn", unit: "g", per: 100, kcal: 134, carb: 2, fat: 4, protein: 21 },
+    { name: "Phổi lợn", unit: "g", per: 100, kcal: 85, carb: 0, fat: 3, protein: 14 },   
+    { name: "Lá lách", unit: "g", per: 100, kcal: 100, carb: 0, fat: 3, protein: 18 },  
+    { name: "Dạ dày lợn", unit: "g", per: 100, kcal: 159, carb: 0, fat: 10, protein: 17 },     
+    { name: "Đuôi lợn", unit: "g", per: 100, kcal: 378, carb: 0, fat: 33, protein: 18 },
+    { name: "Lưỡi lợn", unit: "g", per: 100, kcal: 225, carb: 0, fat: 17, protein: 16 },
+    { name: "Ruột non", unit: "g", per: 100, kcal: 182, carb: 0, fat: 17, protein: 8 },
+    { name: "Đùi gà, thịt", unit: "g", per: 100, kcal: 119, carb: 0, fat: 4, protein: 20 },
+    { name: "Đùi gà, thịt và da", unit: "g", per: 100, kcal: 211, carb: 0, fat: 15, protein: 17 },
+    { name: "Cánh gà, thịt", unit: "g", per: 100, kcal: 126, carb: 0, fat: 4, protein: 22 },
+    { name: "Cánh gà, thịt và da", unit: "g", per: 100, kcal: 222, carb: 0, fat: 16, protein: 18 },
+    { name: "Cẳng gà, thịt", unit: "g", per: 100, kcal: 119, carb: 0, fat: 3, protein: 21 },
+    { name: "Cẳng gà, thịt và da", unit: "g", per: 100, kcal: 161, carb: 0, fat: 9, protein: 19 },
+    { name: "Chân gà, thịt", unit: "g", per: 100, kcal: 120, carb: 0, fat: 4, protein: 20 },
+    { name: "Chân gà, thịt và da", unit: "g", per: 100, kcal: 187, carb: 0, fat: 12, protein: 18 },
+    { name: "Cổ gà, thịt", unit: "g", per: 100, kcal: 154, carb: 0, fat: 9, protein: 18 },
+    { name: "Cổ gà, thịt và da", unit: "g", per: 100, kcal: 297, carb: 0, fat: 26, protein: 14 },
+    { name: "Ức gà, thịt", unit: "g", per: 100, kcal: 110, carb: 0, fat: 1, protein: 23 },
+    { name: "Ức gà, thịt và da", unit: "g", per: 100, kcal: 172, carb: 0, fat: 9, protein: 21 },
+    { name: "Lưng gà, thịt", unit: "g", per: 100, kcal: 137, carb: 0, fat: 6, protein: 20 },
+    { name: "Lưng gà, thịt và mỡ", unit: "g", per: 100, kcal: 319, carb: 0, fat: 29, protein: 14 },
+    { name: "Tim gà", unit: "g", per: 100, kcal: 153, carb: 1, fat: 9, protein: 16 },
+    { name: "Gan gà", unit: "g", per: 100, kcal: 116, carb: 0, fat: 5, protein: 17 },
+    { name: "Thịt gà xay", unit: "g", per: 100, kcal: 143, carb: 0, fat: 8, protein: 17 },
+    { name: "Da gà", unit: "g", per: 100, kcal: 349, carb: 0, fat: 32, protein: 13 },
+    { name: "Vịt nuôi, thịt", unit: "g", per: 100, kcal: 132, carb: 0, fat: 6, protein: 18 },
+    { name: "Vịt nuôi, thịt và da", unit: "g", per: 100, kcal: 404, carb: 0, fat: 39, protein: 11 },
+    { name: "Vịt hoang dã, thịt và da", unit: "g", per: 100, kcal: 211, carb: 0, fat: 15, protein: 17 },
+    { name: "Gan vịt", unit: "g", per: 100, kcal: 136, carb: 4, fat: 5, protein: 19 },
+    { name: "Thịt thăn bò (phần nạc)", unit: "g", per: 100, kcal: 142, carb: 0, fat: 6, protein: 21 },
+    { name: "Thịt bò tươi (cả con - cả nạc)", unit: "g", per: 100, kcal: 278, carb: 0, fat: 22.5, protein: 17.5 },
+    { name: "Thịt ức bò (phần nạc)", unit: "g", per: 100, kcal: 155, carb: 0, fat: 7, protein: 21 },
+    { name: "Thịt ức bò (nạc và mỡ)", unit: "g", per: 100, kcal: 251, carb: 0, fat: 19, protein: 18.5 },
+    { name: "Sườn bò (nạc và mỡ)", unit: "g", per: 100, kcal: 306, carb: 0, fat: 26, protein: 17 },
+    { name: "Bắp bò", unit: "g", per: 100, kcal: 201, carb: 0, fat: 6, protein: 34 },
+    { name: "Lưỡi bò", unit: "g", per: 100, kcal: 224, carb: 4, fat: 16, protein: 15 },
+    { name: "Dạ dày bò", unit: "g", per: 100, kcal: 85, carb: 0, fat: 3.5, protein: 12.5 },
+    { name: "Mỡ bò", unit: "g", per: 100, kcal: 854, carb: 0, fat: 94, protein: 2 },
+    { name: "Phổi bò", unit: "g", per: 100, kcal: 92, carb: 0, fat: 3, protein: 16 },
+    { name: "Gan bò", unit: "g", per: 100, kcal: 135, carb: 4, fat: 4, protein: 20 },
+    { name: "Thận bò", unit: "g", per: 100, kcal: 103, carb: 0, fat: 3, protein: 18 },
+    { name: "Tim bò", unit: "g", per: 100, kcal: 112, carb: 0, fat: 3.5, protein: 18 },
+    { name: "Óc bò", unit: "g", per: 100, kcal: 143, carb: 1, fat: 11, protein: 11 },
+    { name: "Gạo trắng (sống)", unit: "g", per: 100, kcal: 360, carb: 79, fat: 0.7, protein: 7 },
+    { name: "Cơm trắng (chín)", unit: "g", per: 100, kcal: 130, carb: 28, fat: 0.3, protein: 2.7 },
+    { name: "Bún tươi", unit: "g", per: 100, kcal: 109, carb: 24, fat: 0.2, protein: 2 },
+    { name: "Phở (bánh)", unit: "g", per: 100, kcal: 108, carb: 24, fat: 0.2, protein: 2.2 },
+    { name: "Phở bò (1 tô lớn)", unit: "tô", per: 1, kcal: 500, carb: 60, fat: 12, protein: 28 },
+    { name: "Bún bò Huế", unit: "tô", per: 1, kcal: 480, carb: 58, fat: 14, protein: 25 },
+    { name: "Cơm tấm sườn bì", unit: "đĩa", per: 1, kcal: 650, carb: 75, fat: 22, protein: 35 },
+    { name: "Bánh mì thịt", unit: "ổ", per: 1, kcal: 380, carb: 48, fat: 12, protein: 18 },
+    { name: "Bún chả", unit: "suất", per: 1, kcal: 520, carb: 55, fat: 18, protein: 30 },
+    { name: "Cá chép", unit: "g", per: 100, kcal: 127, carb: 0, fat: 5.5, protein: 18 },
+    { name: "Cá đối", unit: "g", per: 100, kcal: 117, carb: 0, fat: 4, protein: 19 },
+    { name: "Cá thu đại tây dương", unit: "g", per: 100, kcal: 205, carb: 0, fat: 14, protein: 19 },
+    { name: "Cá thu thái bình dương", unit: "g", per: 100, kcal: 158, carb: 0, fat: 8, protein: 20 },
+    { name: "Cá thu tây ban nha", unit: "g", per: 100, kcal: 139, carb: 0, fat: 6, protein: 19 },
+    { name: "Cá thu vua", unit: "g", per: 100, kcal: 105, carb: 0, fat: 2, protein: 20 },
+    { name: "Cá rô phi", unit: "g", per: 100, kcal: 96, carb: 0, fat: 2, protein: 20 },
+    { name: "Cá nục", unit: "g", per: 100, kcal: 114, carb: 0.5, fat: 7, protein: 24 },
+    { name: "Cá Tra/basa", unit: "g", per: 100, kcal: 147.5, carb: 0, fat: 5, protein: 25.5 }, 
+    { name: "Cá mè", unit: "g", per: 100, kcal: 127, carb: 0, fat: 6, protein: 18 },
+    { name: "Cá chim", unit: "g", per: 100, kcal: 146, carb: 0, fat: 8, protein: 17 },
+    { name: "Cá mú", unit: "g", per: 100, kcal: 92, carb: 0, fat: 1, protein: 19 },
+    { name: "Cá cơm", unit: "g", per: 100, kcal: 131, carb: 0, fat: 4.8, protein: 20.4 },
+    { name: "Lươn, cá chình", unit: "g", per: 100, kcal: 184, carb: 0, fat: 12, protein: 19 },
+    { name: "Trứng cá", unit: "g", per: 100, kcal: 252, carb: 4, fat: 18, protein: 25 },
+    { name: "Tôm", unit: "g", per: 100, kcal: 100, carb: 0, fat: 0, protein: 16 },
+    { name: "Tôm hùm phương bắc", unit: "g", per: 100, kcal: 90, carb: 0.7, fat: 0.7, protein: 19 },
+    { name: "Tôm hùm gai", unit: "g", per: 100, kcal: 112, carb: 2.4, fat: 1.5, protein: 20.5 },
+    { name: "Cua biển (xanh)", unit: "g", per: 100, kcal: 87, carb: 0, fat: 2, protein: 18 },
+    { name: "Cua vua Alaska", unit: "g", per: 100, kcal: 84, carb: 0, fat: 0.6, protein: 18 },
+    { name: "Cua nữ hoàng", unit: "g", per: 100, kcal: 91, carb: 0, fat: 1, protein: 19 },
+    { name: "Mực ống", unit: "g", per: 100, kcal: 93, carb: 3.5, fat: 0, protein: 14 },
+    { name: "Mực nang", unit: "g", per: 100, kcal: 79, carb: 1.2, fat: 1.2, protein: 16.5 },
+    { name: "Ốc", unit: "g", per: 100, kcal: 89, carb: 3.5, fat: 0, protein: 18 },
+    { name: "Hến", unit: "g", per: 100, kcal: 86, carb: 4, fat: 2, protein: 12 },
+    { name: "Sò", unit: "g", per: 100, kcal: 79, carb: 5, fat: 0, protein: 13 },
+    { name: "Nghêu", unit: "g", per: 100, kcal: 74, carb: 3, fat: 1, protein: 13 },
+    { name: "Bí đao", unit: "g", per: 100, kcal: 14, carb: 3, fat: 0, protein: 0 },
+    { name: "Bí xanh (mùa hè)", unit: "g", per: 100, kcal: 16, carb: 3, fat: 0, protein: 1 },
+    { name: "Bí xanh (baby)", unit: "g", per: 100, kcal: 21, carb: 3, fat: 0, protein: 3 },
+    { name: "Bưởi", unit: "g", per: 100, kcal: 38, carb: 10, fat: 0, protein: 1 },
+    { name: "Bưởi chùm", unit: "g", per: 100, kcal: 33, carb: 8, fat: 0, protein: 1 },
+    { name: "Bắp ngô ngọt", unit: "g", per: 100, kcal: 86, carb: 19, fat: 1, protein: 3 },
+    { name: "Bầu", unit: "g", per: 100, kcal: 20, carb: 4, fat: 0, protein: 1 },
+    { name: "Bông hẹ", unit: "g", per: 100, kcal: 30, carb: 4, fat: 1, protein: 3 },
+    { name: "Củ hành", unit: "g", per: 100, kcal: 40, carb: 9, fat: 0, protein: 1 },
+    { name: "Cần tây", unit: "g", per: 100, kcal: 16, carb: 4, fat: 0, protein: 1 },
+    { name: "Cây bạc hà lục", unit: "g", per: 100, kcal: 44, carb: 8, fat: 1, protein: 3 },
+    { name: "Cây bạc hà cay", unit: "g", per: 100, kcal: 70, carb: 15, fat: 1, protein: 4 },
+    { name: "Củ diếp xoắn", unit: "g", per: 100, kcal: 73, carb: 18, fat: 0, protein: 1 },
+    { name: "Cải thìa", unit: "g", per: 100, kcal: 9, carb: 2, fat: 0, protein: 1 },
+    { name: "Cải bắp", unit: "g", per: 100, kcal: 25, carb: 6, fat: 0, protein: 1 },
+    { name: "Cải thảo", unit: "g", per: 100, kcal: 16, carb: 3, fat: 0, protein: 1 },
+    { name: "Cải xoong / xà lách xoong", unit: "g", per: 100, kcal: 11, carb: 1, fat: 0, protein: 2 },
+    { name: "Cải cúc / rau tần ô", unit: "g", per: 100, kcal: 24, carb: 3, fat: 1, protein: 3 },
+    { name: "Cải xoăn Kale", unit: "g", per: 100, kcal: 49, carb: 10.5, fat: 0, protein: 3 },
+    { name: "Cải ngồng / cải rổ", unit: "g", per: 100, kcal: 22, carb: 4, fat: 1, protein: 1 },
+    { name: "Cải xanh turnips", unit: "g", per: 100, kcal: 32, carb: 7, fat: 0, protein: 1 },
+    { name: "Cà tím", unit: "g", per: 100, kcal: 24, carb: 6, fat: 0, protein: 1 },
+    { name: "Cây đại hoàng", unit: "g", per: 100, kcal: 21, carb: 5, fat: 0, protein: 0.8 },
+    { name: "Cây atisô", unit: "g", per: 100, kcal: 47, carb: 11, fat: 0, protein: 3 },
+    { name: "Củ đậu", unit: "g", per: 100, kcal: 38, carb: 9, fat: 0, protein: 0.8 },
+    { name: "Cà chua xanh", unit: "g", per: 100, kcal: 23, carb: 5, fat: 0, protein: 1 },
+    { name: "Cà chua vàng / cam", unit: "g", per: 100, kcal: 15, carb: 3, fat: 0, protein: 1 },
+    { name: "Củ cải trắng", unit: "g", per: 100, kcal: 14, carb: 3, fat: 0, protein: 1 },
+    { name: "Chanh (quả)", unit: "g", per: 100, kcal: 30, carb: 11, fat: 0, protein: 1 },
+    { name: "Chanh dây", unit: "g", per: 100, kcal: 97, carb: 23, fat: 1, protein: 2 },
+    { name: "Cam (quả)", unit: "g", per: 100, kcal: 47, carb: 12, fat: 0, protein: 1 },
+    { name: "Chuối", unit: "g", per: 100, kcal: 89, carb: 23, fat: 0, protein: 1 },
+    { name: "Chôm chôm", unit: "g", per: 100, kcal: 82, carb: 21, fat: 0, protein: 1 },
+    { name: "Củ nghệ (gia vị)", unit: "g", per: 100, kcal: 354, carb: 65, fat: 10, protein: 8 },
+    { name: "Củ dền", unit: "g", per: 100, kcal: 43, carb: 10, fat: 0, protein: 2 },
+    { name: "Cà rốt", unit: "g", per: 100, kcal: 41, carb: 10, fat: 0, protein: 1 },
+    { name: "Củ từ", unit: "g", per: 100, kcal: 118, carb: 28, fat: 0, protein: 2 },
+    { name: "Dọc mùng", unit: "g", per: 100, kcal: 14, carb: 3.8, fat: 0, protein: 0.25 },
+    { name: "Dưa cải bệ", unit: "g", per: 100, kcal: 17, carb: 4.5, fat: 0, protein: 2 },
+    { name: "Dưa chuột gọt vỏ", unit: "g", per: 100, kcal: 12, carb: 2, fat: 0, protein: 1 },
+    { name: "Dưa chuột có vỏ", unit: "g", per: 100, kcal: 15, carb: 4, fat: 0, protein: 1 },
+    { name: "Dứa", unit: "g", per: 100, kcal: 50, carb: 13, fat: 0, protein: 1 },
+    { name: "Dưa hấu", unit: "g", per: 100, kcal: 30, carb: 8, fat: 0, protein: 1 },
+    { name: "Dưa vàng (casaba)", unit: "g", per: 100, kcal: 28, carb: 7, fat: 0, protein: 1 },
+    { name: "Dưa lưới (honeydew)", unit: "g", per: 100, kcal: 36, carb: 9, fat: 0, protein: 1 },
+    { name: "Dưa ruột vàng (cantaloupe)", unit: "g", per: 100, kcal: 34, carb: 9, fat: 0, protein: 1 },
+    { name: "Dừa, cùi", unit: "g", per: 100, kcal: 354, carb: 15, fat: 33, protein: 3 },
+    { name: "Dừa, nước", unit: "g", per: 100, kcal: 19, carb: 4, fat: 0, protein: 1 },
+    { name: "Dưa gang", unit: "g", per: 100, kcal: 28, carb: 7, fat: 0, protein: 1 },
+    { name: "Diếp Lô Lô", unit: "g", per: 100, kcal: 12, carb: 3, fat: 0, protein: 1.5 },
+    { name: "Dâu tây", unit: "g", per: 100, kcal: 32, carb: 8, fat: 0, protein: 1 },
+    { name: "Dưa cải bắp", unit: "g", per: 100, kcal: 25, carb: 5, fat: 0, protein: 1 },
+    { name: "Đậu phộng, lạc sống", unit: "g", per: 100, kcal: 567, carb: 16, fat: 49, protein: 26 },
+    { name: "Đậu nành (xanh)", unit: "g", per: 100, kcal: 147, carb: 11, fat: 7, protein: 13 },
+    { name: "Đậu cô ve / đậu đũa", unit: "g", per: 100, kcal: 31, carb: 7, fat: 0, protein: 2 },
+    { name: "Đậu / đỗ đen", unit: "g", per: 100, kcal: 341, carb: 62, fat: 1, protein: 22 },
+    { name: "Đậu / đỗ đỏ", unit: "g", per: 100, kcal: 337, carb: 61, fat: 1, protein: 23 },
+    { name: "Đậu / đỗ xanh", unit: "g", per: 100, kcal: 347, carb: 63, fat: 1, protein: 24 },
+    { name: "Đậu / đỗ trắng nhỏ", unit: "g", per: 100, kcal: 336, carb: 62, fat: 1, protein: 21 },
+    { name: "Đậu / đỗ trắng", unit: "g", per: 100, kcal: 333, carb: 60, fat: 1, protein: 23 },
+    { name: "Đậu rồng (hạt)", unit: "g", per: 100, kcal: 409, carb: 42, fat: 16, protein: 30 },
+    { name: "Đậu rồng (lá)", unit: "g", per: 100, kcal: 74, carb: 14, fat: 1, protein: 6 },
+    { name: "Đậu phụ lụa mềm", unit: "g", per: 100, kcal: 55, carb: 3, fat: 3, protein: 5 },
+    { name: "Đậu phụ lụa rắn", unit: "g", per: 100, kcal: 62, carb: 2, fat: 3, protein: 7 },
+    { name: "Đậu phụ okara", unit: "g", per: 100, kcal: 77, carb: 13, fat: 2, protein: 3 },
+    { name: "Đậu phụ rán", unit: "g", per: 100, kcal: 271, carb: 10, fat: 20, protein: 17 },
+    { name: "Đu đủ", unit: "g", per: 100, kcal: 39, carb: 10, fat: 0, protein: 1 },
+    { name: "Giá đỗ", unit: "g", per: 100, kcal: 44, carb: 7.5, fat: 0, protein: 5.5 },
+    { name: "Gừng", unit: "g", per: 100, kcal: 80, carb: 18, fat: 1, protein: 2 },
+    { name: "Gạo nâu / gạo lức", unit: "g", per: 100, kcal: 370, carb: 77, fat: 3, protein: 8 },
+    { name: "Gạo nếp", unit: "g", per: 100, kcal: 370, carb: 82, fat: 1, protein: 7 },
+    { name: "Gạo trắng", unit: "g", per: 100, kcal: 360, carb: 79, fat: 1, protein: 6 },
+    { name: "Húng quế", unit: "g", per: 100, kcal: 23, carb: 3, fat: 1, protein: 3 },
+    { name: "Hoa chuối", unit: "g", per: 100, kcal: 20, carb: 5.5, fat: 0, protein: 1.5 },
+    { name: "Hẹ lá", unit: "g", per: 100, kcal: 16, carb: 3, fat: 0, protein: 2 },
+    { name: "Hồng xiêm / Sa bô chê", unit: "g", per: 100, kcal: 83, carb: 20, fat: 1, protein: 0 },
+    { name: "Hành lá", unit: "g", per: 100, kcal: 3, carb: 7, fat: 0, protein: 2 },
+    { name: "Hạt điều", unit: "g", per: 100, kcal: 553, carb: 33, fat: 44, protein: 8 },
+    { name: "Hạnh nhân", unit: "g", per: 100, kcal: 575, carb: 22, fat: 49, protein: 21 },
+    { name: "Hạt sen", unit: "g", per: 100, kcal: 89, carb: 17, fat: 1, protein: 4 },
+    { name: "Hạt hướng dương (phơi khô)", unit: "g", per: 100, kcal: 584, carb: 20, fat: 51, protein: 21 },
+    { name: "Hột é", unit: "g", per: 100, kcal: 490, carb: 44, fat: 31, protein: 16 },
+    { name: "Khoai sọ", unit: "g", per: 100, kcal: 112, carb: 26, fat: 0, protein: 1 },
+    { name: "Khế", unit: "g", per: 100, kcal: 31, carb: 7, fat: 0, protein: 1 },
+    { name: "Khổ qua (quả)", unit: "g", per: 100, kcal: 17, carb: 4, fat: 0, protein: 1 },
+    { name: "Khổ qua (lá)", unit: "g", per: 100, kcal: 30, carb: 3, fat: 1, protein: 5 },
+    { name: "Kiwi", unit: "g", per: 100, kcal: 61, carb: 15, fat: 1, protein: 1 },
+    { name: "Khoai tây", unit: "g", per: 100, kcal: 77, carb: 18, fat: 0, protein: 2 },
+    { name: "Khoai lang", unit: "g", per: 100, kcal: 86, carb: 20, fat: 0, protein: 2 },
+    { name: "Lá diếp xoắn", unit: "g", per: 100, kcal: 23, carb: 5, fat: 0, protein: 2 },
+    { name: "Lê", unit: "g", per: 100, kcal: 42, carb: 11, fat: 0, protein: 0 },
+    { name: "Lạc", unit: "g", per: 100, kcal: 567, carb: 16, fat: 49, protein: 26 },
+    { name: "Me chua", unit: "g", per: 100, kcal: 27, carb: 7, fat: 0, protein: 2 },
+    { name: "Mướp", unit: "g", per: 100, kcal: 16, carb: 3.5, fat: 0, protein: 1 },
+    { name: "Mướp tây / đậu bắp", unit: "g", per: 100, kcal: 31, carb: 7, fat: 0, protein: 2 },
+    { name: "Măng tre", unit: "g", per: 100, kcal: 14, carb: 6, fat: 0, protein: 2 },
+    { name: "Mít", unit: "g", per: 100, kcal: 94, carb: 24, fat: 0, protein: 1 },
+    { name: "Măng tây", unit: "g", per: 100, kcal: 20, carb: 4, fat: 0, protein: 2 },
+    { name: "Mận", unit: "g", per: 100, kcal: 46, carb: 11, fat: 0, protein: 1 },
+    { name: "Mộc nhĩ", unit: "g", per: 100, kcal: 312, carb: 72, fat: 0, protein: 11 },
+    { name: "Ngó sen", unit: "g", per: 100, kcal: 74, carb: 17.2, fat: 0.1, protein: 2.6 },
+    { name: "Nấm thường tươi", unit: "g", per: 100, kcal: 35, carb: 5.7, fat: 0.8, protein: 4.6 },
+    { name: "Nấm mỡ", unit: "g", per: 100, kcal: 33, carb: 4.5, fat: 0.3, protein: 4 },
+    { name: "Nấm rơm", unit: "g", per: 100, kcal: 31, carb: 4.5, fat: 0.3, protein: 4 },
+    { name: "Nấm hương tươi", unit: "g", per: 100, kcal: 40, carb: 6, fat: 0.5, protein: 5.5 },
+    { name: "Ngải cứu", unit: "g", per: 100, kcal: 55, carb: 8, fat: 0, protein: 5 },
+    { name: "Ngọn xu xu", unit: "g", per: 100, kcal: 18, carb: 6, fat: 0.4, protein: 0.3 },
+    { name: "Nho", unit: "g", per: 100, kcal: 69, carb: 18, fat: 0, protein: 1 },
+    { name: "Nước chanh", unit: "g", per: 100, kcal: 25, carb: 9, fat: 0, protein: 0 },
+    { name: "Nước cam", unit: "g", per: 100, kcal: 45, carb: 10, fat: 0, protein: 1 },
+    { name: "Ớt xanh", unit: "g", per: 100, kcal: 40, carb: 9, fat: 0, protein: 2 },
+    { name: "Ớt xanh ngọt", unit: "g", per: 100, kcal: 20, carb: 5, fat: 0, protein: 1 },
+    { name: "Ớt đỏ ngọt", unit: "g", per: 100, kcal: 31, carb: 6, fat: 0, protein: 1 },
+    { name: "Ớt vàng ngọt", unit: "g", per: 100, kcal: 27, carb: 6, fat: 0, protein: 1 },
+    { name: "Ớt phơi khô", unit: "g", per: 100, kcal: 324, carb: 70, fat: 6, protein: 11 },
+    { name: "Ổi", unit: "g", per: 100, kcal: 68, carb: 14, fat: 1, protein: 3 },
+    { name: "Quả bí ngô (pumpkin)", unit: "g", per: 100, kcal: 26, carb: 6, fat: 0, protein: 1 },
+    { name: "Quả bí đỏ (acorn squash)", unit: "g", per: 100, kcal: 40, carb: 10, fat: 0, protein: 1 },
+    { name: "Quả bí đỏ (butternut squash)", unit: "g", per: 100, kcal: 45, carb: 12, fat: 0, protein: 1 },
+    { name: "Quả na", unit: "g", per: 100, kcal: 101, carb: 25, fat: 1, protein: 2 },
+    { name: "Quả nhãn", unit: "g", per: 100, kcal: 60, carb: 15, fat: 0, protein: 1 },
+    { name: "Quả bơ", unit: "g", per: 100, kcal: 160, carb: 9, fat: 15, protein: 2 },
+    { name: "Quất / trái tắc", unit: "g", per: 100, kcal: 71, carb: 16, fat: 1, protein: 2 },
+    { name: "Quả đào", unit: "g", per: 100, kcal: 39, carb: 10, fat: 0, protein: 1 },
+    { name: "Quả quýt", unit: "g", per: 100, kcal: 53, carb: 13, fat: 0, protein: 1 },
+    { name: "Quả hồng (khô/ngọt)", unit: "g", per: 100, kcal: 127, carb: 33, fat: 0, protein: 1 },
+    { name: "Quả lựu", unit: "g", per: 100, kcal: 83, carb: 19, fat: 1, protein: 2 },
+    { name: "Quả hồng (tươi)", unit: "g", per: 100, kcal: 70, carb: 19, fat: 0, protein: 1 },
+    { name: "Quả hồng bì", unit: "g", per: 100, kcal: 35, carb: 10, fat: 0, protein: 2 },
+    { name: "Rau muống", unit: "g", per: 100, kcal: 30, carb: 3.5, fat: 0, protein: 3 },
+    { name: "Rau đay", unit: "g", per: 100, kcal: 25, carb: 5, fat: 0, protein: 2.8 },
+    { name: "Rau mồng tơi", unit: "g", per: 100, kcal: 14, carb: 4, fat: 0, protein: 2 },
+    { name: "Rau ngót", unit: "g", per: 100, kcal: 36, carb: 6, fat: 0, protein: 5.3 },
+    { name: "Rau bí", unit: "g", per: 100, kcal: 18, carb: 3.5, fat: 0, protein: 2.7 },
+    { name: "Rau húng", unit: "g", per: 100, kcal: 18, carb: 5.5, fat: 0, protein: 2.2 },
+    { name: "Rau khoai lang", unit: "g", per: 100, kcal: 22, carb: 4, fat: 0, protein: 2.6 },
+    { name: "Rau kinh giới", unit: "g", per: 100, kcal: 23, carb: 6.5, fat: 0, protein: 2.7 },
+    { name: "Rau ngổ", unit: "g", per: 100, kcal: 16, carb: 4.5, fat: 0, protein: 1.5 },
+    { name: "Rau diếp xanh (xà lách xanh)", unit: "g", per: 100, kcal: 15, carb: 3, fat: 0, protein: 0 },
+    { name: "Rau diếp đỏ (xà lách đỏ)", unit: "g", per: 100, kcal: 16, carb: 2, fat: 0, protein: 1 },
+    { name: "Rau mùi tây (ngò tây)", unit: "g", per: 100, kcal: 36, carb: 6, fat: 1, protein: 3 },
+    { name: "Rau bina (bó xôi)", unit: "g", per: 100, kcal: 23, carb: 4, fat: 0, protein: 3 },
+    { name: "Rau thì là", unit: "g", per: 100, kcal: 43, carb: 7, fat: 1, protein: 3 },
+    { name: "Rong biển/thạch trắng agar tươi", unit: "g", per: 100, kcal: 26, carb: 7, fat: 0, protein: 1 },
+    { name: "Rong biển agar khô", unit: "g", per: 100, kcal: 306, carb: 81, fat: 0, protein: 6 },
+    { name: "Rong biển xoắn ốc tươi", unit: "g", per: 100, kcal: 26, carb: 2, fat: 0, protein: 6 },
+    { name: "Rong biển xoắn ốc khô", unit: "g", per: 100, kcal: 290, carb: 24, fat: 8, protein: 57 },
+    { name: "Rong biển kelp (tảo biển) tươi", unit: "g", per: 100, kcal: 43, carb: 10, fat: 1, protein: 2 },
+    { name: "Rong biển laver (đỏ) tươi", unit: "g", per: 100, kcal: 35, carb: 5, fat: 0, protein: 6 },
+    { name: "Rong biển irishmoss tươi", unit: "g", per: 100, kcal: 49, carb: 12, fat: 0, protein: 2 },
+    { name: "Rau dền", unit: "g", per: 100, kcal: 23, carb: 4, fat: 0, protein: 2 },
+    { name: "Su su/Xu xu", unit: "g", per: 100, kcal: 19, carb: 5, fat: 0, protein: 1 },
+    { name: "Su hào", unit: "g", per: 100, kcal: 27, carb: 6, fat: 0, protein: 2 },
+    { name: "Sả", unit: "g", per: 100, kcal: 99, carb: 25, fat: 0, protein: 1.5 },
+    { name: "Súp lơ", unit: "g", per: 100, kcal: 25, carb: 5, fat: 0, protein: 2 },
+    { name: "Sầu riêng", unit: "g", per: 100, kcal: 147, carb: 27, fat: 5, protein: 1 },
+    { name: "Tỏi tây", unit: "g", per: 100, kcal: 61, carb: 14, fat: 0, protein: 1 },
+    { name: "Trái cóc", unit: "g", per: 100, kcal: 57, carb: 13, fat: 1, protein: 1 },
+    { name: "Thanh long", unit: "g", per: 100, kcal: 60, carb: 9, fat: 1.5, protein: 2 },
+    { name: "Tía tô", unit: "g", per: 100, kcal: 26, carb: 7, fat: 0, protein: 3 },
+    { name: "Vải", unit: "g", per: 100, kcal: 66, carb: 17, fat: 0, protein: 1 },
+    { name: "Vải khô", unit: "g", per: 100, kcal: 277, carb: 71, fat: 1, protein: 4 },
+    { name: "Xà lách búp Mỹ", unit: "g", per: 100, kcal: 14, carb: 3, fat: 0, protein: 1 },
+    { name: "Yến mạch", unit: "g", per: 100, kcal: 389, carb: 66, fat: 7, protein: 17 },
+    { name: "Bánh mì đen", unit: "g", per: 100, kcal: 250, carb: 48, fat: 3, protein: 9 }
 ];
 const ACTIVITY_LEVELS = [
     { label: "Ít vận động", value: 1.2 }, { label: "Nhẹ (1-3 buổi/tuần)", value: 1.375 }, 
@@ -345,14 +346,11 @@ const DIET_MODES = [
 
 const formatDate = (date) => {
     const d = new Date(date);
-    // Format using Vietnam timezone (UTC+7)
     const vietnamDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
     return `${vietnamDate.getFullYear()}-${String(vietnamDate.getMonth() + 1).padStart(2, '0')}-${String(vietnamDate.getDate()).padStart(2, '0')}`;
 };
 const calcMacro = (val, per, q) => Math.round((val / per) * q * 10) / 10;
 
-// [UNIQUE ID] Tạo timestamp duy nhất cho mỗi meal entry
-// Kết hợp datetime (dễ đọc trong Sheets) + ms + random suffix → đảm bảo không trùng
 const generateUniqueTimestamp = () => {
   const now = new Date();
   const svSE = now.toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
@@ -537,38 +535,13 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
                 <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cập nhật cân nặng</h3>
                     <div className="flex items-center bg-slate-50 p-1.5 rounded-[1.25rem] mb-4 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all border border-slate-100 shadow-inner">
-                        {/* Khu vực chọn ngày */}
                         <div className="relative flex items-center">
                             <svg className="w-4 h-4 text-emerald-500 absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            <input 
-                                type="date" 
-                                value={weightDate} 
-                                max={todayStr} 
-                                onChange={e=>setWeightDate(e.target.value)} 
-                                className="w-[115px] bg-transparent py-3 pl-9 pr-1 outline-none font-black text-[10px] uppercase text-slate-600 cursor-pointer tracking-wider [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" 
-                            />
+                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[115px] bg-transparent py-3 pl-9 pr-1 outline-none font-black text-[10px] uppercase text-slate-600 cursor-pointer tracking-wider [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
                         </div>
-                        
-                        {/* Vạch ngăn cách */}
                         <div className="w-px h-6 bg-slate-200 mx-1 shrink-0"></div>
-                        
-                        {/* Khu vực nhập số kg */}
-                        <input 
-                            type="number" 
-                            value={weightInput} 
-                            onChange={e=>setWeightInput(e.target.value)} 
-                            step="0.1" 
-                            placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} 
-                            className="flex-1 bg-transparent p-3 outline-none font-bold text-sm text-slate-800 placeholder:text-slate-300 w-full min-w-[60px]" 
-                        />
-                        
-                        {/* Nút GHI tích hợp bên trong */}
-                        <button 
-                            onClick={saveWeight} 
-                            className="h-10 px-5 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-md shadow-emerald-200 shrink-0"
-                        >
-                            Ghi
-                        </button>
+                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-3 outline-none font-bold text-sm text-slate-800 placeholder:text-slate-300 w-full min-w-[60px]" />
+                        <button onClick={saveWeight} className="h-10 px-5 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-md shadow-emerald-200 shrink-0">Ghi</button>
                     </div>
                     <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-300 mb-2 mt-6">Lịch sử (Gần nhất)</h4>
                     <div className="max-h-32 overflow-y-auto no-scrollbar bg-slate-50 rounded-2xl p-2 border border-slate-100">
@@ -608,10 +581,7 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
                     <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
                 </section>
             </main>
-            
-            {/* THÊM DÒNG NÀY ĐỂ HIỆN THANH MENU ĐIỀU HƯỚNG */}
             <BottomNav view={view} setView={setView} />
-            
         </div>
     );
 }
@@ -639,6 +609,10 @@ export default function App() {
     const [view, setView] = useState("profile");
     const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
+    
+    // NÂNG CẤP: State cho chức năng chỉnh sửa món ăn
+    const [editModal, setEditModal] = useState({ isOpen: false, item: null });
+    const [editForm, setEditForm] = useState({ name: "", quantity: "", unit: "g", kcal: "", protein: "", carb: "", fat: "" });
 
     const [profile, setProfile] = useState({ 
         gender: "male", age: 25, height: 165, weight: 60, activity: 1.375, goal: 0, 
@@ -677,7 +651,7 @@ export default function App() {
                 else if (hour >= 10 && hour < 14) setSelectedMeal("Bữa trưa");
                 else if (hour >= 14 && hour < 17) setSelectedMeal("Ăn vặt");
                 else if (hour >= 17 && hour < 21) setSelectedMeal("Bữa tối");
-                else setSelectedMeal("Ăn vặt"); // Khuya muộn và rạng sáng (21h đêm - 4h sáng) mặc định là Ăn vặt
+                else setSelectedMeal("Ăn vặt");
             } catch (e) {}
         }
     }, []);
@@ -825,25 +799,6 @@ export default function App() {
         return results.slice(0, 50);
     }, [searchQuery, allFoods]);
 
-    // [AUTO-SYNC] Ghi 1 meal entry thẳng lên Sheets ngay khi người dùng thêm món
-    // Không chờ sync thủ công — dùng route POST /api/sync với action="push_single"
-    const pushMealToSheet = async (item, date) => {
-        if (!userId || !password) return;
-        try {
-            await fetch("/api/sync", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    action: "push_single",
-                    userId, password,
-                    meal: { ...item, date },
-                }),
-            });
-        } catch (err) {
-            console.warn("[StayFit] Auto-sync thất bại, sẽ sync lại lần sau:", err.message);
-        }
-    };
-
     const handleAddSelectedFood = () => {
         if (!selectedFood) return;
         const quantity = parseFloat(qty) || 0;
@@ -854,7 +809,6 @@ export default function App() {
             meal: selectedMeal, id: Date.now(), timestamp: generateUniqueTimestamp()
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
-        pushMealToSheet(newItem, currentDate); // ← ghi ngay lên Sheets
         setSelectedFood(null); setSearchQuery(""); setQty(1);
     };
 
@@ -874,7 +828,8 @@ export default function App() {
             meal: selectedMeal, id: Date.now(), timestamp: generateUniqueTimestamp()
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
-        pushMealToSheet(newItem, currentDate); // ← ghi ngay lên Sheets = q; let baseUnit = 'g';
+
+        let weightInGrams = q; let baseUnit = 'g';
         if (['kg'].includes(u)) { weightInGrams = q * 1000; } else if (['l', 'lít'].includes(u)) { weightInGrams = q * 1000; baseUnit = 'ml'; }
         else if (['ml'].includes(u)) { weightInGrams = q; baseUnit = 'ml'; } else if (['g', 'gram'].includes(u)) { weightInGrams = q; }
         else { const mockWeights = { 'tô': 400, 'bát': 400, 'ly': 250, 'quả': 100 }; weightInGrams = q * (mockWeights[u] || 100); }
@@ -901,16 +856,6 @@ export default function App() {
         }
     };
 
-    const updateItemMeal = (id, newMeal) => {
-        // Chỉ cần cập nhật giao diện, KHÔNG đổi timestamp, KHÔNG cần gọi API Xóa
-        setHistory(prev => {
-            const currentList = prev[currentDate] || [];
-            return {
-                ...prev,
-                [currentDate]: currentList.map(item => item.id === id ? { ...item, meal: newMeal } : item)
-            };
-        });
-    };
     const handleConfirmDelete = () => {
         if (!confirmModal.foodToDelete) return;
         const foodName = confirmModal.foodToDelete.name;
@@ -926,6 +871,60 @@ export default function App() {
             manualCarb: Math.round((target * mode.carb) / 4), manualFat: Math.round((target * mode.fat) / 9)
         });
         setIsDietModalOpen(false);
+    };
+
+    const updateItemMeal = (id, newMeal) => {
+        setHistory(prev => {
+            const currentList = prev[currentDate] || [];
+            return {
+                ...prev,
+                [currentDate]: currentList.map(item => item.id === id ? { ...item, meal: newMeal } : item)
+            };
+        });
+    };
+
+    // HÀM MỚI: Mở modal chỉnh sửa món ăn
+    const openEditModal = (item) => {
+        setEditModal({ isOpen: true, item: item });
+        setEditForm({
+            name: item.name,
+            quantity: item.quantity,
+            unit: item.unit,
+            kcal: item.kcal,
+            protein: item.protein,
+            carb: item.carb,
+            fat: item.fat
+        });
+    };
+
+    // HÀM MỚI: Lưu thông tin sau khi chỉnh sửa
+    const saveEditedItem = () => {
+        if (!editForm.name || editForm.kcal === "") {
+            alert("Vui lòng nhập đủ tên và số Kcal.");
+            return;
+        }
+
+        const idToUpdate = editModal.item.id;
+        const updatedItem = {
+            ...editModal.item,
+            name: editForm.name,
+            quantity: parseFloat(editForm.quantity) || 1,
+            unit: editForm.unit,
+            kcal: parseFloat(editForm.kcal) || 0,
+            protein: parseFloat(editForm.protein) || 0,
+            carb: parseFloat(editForm.carb) || 0,
+            fat: parseFloat(editForm.fat) || 0
+        };
+
+        setHistory(prev => {
+            const currentList = prev[currentDate] || [];
+            return {
+                ...prev,
+                [currentDate]: currentList.map(item => item.id === idToUpdate ? updatedItem : item)
+            };
+        });
+
+        setEditModal({ isOpen: false, item: null });
     };
 
     if (!isClient) return null;
@@ -1026,7 +1025,6 @@ export default function App() {
             <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative font-sans text-slate-800">
              <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
                     <div className="flex items-center gap-2">
-                        {/* Nút lùi ngày: Không viền, mờ 50%, phát sáng mờ khi hover/chạm */}
                         <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="p-2 text-slate-300 opacity-50 hover:opacity-100 hover:text-emerald-500 hover:bg-emerald-50 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-full transition-all duration-300 active:scale-95">
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
                         </button>
@@ -1035,7 +1033,6 @@ export default function App() {
                             <span className="font-black text-slate-800 uppercase text-[11px] tracking-widest">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</span>
                         </div>
                         
-                        {/* Nút tiến ngày: Không viền, mờ 50%, phát sáng mờ khi hover/chạm */}
                         <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="p-2 text-slate-300 opacity-50 hover:opacity-100 hover:text-emerald-500 hover:bg-emerald-50 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-full transition-all duration-300 active:scale-95">
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
                         </button>
@@ -1147,6 +1144,7 @@ export default function App() {
                             </div>
                         )}
                     </section>
+                    
                     <div className="space-y-3 pb-4">
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Danh sách nạp vào</h3>
                         {dailyLog.map(item => (
@@ -1158,7 +1156,14 @@ export default function App() {
                                         </select>
                                         <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center text-slate-400"><svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg></div>
                                     </div>
-                                    <p className="text-xs font-bold text-slate-800 uppercase truncate mb-1.5">{item.name} &mdash; {item.quantity}{item.unit}</p>
+                                    
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                        <p className="text-xs font-bold text-slate-800 uppercase truncate">{item.name} &mdash; {item.quantity}{item.unit}</p>
+                                        {/* NÚT CHỈNH SỬA MỚI */}
+                                        <button onClick={() => openEditModal(item)} className="text-emerald-500 hover:text-emerald-600 bg-emerald-50 hover:bg-emerald-100 p-1.5 rounded-md transition-colors shadow-sm">
+                                            <IconEdit />
+                                        </button>
+                                    </div>
                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1.5 flex-wrap"><span className="text-orange-500 font-black">{item.kcal} kcal</span><span className="text-slate-200">|</span> P: {item.protein}g <span className="text-slate-200">|</span> C: {item.carb}g <span className="text-slate-200">|</span> F: {item.fat}g</p>
                                 </div>
                                 <div className="flex items-center"><button onClick={() => removeFood(item.id)} className="text-slate-200 hover:text-red-500 transition-colors p-2 bg-slate-50 rounded-xl group-hover:bg-red-50"><IconTrash /></button></div>
@@ -1166,6 +1171,55 @@ export default function App() {
                         ))}
                         {dailyLog.length === 0 && ( <p className="text-center text-slate-300 text-[10px] uppercase font-bold italic py-8 border-2 border-dashed border-slate-100 rounded-[2.5rem] tracking-[0.2em]">Danh sách trống</p> )}
                     </div>
+                    
+                    {/* --- MODAL CHỈNH SỬA MÓN ĂN --- */}
+                    {editModal.isOpen && (
+                        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                            <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200 relative">
+                                 <button onClick={() => setEditModal({ isOpen: false, item: null })} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors font-black">✕</button>
+                                <h3 className="text-sm font-black text-slate-800 mb-4 uppercase tracking-widest text-center">Sửa thông tin món</h3>
+                                
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Tên món</label>
+                                        <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                         <div>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Số lượng</label>
+                                            <input type="number" step="any" value={editForm.quantity} onChange={e => setEditForm({...editForm, quantity: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                                         </div>
+                                         <div>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Đơn vị</label>
+                                            <select value={editForm.unit} onChange={e => setEditForm({...editForm, unit: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 appearance-none cursor-pointer">
+                                                <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
+                                            </select>
+                                         </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="relative group">
+                                            <label className="text-[10px] font-black text-orange-400 uppercase block mb-1">Kcal</label>
+                                            <input type="number" step="any" value={editForm.kcal} onChange={e => setEditForm({...editForm, kcal: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" />
+                                        </div>
+                                        <div className="relative group">
+                                            <label className="text-[10px] font-black text-emerald-400 uppercase block mb-1">Protein</label>
+                                            <input type="number" step="any" value={editForm.protein} onChange={e => setEditForm({...editForm, protein: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                                        </div>
+                                        <div className="relative group">
+                                            <label className="text-[10px] font-black text-blue-400 uppercase block mb-1">Carb</label>
+                                            <input type="number" step="any" value={editForm.carb} onChange={e => setEditForm({...editForm, carb: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-blue-500/20" />
+                                        </div>
+                                        <div className="relative group">
+                                            <label className="text-[10px] font-black text-yellow-400 uppercase block mb-1">Fat</label>
+                                            <input type="number" step="any" value={editForm.fat} onChange={e => setEditForm({...editForm, fat: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-yellow-500/20" />
+                                        </div>
+                                    </div>
+                                    <button onClick={saveEditedItem} className="w-full py-3.5 bg-emerald-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-200 active:scale-95 transition-all mt-4">Lưu thay đổi</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {confirmModal.isOpen && (
                         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                             <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200">
