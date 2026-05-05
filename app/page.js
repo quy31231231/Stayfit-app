@@ -901,31 +901,13 @@ export default function App() {
         }
     };
 
-    const updateItemMeal = async (id, newMeal) => {
-        const itemToUpdate = (history[currentDate] || []).find(i => i.id === id);
-        if (!itemToUpdate) return;
-
-        // 1. Xóa ngầm dữ liệu cũ trên Google Sheets
-        if (itemToUpdate.timestamp && userId && password) {
-            fetch("/api/sync", {
-                method: "DELETE", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, password, timestamp: itemToUpdate.timestamp }),
-            }).catch(console.error);
-        }
-
-        // 2. Tạo món ăn mới với danh mục bữa ăn mới và cấp "căn cước" (timestamp) mới
-        const updatedItem = {
-            ...itemToUpdate,
-            meal: newMeal,
-            timestamp: generateUniqueTimestamp() // Bắt buộc phải cấp mã mới để server nhận diện
-        };
-
-        // 3. Cập nhật lại giao diện ngay lập tức
+    const updateItemMeal = (id, newMeal) => {
+        // Chỉ cần cập nhật giao diện, KHÔNG đổi timestamp, KHÔNG cần gọi API Xóa
         setHistory(prev => {
             const currentList = prev[currentDate] || [];
             return {
                 ...prev,
-                [currentDate]: currentList.map(item => item.id === id ? updatedItem : item)
+                [currentDate]: currentList.map(item => item.id === id ? { ...item, meal: newMeal } : item)
             };
         });
     };

@@ -72,27 +72,42 @@ export async function POST(req) {
 
       // 2. SYNC LỊCH SỬ THỰC ĐƠN
       if (history && typeof history === 'object') {
-        // [PERF] Fetch toàn bộ history của user 1 lần duy nhất (thay vì fetch lại cho mỗi meal)
         const existingRes = await sheets.spreadsheets.values.get({
           spreadsheetId: SHEET_ID,
           range: `History!A:K`,
         });
         const existingRows = existingRes.data.values || [];
-        // [DEDUP] Tạo Set tổ hợp userId+timestamp để check O(1) và không nhầm giữa user khác nhau
-        const existingKeys = new Set(
-          existingRows
-            .filter(row => row[0] === userId && row[10])
-            .map(row => `${row[0]}::${row[10]}`)
-        );
+        
+        // [NÂNG CẤP] Dùng Map để nhớ chính xác vị trí (dòng) của từng món ăn trên Sheets
+        const existingMap = new Map();
+        existingRows.forEach((row, index) => {
+          if (row[0] === userId && row[10]) {
+            existingMap.set(`${row[0]}::${row[10]}`, { row, index });
+          }
+        });
 
         for (const [date, meals] of Object.entries(history)) {
           if (Array.isArray(meals)) {
             for (const meal of meals) {
               const key = `${userId}::${meal.timestamp}`;
-              if (!existingKeys.has(key)) {
+              
+              if (existingMap.has(key)) {
+                // NẾU MÓN ĐÃ TỒN TẠI: Kiểm tra xem có đổi bữa ăn không để CẬP NHẬT
+                const { row, index } = existingMap.get(key);
+                if (row[2] !== meal.meal) {
+                  await sheets.spreadsheets.values.update({
+                    spreadsheetId: SHEET_ID,
+                    range: `History!C${index + 1}`, // Cột C chính là cột ghi Bữa Ăn
+                    valueInputOption: "USER_ENTERED",
+                    requestBody: { values: [[meal.meal]] }
+                  });
+                  row[2] = meal.meal; // Cập nhật trạng thái để máy chủ không cập nhật trùng lặp
+                }
+              } else {
+                // NẾU LÀ MÓN MỚI TOANH: Thêm vào cuối bảng như bình thường
                 await sheets.spreadsheets.values.append({
                   spreadsheetId: SHEET_ID,
-                  range: "History!A:K", // ✅ Đúng với 11 cột (A→K)
+                  range: "History!A:K",
                   valueInputOption: "USER_ENTERED",
                   requestBody: {
                     values: [[
@@ -102,8 +117,7 @@ export async function POST(req) {
                     ]]
                   }
                 });
-                // Thêm key vào Set ngay để tránh trùng trong cùng batch sync
-                existingKeys.add(key);
+                existingMap.set(key, { row: [], index: existingRows.length }); // Đánh dấu là đã thêm
               }
             }
           }
