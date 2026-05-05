@@ -78,13 +78,15 @@ export async function POST(req) {
         });
         const existingRows = existingRes.data.values || [];
         
-        // [NÂNG CẤP] Dùng Map để nhớ chính xác vị trí (dòng) của từng món ăn trên Sheets
+        // Dùng Map để nhớ chính xác vị trí (dòng) của từng món ăn trên Sheets
         const existingMap = new Map();
         existingRows.forEach((row, index) => {
           if (row[0] === userId && row[10]) {
             existingMap.set(`${row[0]}::${row[10]}`, { row, index });
           }
         });
+
+        const rowsToAppend = []; // TẠO MẢNG GOM DỮ LIỆU ĐỂ LƯU 1 LẦN DUY NHẤT
 
         for (const [date, meals] of Object.entries(history)) {
           if (Array.isArray(meals)) {
@@ -95,8 +97,6 @@ export async function POST(req) {
                 // NẾU MÓN ĐÃ TỒN TẠI: Kiểm tra xem có bất kỳ thay đổi nào cần cập nhật không
                 const { row, index } = existingMap.get(key);
                 
-                // Kiểm tra sự khác biệt giữa data gửi lên và data hiện tại trên Sheet
-                // Lấy các giá trị trên Sheet (nhớ ép kiểu về số để so sánh chính xác với số)
                 const currentMeal = row[2];
                 const currentName = row[3];
                 const currentQty = parseFloat(row[4]);
@@ -117,23 +117,17 @@ export async function POST(req) {
                     currentFat !== meal.fat;
 
                 if (isChanged) {
-                  // Cập nhật nguyên một dải từ C (Meal) đến J (Fat) trên hàng đó
+                  // Cập nhật nguyên một dải từ C (Meal) đến J (Fat)
                   await sheets.spreadsheets.values.update({
                     spreadsheetId: SHEET_ID,
                     range: `History!C${index + 1}:J${index + 1}`,
                     valueInputOption: "USER_ENTERED",
                     requestBody: { values: [[
-                        meal.meal, 
-                        meal.name, 
-                        meal.quantity, 
-                        meal.unit, 
-                        meal.kcal, 
-                        meal.protein, 
-                        meal.carb, 
-                        meal.fat
+                        meal.meal, meal.name, meal.quantity, meal.unit, 
+                        meal.kcal, meal.protein, meal.carb, meal.fat
                     ]] }
                   });
-                  // Cập nhật lại row trong bộ nhớ để tránh update lại lần nữa trong cùng session
+                  // Cập nhật lại row trong bộ nhớ
                   row[2] = meal.meal;
                   row[3] = meal.name;
                   row[4] = meal.quantity;
@@ -144,23 +138,26 @@ export async function POST(req) {
                   row[9] = meal.fat;
                 }
               } else {
-                // NẾU LÀ MÓN MỚI TOANH: Thêm vào cuối bảng như bình thường
-                await sheets.spreadsheets.values.append({
-                  spreadsheetId: SHEET_ID,
-                  range: "History!A:K",
-                  valueInputOption: "USER_ENTERED",
-                  requestBody: {
-                    values: [[
-                      userId, date, meal.meal, meal.name, meal.quantity,
-                      meal.unit, meal.kcal, meal.protein, meal.carb, meal.fat,
-                      meal.timestamp
-                    ]]
-                  }
-                });
-                existingMap.set(key, { row: [], index: existingRows.length }); // Đánh dấu là đã thêm
+                // NẾU LÀ MÓN MỚI TOANH: Đưa vào mảng chờ (chưa gửi ngay)
+                rowsToAppend.push([
+                  userId, date, meal.meal, meal.name, meal.quantity,
+                  meal.unit, meal.kcal, meal.protein, meal.carb, meal.fat,
+                  meal.timestamp
+                ]);
+                existingMap.set(key, { row: [], index: -1 }); // Đánh dấu để tránh trùng
               }
             }
           }
+        }
+
+        // BATCH APPEND: LƯU TẤT CẢ MÓN MỚI CÙNG 1 LÚC (Nhanh và chống trùng tuyệt đối)
+        if (rowsToAppend.length > 0) {
+          await sheets.spreadsheets.values.append({
+            spreadsheetId: SHEET_ID,
+            range: "History!A:K",
+            valueInputOption: "USER_ENTERED",
+            requestBody: { values: rowsToAppend }
+          });
         }
       }
 
