@@ -970,25 +970,21 @@ export default function App() {
     };
 
     const handleUndo = () => {
-        if (undoStack.length === 0) return; // Nếu thùng rác trống thì không làm gì cả
+        if (undoStack.length === 0) return;
         
-        // Lấy món bị xóa gần nhất (nằm ở cuối mảng)
         const lastDeleted = undoStack[undoStack.length - 1];
         
-        const restoredItem = { ...lastDeleted.item, id: Date.now(), timestamp: generateUniqueTimestamp() };
+        // SỬA LỖI Ở ĐÂY: Trả lại nguyên vẹn món ăn gốc, KHÔNG tạo Timestamp mới nữa
+        const restoredItem = lastDeleted.item;
         
         setHistory(prev => {
             const currentList = prev[currentDate] || [];
             const newList = [...currentList]; 
             // Chèn lại món ăn vào đúng vị trí cũ
             newList.splice(lastDeleted.index, 0, restoredItem);
-            return {
-                ...prev,
-                [currentDate]: newList
-            };
+            return { ...prev, [currentDate]: newList };
         });
         
-        // Hoàn tác xong thì bóc món đó khỏi mảng thùng rác
         setUndoStack(prev => prev.slice(0, -1));
     };
 
