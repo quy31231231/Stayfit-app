@@ -376,7 +376,7 @@ function MacroProgressBar({ label, current, target, colorClass }) {
     );
 }
 
-function StatsView({ history, profile, setProfile, target, setView, view, setCurrentDate }) {
+function StatsView({ history, profile, setProfile, target, targetLog, setView, view, setCurrentDate }) {
     const [weightLog, setWeightLog] = useState(() => { 
         if (typeof window !== "undefined") {
             const s = localStorage.getItem('stayfit_weight_log'); return s ? JSON.parse(s) : {}; 
@@ -489,7 +489,16 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
             const dataSnack = currentChartDates.map(d => Math.round(sumMealKcal(history[d], 'Ăn vặt')));
             
             const dataTotal = currentChartDates.map(d => Math.round(sumDayMacro(history[d], 'kcal'))); 
-            const targetLine = new Array(14).fill(target);
+            const targetLine = currentChartDates.map(d => {
+                if (targetLog && targetLog[d]) return targetLog[d]; 
+                
+                // Nếu ngày đó không có dữ liệu chốt sổ, tự động lấy mục tiêu của ngày gần nhất trước đó
+                if (targetLog) {
+                    const pastDates = Object.keys(targetLog).filter(k => k < d).sort((a,b) => new Date(b) - new Date(a));
+                    if (pastDates.length > 0) return targetLog[pastDates[0]];
+                }
+                return target; // Nếu trống hoàn toàn thì lấy mặc định
+            });
 
             kcalChartInstance.current = new Chart(ctx, { 
                 type: 'bar', 
@@ -571,7 +580,7 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
             if (kcalChartInstance.current) kcalChartInstance.current.destroy(); 
             if (macroChartInstance.current) macroChartInstance.current.destroy(); 
         };
-    }, [history, weightLog, target, currentChartDates]);
+    }, [history, weightLog, target, targetLog, currentChartDates]);
 
     const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
 
@@ -662,6 +671,7 @@ export default function App() {
     // NÂNG CẤP: State cho chức năng chỉnh sửa món ăn TẠI THƯ VIỆN CHỌN NHANH
     const [editLibraryModal, setEditLibraryModal] = useState({ isOpen: false, item: null, originalName: "" });
     const [libraryEditForm, setLibraryEditForm] = useState({ name: "", unit: "g", per: 100, kcal: "", protein: "", carb: "", fat: "" });
+    const [targetLog, setTargetLog] = useState({}); // Lưu lịch sử mục tiêu theo ngày
 
     const [profile, setProfile] = useState({ 
         gender: "male", age: 25, height: 165, weight: 60, activity: 1.375, goal: 0, 
@@ -689,6 +699,7 @@ export default function App() {
             setUserId(localStorage.getItem('stayfit_userid') || "");
             setPassword(localStorage.getItem('stayfit_password') || "");
             const p = localStorage.getItem('stayfit_profile'); if(p) setProfile({...profile, ...JSON.parse(p)});
+            const tl = localStorage.getItem('stayfit_target_log'); if(tl) setTargetLog(JSON.parse(tl));
             const h = localStorage.getItem('stayfit_history'); if(h) setHistory(JSON.parse(h));
             const c = localStorage.getItem('stayfit_custom_foods'); if(c) setCustomFoodList(JSON.parse(c));
             const d = localStorage.getItem('stayfit_deleted_common'); if(d) setDeletedCommonFoods(JSON.parse(d));
@@ -810,6 +821,19 @@ export default function App() {
     }, [profile]);
 
     const target = profile.isManualTarget ? profile.manualTargetKcal : calculatedTarget;
+    // Tự động chốt sổ mục tiêu Kcal cho ngày hôm nay
+    useEffect(() => {
+        if (!isClient) return;
+        const todayStr = formatDate(new Date());
+        setTargetLog(prev => {
+            if (prev[todayStr] !== target) {
+                const newLog = { ...prev, [todayStr]: target };
+                localStorage.setItem('stayfit_target_log', JSON.stringify(newLog));
+                return newLog;
+            }
+            return prev;
+        });
+    }, [target, isClient]);
     const dailyLog = history[currentDate] || [];
     
     const dailyKcal = Math.round(dailyLog.reduce((s, i) => s + (i.kcal || 0), 0) * 10) / 10;
@@ -1007,7 +1031,7 @@ export default function App() {
     }
 
     if (view === "stats") {
-        return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} setView={setView} view={view} setCurrentDate={setCurrentDate} />;
+        return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} targetLog={targetLog} setView={setView} view={view} setCurrentDate={setCurrentDate} />;
     }
     
     if (view === "profile") {
