@@ -475,20 +475,69 @@ function StatsView({ history, profile, setProfile, target, setView, view, setCur
         if (kcalChartRef.current) {
             const ctx = kcalChartRef.current.getContext('2d');
             const labels = currentChartDates.map(d => getWeekLabel(d));
-            const dataKcal = currentChartDates.map(d => Math.round(sumDayMacro(history[d], 'kcal'))); 
+            
+            // Hàm tính tổng Calo theo từng bữa ăn
+            const sumMealKcal = (dayLog, mealName) => { 
+                if (!dayLog || !Array.isArray(dayLog)) return 0; 
+                return dayLog.filter(item => item.meal === mealName).reduce((sum, item) => sum + (item.kcal || 0), 0); 
+            };
+
+            // Lấy dữ liệu cho từng bữa
+            const dataBreakfast = currentChartDates.map(d => Math.round(sumMealKcal(history[d], 'Bữa sáng')));
+            const dataLunch = currentChartDates.map(d => Math.round(sumMealKcal(history[d], 'Bữa trưa')));
+            const dataDinner = currentChartDates.map(d => Math.round(sumMealKcal(history[d], 'Bữa tối')));
+            const dataSnack = currentChartDates.map(d => Math.round(sumMealKcal(history[d], 'Ăn vặt')));
+            
+            const dataTotal = currentChartDates.map(d => Math.round(sumDayMacro(history[d], 'kcal'))); 
             const targetLine = new Array(14).fill(target);
 
             kcalChartInstance.current = new Chart(ctx, { 
                 type: 'bar', 
-                data: { labels: labels, datasets: [
-                    { type: 'bar', label: 'Kcal thực tế', data: dataKcal, backgroundColor: '#3B82F6', borderRadius: 4, datalabels: { align: 'end', anchor: 'end', color: '#3B82F6', font: { weight: 'bold', size: 9 }, formatter: (val) => val > 0 ? val : '' } }, 
-                    { type: 'line', label: 'Mục tiêu', data: targetLine, borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } }
-                ]}, 
+                data: { 
+                    labels: labels, 
+                    datasets: [
+                        // Dòng Line ẩn (chỉ dùng để hiển thị nhãn Tổng Calo trên đỉnh cột)
+                        { type: 'line', label: 'Tổng', data: dataTotal, borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#3B82F6', font: { weight: 'black', size: 9 }, formatter: (val) => val > 0 ? val : '' } },
+                        { type: 'line', label: 'Mục tiêu', data: targetLine, borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
+                        
+                        // Các cột xếp chồng (Màu sắc đồng bộ với tỷ lệ bữa ăn bên trên)
+                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, backgroundColor: '#fb923c', datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, backgroundColor: '#10b981', datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa tối', data: dataDinner, backgroundColor: '#3b82f6', datalabels: { display: false } },
+                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, backgroundColor: '#c084fc', datalabels: { display: false }, borderRadius: { topLeft: 4, topRight: 4 } }
+                    ]
+                }, 
                 options: { 
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } },
                     onClick: handleChartClick, onHover: handleChartHover,
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } }, 
-                    scales: { y: { display: true, beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { display: false } }, x: { display: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { font: { weight: 'bold', size: 9 } } } } 
+                    plugins: { 
+                        legend: { display: false }, 
+                        // Bật tính năng Hiện thông tin khi Hover
+                        tooltip: { 
+                            enabled: true,
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#0f172a',
+                            bodyColor: '#334155',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            padding: 10,
+                            boxPadding: 4,
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    // Không hiển thị popup cho đường Mục tiêu, Tổng và các bữa 0 Kcal
+                                    if (context.dataset.label === 'Mục tiêu' || context.dataset.label === 'Tổng' || context.parsed.y === 0) return null;
+                                    return ` ${context.dataset.label}: ${context.parsed.y} kcal`;
+                                }
+                            }
+                        } 
+                    }, 
+                    scales: { 
+                        x: { stacked: true, display: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { font: { weight: 'bold', size: 9 } } },
+                        y: { stacked: true, display: true, beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { display: false } } 
+                    } 
                 } 
             });
         }
