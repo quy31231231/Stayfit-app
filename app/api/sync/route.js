@@ -70,10 +70,10 @@ export async function POST(req) {
             for (const meal of meals) {
               const existingRes = await sheets.spreadsheets.values.get({
                 spreadsheetId: SHEET_ID,
-                range: `History!A:J`,
-              });
+                range: `History!A:K`, // ✅ Đã mở rộng vùng đọc đến cột K (chứa timestamp)
+                });
               const existingRows = existingRes.data.values || [];
-              const exists = existingRows.some(row => row[8] === meal.timestamp);
+              const exists = existingRows.some(row => row[10] === meal.timestamp);
 
               if (!exists) {
                 await sheets.spreadsheets.values.append({
