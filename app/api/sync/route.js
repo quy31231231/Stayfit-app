@@ -18,6 +18,13 @@ async function getSheets() {
   return google.sheets({ version: "v4", auth });
 }
 
+// Get sheet ID by sheet name
+async function getSheetIdByName(sheets, spreadsheetId, sheetName) {
+  const metadata = await sheets.spreadsheets.get({ spreadsheetId });
+  const sheet = metadata.data.sheets.find(s => s.properties.title === sheetName);
+  return sheet ? sheet.properties.sheetId : null;
+}
+
 export async function POST(req) {
   const SHEET_ID = process.env.SPREADSHEET_ID || process.env.GOOGLE_SHEET_ID;
   if (!SHEET_ID) return Response.json({ error: "Missing SPREADSHEET_ID" }, { status: 400 });
@@ -243,19 +250,35 @@ export async function DELETE(req) {
       return Response.json({ error: "Authentication failed" }, { status: 401 });
     }
 
-    // Delete from History - clear the row (safer than deleting dimension)
+    // Delete from History - find row index and delete it
     const historyRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "History!A:K" });
     const historyRows = historyRes.data.values || [];
     const deleteRowIndex = historyRows.findIndex(row => row && row[0] === userId && row[10] === timestamp);
 
     if (deleteRowIndex !== -1) {
-      // Clear all values in the row but keep the row structure intact
-      await sheets.spreadsheets.values.batchClear({
-        spreadsheetId: SHEET_ID,
-        requestBody: {
-          ranges: [`History!A${deleteRowIndex + 1}:K${deleteRowIndex + 1}`]
-        }
-      });
+      // Get the correct sheet ID for History sheet
+      const historySheetId = await getSheetIdByName(sheets, SHEET_ID, "History");
+      
+      if (historySheetId !== null) {
+        // Properly delete the row by removing the dimension
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId: SHEET_ID,
+          requestBody: {
+            requests: [
+              {
+                deleteDimension: {
+                  range: {
+                    sheetId: historySheetId,
+                    dimension: "ROWS",
+                    startIndex: deleteRowIndex,
+                    endIndex: deleteRowIndex + 1
+                  }
+                }
+              }
+            ]
+          }
+        });
+      }
     }
 
     return Response.json({ status: "deleted" });
