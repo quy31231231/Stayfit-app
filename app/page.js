@@ -15,7 +15,7 @@ const IconPlus = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" heigh
 const IconSearch = () => (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>);
 const IconStats = () => (<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>);
 const IconEdit = () => (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>);
-
+const IconUndo = () => (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>);
 // --- DỮ LIỆU CƠ BẢN ---
 const COMMON_FOODS = [
     { name: "Tỏi", unit: "g", per: 100, kcal: 149, carb: 33, fat: 0.5, protein: 6.4 },
@@ -387,7 +387,11 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     const [weightDate, setWeightDate] = useState(() => formatDate(new Date()));
     const [chartOffset, setChartOffset] = useState(0);
     const daysPerPage = 14;
-    
+    const [undoItem, setUndoItem] = useState(null);
+    const undoTimeoutRef = useRef(null);
+
+    // Tự động ẩn nút hoàn tác nếu người dùng chuyển sang xem ngày khác
+    useEffect(() => { setUndoItem(null); }, [currentDate]);
     const weightChartRef = useRef(null); 
     const kcalChartRef = useRef(null); 
     const macroChartRef = useRef(null);
@@ -916,9 +920,16 @@ export default function App() {
         setTab("quick");
     };
 
-    const removeFood = async (id) => {
+   const removeFood = async (id) => {
         const itemToDelete = (history[currentDate] || []).find(i => i.id === id);
         setHistory(prev => ({ ...prev, [currentDate]: (prev[currentDate] || []).filter(i => i.id !== id) }));
+        
+        // --- BẬT TÍNH NĂNG HOÀN TÁC ---
+        setUndoItem(itemToDelete);
+        if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
+        undoTimeoutRef.current = setTimeout(() => { setUndoItem(null); }, 6000); // Ẩn nút sau 6 giây
+        // ------------------------------
+
         if (itemToDelete && itemToDelete.timestamp && userId && password) {
             try {
                 await fetch("/api/sync", {
@@ -929,12 +940,14 @@ export default function App() {
         }
     };
 
-    const handleConfirmDelete = () => {
-        if (!confirmModal.foodToDelete) return;
-        const foodName = confirmModal.foodToDelete.name;
-        setCustomFoodList(prev => prev.filter(f => f.name !== foodName));
-        if (COMMON_FOODS.some(f => f.name === foodName)) setDeletedCommonFoods(prev => [...prev, foodName]);
-        setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" }); setSelectedFood(null); 
+    const handleUndo = () => {
+        if (!undoItem) return;
+        // Phục hồi món ăn với mã Timestamp MỚI để Server hiểu đây là lần nhập mới (chống lỗi đồng bộ)
+        const restoredItem = { ...undoItem, id: Date.now(), timestamp: generateUniqueTimestamp() };
+        setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), restoredItem] }));
+        
+        setUndoItem(null); // Ẩn nút hoàn tác sau khi đã phục hồi
+        if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
     };
 
     const applyDietMode = (mode) => {
@@ -1268,7 +1281,14 @@ export default function App() {
                     </section>
                     
                     <div className="space-y-3 pb-4">
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Danh sách nạp vào</h3>
+                        <div className="flex justify-between items-center px-2 mb-2 h-6">
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Danh sách nạp vào</h3>
+                            {undoItem && (
+                                <button onClick={handleUndo} className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1.5 hover:text-emerald-700 bg-emerald-100/80 hover:bg-emerald-200 px-2.5 py-1.5 rounded-lg transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
+                                    <IconUndo /> Hoàn tác
+                                </button>
+                            )}
+                        </div>
                         {dailyLog.map(item => (
                             <div key={item.id} className="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-slate-50 border-l-4 border-l-emerald-400 animate-in slide-in-from-left duration-300 group">
                                 <div className="flex-1 pr-3">
