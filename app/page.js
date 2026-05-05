@@ -674,9 +674,8 @@ export default function App() {
     const [targetLog, setTargetLog] = useState({}); // Lưu lịch sử mục tiêu theo ngày
 
     // ---> DÁN 4 DÒNG ĐÓ VÀO ĐÂY <---
-    const [undoItem, setUndoItem] = useState(null);
-    const undoTimeoutRef = useRef(null);
-    useEffect(() => { setUndoItem(null); }, [currentDate]);
+    const [undoStack, setUndoStack] = useState([]); // Mảng chứa Lịch sử các món đã xóa
+    useEffect(() => { setUndoStack([]); }, [currentDate]); // Đổi ngày thì dọn sạch thùng rác
     // -------------------------------
 
     const [profile, setProfile] = useState({ 
@@ -925,16 +924,13 @@ export default function App() {
    const removeFood = async (id) => {
         const currentList = history[currentDate] || [];
         const itemToDelete = currentList.find(i => i.id === id);
-        const itemIndex = currentList.findIndex(i => i.id === id); // Lấy chính xác vị trí của món ăn
+        const itemIndex = currentList.findIndex(i => i.id === id);
 
         setHistory(prev => ({ ...prev, [currentDate]: currentList.filter(i => i.id !== id) }));
         
-        // --- BẬT TÍNH NĂNG HOÀN TÁC ---
-        // Lưu cả dữ liệu món ăn VÀ vị trí (index) của nó
-        setUndoItem({ item: itemToDelete, index: itemIndex });
-        if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
-        undoTimeoutRef.current = setTimeout(() => { setUndoItem(null); }, 6000); // Ẩn nút sau 6 giây
-        // ------------------------------
+        // --- VẤN ĐỀ 1 & 2: HOÀN TÁC NHIỀU LẦN VÀ KHÔNG TỰ ẨN ---
+        // Nhồi món vừa xóa vào mảng (Stack)
+        setUndoStack(prev => [...prev, { item: itemToDelete, index: itemIndex }]);
 
         if (itemToDelete && itemToDelete.timestamp && userId && password) {
             try {
@@ -947,26 +943,26 @@ export default function App() {
     };
 
     const handleUndo = () => {
-        if (!undoItem) return;
+        if (undoStack.length === 0) return; // Nếu thùng rác trống thì không làm gì cả
         
-        // Tạo item mới (để server hiểu là nhập lại) nhưng giữ nguyên thông tin
-        const restoredItem = { ...undoItem.item, id: Date.now(), timestamp: generateUniqueTimestamp() };
+        // Lấy món bị xóa gần nhất (nằm ở cuối mảng)
+        const lastDeleted = undoStack[undoStack.length - 1];
+        
+        const restoredItem = { ...lastDeleted.item, id: Date.now(), timestamp: generateUniqueTimestamp() };
         
         setHistory(prev => {
             const currentList = prev[currentDate] || [];
-            const newList = [...currentList]; // Tạo một bản sao của danh sách hiện tại
-            
-            // Dùng hàm splice để chèn món ăn trở lại ĐÚNG vị trí (index) đã lưu
-            newList.splice(undoItem.index, 0, restoredItem);
-            
+            const newList = [...currentList]; 
+            // Chèn lại món ăn vào đúng vị trí cũ
+            newList.splice(lastDeleted.index, 0, restoredItem);
             return {
                 ...prev,
                 [currentDate]: newList
             };
         });
         
-        setUndoItem(null); // Ẩn nút hoàn tác sau khi đã phục hồi
-        if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
+        // Hoàn tác xong thì bóc món đó khỏi mảng thùng rác
+        setUndoStack(prev => prev.slice(0, -1));
     };
 
     const applyDietMode = (mode) => {
@@ -1300,14 +1296,19 @@ export default function App() {
                     </section>
                     
                     <div className="space-y-3 pb-4">
-                        <div className="flex justify-between items-center px-2 mb-2 h-6">
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Danh sách nạp vào</h3>
-                        {undoItem && (
-                            <button onClick={handleUndo} className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1.5 hover:text-emerald-700 bg-emerald-100/80 hover:bg-emerald-200 px-2.5 py-1.5 rounded-lg transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
-                                <IconUndo /> Hoàn tác
-                            </button>
-                        )}
-                    </div>
+                        <div className="flex justify-between items-center px-2 mb-2 h-8">
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Danh sách nạp vào</h3>
+                            {/* VẤN ĐỀ 3: NÚT HÌNH TRÒN, CHỈ CÓ ICON, VIỀN XANH KHI HOVER */}
+                            {undoStack.length > 0 && (
+                                <div className="relative group">
+                                    <button onClick={handleUndo} className="w-8 h-8 flex items-center justify-center rounded-full text-emerald-600 bg-emerald-50 border-2 border-transparent hover:border-emerald-500 hover:bg-emerald-100 transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
+                                        <IconUndo />
+                                    </button>
+                                    {/* Hiển thị số lượng món có thể hoàn tác khi hover */}
+                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full shadow-sm pointer-events-none">{undoStack.length}</span>
+                                </div>
+                            )}
+                        </div>
                         {dailyLog.map(item => (
                             <div key={item.id} className="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-slate-50 border-l-4 border-l-emerald-400 animate-in slide-in-from-left duration-300 group">
                                 <div className="flex-1 pr-3">
@@ -1319,7 +1320,6 @@ export default function App() {
                                     </div>
                                     
                                     <div className="flex items-center gap-2 mb-1.5">
-                                        {/* ĐÃ TRẢ LẠI GIAO DIỆN NGUYÊN BẢN (KHÔNG CÒN NÚT EDIT Ở ĐÂY) */}
                                         <p className="text-xs font-bold text-slate-800 uppercase truncate">{item.name} &mdash; {item.quantity}{item.unit}</p>
                                     </div>
                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1.5 flex-wrap"><span className="text-orange-500 font-black">{item.kcal} kcal</span><span className="text-slate-200">|</span> P: {item.protein}g <span className="text-slate-200">|</span> C: {item.carb}g <span className="text-slate-200">|</span> F: {item.fat}g</p>
