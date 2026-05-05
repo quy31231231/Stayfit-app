@@ -505,17 +505,17 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                 data: { 
                     labels: labels, 
                     datasets: [
-                        // Dòng Line ẩn (chỉ dùng để hiển thị nhãn Tổng Calo trên đỉnh cột)
-                        { type: 'line', label: 'Tổng', data: dataTotal, borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#3B82F6', font: { weight: 'black', size: 9 }, formatter: (val) => val > 0 ? val : '' } },
-                        { type: 'line', label: 'Mục tiêu', data: targetLine, borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
+                        // Đặt stack riêng rẽ cho các đường line để chúng không bị cộng dồn
+                        { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#3B82F6', font: { weight: 'black', size: 9 }, formatter: (val) => val > 0 ? val : '' } },
+                        { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
                         
-                        // Các cột xếp chồng (Màu sắc đồng bộ với tỷ lệ bữa ăn bên trên)
-                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, backgroundColor: '#fb923c', datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, backgroundColor: '#10b981', datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa tối', data: dataDinner, backgroundColor: '#3b82f6', datalabels: { display: false } },
-                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, backgroundColor: '#c084fc', datalabels: { display: false }, borderRadius: { topLeft: 4, topRight: 4 } }
+                        // Gắn chung stack 'bars' cho 4 bữa ăn để chúng tự động xếp chồng lên nhau
+                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#fb923c', datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#10b981', datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#3b82f6', datalabels: { display: false } },
+                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#c084fc', datalabels: { display: false }, borderRadius: { topLeft: 4, topRight: 4 } }
                     ]
-                }, 
+                },
                 options: { 
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } },
                     onClick: handleChartClick, onHover: handleChartHover,
