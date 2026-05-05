@@ -923,11 +923,15 @@ export default function App() {
     };
 
    const removeFood = async (id) => {
-        const itemToDelete = (history[currentDate] || []).find(i => i.id === id);
-        setHistory(prev => ({ ...prev, [currentDate]: (prev[currentDate] || []).filter(i => i.id !== id) }));
+        const currentList = history[currentDate] || [];
+        const itemToDelete = currentList.find(i => i.id === id);
+        const itemIndex = currentList.findIndex(i => i.id === id); // Lấy chính xác vị trí của món ăn
+
+        setHistory(prev => ({ ...prev, [currentDate]: currentList.filter(i => i.id !== id) }));
         
         // --- BẬT TÍNH NĂNG HOÀN TÁC ---
-        setUndoItem(itemToDelete);
+        // Lưu cả dữ liệu món ăn VÀ vị trí (index) của nó
+        setUndoItem({ item: itemToDelete, index: itemIndex });
         if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
         undoTimeoutRef.current = setTimeout(() => { setUndoItem(null); }, 6000); // Ẩn nút sau 6 giây
         // ------------------------------
@@ -944,9 +948,22 @@ export default function App() {
 
     const handleUndo = () => {
         if (!undoItem) return;
-        // Phục hồi món ăn với mã Timestamp MỚI để Server hiểu đây là lần nhập mới (chống lỗi đồng bộ)
-        const restoredItem = { ...undoItem, id: Date.now(), timestamp: generateUniqueTimestamp() };
-        setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), restoredItem] }));
+        
+        // Tạo item mới (để server hiểu là nhập lại) nhưng giữ nguyên thông tin
+        const restoredItem = { ...undoItem.item, id: Date.now(), timestamp: generateUniqueTimestamp() };
+        
+        setHistory(prev => {
+            const currentList = prev[currentDate] || [];
+            const newList = [...currentList]; // Tạo một bản sao của danh sách hiện tại
+            
+            // Dùng hàm splice để chèn món ăn trở lại ĐÚNG vị trí (index) đã lưu
+            newList.splice(undoItem.index, 0, restoredItem);
+            
+            return {
+                ...prev,
+                [currentDate]: newList
+            };
+        });
         
         setUndoItem(null); // Ẩn nút hoàn tác sau khi đã phục hồi
         if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
