@@ -343,9 +343,11 @@ const DIET_MODES = [
     }
 ];
 
-const formatDate = (date) => { 
-    const d = new Date(date); 
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; 
+const formatDate = (date) => {
+    const d = new Date(date);
+    // Format using Vietnam timezone (UTC+7)
+    const vietnamDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+    return `${vietnamDate.getFullYear()}-${String(vietnamDate.getMonth() + 1).padStart(2, '0')}-${String(vietnamDate.getDate()).padStart(2, '0')}`;
 };
 const calcMacro = (val, per, q) => Math.round((val / per) * q * 10) / 10;
 const removeAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
