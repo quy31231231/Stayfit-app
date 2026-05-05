@@ -816,8 +816,8 @@ export default function App() {
         const handleVisibilityChange = () => { if (document.visibilityState === 'hidden') syncToCloud(); };
         document.addEventListener('visibilitychange', handleVisibilityChange);
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-    }, [isClient]);
-
+    }, [isClient, history, profile, userId, password]);
+    
     const calculatedTarget = useMemo(() => {
         let bmr = profile.gender === "male" 
             ? 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5
