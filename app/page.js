@@ -985,6 +985,7 @@ export default function App() {
                 </div>
                 <div className="space-y-3 mt-2">
                     <button onClick={() => setView("journal")} className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase shadow-lg shadow-emerald-200 active:scale-95 transition-all">Bắt đầu ngay</button>
+                    <button onClick={syncToCloud} className="w-full py-4 bg-blue-100 text-blue-600 rounded-3xl font-black uppercase tracking-widest hover:bg-blue-200 active:scale-95 transition-all">⬆ Đồng bộ dữ liệu</button>
                     <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-4 bg-slate-100 text-slate-500 rounded-3xl font-black uppercase tracking-widest hover:bg-slate-200 active:scale-95 transition-all">Đăng xuất</button>
                 </div>
                 <BottomNav view={view} setView={setView} />
