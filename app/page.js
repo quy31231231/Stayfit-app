@@ -350,6 +350,16 @@ const formatDate = (date) => {
     return `${vietnamDate.getFullYear()}-${String(vietnamDate.getMonth() + 1).padStart(2, '0')}-${String(vietnamDate.getDate()).padStart(2, '0')}`;
 };
 const calcMacro = (val, per, q) => Math.round((val / per) * q * 10) / 10;
+
+// [UNIQUE ID] Tạo timestamp duy nhất cho mỗi meal entry
+// Kết hợp datetime (dễ đọc trong Sheets) + ms + random suffix → đảm bảo không trùng
+const generateUniqueTimestamp = () => {
+  const now = new Date();
+  const svSE = now.toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
+  const ms = String(now.getMilliseconds()).padStart(3, "0");
+  const rand = Math.random().toString(36).slice(2, 7);
+  return `${svSE}.${ms}-${rand}`;
+};
 const removeAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
 
 // --- COMPONENTS ---
@@ -822,7 +832,7 @@ export default function App() {
             name: selectedFood.name, quantity: quantity, unit: selectedFood.unit,
             kcal: calcMacro(selectedFood.kcal, selectedFood.per, quantity), protein: calcMacro(selectedFood.protein, selectedFood.per, quantity),
             carb: calcMacro(selectedFood.carb, selectedFood.per, quantity), fat: calcMacro(selectedFood.fat, selectedFood.per, quantity),
-            meal: selectedMeal, id: Date.now(), timestamp: new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })
+            meal: selectedMeal, id: Date.now(), timestamp: generateUniqueTimestamp()
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
         setSelectedFood(null); setSearchQuery(""); setQty(1);
@@ -841,7 +851,7 @@ export default function App() {
         const newItem = {
             name: foodName, quantity: q, unit: u, kcal: Math.round(k * 10) / 10,
             protein: Math.round(p * 10) / 10, carb: Math.round(c * 10) / 10, fat: Math.round(f * 10) / 10,
-            meal: selectedMeal, id: Date.now(), timestamp: new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" })
+            meal: selectedMeal, id: Date.now(), timestamp: generateUniqueTimestamp()
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
 

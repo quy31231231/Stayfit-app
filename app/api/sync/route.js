@@ -65,19 +65,28 @@ export async function POST(req) {
 
       // 2. SYNC LỊCH SỬ THỰC ĐƠN
       if (history && typeof history === 'object') {
+        // [PERF] Fetch toàn bộ history của user 1 lần duy nhất (thay vì fetch lại cho mỗi meal)
+        const existingRes = await sheets.spreadsheets.values.get({
+          spreadsheetId: SHEET_ID,
+          range: `History!A:K`,
+        });
+        const existingRows = existingRes.data.values || [];
+        // [DEDUP] Tạo Set tổ hợp userId+timestamp để check O(1) và không nhầm giữa user khác nhau
+        const existingKeys = new Set(
+          existingRows
+            .filter(row => row[0] === userId && row[10])
+            .map(row => `${row[0]}::${row[10]}`)
+        );
+
         for (const [date, meals] of Object.entries(history)) {
           if (Array.isArray(meals)) {
             for (const meal of meals) {
-              const existingRes = await sheets.spreadsheets.values.get({
-                spreadsheetId: SHEET_ID,
-                range: `History!A:K`, // ✅ Đã mở rộng vùng đọc đến cột K (chứa timestamp)
-                });
-              const existingRows = existingRes.data.values || [];
-              const exists = existingRows.some(row => row[10] === meal.timestamp);
-
-              if (!exists) {
+              const key = `${userId}::${meal.timestamp}`;
+              if (!existingKeys.has(key)) {
                 await sheets.spreadsheets.values.append({
-                  spreadsheetId: SHEET_ID, range: "History!A:J", valueInputOption: "USER_ENTERED",
+                  spreadsheetId: SHEET_ID,
+                  range: "History!A:K", // ✅ Đúng với 11 cột (A→K)
+                  valueInputOption: "USER_ENTERED",
                   requestBody: {
                     values: [[
                       userId, date, meal.meal, meal.name, meal.quantity,
@@ -86,6 +95,8 @@ export async function POST(req) {
                     ]]
                   }
                 });
+                // Thêm key vào Set ngay để tránh trùng trong cùng batch sync
+                existingKeys.add(key);
               }
             }
           }
@@ -183,7 +194,7 @@ export async function GET(req) {
           carb: parseFloat(row[8]),
           fat: parseFloat(row[9]),
           timestamp: row[10],
-          id: Date.now(),
+          id: row[10] || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         };
         if (!history[date]) history[date] = [];
         history[date].push(meal);
