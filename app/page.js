@@ -1194,13 +1194,47 @@ export default function App() {
                                 {selectedFood && (() => {
                                     let weightInGrams = qty; const u = selectedFood.unit.toLowerCase();
                                     if (['kg', 'l', 'lít'].includes(u)) { weightInGrams = qty * 1000; } else if (['ml', 'g', 'gram'].includes(u)) { weightInGrams = qty; } else { const mockWeights = { 'tô': 400, 'ly': 250, 'quả': 100 }; weightInGrams = qty * (mockWeights[u] || 100); }
-                                    const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty); const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty); const totalCarb = calcMacro(selectedFood.carb, selectedFood.per, qty); const totalFat = calcMacro(selectedFood.fat, selectedFood.per, qty);
+                                    
+                                    const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty); 
+                                    const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty); 
+                                    const totalCarb = calcMacro(selectedFood.carb, selectedFood.per, qty); 
+                                    const totalFat = calcMacro(selectedFood.fat, selectedFood.per, qty);
+                                    
+                                    // TÍNH NĂNG 11: Tính tổng dự kiến NẾU nạp món này vào nhật ký
+                                    const projectedKcal = Math.round((dailyKcal + totalKcal) * 10) / 10;
+                                    const projectedPro = Math.round((dailyProtein + totalPro) * 10) / 10;
+                                    const projectedCarb = Math.round((dailyCarb + totalCarb) * 10) / 10;
+                                    const projectedFat = Math.round((dailyFat + totalFat) * 10) / 10;
+
                                     return (
                                     <div className="mt-4 pt-5 border-t border-slate-100 animate-in slide-in-from-top-2">
                                         <div className="bg-slate-900 rounded-2xl p-4 mb-4 text-white shadow-xl relative overflow-hidden">
                                             <div className="absolute top-0 right-0 p-4 opacity-10"><IconJournal /></div>
-                                            <div className="relative z-10 flex justify-between items-start mb-3"><div><h5 className="font-black text-lg text-emerald-400 leading-tight">{selectedFood.name}</h5><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{qty} {selectedFood.unit} (~{Math.round(weightInGrams)}g)</p></div><div className="text-right"><span className="text-2xl font-black text-white">{totalKcal}</span><span className="text-[9px] text-slate-400 font-bold ml-1">KCAL</span></div></div>
-                                            <div className="flex justify-between items-center bg-white/10 rounded-xl p-2 mb-3"><div className="text-center w-1/3 border-r border-white/10"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Protein</p><p className="text-xs font-black text-emerald-400">{totalPro}g</p></div><div className="text-center w-1/3 border-r border-white/10"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Carb</p><p className="text-xs font-black text-blue-400">{totalCarb}g</p></div><div className="text-center w-1/3"><p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Fat</p><p className="text-xs font-black text-yellow-400">{totalFat}g</p></div></div>
+                                            <div className="relative z-10 flex justify-between items-start mb-3">
+                                                <div>
+                                                    <h5 className="font-black text-lg text-emerald-400 leading-tight">{selectedFood.name}</h5>
+                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{qty} {selectedFood.unit} (~{Math.round(weightInGrams)}g)</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-2xl font-black text-white">{totalKcal}</span>
+                                                    <span className="text-sm font-bold text-slate-400 ml-1">/ {projectedKcal}</span>
+                                                    <span className="text-[9px] text-slate-400 font-bold ml-1">KCAL</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-white/10 rounded-xl p-2 mb-3">
+                                                <div className="text-center w-1/3 border-r border-white/10">
+                                                    <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Protein</p>
+                                                    <p className="text-xs font-black text-emerald-400">{totalPro}g <span className="text-[9px] font-bold text-slate-400">/ {projectedPro}g</span></p>
+                                                </div>
+                                                <div className="text-center w-1/3 border-r border-white/10">
+                                                    <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Carb</p>
+                                                    <p className="text-xs font-black text-blue-400">{totalCarb}g <span className="text-[9px] font-bold text-slate-400">/ {projectedCarb}g</span></p>
+                                                </div>
+                                                <div className="text-center w-1/3">
+                                                    <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Fat</p>
+                                                    <p className="text-xs font-black text-yellow-400">{totalFat}g <span className="text-[9px] font-bold text-slate-400">/ {projectedFat}g</span></p>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="w-24 relative"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Số lượng</label><input type="number" value={qty} step="any" min="0.1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-slate-100 text-slate-800 p-3 rounded-xl text-sm outline-none font-black text-center focus:ring-2 focus:ring-emerald-500/20 transition-all" /></div>
