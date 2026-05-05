@@ -387,11 +387,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     const [weightDate, setWeightDate] = useState(() => formatDate(new Date()));
     const [chartOffset, setChartOffset] = useState(0);
     const daysPerPage = 14;
-    const [undoItem, setUndoItem] = useState(null);
-    const undoTimeoutRef = useRef(null);
 
-    // Tự động ẩn nút hoàn tác nếu người dùng chuyển sang xem ngày khác
-    useEffect(() => { setUndoItem(null); }, [currentDate]);
     const weightChartRef = useRef(null); 
     const kcalChartRef = useRef(null); 
     const macroChartRef = useRef(null);
@@ -676,6 +672,12 @@ export default function App() {
     const [editLibraryModal, setEditLibraryModal] = useState({ isOpen: false, item: null, originalName: "" });
     const [libraryEditForm, setLibraryEditForm] = useState({ name: "", unit: "g", per: 100, kcal: "", protein: "", carb: "", fat: "" });
     const [targetLog, setTargetLog] = useState({}); // Lưu lịch sử mục tiêu theo ngày
+
+    // ---> DÁN 4 DÒNG ĐÓ VÀO ĐÂY <---
+    const [undoItem, setUndoItem] = useState(null);
+    const undoTimeoutRef = useRef(null);
+    useEffect(() => { setUndoItem(null); }, [currentDate]);
+    // -------------------------------
 
     const [profile, setProfile] = useState({ 
         gender: "male", age: 25, height: 165, weight: 60, activity: 1.375, goal: 0, 
@@ -1282,13 +1284,13 @@ export default function App() {
                     
                     <div className="space-y-3 pb-4">
                         <div className="flex justify-between items-center px-2 mb-2 h-6">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Danh sách nạp vào</h3>
-                            {undoItem && (
-                                <button onClick={handleUndo} className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1.5 hover:text-emerald-700 bg-emerald-100/80 hover:bg-emerald-200 px-2.5 py-1.5 rounded-lg transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
-                                    <IconUndo /> Hoàn tác
-                                </button>
-                            )}
-                        </div>
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Danh sách nạp vào</h3>
+                        {undoItem && (
+                            <button onClick={handleUndo} className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1.5 hover:text-emerald-700 bg-emerald-100/80 hover:bg-emerald-200 px-2.5 py-1.5 rounded-lg transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
+                                <IconUndo /> Hoàn tác
+                            </button>
+                        )}
+                    </div>
                         {dailyLog.map(item => (
                             <div key={item.id} className="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-slate-50 border-l-4 border-l-emerald-400 animate-in slide-in-from-left duration-300 group">
                                 <div className="flex-1 pr-3">
