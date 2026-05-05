@@ -610,9 +610,9 @@ export default function App() {
     const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
     
-    // NÂNG CẤP: State cho chức năng chỉnh sửa món ăn
-    const [editModal, setEditModal] = useState({ isOpen: false, item: null });
-    const [editForm, setEditForm] = useState({ name: "", quantity: "", unit: "g", kcal: "", protein: "", carb: "", fat: "" });
+    // NÂNG CẤP: State cho chức năng chỉnh sửa món ăn TẠI THƯ VIỆN CHỌN NHANH
+    const [editLibraryModal, setEditLibraryModal] = useState({ isOpen: false, item: null, originalName: "" });
+    const [libraryEditForm, setLibraryEditForm] = useState({ name: "", unit: "g", per: 100, kcal: "", protein: "", carb: "", fat: "" });
 
     const [profile, setProfile] = useState({ 
         gender: "male", age: 25, height: 165, weight: 60, activity: 1.375, goal: 0, 
@@ -883,48 +883,58 @@ export default function App() {
         });
     };
 
-    // HÀM MỚI: Mở modal chỉnh sửa món ăn
-    const openEditModal = (item) => {
-        setEditModal({ isOpen: true, item: item });
-        setEditForm({
-            name: item.name,
-            quantity: item.quantity,
-            unit: item.unit,
-            kcal: item.kcal,
-            protein: item.protein,
-            carb: item.carb,
-            fat: item.fat
+    // HÀM MỚI: Mở modal chỉnh sửa THƯ VIỆN món ăn
+    const openLibraryEditModal = (food) => {
+        setEditLibraryModal({ isOpen: true, item: food, originalName: food.name });
+        setLibraryEditForm({
+            name: food.name,
+            unit: food.unit,
+            per: food.per || 100, // Định lượng chuẩn mặc định là 100 nếu không có
+            kcal: food.kcal,
+            protein: food.protein,
+            carb: food.carb,
+            fat: food.fat
         });
     };
 
-    // HÀM MỚI: Lưu thông tin sau khi chỉnh sửa
-    const saveEditedItem = () => {
-        if (!editForm.name || editForm.kcal === "") {
+    // HÀM MỚI: Lưu thông tin sau khi chỉnh sửa vào THƯ VIỆN
+    const saveLibraryEdit = () => {
+        if (!libraryEditForm.name || libraryEditForm.kcal === "") {
             alert("Vui lòng nhập đủ tên và số Kcal.");
             return;
         }
 
-        const idToUpdate = editModal.item.id;
-        const updatedItem = {
-            ...editModal.item,
-            name: editForm.name,
-            quantity: parseFloat(editForm.quantity) || 1,
-            unit: editForm.unit,
-            kcal: parseFloat(editForm.kcal) || 0,
-            protein: parseFloat(editForm.protein) || 0,
-            carb: parseFloat(editForm.carb) || 0,
-            fat: parseFloat(editForm.fat) || 0
+        const oldName = editLibraryModal.originalName;
+        const isCommon = COMMON_FOODS.some(f => f.name === oldName);
+
+        // Xóa món cũ khỏi danh sách custom (nếu nó từng là món custom)
+        let newCustomList = customFoodList.filter(f => f.name !== oldName);
+
+        // Nếu món cũ là món mặc định, phải đưa nó vào danh sách bị xóa (để ẩn đi)
+        if (isCommon && !deletedCommonFoods.includes(oldName)) {
+            setDeletedCommonFoods(prev => [...prev, oldName]);
+        }
+
+        // Tạo món ăn mới đã được cập nhật thông số
+        const updatedFood = {
+            name: libraryEditForm.name.trim(),
+            unit: libraryEditForm.unit,
+            per: parseFloat(libraryEditForm.per) || 100,
+            kcal: parseFloat(libraryEditForm.kcal) || 0,
+            protein: parseFloat(libraryEditForm.protein) || 0,
+            carb: parseFloat(libraryEditForm.carb) || 0,
+            fat: parseFloat(libraryEditForm.fat) || 0
         };
 
-        setHistory(prev => {
-            const currentList = prev[currentDate] || [];
-            return {
-                ...prev,
-                [currentDate]: currentList.map(item => item.id === idToUpdate ? updatedItem : item)
-            };
-        });
+        // Đẩy món đã sửa lên đầu danh sách Custom
+        setCustomFoodList([updatedFood, ...newCustomList]);
+        
+        // Nếu người dùng đang bấm chọn đúng món đó thì cập nhật luôn thông tin hiển thị
+        if (selectedFood && selectedFood.name === oldName) {
+            setSelectedFood(updatedFood);
+        }
 
-        setEditModal({ isOpen: false, item: null });
+        setEditLibraryModal({ isOpen: false, item: null, originalName: "" });
     };
 
     if (!isClient) return null;
@@ -1095,10 +1105,15 @@ export default function App() {
                                 <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto no-scrollbar pb-2">
                                     {filteredFoods.map((f, idx) => (
                                         <div key={f.name + idx} className="relative group flex">
-                                            <button onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`w-full p-4 pr-8 rounded-2xl text-left transition-all border ${selectedFood?.name === f.name ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-transparent"} active:scale-95`}>
+                                            <button onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`w-full p-4 pr-16 rounded-2xl text-left transition-all border ${selectedFood?.name === f.name ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-transparent"} active:scale-95`}>
                                                 <p className="text-[9px] font-black text-slate-500 uppercase leading-tight truncate mb-1">{f.name}</p><p className="text-sm font-black text-slate-800">{f.kcal} <span className="text-[8px] font-normal italic opacity-40">kcal/{f.per}{f.unit}</span></p>
                                             </button>
-                                            <button onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} className="absolute right-2 top-2 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"><IconTrash /></button>
+                                            
+                                            {/* NÚT SỬA VÀ XÓA HIỆN RA KHI CHẠM/HOVER Ở MỤC CHỌN NHANH */}
+                                            <div className="absolute right-1 top-2 flex opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                                <button onClick={(e) => { e.stopPropagation(); openLibraryEditModal(f); }} className="p-2 text-slate-300 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"><IconEdit /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><IconTrash /></button>
+                                            </div>
                                         </div>
                                     ))}
                                     {filteredFoods.length === 0 && ( <p className="col-span-2 text-center py-6 text-slate-400 text-xs italic">Không tìm thấy món ăn</p> )}
@@ -1158,11 +1173,8 @@ export default function App() {
                                     </div>
                                     
                                     <div className="flex items-center gap-2 mb-1.5">
+                                        {/* ĐÃ TRẢ LẠI GIAO DIỆN NGUYÊN BẢN (KHÔNG CÒN NÚT EDIT Ở ĐÂY) */}
                                         <p className="text-xs font-bold text-slate-800 uppercase truncate">{item.name} &mdash; {item.quantity}{item.unit}</p>
-                                        {/* NÚT CHỈNH SỬA MỚI */}
-                                        <button onClick={() => openEditModal(item)} className="text-emerald-500 hover:text-emerald-600 bg-emerald-50 hover:bg-emerald-100 p-1.5 rounded-md transition-colors shadow-sm">
-                                            <IconEdit />
-                                        </button>
                                     </div>
                                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1.5 flex-wrap"><span className="text-orange-500 font-black">{item.kcal} kcal</span><span className="text-slate-200">|</span> P: {item.protein}g <span className="text-slate-200">|</span> C: {item.carb}g <span className="text-slate-200">|</span> F: {item.fat}g</p>
                                 </div>
@@ -1172,26 +1184,26 @@ export default function App() {
                         {dailyLog.length === 0 && ( <p className="text-center text-slate-300 text-[10px] uppercase font-bold italic py-8 border-2 border-dashed border-slate-100 rounded-[2.5rem] tracking-[0.2em]">Danh sách trống</p> )}
                     </div>
                     
-                    {/* --- MODAL CHỈNH SỬA MÓN ĂN --- */}
-                    {editModal.isOpen && (
+                    {/* --- MODAL CHỈNH SỬA THƯ VIỆN MÓN ĂN --- */}
+                    {editLibraryModal.isOpen && (
                         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                             <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200 relative">
-                                 <button onClick={() => setEditModal({ isOpen: false, item: null })} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors font-black">✕</button>
-                                <h3 className="text-sm font-black text-slate-800 mb-4 uppercase tracking-widest text-center">Sửa thông tin món</h3>
+                                 <button onClick={() => setEditLibraryModal({ isOpen: false, item: null, originalName: "" })} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors font-black">✕</button>
+                                <h3 className="text-sm font-black text-slate-800 mb-4 uppercase tracking-widest text-center">Sửa thư viện món</h3>
                                 
                                 <div className="space-y-3">
                                     <div>
                                         <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Tên món</label>
-                                        <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                                        <input type="text" value={libraryEditForm.name} onChange={e => setLibraryEditForm({...libraryEditForm, name: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                          <div>
-                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Số lượng</label>
-                                            <input type="number" step="any" value={editForm.quantity} onChange={e => setEditForm({...editForm, quantity: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Định lượng (per)</label>
+                                            <input type="number" step="any" value={libraryEditForm.per} onChange={e => setLibraryEditForm({...libraryEditForm, per: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
                                          </div>
                                          <div>
                                             <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Đơn vị</label>
-                                            <select value={editForm.unit} onChange={e => setEditForm({...editForm, unit: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 appearance-none cursor-pointer">
+                                            <select value={libraryEditForm.unit} onChange={e => setLibraryEditForm({...libraryEditForm, unit: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 appearance-none cursor-pointer">
                                                 <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
                                             </select>
                                          </div>
@@ -1199,22 +1211,22 @@ export default function App() {
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="relative group">
                                             <label className="text-[10px] font-black text-orange-400 uppercase block mb-1">Kcal</label>
-                                            <input type="number" step="any" value={editForm.kcal} onChange={e => setEditForm({...editForm, kcal: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" />
+                                            <input type="number" step="any" value={libraryEditForm.kcal} onChange={e => setLibraryEditForm({...libraryEditForm, kcal: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" />
                                         </div>
                                         <div className="relative group">
                                             <label className="text-[10px] font-black text-emerald-400 uppercase block mb-1">Protein</label>
-                                            <input type="number" step="any" value={editForm.protein} onChange={e => setEditForm({...editForm, protein: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                                            <input type="number" step="any" value={libraryEditForm.protein} onChange={e => setLibraryEditForm({...libraryEditForm, protein: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
                                         </div>
                                         <div className="relative group">
                                             <label className="text-[10px] font-black text-blue-400 uppercase block mb-1">Carb</label>
-                                            <input type="number" step="any" value={editForm.carb} onChange={e => setEditForm({...editForm, carb: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-blue-500/20" />
+                                            <input type="number" step="any" value={libraryEditForm.carb} onChange={e => setLibraryEditForm({...libraryEditForm, carb: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-blue-500/20" />
                                         </div>
                                         <div className="relative group">
                                             <label className="text-[10px] font-black text-yellow-400 uppercase block mb-1">Fat</label>
-                                            <input type="number" step="any" value={editForm.fat} onChange={e => setEditForm({...editForm, fat: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-yellow-500/20" />
+                                            <input type="number" step="any" value={libraryEditForm.fat} onChange={e => setLibraryEditForm({...libraryEditForm, fat: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-yellow-500/20" />
                                         </div>
                                     </div>
-                                    <button onClick={saveEditedItem} className="w-full py-3.5 bg-emerald-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-200 active:scale-95 transition-all mt-4">Lưu thay đổi</button>
+                                    <button onClick={saveLibraryEdit} className="w-full py-3.5 bg-emerald-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-200 active:scale-95 transition-all mt-4">Lưu vào thư viện</button>
                                 </div>
                             </div>
                         </div>
