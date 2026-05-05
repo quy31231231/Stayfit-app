@@ -92,16 +92,56 @@ export async function POST(req) {
               const key = `${userId}::${meal.timestamp}`;
               
               if (existingMap.has(key)) {
-                // NẾU MÓN ĐÃ TỒN TẠI: Kiểm tra xem có đổi bữa ăn không để CẬP NHẬT
+                // NẾU MÓN ĐÃ TỒN TẠI: Kiểm tra xem có bất kỳ thay đổi nào cần cập nhật không
                 const { row, index } = existingMap.get(key);
-                if (row[2] !== meal.meal) {
+                
+                // Kiểm tra sự khác biệt giữa data gửi lên và data hiện tại trên Sheet
+                // Lấy các giá trị trên Sheet (nhớ ép kiểu về số để so sánh chính xác với số)
+                const currentMeal = row[2];
+                const currentName = row[3];
+                const currentQty = parseFloat(row[4]);
+                const currentUnit = row[5];
+                const currentKcal = parseFloat(row[6]);
+                const currentPro = parseFloat(row[7]);
+                const currentCarb = parseFloat(row[8]);
+                const currentFat = parseFloat(row[9]);
+
+                const isChanged = 
+                    currentMeal !== meal.meal ||
+                    currentName !== meal.name ||
+                    currentQty !== meal.quantity ||
+                    currentUnit !== meal.unit ||
+                    currentKcal !== meal.kcal ||
+                    currentPro !== meal.protein ||
+                    currentCarb !== meal.carb ||
+                    currentFat !== meal.fat;
+
+                if (isChanged) {
+                  // Cập nhật nguyên một dải từ C (Meal) đến J (Fat) trên hàng đó
                   await sheets.spreadsheets.values.update({
                     spreadsheetId: SHEET_ID,
-                    range: `History!C${index + 1}`, // Cột C chính là cột ghi Bữa Ăn
+                    range: `History!C${index + 1}:J${index + 1}`,
                     valueInputOption: "USER_ENTERED",
-                    requestBody: { values: [[meal.meal]] }
+                    requestBody: { values: [[
+                        meal.meal, 
+                        meal.name, 
+                        meal.quantity, 
+                        meal.unit, 
+                        meal.kcal, 
+                        meal.protein, 
+                        meal.carb, 
+                        meal.fat
+                    ]] }
                   });
-                  row[2] = meal.meal; // Cập nhật trạng thái để máy chủ không cập nhật trùng lặp
+                  // Cập nhật lại row trong bộ nhớ để tránh update lại lần nữa trong cùng session
+                  row[2] = meal.meal;
+                  row[3] = meal.name;
+                  row[4] = meal.quantity;
+                  row[5] = meal.unit;
+                  row[6] = meal.kcal;
+                  row[7] = meal.protein;
+                  row[8] = meal.carb;
+                  row[9] = meal.fat;
                 }
               } else {
                 // NẾU LÀ MÓN MỚI TOANH: Thêm vào cuối bảng như bình thường
