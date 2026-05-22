@@ -30,7 +30,7 @@ export async function POST(req) {
   if (!SHEET_ID) return Response.json({ error: "Missing SPREADSHEET_ID" }, { status: 400 });
 
   const sheets = await getSheets();
-  const { action, userId, password, profile, history, weightLog } = await req.json();
+  const { action, userId, password, profile, history, weightLog, customFoods, deletedCommonFoods } = await req.json();
 
   // === UPLOAD DỮ LIỆU TỪ APP LÊN SHEETS ===
   if (action === "upload") {
@@ -39,8 +39,8 @@ export async function POST(req) {
     try {
       const hashedPassword = hashPassword(password);
 
-      // 1. KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE
-      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:J" });
+      // 1. KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE (đọc đến cột L để lấy luôn customFoods/deletedCommon hiện tại)
+      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:L" });
       const profileRows = profileRes.data.values || [];
       const profileIndex = profileRows.findIndex(row => row[0] === userId);
 
@@ -51,21 +51,29 @@ export async function POST(req) {
         }
       }
 
+      // Nếu client không gửi customFoods/deletedCommonFoods, giữ nguyên giá trị cũ trong Sheets
+      const existingCustomFoods = profileIndex !== -1 ? (profileRows[profileIndex][10] || "") : "";
+      const existingDeletedCommon = profileIndex !== -1 ? (profileRows[profileIndex][11] || "") : "";
+      const customFoodsJson = Array.isArray(customFoods) ? JSON.stringify(customFoods) : existingCustomFoods;
+      const deletedCommonJson = Array.isArray(deletedCommonFoods) ? JSON.stringify(deletedCommonFoods) : existingDeletedCommon;
+
       const newProfileRow = [
-        userId, profile.gender || "", profile.age || "", profile.height || "", profile.weight || "", 
-        profile.activity || "", profile.goal || "", profile.manualTargetKcal || "", 
-        new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" }), 
-        hashedPassword
+        userId, profile.gender || "", profile.age || "", profile.height || "", profile.weight || "",
+        profile.activity || "", profile.goal || "", profile.manualTargetKcal || "",
+        new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" }),
+        hashedPassword,
+        customFoodsJson,
+        deletedCommonJson
       ];
 
       if (profileIndex !== -1) {
         await sheets.spreadsheets.values.update({
-          spreadsheetId: SHEET_ID, range: `Profile!A${profileIndex + 1}`, valueInputOption: "USER_ENTERED",
+          spreadsheetId: SHEET_ID, range: `Profile!A${profileIndex + 1}:L${profileIndex + 1}`, valueInputOption: "USER_ENTERED",
           requestBody: { values: [newProfileRow] }
         });
       } else {
         await sheets.spreadsheets.values.append({
-          spreadsheetId: SHEET_ID, range: "Profile!A:J", valueInputOption: "USER_ENTERED",
+          spreadsheetId: SHEET_ID, range: "Profile!A:L", valueInputOption: "USER_ENTERED",
           requestBody: { values: [newProfileRow] }
         });
       }
@@ -207,8 +215,8 @@ export async function GET(req) {
     const sheets = await getSheets();
     const hashedPassword = hashPassword(password);
 
-    // 1. LẤY PROFILE
-    const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:J" });
+    // 1. LẤY PROFILE (đọc đến cột L để lấy customFoods + deletedCommonFoods)
+    const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:L" });
     const profileRows = profileRes.data.values || [];
     const profileRow = profileRows.find(row => row[0] === userId);
 
@@ -230,6 +238,11 @@ export async function GET(req) {
       goal: parseInt(profileRow[6]) || 0,
       manualTargetKcal: profileRow[7] ? parseInt(profileRow[7]) : null,
     };
+
+    let customFoods = null;
+    let deletedCommonFoods = null;
+    try { if (profileRow[10]) customFoods = JSON.parse(profileRow[10]); } catch (e) {}
+    try { if (profileRow[11]) deletedCommonFoods = JSON.parse(profileRow[11]); } catch (e) {}
 
     // 2. LẤY LỊCH SỬ
     const historyRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "History!A:K" });
@@ -270,7 +283,7 @@ export async function GET(req) {
       }
     });
 
-    return Response.json({ profile, history, weightLog });
+    return Response.json({ profile, history, weightLog, customFoods, deletedCommonFoods });
 
   } catch (err) {
     console.error(err);
@@ -293,7 +306,7 @@ export async function DELETE(req) {
     const hashedPassword = hashPassword(password);
 
     // Verify password
-    const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:J" });
+    const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:L" });
     const profileRows = profileRes.data.values || [];
     const profileRow = profileRows.find(row => row[0] === userId);
 

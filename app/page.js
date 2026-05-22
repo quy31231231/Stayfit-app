@@ -731,8 +731,15 @@ export default function App() {
         }
     }, [profile, history, customFoodList, deletedCommonFoods, view, userId, isClient]);
 
+    // Mốc thời gian pull gần nhất — dùng để skip push echo ngay sau khi pull
+    const lastPullAtRef = useRef(0);
+    // Cờ chống chạy đồng thời nhiều syncFromCloud
+    const pullingRef = useRef(false);
+
     const syncToCloud = async () => {
-        if (!userId || !password) return; 
+        if (!userId || !password) return;
+        // Tránh push echo: nếu vừa pull xong dưới 1.5s thì bỏ qua (state đổi do pull, không phải user)
+        if (Date.now() - lastPullAtRef.current < 1500) return;
         try {
             const profileToSave = { ...profile };
             if (!profileToSave.isManualTarget) profileToSave.manualTargetKcal = "";
@@ -744,13 +751,17 @@ export default function App() {
                 body: JSON.stringify({
                     action: "upload", userId: userId, password: password, profile: profileToSave,
                     history: history, weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
+                    customFoods: customFoodList,
+                    deletedCommonFoods: deletedCommonFoods,
                 }),
             });
         } catch (err) { console.error("Lỗi lưu ngầm:", err.message); }
     };
 
     const syncFromCloud = async () => {
-        if (!userId || !password) return; 
+        if (!userId || !password) return;
+        if (pullingRef.current) return;
+        pullingRef.current = true;
         try {
             const res = await fetch(`/api/sync?userId=${userId}&password=${password}`);
             const data = await res.json();
@@ -759,7 +770,7 @@ export default function App() {
 
             if (data.profile) {
                 data.profile.isManualTarget = typeof data.profile.manualTargetKcal === 'number' && !isNaN(data.profile.manualTargetKcal);
-                if (!data.profile.isManualTarget) data.profile.manualTargetKcal = 2000; 
+                if (!data.profile.isManualTarget) data.profile.manualTargetKcal = 2000;
                 data.profile.isManualMacro = profile.isManualMacro || false;
                 data.profile.manualProtein = profile.manualProtein || 125;
                 data.profile.manualCarb = profile.manualCarb || 250;
@@ -769,11 +780,18 @@ export default function App() {
             }
             if (data.history) setHistory(data.history);
             if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
+            if (Array.isArray(data.customFoods)) setCustomFoodList(data.customFoods);
+            if (Array.isArray(data.deletedCommonFoods)) setDeletedCommonFoods(data.deletedCommonFoods);
+
+            lastPullAtRef.current = Date.now();
+
+            // Chỉ reload đúng 1 lần khi đăng nhập lần đầu trong session (để re-init biểu đồ, v.v.)
             if (!sessionStorage.getItem(`sync_done_${userId}`)) {
                 sessionStorage.setItem(`sync_done_${userId}`, 'true');
                 window.location.reload();
             }
         } catch (err) { console.error("Lỗi tải ngầm:", err.message); }
+        finally { pullingRef.current = false; }
     };
 
     const handleLogin = async () => {
@@ -790,6 +808,8 @@ export default function App() {
             if (data.profile) setProfile({...profile, ...data.profile});
             if (data.history) setHistory(data.history);
             if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
+            if (Array.isArray(data.customFoods)) localStorage.setItem('stayfit_custom_foods', JSON.stringify(data.customFoods));
+            if (Array.isArray(data.deletedCommonFoods)) localStorage.setItem('stayfit_deleted_common', JSON.stringify(data.deletedCommonFoods));
             window.location.reload();
         } catch (err) { alert("❌ Lỗi: " + err.message); } 
         finally { setLoginLoading(false); }
@@ -809,14 +829,35 @@ export default function App() {
         if (isFirstRender.current) { isFirstRender.current = false; return; }
         const timeoutId = setTimeout(() => { syncToCloud(); }, 2500);
         return () => clearTimeout(timeoutId);
-    }, [history, profile]); 
+    }, [history, profile, customFoodList, deletedCommonFoods]);
 
+    // Auto-PULL: khi tab hiển thị trở lại, khi window focus, và polling 30s
     useEffect(() => {
-        if (!isClient) return;
-        const handleVisibilityChange = () => { if (document.visibilityState === 'hidden') syncToCloud(); };
+        if (!isClient || !userId || !password) return;
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                syncToCloud();
+            } else if (document.visibilityState === 'visible') {
+                syncFromCloud();
+            }
+        };
+        const handleFocus = () => { syncFromCloud(); };
+
         document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-    }, [isClient, history, profile, userId, password]);
+        window.addEventListener('focus', handleFocus);
+
+        // Polling mỗi 30s khi tab đang hiển thị
+        const pollId = setInterval(() => {
+            if (document.visibilityState === 'visible') syncFromCloud();
+        }, 30000);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', handleFocus);
+            clearInterval(pollId);
+        };
+    }, [isClient, userId, password]);
     
     const calculatedTarget = useMemo(() => {
         let bmr = profile.gender === "male" 
