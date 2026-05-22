@@ -366,10 +366,10 @@ function MacroProgressBar({ label, current, target, colorClass }) {
     return (
         <div className="w-full">
             <div className="flex justify-between text-[10px] font-black uppercase mb-1.5">
-                <span className="text-slate-400">{label}</span>
-                <span className="text-slate-700">{current}g <span className="opacity-40">/ {target}g</span></span>
+                <span className="text-ink-muted">{label}</span>
+                <span className="text-ink">{current}g <span className="opacity-40">/ {target}g</span></span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-cream-deep rounded-full h-1.5 overflow-hidden">
                 <div className={`h-full ${colorClass} transition-all duration-700 ease-out`} style={{ width: `${pct}%` }}></div>
             </div>
         </div>
@@ -445,7 +445,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     };
 
     useEffect(() => {
-        Chart.defaults.font.family = "'Inter', sans-serif"; Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter', sans-serif"; Chart.defaults.color = '#7A7066';
 
         if (weightChartInstance.current) weightChartInstance.current.destroy();
         const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(a) - new Date(b)).slice(-14);
@@ -454,14 +454,14 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
             const labels = sortedDates.map(d => getWeekLabel(d)); 
             const data = sortedDates.map(d => weightLog[d]);
             const gradient = ctx.createLinearGradient(0, 0, 0, 200); 
-            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)'); gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+            gradient.addColorStop(0, 'rgba(217, 119, 87, 0.3)'); gradient.addColorStop(1, 'rgba(217, 119, 87, 0.0)');
 
             weightChartInstance.current = new Chart(ctx, { 
                 type: 'line', 
                 data: { labels: labels, datasets: [{ 
-                    label: 'Cân nặng (kg)', data: data, borderColor: '#10B981', backgroundColor: gradient, borderWidth: 3, 
-                    pointBackgroundColor: '#ffffff', pointBorderColor: '#10B981', pointRadius: 4, fill: true, tension: 0.3,
-                    datalabels: { align: 'top', color: '#10B981', font: { weight: 'bold', size: 10 }, formatter: (val) => val }
+                    label: 'Cân nặng (kg)', data: data, borderColor: '#D97757', backgroundColor: gradient, borderWidth: 3, 
+                    pointBackgroundColor: '#ffffff', pointBorderColor: '#D97757', pointRadius: 4, fill: true, tension: 0.3,
+                    datalabels: { align: 'top', color: '#D97757', font: { weight: 'bold', size: 10 }, formatter: (val) => val }
                 }] }, 
                 options: { 
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 20 } },
@@ -506,14 +506,14 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                     labels: labels, 
                     datasets: [
                         // Đặt stack riêng rẽ cho các đường line để chúng không bị cộng dồn
-                        { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#3B82F6', font: { weight: 'black', size: 9 }, formatter: (val) => val > 0 ? val : '' } },
-                        { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#cbd5e1', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
+                        { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#6B95AB', font: { weight: 'black', size: 9 }, formatter: (val) => val > 0 ? val : '' } },
+                        { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#B8AFA4', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
                         
                         // Gắn chung stack 'bars' cho 4 bữa ăn để chúng tự động xếp chồng lên nhau
-                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#fb923c', datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#10b981', datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#3b82f6', datalabels: { display: false } },
-                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#c084fc', datalabels: { display: false }, borderRadius: { topLeft: 4, topRight: 4 } }
+                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#C49A4A', datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#5F8266', datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#9B8AB8', datalabels: { display: false } },
+                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#D97757', datalabels: { display: false }, borderRadius: { topLeft: 4, topRight: 4 } }
                     ]
                 },
                 options: { 
@@ -525,9 +525,9 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                         tooltip: { 
                             enabled: true,
                             backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            titleColor: '#0f172a',
-                            bodyColor: '#334155',
-                            borderColor: '#e2e8f0',
+                            titleColor: '#2D2620',
+                            bodyColor: '#2D2620',
+                            borderColor: '#EBE3D2',
                             borderWidth: 1,
                             padding: 10,
                             boxPadding: 4,
@@ -544,8 +544,8 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                         } 
                     }, 
                     scales: { 
-                        x: { stacked: true, display: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { font: { weight: 'bold', size: 9 } } },
-                        y: { stacked: true, display: true, beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { display: false } } 
+                        x: { stacked: true, display: true, grid: { color: '#F4EFE6', drawBorder: false }, ticks: { font: { weight: 'bold', size: 9 } } },
+                        y: { stacked: true, display: true, beginAtZero: true, grid: { color: '#F4EFE6', drawBorder: false }, ticks: { display: false } } 
                     } 
                 } 
             });
@@ -562,15 +562,15 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
            macroChartInstance.current = new Chart(ctx, { 
                 type: 'line', 
                 data: { labels: labels, datasets: [
-                    { label: 'Protein', data: dataProtein, borderColor: '#10B981', backgroundColor: '#10B981', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } }, 
-                    { label: 'Carb', data: dataCarb, borderColor: '#3B82F6', backgroundColor: '#3B82F6', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } },
-                    { label: 'Fat', data: dataFat, borderColor: '#F59E0B', backgroundColor: '#F59E0B', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } }
+                    { label: 'Protein', data: dataProtein, borderColor: '#D97757', backgroundColor: '#D97757', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } }, 
+                    { label: 'Carb', data: dataCarb, borderColor: '#6B95AB', backgroundColor: '#6B95AB', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } },
+                    { label: 'Fat', data: dataFat, borderColor: '#C49A4A', backgroundColor: '#C49A4A', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } }
                 ]},
                 options: { 
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25, bottom: 15 } },
                     onClick: handleChartClick, onHover: handleChartHover,
                     plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: {size: 10, weight: 'bold'} } }, tooltip: { enabled: false } }, 
-                    scales: { y: { display: true, beginAtZero: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { display: false } }, x: { display: true, grid: { color: '#f1f5f9', drawBorder: false }, ticks: { font: { weight: 'bold', size: 9 } } } } 
+                    scales: { y: { display: true, beginAtZero: true, grid: { color: '#F4EFE6', drawBorder: false }, ticks: { display: false } }, x: { display: true, grid: { color: '#F4EFE6', drawBorder: false }, ticks: { font: { weight: 'bold', size: 9 } } } } 
                 } 
             });
         }
@@ -585,57 +585,57 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
 
     return (
-        <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative text-slate-800">
-            <header className="bg-white p-6 border-b border-slate-100 flex justify-center items-center shadow-sm sticky top-0 z-20">
-                <h1 className="font-black uppercase tracking-widest text-slate-800 text-xs text-center w-full">Thống kê & Biểu đồ</h1>
+        <div className="max-w-md mx-auto min-h-screen bg-cream-soft pb-28 animate-in fade-in duration-300 relative text-ink">
+            <header className="bg-white p-6 border-b border-cream-deep flex justify-center items-center shadow-sm sticky top-0 z-20">
+                <h1 className="font-black uppercase tracking-widest text-ink text-xs text-center w-full">Thống kê & Biểu đồ</h1>
             </header>
             <main className="p-4 space-y-6">
-                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cập nhật cân nặng</h3>
-                    <div className="flex items-center bg-slate-50 p-1.5 rounded-[1.25rem] mb-4 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all border border-slate-100 shadow-inner">
+                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep">
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted mb-4">Cập nhật cân nặng</h3>
+                    <div className="flex items-center bg-cream-soft p-1.5 rounded-[1.25rem] mb-4 focus-within:ring-2 focus-within:ring-orange/20 transition-all border border-cream-deep shadow-inner">
                         <div className="relative flex items-center">
-                            <svg className="w-4 h-4 text-emerald-500 absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[115px] bg-transparent py-3 pl-9 pr-1 outline-none font-black text-[10px] uppercase text-slate-600 cursor-pointer tracking-wider [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
+                            <svg className="w-4 h-4 text-orange absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[115px] bg-transparent py-3 pl-9 pr-1 outline-none font-black text-[10px] uppercase text-ink cursor-pointer tracking-wider [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
                         </div>
-                        <div className="w-px h-6 bg-slate-200 mx-1 shrink-0"></div>
-                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-3 outline-none font-bold text-sm text-slate-800 placeholder:text-slate-300 w-full min-w-[60px]" />
-                        <button onClick={saveWeight} className="h-10 px-5 bg-emerald-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-md shadow-emerald-200 shrink-0">Ghi</button>
+                        <div className="w-px h-6 bg-cream-deep mx-1 shrink-0"></div>
+                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-3 outline-none font-bold text-sm text-ink placeholder:text-ink-faint w-full min-w-[60px]" />
+                        <button onClick={saveWeight} className="h-10 px-5 bg-orange text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-md shadow-orange-soft shrink-0">Ghi</button>
                     </div>
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-300 mb-2 mt-6">Lịch sử (Gần nhất)</h4>
-                    <div className="max-h-32 overflow-y-auto no-scrollbar bg-slate-50 rounded-2xl p-2 border border-slate-100">
+                    <h4 className="text-[9px] font-black uppercase tracking-widest text-ink-faint mb-2 mt-6">Lịch sử (Gần nhất)</h4>
+                    <div className="max-h-32 overflow-y-auto no-scrollbar bg-cream-soft rounded-2xl p-2 border border-cream-deep">
                         {sortedDates.length === 0 ? (
-                            <p className="text-center text-slate-400 text-[10px] uppercase font-bold italic py-4">Chưa có bản ghi</p>
+                            <p className="text-center text-ink-muted text-[10px] uppercase font-bold italic py-4">Chưa có bản ghi</p>
                         ) : (
                             sortedDates.slice(0, 14).map(date => (
-                                <div key={date} className="flex justify-between items-center p-3 bg-white rounded-xl mb-1 shadow-sm border border-slate-50">
+                                <div key={date} className="flex justify-between items-center p-3 bg-white rounded-xl mb-1 shadow-sm border border-cream-soft">
                                     <div className="flex items-center gap-3">
-                                        <span className="text-[10px] font-black uppercase text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">{getWeekLabel(date)}/{date.split('-')[0]}</span>
-                                        <span className="text-sm font-black text-slate-800">{weightLog[date]} <span className="text-[10px] font-bold italic opacity-40">kg</span></span>
+                                        <span className="text-[10px] font-black uppercase text-ink-muted bg-cream-soft px-2 py-1 rounded-lg">{getWeekLabel(date)}/{date.split('-')[0]}</span>
+                                        <span className="text-sm font-black text-ink">{weightLog[date]} <span className="text-[10px] font-bold italic opacity-40">kg</span></span>
                                     </div>
-                                    <button onClick={() => deleteWeight(date)} className="p-2 text-slate-200 hover:text-red-500 bg-slate-50 rounded-lg transition-colors group"><IconTrash /></button>
+                                    <button onClick={() => deleteWeight(date)} className="p-2 text-cream-deep hover:text-orange-deep bg-cream-soft rounded-lg transition-colors group"><IconTrash /></button>
                                 </div>
                             ))
                         )}
                     </div>
                 </section>
-                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 relative">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Biểu đồ cân nặng</h3>
-                    {sortedDates.length === 0 && ( <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-[2.5rem] z-10"><p className="text-xs font-bold text-slate-400 italic">Chưa có dữ liệu</p></div> )}
+                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep relative">
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted mb-4">Biểu đồ cân nặng</h3>
+                    {sortedDates.length === 0 && ( <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-[2.5rem] z-10"><p className="text-xs font-bold text-ink-muted italic">Chưa có dữ liệu</p></div> )}
                     <div className="h-48 relative w-full"><canvas ref={weightChartRef}></canvas></div>
                 </section>
-                <div className="flex justify-between items-center bg-white p-2 rounded-2xl shadow-sm border border-slate-100 sticky top-[80px] z-10">
-                    <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-xl text-[10px] font-black uppercase transition-colors">◀ 14 Ngày Trước</button>
-                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest text-center px-2">
+                <div className="flex justify-between items-center bg-white p-2 rounded-2xl shadow-sm border border-cream-deep sticky top-[80px] z-10">
+                    <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-cream-soft hover:bg-cream-deep text-ink-muted rounded-xl text-[10px] font-black uppercase transition-colors">◀ 14 Ngày Trước</button>
+                    <span className="text-[10px] font-black uppercase text-ink-muted tracking-widest text-center px-2">
                         {getWeekLabel(currentChartDates[0])} - {getWeekLabel(currentChartDates[currentChartDates.length-1])}
                     </span>                    
-                    <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase transition-colors ${chartOffset === 0 ? 'bg-transparent text-slate-200' : 'bg-slate-50 hover:bg-slate-100 text-slate-500'}`}>Tiếp Theo ▶</button>
+                    <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase transition-colors ${chartOffset === 0 ? 'bg-transparent text-cream-deep' : 'bg-cream-soft hover:bg-cream-deep text-ink-muted'}`}>Tiếp Theo ▶</button>
                 </div>
-                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
-                    <div className="flex justify-between items-center mb-1"><h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Calo nạp vào</h3><span className="text-[8px] italic text-slate-300">Nhấn vào cột để xem</span></div>
+                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep">
+                    <div className="flex justify-between items-center mb-1"><h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted">Năng lượng đã nạp</h3><span className="text-[8px] italic text-ink-faint">Nhấn vào cột để xem</span></div>
                     <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
                 </section>
-               <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
-                    <div className="flex justify-between items-center mb-4"><h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Protein, Carb & Fat</h3><span className="text-[8px] italic text-slate-300">Nhấn vào điểm để xem</span></div>
+               <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep">
+                    <div className="flex justify-between items-center mb-4"><h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted">Protein, Carb & Fat</h3><span className="text-[8px] italic text-ink-faint">Nhấn vào điểm để xem</span></div>
                     <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
                 </section>
             </main>
@@ -646,14 +646,14 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
 
 function BottomNav({view, setView}) {
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 p-4 z-40 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] max-w-md mx-auto">
-            <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='journal' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-cream-deep p-4 z-40 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] max-w-md mx-auto">
+            <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='journal' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
                 <IconJournal /><span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
             </button>
-            <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='stats' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
+            <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='stats' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
                 <IconStats /><span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
             </button>
-            <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='profile' ? 'text-emerald-600 scale-110 font-black':'text-slate-300 opacity-60'}`}>
+            <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='profile' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
                 <IconUser /><span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
             </button>
         </div>
@@ -920,8 +920,8 @@ export default function App() {
 
     const mealBreakdown = useMemo(() => {
         return [ 
-            { name: "Bữa sáng", icon: "☀️", color: "bg-orange-400" }, { name: "Bữa trưa", icon: "🌤️", color: "bg-emerald-500" }, 
-            { name: "Bữa tối", icon: "🌙", color: "bg-blue-500" }, { name: "Ăn vặt", icon: "⭐", color: "bg-purple-400" } 
+            { name: "Bữa sáng", icon: "☀️", color: "bg-clay" }, { name: "Bữa trưa", icon: "🌤️", color: "bg-sage" },
+            { name: "Bữa tối", icon: "🌙", color: "bg-lilac" }, { name: "Ăn vặt", icon: "⭐", color: "bg-orange" } 
         ].map(meal => {
             const mealTotal = dailyLog.filter(item => item.meal === meal.name).reduce((sum, item) => sum + (item.kcal || 0), 0);
             return { ...meal, kcal: Math.round(mealTotal * 10) / 10 };
@@ -1106,16 +1106,16 @@ export default function App() {
 
     if (!userId || !password) {
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-emerald-600 flex flex-col items-center justify-center p-8 text-white relative overflow-hidden font-sans">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-700 rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/3"></div>
+            <div className="max-w-md mx-auto min-h-screen bg-orange flex flex-col items-center justify-center p-8 text-white relative overflow-hidden font-sans">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-orange rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-deep rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/3"></div>
                 <div className="bg-white/10 p-8 rounded-[2.5rem] w-full backdrop-blur-xl border border-white/20 text-center shadow-2xl relative z-10">
                     <h1 className="text-4xl font-black tracking-tighter italic mb-8">STAYFIT</h1>
                     <div className="space-y-3 mb-6">
                         <input type="text" value={inputUser} onChange={e=>setInputUser(e.target.value)} placeholder="Tên ID (vd: quy2026)" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" />
                         <input type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="Mật khẩu" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} />
                     </div>
-                    <button onClick={handleLogin} disabled={loginLoading} className="w-full py-4 bg-white text-emerald-600 rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng Nhập"}</button>
+                    <button onClick={handleLogin} disabled={loginLoading} className="w-full py-4 bg-white text-orange rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng Nhập"}</button>
                     <p className="text-[9px] text-white/50 font-bold mt-4 px-4 leading-relaxed">Nếu chưa có tài khoản, hãy nhập ID & Mật khẩu mới để tự động đăng ký.</p>
                 </div>
             </div>
@@ -1128,61 +1128,61 @@ export default function App() {
     
     if (view === "profile") {
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-white p-8 flex flex-col justify-center space-y-6 animate-in fade-in duration-500 pb-28 relative font-sans text-slate-800">
-                <div className="text-center mb-4"><h1 className="text-4xl font-black text-emerald-600 tracking-tighter italic">STAYFIT</h1><p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Hồ sơ cá nhân</p></div>
-                <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl">
-                    <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='male' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>Nam</button>
-                    <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='female' ? 'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>Nữ</button>
+            <div className="max-w-md mx-auto min-h-screen bg-white p-8 flex flex-col justify-center space-y-6 animate-in fade-in duration-500 pb-28 relative font-sans text-ink">
+                <div className="text-center mb-4"><h1 className="text-4xl font-black text-orange tracking-tighter italic">STAYFIT</h1><p className="text-ink-muted text-[10px] font-black uppercase tracking-[0.3em] mt-2">Hồ sơ cá nhân</p></div>
+                <div className="flex gap-2 p-1 bg-cream-deep rounded-2xl">
+                    <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='male' ? 'bg-white text-orange shadow-sm':'text-ink-muted'}`}>Nam</button>
+                    <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='female' ? 'bg-white text-orange shadow-sm':'text-ink-muted'}`}>Nữ</button>
                 </div>
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="relative"><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Tuổi</label><div className="relative group"><input type="number" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="w-full bg-slate-50 p-4 pr-12 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">tuổi</span></div></div>
-                        <div className="relative"><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Cân nặng</label><div className="relative group"><input type="number" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">kg</span></div></div>
+                        <div className="relative"><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Tuổi</label><div className="relative group"><input type="number" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="w-full bg-cream-soft p-4 pr-12 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-orange/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-ink-muted italic">tuổi</span></div></div>
+                        <div className="relative"><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Cân nặng</label><div className="relative group"><input type="number" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="w-full bg-cream-soft p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-orange/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-ink-muted italic">kg</span></div></div>
                     </div>
-                    <div className="relative"><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Chiều cao</label><div className="relative group"><input type="number" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 italic">cm</span></div></div>
-                    <div><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Mức độ vận động</label><select value={profile.activity} onChange={e=>{ setProfile({...profile, activity:+e.target.value, isManualTarget: false}); }} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{ACTIVITY_LEVELS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}</select></div>
-                    <div><label className="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Mục tiêu cân nặng</label><select value={profile.goal} onChange={e=>{ setProfile({...profile, goal:+e.target.value, isManualTarget: false}); }} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{GOALS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}</select></div>
+                    <div className="relative"><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Chiều cao</label><div className="relative group"><input type="number" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-cream-soft p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-orange/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-ink-muted italic">cm</span></div></div>
+                    <div><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Mức độ vận động</label><select value={profile.activity} onChange={e=>{ setProfile({...profile, activity:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{ACTIVITY_LEVELS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}</select></div>
+                    <div><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Mục tiêu cân nặng</label><select value={profile.goal} onChange={e=>{ setProfile({...profile, goal:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{GOALS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}</select></div>
                 </div>
-                <div className="bg-slate-900 rounded-3xl p-6 text-white text-center shadow-xl flex flex-col items-center">
-                    <span className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Ngân sách Calo/Ngày</span>
-                    <div className="flex justify-center items-end mt-1"><input type="number" value={target} onChange={e => { setProfile({ ...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0 }); }} className="text-4xl font-black text-emerald-400 tracking-tighter bg-transparent text-center outline-none w-32 border-b-2 border-dashed border-slate-700 hover:border-emerald-400 focus:border-emerald-400 transition-colors" /><span className="text-lg font-normal text-slate-500 italic mb-1 ml-1">kcal</span></div>
-                    {profile.isManualTarget && <button onClick={() => setProfile({...profile, isManualTarget: false})} className="text-[9px] text-emerald-500/80 mt-3 font-bold uppercase tracking-widest hover:text-emerald-400 transition-colors">⟲ Trở về Mức Tính Tự Động ({calculatedTarget})</button>}
+                <div className="bg-ink rounded-3xl p-6 text-white text-center shadow-xl flex flex-col items-center">
+                    <span className="text-ink-muted text-[10px] font-black uppercase tracking-widest">Ngân sách Calo/Ngày</span>
+                    <div className="flex justify-center items-end mt-1"><input type="number" value={target} onChange={e => { setProfile({ ...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0 }); }} className="text-4xl font-black text-orange tracking-tighter bg-transparent text-center outline-none w-32 border-b-2 border-dashed border-ink hover:border-orange focus:border-orange transition-colors" /><span className="text-lg font-normal text-ink-muted italic mb-1 ml-1">kcal</span></div>
+                    {profile.isManualTarget && <button onClick={() => setProfile({...profile, isManualTarget: false})} className="text-[9px] text-orange/80 mt-3 font-bold uppercase tracking-widest hover:text-orange transition-colors">⟲ Trở về Mức Tính Tự Động ({calculatedTarget})</button>}
                 </div>
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mt-2">
-                    <div className="flex justify-between items-center mb-4"><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tùy chỉnh Macro</span><button onClick={() => { const nextState = !profile.isManualMacro; setProfile({...profile, isManualMacro: nextState}); if (nextState) setIsDietModalOpen(true); }} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${profile.isManualMacro ? 'bg-emerald-500' : 'bg-slate-200'}`}><span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${profile.isManualMacro ? 'translate-x-5' : 'translate-x-1'}`} /></button></div>
+                <div className="bg-white rounded-3xl p-6 shadow-sm border border-cream-deep mt-2">
+                    <div className="flex justify-between items-center mb-4"><span className="text-[10px] font-black uppercase tracking-widest text-ink-muted">Tùy chỉnh Macro</span><button onClick={() => { const nextState = !profile.isManualMacro; setProfile({...profile, isManualMacro: nextState}); if (nextState) setIsDietModalOpen(true); }} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${profile.isManualMacro ? 'bg-orange' : 'bg-cream-deep'}`}><span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${profile.isManualMacro ? 'translate-x-5' : 'translate-x-1'}`} /></button></div>
                     {profile.isManualMacro ? (
                         <div className="animate-in fade-in slide-in-from-top-2">
-                            <div className="flex justify-between items-center mb-3 bg-slate-50 p-2 rounded-xl"><span className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-2">{profile.macroDietMode || "Tự nhập tay (Custom)"}</span><button onClick={() => setIsDietModalOpen(true)} className="text-[9px] font-black bg-white px-3 py-1.5 rounded-lg text-emerald-600 shadow-sm border border-slate-100 hover:bg-emerald-50 transition-colors uppercase active:scale-95">Đổi chế độ</button></div>
+                            <div className="flex justify-between items-center mb-3 bg-cream-soft p-2 rounded-xl"><span className="text-[10px] font-black uppercase tracking-widest text-ink ml-2">{profile.macroDietMode || "Tự nhập tay (Custom)"}</span><button onClick={() => setIsDietModalOpen(true)} className="text-[9px] font-black bg-white px-3 py-1.5 rounded-lg text-orange shadow-sm border border-cream-deep hover:bg-orange-soft transition-colors uppercase active:scale-95">Đổi chế độ</button></div>
                             <div className="grid grid-cols-3 gap-2">
-                                <div className="text-center relative"><label className="text-[9px] font-black text-emerald-500 uppercase block mb-1">Protein</label><input type="number" value={profile.manualProtein} onChange={e => setProfile({...profile, manualProtein: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-slate-50 py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all" /><span className="text-[9px] text-slate-400 italic absolute bottom-3 right-3 pointer-events-none">g</span></div>
-                                <div className="text-center relative"><label className="text-[9px] font-black text-blue-500 uppercase block mb-1">Carb</label><input type="number" value={profile.manualCarb} onChange={e => setProfile({...profile, manualCarb: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-slate-50 py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" /><span className="text-[9px] text-slate-400 italic absolute bottom-3 right-3 pointer-events-none">g</span></div>
-                                <div className="text-center relative"><label className="text-[9px] font-black text-yellow-500 uppercase block mb-1">Fat</label><input type="number" value={profile.manualFat} onChange={e => setProfile({...profile, manualFat: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-slate-50 py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-yellow-500/20 transition-all" /><span className="text-[9px] text-slate-400 italic absolute bottom-3 right-3 pointer-events-none">g</span></div>
+                                <div className="text-center relative"><label className="text-[9px] font-black text-orange uppercase block mb-1">Protein</label><input type="number" value={profile.manualProtein} onChange={e => setProfile({...profile, manualProtein: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-orange/20 transition-all" /><span className="text-[9px] text-ink-muted italic absolute bottom-3 right-3 pointer-events-none">g</span></div>
+                                <div className="text-center relative"><label className="text-[9px] font-black text-mist-deep uppercase block mb-1">Carb</label><input type="number" value={profile.manualCarb} onChange={e => setProfile({...profile, manualCarb: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-mist-deep/20 transition-all" /><span className="text-[9px] text-ink-muted italic absolute bottom-3 right-3 pointer-events-none">g</span></div>
+                                <div className="text-center relative"><label className="text-[9px] font-black text-clay uppercase block mb-1">Fat</label><input type="number" value={profile.manualFat} onChange={e => setProfile({...profile, manualFat: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-clay/20 transition-all" /><span className="text-[9px] text-ink-muted italic absolute bottom-3 right-3 pointer-events-none">g</span></div>
                             </div>
                         </div>
                     ) : (
                         <div className="flex justify-between items-center text-center opacity-50">
-                            <div><p className="text-[9px] font-black text-emerald-500 uppercase mb-1">Protein</p><p className="text-xs font-bold">{Math.round((target * 0.25 / 4) * 10) / 10}g</p></div>
-                            <div><p className="text-[9px] font-black text-blue-500 uppercase mb-1">Carb</p><p className="text-xs font-bold">{Math.round((target * 0.50 / 4) * 10) / 10}g</p></div>
-                            <div><p className="text-[9px] font-black text-yellow-500 uppercase mb-1">Fat</p><p className="text-xs font-bold">{Math.round((target * 0.25 / 9) * 10) / 10}g</p></div>
+                            <div><p className="text-[9px] font-black text-orange uppercase mb-1">Protein</p><p className="text-xs font-bold">{Math.round((target * 0.25 / 4) * 10) / 10}g</p></div>
+                            <div><p className="text-[9px] font-black text-mist-deep uppercase mb-1">Carb</p><p className="text-xs font-bold">{Math.round((target * 0.50 / 4) * 10) / 10}g</p></div>
+                            <div><p className="text-[9px] font-black text-clay uppercase mb-1">Fat</p><p className="text-xs font-bold">{Math.round((target * 0.25 / 9) * 10) / 10}g</p></div>
                         </div>
                     )}
                 </div>
                 <div className="space-y-3 mt-2">
-                    <button onClick={() => setView("journal")} className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black uppercase shadow-lg shadow-emerald-200 active:scale-95 transition-all">Bắt đầu ngay</button>
-                    <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-4 bg-slate-100 text-slate-500 rounded-3xl font-black uppercase tracking-widest hover:bg-slate-200 active:scale-95 transition-all">Đăng xuất</button>
+                    <button onClick={() => setView("journal")} className="w-full py-5 bg-orange text-white rounded-3xl font-black uppercase shadow-lg shadow-orange-soft active:scale-95 transition-all">Bắt đầu ngay</button>
+                    <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-4 bg-cream-deep text-ink-muted rounded-3xl font-black uppercase tracking-widest hover:bg-cream-deep active:scale-95 transition-all">Đăng xuất</button>
                 </div>
                 <BottomNav view={view} setView={setView} />
                 {isDietModalOpen && (
-                    <div className="fixed inset-0 bg-slate-50 z-50 flex flex-col overflow-hidden max-w-md mx-auto animate-in slide-in-from-bottom-full duration-300">
-                        <div className="sticky top-0 z-20 bg-slate-50 p-6 border-b border-slate-200 flex justify-between items-center shrink-0 shadow-sm"><h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-800">Chọn chế độ ăn</h3><button onClick={() => setIsDietModalOpen(false)} className="w-8 h-8 bg-white shadow-sm rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><span className="font-black text-xs">X</span></button></div>
+                    <div className="fixed inset-0 bg-cream-soft z-50 flex flex-col overflow-hidden max-w-md mx-auto animate-in slide-in-from-bottom-full duration-300">
+                        <div className="sticky top-0 z-20 bg-cream-soft p-6 border-b border-cream-deep flex justify-between items-center shrink-0 shadow-sm"><h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-ink">Chọn chế độ ăn</h3><button onClick={() => setIsDietModalOpen(false)} className="w-8 h-8 bg-white shadow-sm rounded-full flex items-center justify-center text-ink-muted hover:bg-cream-deep transition-colors"><span className="font-black text-xs">X</span></button></div>
                         <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar pb-10">
                             {DIET_MODES.map((cat, idx) => (
-                                <div key={idx}><h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-3 ml-2">{cat.category}</h4>
+                                <div key={idx}><h4 className="text-[10px] font-black uppercase tracking-widest text-orange mb-3 ml-2">{cat.category}</h4>
                                     <div className="space-y-2">
                                         {cat.items.map(mode => (
-                                            <button key={mode.id} onClick={() => applyDietMode(mode)} className={`w-full text-left p-4 rounded-2xl border transition-all active:scale-95 ${profile.macroDietMode === mode.name ? 'border-emerald-500 bg-emerald-50 shadow-md' : 'border-slate-100 bg-white hover:border-emerald-200 hover:bg-slate-50 shadow-sm'}`}>
-                                                <div className="flex justify-between items-center mb-1"><span className="text-sm font-black text-slate-800">{mode.name}</span><span className="text-[9px] font-black bg-slate-100 text-slate-500 px-2 py-1 rounded-lg">{mode.label}</span></div>
-                                                <p className="text-[10px] text-slate-500 font-medium leading-relaxed">{mode.desc}</p>
+                                            <button key={mode.id} onClick={() => applyDietMode(mode)} className={`w-full text-left p-4 rounded-2xl border transition-all active:scale-95 ${profile.macroDietMode === mode.name ? 'border-orange bg-orange-soft shadow-md' : 'border-cream-deep bg-white hover:border-orange-soft hover:bg-cream-soft shadow-sm'}`}>
+                                                <div className="flex justify-between items-center mb-1"><span className="text-sm font-black text-ink">{mode.name}</span><span className="text-[9px] font-black bg-cream-deep text-ink-muted px-2 py-1 rounded-lg">{mode.label}</span></div>
+                                                <p className="text-[10px] text-ink-muted font-medium leading-relaxed">{mode.desc}</p>
                                             </button>
                                         ))}
                                     </div>
@@ -1197,91 +1197,91 @@ export default function App() {
 
     if (view === "journal") {
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-slate-50 pb-28 animate-in fade-in duration-300 relative font-sans text-slate-800">
-             <header className="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+            <div className="max-w-md mx-auto min-h-screen bg-cream-soft pb-28 animate-in fade-in duration-300 relative font-sans text-ink">
+             <header className="bg-white p-6 border-b border-cream-deep flex justify-between items-center sticky top-0 z-20 shadow-sm">
                     <div className="flex items-center gap-2">
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="p-2 text-slate-300 opacity-50 hover:opacity-100 hover:text-emerald-500 hover:bg-emerald-50 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-full transition-all duration-300 active:scale-95">
+                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="p-2 text-ink-faint opacity-50 hover:opacity-100 hover:text-orange hover:bg-orange-soft hover:shadow-[0_0_15px_rgba(217,119,87,0.4)] rounded-full transition-all duration-300 active:scale-95">
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
                         </button>
                         
                         <div className="text-center min-w-[90px]">
-                            <span className="font-black text-slate-800 uppercase text-[11px] tracking-widest">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</span>
+                            <span className="font-black text-ink uppercase text-[11px] tracking-widest">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</span>
                         </div>
                         
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="p-2 text-slate-300 opacity-50 hover:opacity-100 hover:text-emerald-500 hover:bg-emerald-50 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-full transition-all duration-300 active:scale-95">
+                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="p-2 text-ink-faint opacity-50 hover:opacity-100 hover:text-orange hover:bg-orange-soft hover:shadow-[0_0_15px_rgba(217,119,87,0.4)] rounded-full transition-all duration-300 active:scale-95">
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
                         </button>
                     </div>
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs shadow-sm">SF</div>
+                    <div className="w-9 h-9 rounded-xl bg-orange-soft text-orange flex items-center justify-center font-black text-xs shadow-sm">SF</div>
                 </header>
                 <main className="p-4 space-y-6">
-                    <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex flex-col gap-6">
+                    <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep flex flex-col gap-6">
                         <div className="flex items-center justify-between">
                             <div className="relative w-24 h-24 flex items-center justify-center">
                                 <svg className="transform -rotate-90 w-24 h-24">
-                                    <circle cx="48" cy="48" r="40" stroke="#F1F5F9" strokeWidth="10" fill="transparent" />
-                                    <circle cx="48" cy="48" r="40" stroke={dailyKcal > target ? "#EF4444" : "#10B981"} strokeWidth="10" fill="transparent" strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - Math.min(dailyKcal/target, 1.2))} strokeLinecap="round" className="transition-all duration-1000" />
+                                    <circle cx="48" cy="48" r="40" stroke="#F4EFE6" strokeWidth="10" fill="transparent" />
+                                    <circle cx="48" cy="48" r="40" stroke={dailyKcal > target ? "#D97757" : "#D97757"} strokeWidth="10" fill="transparent" strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - Math.min(dailyKcal/target, 1.2))} strokeLinecap="round" className="transition-all duration-1000" />
                                 </svg>
-                                <span className="absolute font-black text-xl text-slate-800">{Math.round((dailyKcal/target)*100) || 0}%</span>
+                                <span className="absolute font-black text-xl text-ink">{Math.round((dailyKcal/target)*100) || 0}%</span>
                             </div>
                             <div className="flex-1 text-right">
-                                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Mục tiêu: {target}</p>
-                                <h3 className="text-4xl font-black text-slate-800 leading-none">{dailyKcal}</h3>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Calo đã nạp</p>
+                                <p className="text-[10px] font-black text-ink-faint uppercase tracking-widest leading-none mb-1">Mục tiêu: {target}</p>
+                                <h3 className="text-4xl font-black text-ink leading-none">{dailyKcal}</h3>
+                                <p className="text-[10px] font-bold text-ink-muted uppercase mt-1 tracking-tighter">Năng lượng đã nạp</p>
                             </div>
                         </div>
-                        <div className="border-t border-slate-50 pt-5 space-y-3">
-                            <MacroProgressBar label="Protein" current={dailyProtein} target={targetProtein} colorClass="bg-emerald-500" />
-                            <MacroProgressBar label="Carb" current={dailyCarb} target={targetCarb} colorClass="bg-blue-500" />
-                            <MacroProgressBar label="Fat" current={dailyFat} target={targetFat} colorClass="bg-yellow-400" />
+                        <div className="border-t border-cream-soft pt-5 space-y-3">
+                            <MacroProgressBar label="Protein" current={dailyProtein} target={targetProtein} colorClass="bg-orange" />
+                            <MacroProgressBar label="Carb" current={dailyCarb} target={targetCarb} colorClass="bg-mist-deep" />
+                            <MacroProgressBar label="Fat" current={dailyFat} target={targetFat} colorClass="bg-clay" />
                         </div>
-                        <div className="border-t border-slate-50 pt-5 mt-1">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Theo bữa ăn</h3>
-                            {isDailyLogEmpty ? ( <p className="text-center text-[11px] italic text-slate-300 py-2">Chưa có dữ liệu hôm nay</p> ) : (
+                        <div className="border-t border-cream-soft pt-5 mt-1">
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted mb-4">Theo bữa ăn</h3>
+                            {isDailyLogEmpty ? ( <p className="text-center text-[11px] italic text-ink-faint py-2">Chưa có dữ liệu hôm nay</p> ) : (
                                 <div className="space-y-3">
                                     {mealBreakdown.map(meal => (
                                         <div key={meal.name} className="flex items-center justify-between gap-3">
-                                            <div className="flex items-center gap-2 w-24"><span className="w-5 h-5 flex items-center justify-center text-sm">{meal.icon}</span><span className="font-bold text-xs text-slate-700 uppercase">{meal.name}</span></div>
-                                            <div className="flex-1 bg-slate-100 rounded-full h-[3px]"><div className={`h-full rounded-full transition-all duration-500 ${meal.color}`} style={{ width: `${meal.kcal > 0 ? (meal.kcal / maxMealKcal) * 100 : 0}%` }}></div></div>
-                                            <div className="text-right min-w-[56px]">{meal.kcal > 0 ? ( <span className="font-black text-sm text-slate-800">{meal.kcal} <span className="text-[8px] text-slate-400 font-bold ml-0.5">KCAL</span></span> ) : ( <span className="font-black text-sm text-slate-300">—</span> )}</div>
+                                            <div className="flex items-center gap-2 w-24"><span className="w-5 h-5 flex items-center justify-center text-sm">{meal.icon}</span><span className="font-bold text-xs text-ink uppercase">{meal.name}</span></div>
+                                            <div className="flex-1 bg-cream-deep rounded-full h-[3px]"><div className={`h-full rounded-full transition-all duration-500 ${meal.color}`} style={{ width: `${meal.kcal > 0 ? (meal.kcal / maxMealKcal) * 100 : 0}%` }}></div></div>
+                                            <div className="text-right min-w-[56px]">{meal.kcal > 0 ? ( <span className="font-black text-sm text-ink">{meal.kcal} <span className="text-[8px] text-ink-muted font-bold ml-0.5">KCAL</span></span> ) : ( <span className="font-black text-sm text-ink-faint">—</span> )}</div>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
                     </div>
-                    <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100">
+                    <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep">
                         <div className="flex justify-between items-center mb-6">
-                            <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2"><IconPlus /> Thêm món</h4>
+                            <h4 className="text-[10px] font-black text-ink uppercase tracking-[0.2em] flex items-center gap-2"><IconPlus /> Thêm món</h4>
                             <div className="relative">
-                                <select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="bg-slate-50 hover:bg-emerald-50 text-[10px] font-black text-slate-600 py-2 pl-4 pr-8 rounded-full outline-none uppercase tracking-widest cursor-pointer border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 focus:text-emerald-700 transition-all shadow-sm appearance-none select-none">
-                                    {MEAL_TYPES.map(m => ( <option key={m} value={m} className="font-bold text-slate-700">{m}</option> ))}
+                                <select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="bg-cream-soft hover:bg-orange-soft text-[10px] font-black text-ink py-2 pl-4 pr-8 rounded-full outline-none uppercase tracking-widest cursor-pointer border border-cream-deep focus:border-orange focus:ring-4 focus:ring-orange/20 focus:text-orange-deep transition-all shadow-sm appearance-none select-none">
+                                    {MEAL_TYPES.map(m => ( <option key={m} value={m} className="font-bold text-ink">{m}</option> ))}
                                 </select>
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-emerald-600"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg></div>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-orange"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg></div>
                             </div>
                         </div>
-                        <div className="flex p-1 bg-slate-100 rounded-xl mb-4">
-                            <button onClick={() => setTab("quick")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "quick" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}>Chọn nhanh</button>
-                            <button onClick={() => setTab("custom")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "custom" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"}`}>Nhập tay</button>
+                        <div className="flex p-1 bg-cream-deep rounded-xl mb-4">
+                            <button onClick={() => setTab("quick")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "quick" ? "bg-white text-orange shadow-sm" : "text-ink-muted"}`}>Chọn nhanh</button>
+                            <button onClick={() => setTab("custom")} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${tab === "custom" ? "bg-white text-orange shadow-sm" : "text-ink-muted"}`}>Nhập tay</button>
                         </div>
                         {tab === "quick" ? (
                             <div>
-                                <div className="relative mb-4"><div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div><input type="text" placeholder="Tìm món ăn..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 pl-10 pr-4 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500/20" /></div>
+                                <div className="relative mb-4"><div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-ink-muted"><IconSearch /></div><input type="text" placeholder="Tìm món ăn..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-cream-soft border border-cream-deep rounded-xl py-3 pl-10 pr-4 text-xs font-bold outline-none focus:ring-2 focus:ring-orange/20" /></div>
                                 <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto no-scrollbar pb-2">
                                     {filteredFoods.map((f, idx) => (
                                         <div key={f.name + idx} className="relative group flex">
-                                            <button onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`w-full p-4 pr-16 rounded-2xl text-left transition-all border ${selectedFood?.name === f.name ? "bg-emerald-50 border-emerald-200" : "bg-slate-50 border-transparent"} active:scale-95`}>
-                                                <p className="text-[9px] font-black text-slate-500 uppercase leading-tight truncate mb-1">{f.name}</p><p className="text-sm font-black text-slate-800">{f.kcal} <span className="text-[8px] font-normal italic opacity-40">kcal/{f.per}{f.unit}</span></p>
+                                            <button onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`w-full p-4 pr-16 rounded-2xl text-left transition-all border ${selectedFood?.name === f.name ? "bg-orange-soft border-orange-soft" : "bg-cream-soft border-transparent"} active:scale-95`}>
+                                                <p className="text-[9px] font-black text-ink-muted uppercase leading-tight truncate mb-1">{f.name}</p><p className="text-sm font-black text-ink">{f.kcal} <span className="text-[8px] font-normal italic opacity-40">kcal/{f.per}{f.unit}</span></p>
                                             </button>
                                             
                                             {/* NÚT SỬA VÀ XÓA HIỆN RA KHI CHẠM/HOVER Ở MỤC CHỌN NHANH */}
                                             <div className="absolute right-1 top-2 flex opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                                                <button onClick={(e) => { e.stopPropagation(); openLibraryEditModal(f); }} className="p-2 text-slate-300 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"><IconEdit /></button>
-                                                <button onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><IconTrash /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); openLibraryEditModal(f); }} className="p-2 text-ink-faint hover:text-orange hover:bg-orange-soft rounded-lg transition-colors"><IconEdit /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} className="p-2 text-ink-faint hover:text-orange-deep hover:bg-orange-soft rounded-lg transition-colors"><IconTrash /></button>
                                             </div>
                                         </div>
                                     ))}
-                                    {filteredFoods.length === 0 && ( <p className="col-span-2 text-center py-6 text-slate-400 text-xs italic">Không tìm thấy món ăn</p> )}
+                                    {filteredFoods.length === 0 && ( <p className="col-span-2 text-center py-6 text-ink-muted text-xs italic">Không tìm thấy món ăn</p> )}
                                 </div>
                                 {selectedFood && (() => {
                                     let weightInGrams = qty; const u = selectedFood.unit.toLowerCase();
@@ -1299,39 +1299,39 @@ export default function App() {
                                     const projectedFat = Math.round((dailyFat + totalFat) * 10) / 10;
 
                                     return (
-                                    <div className="mt-4 pt-5 border-t border-slate-100 animate-in slide-in-from-top-2">
-                                        <div className="bg-slate-900 rounded-2xl p-4 mb-4 text-white shadow-xl relative overflow-hidden">
+                                    <div className="mt-4 pt-5 border-t border-cream-deep animate-in slide-in-from-top-2">
+                                        <div className="bg-ink rounded-2xl p-4 mb-4 text-white shadow-xl relative overflow-hidden">
                                             <div className="absolute top-0 right-0 p-4 opacity-10"><IconJournal /></div>
                                             <div className="relative z-10 flex justify-between items-start mb-3">
                                                 <div>
-                                                    <h5 className="font-black text-lg text-emerald-400 leading-tight">{selectedFood.name}</h5>
-                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{qty} {selectedFood.unit} (~{Math.round(weightInGrams)}g)</p>
+                                                    <h5 className="font-black text-lg text-orange leading-tight">{selectedFood.name}</h5>
+                                                    <p className="text-[10px] text-ink-muted font-bold uppercase tracking-widest mt-0.5">{qty} {selectedFood.unit} (~{Math.round(weightInGrams)}g)</p>
                                                 </div>
                                                 <div className="text-right">
                                                     <span className="text-2xl font-black text-white">{totalKcal}</span>
-                                                    <span className="text-sm font-bold text-slate-400 ml-1">/ {projectedKcal}</span>
-                                                    <span className="text-[9px] text-slate-400 font-bold ml-1">KCAL</span>
+                                                    <span className="text-sm font-bold text-ink-muted ml-1">/ {projectedKcal}</span>
+                                                    <span className="text-[9px] text-ink-muted font-bold ml-1">KCAL</span>
                                                 </div>
                                             </div>
                                             <div className="flex justify-between items-center bg-white/10 rounded-xl p-2 mb-3">
                                                 <div className="text-center w-1/3 border-r border-white/10">
-                                                    <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Protein</p>
-                                                    <p className="text-xs font-black text-emerald-400">{totalPro}g <span className="text-[9px] font-bold text-slate-400">/ {projectedPro}g</span></p>
+                                                    <p className="text-[8px] uppercase tracking-widest text-ink-muted font-black mb-0.5">Protein</p>
+                                                    <p className="text-xs font-black text-orange">{totalPro}g <span className="text-[9px] font-bold text-ink-muted">/ {projectedPro}g</span></p>
                                                 </div>
                                                 <div className="text-center w-1/3 border-r border-white/10">
-                                                    <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Carb</p>
-                                                    <p className="text-xs font-black text-blue-400">{totalCarb}g <span className="text-[9px] font-bold text-slate-400">/ {projectedCarb}g</span></p>
+                                                    <p className="text-[8px] uppercase tracking-widest text-ink-muted font-black mb-0.5">Carb</p>
+                                                    <p className="text-xs font-black text-mist">{totalCarb}g <span className="text-[9px] font-bold text-ink-muted">/ {projectedCarb}g</span></p>
                                                 </div>
                                                 <div className="text-center w-1/3">
-                                                    <p className="text-[8px] uppercase tracking-widest text-slate-400 font-black mb-0.5">Fat</p>
-                                                    <p className="text-xs font-black text-yellow-400">{totalFat}g <span className="text-[9px] font-bold text-slate-400">/ {projectedFat}g</span></p>
+                                                    <p className="text-[8px] uppercase tracking-widest text-ink-muted font-black mb-0.5">Fat</p>
+                                                    <p className="text-xs font-black text-clay">{totalFat}g <span className="text-[9px] font-bold text-ink-muted">/ {projectedFat}g</span></p>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <div className="w-24 relative"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Số lượng</label><input type="number" value={qty} step="any" min="0.1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-slate-100 text-slate-800 p-3 rounded-xl text-sm outline-none font-black text-center focus:ring-2 focus:ring-emerald-500/20 transition-all" /></div>
-                                            <button onClick={() => handleAddSelectedFood()} className="flex-1 mt-4 h-12 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase shadow-xl shadow-emerald-100 flex items-center justify-center gap-1 active:scale-95 transition-all">Ghi vào nhật ký <IconPlus /></button>
-                                            <button onClick={() => { setSelectedFood(null); setQty(1); }} className="mt-4 p-3 text-slate-300 hover:text-red-500 bg-slate-50 rounded-xl transition-colors"><IconTrash /></button>
+                                            <div className="w-24 relative"><label className="text-[9px] font-black text-ink-muted uppercase tracking-widest block mb-1">Số lượng</label><input type="number" value={qty} step="any" min="0.1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-deep text-ink p-3 rounded-xl text-sm outline-none font-black text-center focus:ring-2 focus:ring-orange/20 transition-all" /></div>
+                                            <button onClick={() => handleAddSelectedFood()} className="flex-1 mt-4 h-12 bg-orange text-white rounded-xl text-[10px] font-black uppercase shadow-xl shadow-orange-soft flex items-center justify-center gap-1 active:scale-95 transition-all">Ghi vào nhật ký <IconPlus /></button>
+                                            <button onClick={() => { setSelectedFood(null); setQty(1); }} className="mt-4 p-3 text-ink-faint hover:text-orange-deep bg-cream-soft rounded-xl transition-colors"><IconTrash /></button>
                                         </div>
                                     </div>
                                     );
@@ -1339,21 +1339,21 @@ export default function App() {
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                <input placeholder="Tên món ăn (vd: Gà rán...)" value={customFood.name} onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} className="w-full bg-slate-50 p-4 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 transition-all" />
+                                <input placeholder="Tên món ăn (vd: Gà rán...)" value={customFood.name} onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} className="w-full bg-cream-soft p-4 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20 transition-all" />
                                 <div className="grid grid-cols-2 gap-3">
-                                    <input type="number" placeholder="Số lượng nhập" value={customFood.quantity} onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} className="bg-slate-50 p-4 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 transition-all" />
-                                    <select value={customFood.unit} onChange={e => setCustomFood(p=>({...p, unit:e.target.value}))} className="bg-slate-50 p-4 rounded-2xl text-sm outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-emerald-500/20 transition-all">
+                                    <input type="number" placeholder="Số lượng nhập" value={customFood.quantity} onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} className="bg-cream-soft p-4 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20 transition-all" />
+                                    <select value={customFood.unit} onChange={e => setCustomFood(p=>({...p, unit:e.target.value}))} className="bg-cream-soft p-4 rounded-2xl text-sm outline-none font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-orange/20 transition-all">
                                         <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="relative group"><input type="number" placeholder="Kcal" value={customFood.kcal} onChange={e => setCustomFood(p=>({...p, kcal:e.target.value}))} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-orange-400 uppercase">kcal</span></div>
-                                    <div className="relative group"><input type="number" placeholder="Protein" value={customFood.protein} onChange={e => setCustomFood(p=>({...p, protein:e.target.value}))} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-emerald-400 uppercase">Pro</span></div>
-                                    <div className="relative group"><input type="number" placeholder="Carb" value={customFood.carb} onChange={e => setCustomFood(p=>({...p, carb:e.target.value}))} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-blue-500/20" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-blue-400 uppercase">Carb</span></div>
-                                    <div className="relative group"><input type="number" placeholder="Fat" value={customFood.fat} onChange={e => setCustomFood(p=>({...p, fat:e.target.value}))} className="w-full bg-slate-50 p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-yellow-500/20" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-yellow-400 uppercase">Fat</span></div>
+                                    <div className="relative group"><input type="number" placeholder="Kcal" value={customFood.kcal} onChange={e => setCustomFood(p=>({...p, kcal:e.target.value}))} className="w-full bg-cream-soft p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-orange-400 uppercase">kcal</span></div>
+                                    <div className="relative group"><input type="number" placeholder="Protein" value={customFood.protein} onChange={e => setCustomFood(p=>({...p, protein:e.target.value}))} className="w-full bg-cream-soft p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-orange uppercase">Pro</span></div>
+                                    <div className="relative group"><input type="number" placeholder="Carb" value={customFood.carb} onChange={e => setCustomFood(p=>({...p, carb:e.target.value}))} className="w-full bg-cream-soft p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-mist-deep/20" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-mist uppercase">Carb</span></div>
+                                    <div className="relative group"><input type="number" placeholder="Fat" value={customFood.fat} onChange={e => setCustomFood(p=>({...p, fat:e.target.value}))} className="w-full bg-cream-soft p-4 pr-10 rounded-2xl text-sm outline-none font-bold focus:ring-2 focus:ring-clay/20" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-clay uppercase">Fat</span></div>
                                 </div>
                                 {customFood.name.trim() !== "" && parseFloat(customFood.kcal) > 0 && (
-                                    <button onClick={addCustom} className="w-full bg-slate-900 text-white p-4 rounded-2xl font-black uppercase text-[10px] tracking-widest mt-4 active:scale-95 transition-all shadow-xl animate-in slide-in-from-bottom-4 fade-in duration-300">Xác nhận thêm</button>
+                                    <button onClick={addCustom} className="w-full bg-ink text-white p-4 rounded-2xl font-black uppercase text-[10px] tracking-widest mt-4 active:scale-95 transition-all shadow-xl animate-in slide-in-from-bottom-4 fade-in duration-300">Xác nhận thêm</button>
                                 )}
                             </div>
                         )}
@@ -1361,54 +1361,54 @@ export default function App() {
                     
                     <div className="space-y-3 pb-4">
                        <div className="flex justify-between items-center px-2 mb-2 h-8">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Danh sách nạp vào</h3>
+                            <h3 className="text-[10px] font-black text-ink-muted uppercase tracking-[0.2em]">Danh sách nạp vào</h3>
                             {undoStack.length > 0 && (
-                                <button onClick={handleUndo} className="w-8 h-8 flex items-center justify-center rounded-full text-emerald-600 bg-emerald-50 border-2 border-transparent hover:border-emerald-500 hover:bg-emerald-100 transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
+                                <button onClick={handleUndo} className="w-8 h-8 flex items-center justify-center rounded-full text-orange bg-orange-soft border-2 border-transparent hover:border-orange hover:bg-orange-soft transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
                                     <IconUndo />
                                 </button>
                             )}
                         </div>
                         {dailyLog.map(item => (
-                            <div key={item.id} className="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-slate-50 border-l-4 border-l-emerald-400 animate-in slide-in-from-left duration-300 group">
+                            <div key={item.id} className="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-cream-soft border-l-4 border-l-orange animate-in slide-in-from-left duration-300 group">
                                 <div className="flex-1 pr-3">
-                                    <div className="relative inline-flex items-center bg-slate-100 hover:bg-emerald-50 rounded-md transition-colors mb-1.5 border border-transparent hover:border-emerald-200 cursor-pointer">
-                                        <select value={item.meal || "Bữa sáng"} onChange={(e) => updateItemMeal(item.id, e.target.value)} className="text-[9px] font-black text-slate-600 hover:text-emerald-700 uppercase tracking-widest bg-transparent outline-none cursor-pointer appearance-none py-1 pl-2 pr-5 w-full h-full focus:outline-none focus:text-emerald-700 focus:bg-emerald-100 rounded-md transition-all select-none">
-                                            {MEAL_TYPES.map(m => ( <option key={m} value={m} className="font-bold text-slate-700">{m}</option> ))}
+                                    <div className="relative inline-flex items-center bg-cream-deep hover:bg-orange-soft rounded-md transition-colors mb-1.5 border border-transparent hover:border-orange-soft cursor-pointer">
+                                        <select value={item.meal || "Bữa sáng"} onChange={(e) => updateItemMeal(item.id, e.target.value)} className="text-[9px] font-black text-ink hover:text-orange-deep uppercase tracking-widest bg-transparent outline-none cursor-pointer appearance-none py-1 pl-2 pr-5 w-full h-full focus:outline-none focus:text-orange-deep focus:bg-orange-soft rounded-md transition-all select-none">
+                                            {MEAL_TYPES.map(m => ( <option key={m} value={m} className="font-bold text-ink">{m}</option> ))}
                                         </select>
-                                        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center text-slate-400"><svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg></div>
+                                        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center text-ink-muted"><svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg></div>
                                     </div>
                                     
                                     <div className="flex items-center gap-2 mb-1.5">
-                                        <p className="text-xs font-bold text-slate-800 uppercase truncate">{item.name} &mdash; {item.quantity}{item.unit}</p>
+                                        <p className="text-xs font-bold text-ink uppercase truncate">{item.name} &mdash; {item.quantity}{item.unit}</p>
                                     </div>
-                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1.5 flex-wrap"><span className="text-orange-500 font-black">{item.kcal} kcal</span><span className="text-slate-200">|</span> P: {item.protein}g <span className="text-slate-200">|</span> C: {item.carb}g <span className="text-slate-200">|</span> F: {item.fat}g</p>
+                                    <p className="text-[9px] font-bold text-ink-muted uppercase tracking-tighter flex items-center gap-1.5 flex-wrap"><span className="text-orange-500 font-black">{item.kcal} kcal</span><span className="text-cream-deep">|</span> P: {item.protein}g <span className="text-cream-deep">|</span> C: {item.carb}g <span className="text-cream-deep">|</span> F: {item.fat}g</p>
                                 </div>
-                                <div className="flex items-center"><button onClick={() => removeFood(item.id)} className="text-slate-200 hover:text-red-500 transition-colors p-2 bg-slate-50 rounded-xl group-hover:bg-red-50"><IconTrash /></button></div>
+                                <div className="flex items-center"><button onClick={() => removeFood(item.id)} className="text-cream-deep hover:text-orange-deep transition-colors p-2 bg-cream-soft rounded-xl group-hover:bg-orange-soft"><IconTrash /></button></div>
                             </div>
                         ))}
-                        {dailyLog.length === 0 && ( <p className="text-center text-slate-300 text-[10px] uppercase font-bold italic py-8 border-2 border-dashed border-slate-100 rounded-[2.5rem] tracking-[0.2em]">Danh sách trống</p> )}
+                        {dailyLog.length === 0 && ( <p className="text-center text-ink-faint text-[10px] uppercase font-bold italic py-8 border-2 border-dashed border-cream-deep rounded-[2.5rem] tracking-[0.2em]">Danh sách trống</p> )}
                     </div>
                     
                     {/* --- MODAL CHỈNH SỬA THƯ VIỆN MÓN ĂN --- */}
                     {editLibraryModal.isOpen && (
-                        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                        <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                             <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200 relative">
-                                 <button onClick={() => setEditLibraryModal({ isOpen: false, item: null, originalName: "" })} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors font-black">✕</button>
-                                <h3 className="text-sm font-black text-slate-800 mb-4 uppercase tracking-widest text-center">Sửa thư viện món</h3>
+                                 <button onClick={() => setEditLibraryModal({ isOpen: false, item: null, originalName: "" })} className="absolute top-4 right-4 text-ink-muted hover:text-ink w-8 h-8 flex items-center justify-center rounded-full hover:bg-cream-deep transition-colors font-black">✕</button>
+                                <h3 className="text-sm font-black text-ink mb-4 uppercase tracking-widest text-center">Sửa thư viện món</h3>
                                 
                                 <div className="space-y-3">
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Tên món</label>
-                                        <input type="text" value={libraryEditForm.name} onChange={e => setLibraryEditForm({...libraryEditForm, name: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                                        <label className="text-[10px] font-black text-ink-muted uppercase block mb-1">Tên món</label>
+                                        <input type="text" value={libraryEditForm.name} onChange={e => setLibraryEditForm({...libraryEditForm, name: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                          <div>
-                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Định lượng (per)</label>
-                                            <input type="number" step="any" value={libraryEditForm.per} onChange={e => setLibraryEditForm({...libraryEditForm, per: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                                            <label className="text-[10px] font-black text-ink-muted uppercase block mb-1">Định lượng (per)</label>
+                                            <input type="number" step="any" value={libraryEditForm.per} onChange={e => setLibraryEditForm({...libraryEditForm, per: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20" />
                                          </div>
                                          <div>
-                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1">Đơn vị</label>
-                                            <select value={libraryEditForm.unit} onChange={e => setLibraryEditForm({...libraryEditForm, unit: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20 appearance-none cursor-pointer">
+                                            <label className="text-[10px] font-black text-ink-muted uppercase block mb-1">Đơn vị</label>
+                                            <select value={libraryEditForm.unit} onChange={e => setLibraryEditForm({...libraryEditForm, unit: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20 appearance-none cursor-pointer">
                                                 <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
                                             </select>
                                          </div>
@@ -1416,45 +1416,45 @@ export default function App() {
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="relative group">
                                             <label className="text-[10px] font-black text-orange-400 uppercase block mb-1">Kcal</label>
-                                            <input type="number" step="any" value={libraryEditForm.kcal} onChange={e => setLibraryEditForm({...libraryEditForm, kcal: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" />
+                                            <input type="number" step="any" value={libraryEditForm.kcal} onChange={e => setLibraryEditForm({...libraryEditForm, kcal: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" />
                                         </div>
                                         <div className="relative group">
-                                            <label className="text-[10px] font-black text-emerald-400 uppercase block mb-1">Protein</label>
-                                            <input type="number" step="any" value={libraryEditForm.protein} onChange={e => setLibraryEditForm({...libraryEditForm, protein: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-emerald-500/20" />
+                                            <label className="text-[10px] font-black text-orange uppercase block mb-1">Protein</label>
+                                            <input type="number" step="any" value={libraryEditForm.protein} onChange={e => setLibraryEditForm({...libraryEditForm, protein: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20" />
                                         </div>
                                         <div className="relative group">
-                                            <label className="text-[10px] font-black text-blue-400 uppercase block mb-1">Carb</label>
-                                            <input type="number" step="any" value={libraryEditForm.carb} onChange={e => setLibraryEditForm({...libraryEditForm, carb: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-blue-500/20" />
+                                            <label className="text-[10px] font-black text-mist uppercase block mb-1">Carb</label>
+                                            <input type="number" step="any" value={libraryEditForm.carb} onChange={e => setLibraryEditForm({...libraryEditForm, carb: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-mist-deep/20" />
                                         </div>
                                         <div className="relative group">
-                                            <label className="text-[10px] font-black text-yellow-400 uppercase block mb-1">Fat</label>
-                                            <input type="number" step="any" value={libraryEditForm.fat} onChange={e => setLibraryEditForm({...libraryEditForm, fat: e.target.value})} className="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-yellow-500/20" />
+                                            <label className="text-[10px] font-black text-clay uppercase block mb-1">Fat</label>
+                                            <input type="number" step="any" value={libraryEditForm.fat} onChange={e => setLibraryEditForm({...libraryEditForm, fat: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-clay/20" />
                                         </div>
                                     </div>
-                                    <button onClick={saveLibraryEdit} className="w-full py-3.5 bg-emerald-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-200 active:scale-95 transition-all mt-4">Lưu vào thư viện</button>
+                                    <button onClick={saveLibraryEdit} className="w-full py-3.5 bg-orange text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-soft active:scale-95 transition-all mt-4">Lưu vào thư viện</button>
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {confirmModal.isOpen && (
-                        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                        <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                             <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200">
                                 {confirmModal.alertMessage ? (
                                     <div className="text-center">
                                         <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mx-auto mb-4"><span className="font-black text-xl">!</span></div>
-                                        <h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Thông báo</h3>
-                                        <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">{confirmModal.alertMessage}</p>
-                                        <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Đã hiểu</button>
+                                        <h3 className="text-sm font-black text-ink mb-2 uppercase tracking-widest">Thông báo</h3>
+                                        <p className="text-xs text-ink-muted mb-6 font-medium leading-relaxed">{confirmModal.alertMessage}</p>
+                                        <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="w-full py-3.5 bg-ink text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Đã hiểu</button>
                                     </div>
                                 ) : (
                                     <div className="text-center">
-                                        <div className="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4"><IconTrash /></div>
-                                        <h3 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-widest">Xác nhận xóa</h3>
-                                        <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">Bạn có chắc muốn xóa <span className="font-black text-slate-700">"{confirmModal.foodToDelete?.name}"</span>?</p>
+                                        <div className="w-12 h-12 rounded-full bg-orange-soft text-orange-deep flex items-center justify-center mx-auto mb-4"><IconTrash /></div>
+                                        <h3 className="text-sm font-black text-ink mb-2 uppercase tracking-widest">Xác nhận xóa</h3>
+                                        <p className="text-xs text-ink-muted mb-6 font-medium leading-relaxed">Bạn có chắc muốn xóa <span className="font-black text-ink">"{confirmModal.foodToDelete?.name}"</span>?</p>
                                         <div className="flex gap-2">
-                                            <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Hủy</button>
-                                            <button onClick={handleConfirmDelete} className="flex-1 py-3.5 bg-red-500 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-200 active:scale-95 transition-all">Xóa Món</button>
+                                            <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="flex-1 py-3.5 bg-cream-deep text-ink rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Hủy</button>
+                                            <button onClick={handleConfirmDelete} className="flex-1 py-3.5 bg-orange-deep text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-soft active:scale-95 transition-all">Xóa Món</button>
                                         </div>
                                     </div>
                                 )}
