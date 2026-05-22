@@ -591,110 +591,119 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
 
     const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
 
+    const latestWeight = sortedDates.length > 0 ? weightLog[sortedDates[0]] : null;
+
     return (
-        <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-300 relative text-ink">
+        <div className="min-h-screen bg-cream pb-28 animate-in fade-in duration-300 text-ink" style={{ fontFamily: WARM_FONT, letterSpacing: "-0.005em" }}>
             {/* Slim sticky header */}
-            <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex items-center justify-center">
-                <div className="text-center">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">Tổng quan</span>
-                    <p className="text-sm font-bold text-ink">Thống kê & Biểu đồ</p>
+            <header className="sticky top-0 z-30 backdrop-blur-md border-b border-ink/[0.08] px-5" style={{ background: "rgba(251, 248, 242, 0.85)" }}>
+                <div className="max-w-md md:max-w-2xl mx-auto py-3 text-center">
+                    <span style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted">Tổng quan</span>
+                    <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }} className="text-ink">Thống kê & Biểu đồ</p>
                 </div>
             </header>
 
-            <main className="p-4 space-y-5">
-                {/* CẬP NHẬT CÂN NẶNG */}
-                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
-                    <header className="flex items-center gap-3 mb-4">
-                        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">⚖️</span>
-                        <div>
-                            <h3 className="text-[15px] font-bold tracking-tight text-ink">Cập nhật cân nặng</h3>
-                            <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Ghi lại để theo dõi tiến trình</p>
-                        </div>
-                    </header>
+            <main>
+                {/* HERO TILE — intro */}
+                <Tile tone="cream" className="text-center">
+                    <Eyebrow accent="orange-deep">Hành trình</Eyebrow>
+                    <HeroDisplay>
+                        {latestWeight ? `${latestWeight} kg.` : "Hiểu cơ thể qua thời gian."}
+                    </HeroDisplay>
+                    <Lead className="mt-3 text-ink-muted">
+                        {latestWeight ? "Tiếp tục lắng nghe — mỗi con số là một câu chuyện." : "Ghi lại con số đầu tiên để bắt đầu hành trình."}
+                    </Lead>
+                </Tile>
 
-                    <div className="flex items-center bg-cream-soft p-1.5 rounded-2xl mb-4 ring-1 ring-cream-deep/40 focus-within:ring-2 focus-within:ring-orange/30 transition">
-                        <div className="relative flex items-center">
-                            <svg className="w-4 h-4 text-orange-deep absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[120px] bg-transparent py-2.5 pl-9 pr-1 outline-none text-[11px] font-semibold text-ink tracking-wider cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
-                        </div>
-                        <div className="w-px h-6 bg-cream-deep mx-1 shrink-0"></div>
-                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-2.5 outline-none font-semibold text-[13px] text-ink placeholder:text-ink-faint min-w-[60px] tabular-nums" />
-                        <button onClick={saveWeight} className="h-9 px-4 bg-orange text-white rounded-xl font-bold text-[11px] active:scale-95 transition shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep shrink-0">Ghi</button>
+                {/* WHITE TILE — Cập nhật cân nặng */}
+                <Tile tone="white">
+                    <div className="text-center mb-8">
+                        <Eyebrow accent="orange-deep">⚖️ Cân nặng</Eyebrow>
+                        <Display>Ghi lại để theo dõi.</Display>
                     </div>
 
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-muted mb-2">Lịch sử gần nhất</p>
-                    <div className="max-h-36 overflow-y-auto no-scrollbar bg-cream-soft rounded-2xl p-1.5 ring-1 ring-cream-deep/40">
+                    <div className="flex items-center bg-cream-soft p-1.5 rounded-full mb-5 ring-1 ring-ink/[0.08] focus-within:ring-2 focus-within:ring-orange-deep/30 transition">
+                        <div className="relative flex items-center pl-1">
+                            <svg className="w-4 h-4 text-orange-deep absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[120px] bg-transparent py-2.5 pl-9 pr-1 outline-none text-ink cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }} />
+                        </div>
+                        <div className="w-px h-6 bg-ink/[0.1] mx-1 shrink-0"/>
+                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-2.5 outline-none text-ink placeholder:text-ink-faint min-w-[60px] tabular-nums" style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }} />
+                        <PillButton onClick={saveWeight} className="shrink-0">Ghi</PillButton>
+                    </div>
+
+                    <p style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted mb-3 px-1">Lịch sử gần nhất</p>
+                    <div className="max-h-40 overflow-y-auto no-scrollbar space-y-1.5">
                         {sortedDates.length === 0 ? (
-                            <p className="text-center text-ink-faint text-[11px] italic font-medium py-4">Chưa có bản ghi</p>
+                            <p className="text-center text-ink-faint italic py-6" style={{ fontSize: 13 }}>Chưa có bản ghi</p>
                         ) : (
                             sortedDates.slice(0, 14).map(date => (
-                                <div key={date} className="flex justify-between items-center p-2.5 bg-white rounded-xl mb-1 last:mb-0 group hover:ring-1 hover:ring-cream-deep transition">
-                                    <div className="flex items-center gap-2.5">
-                                        <span className="text-[10px] font-semibold text-ink-muted bg-cream-soft px-2 py-1 rounded-lg tabular-nums">{getWeekLabel(date)}/{date.split('-')[0]}</span>
-                                        <span className="text-[13px] font-bold text-ink tabular-nums">{weightLog[date]}<span className="text-[10px] font-medium text-ink-muted ml-0.5">kg</span></span>
+                                <div key={date} className="flex justify-between items-center px-3 py-2.5 bg-cream-soft rounded-2xl ring-1 ring-ink/[0.06] group">
+                                    <div className="flex items-center gap-3">
+                                        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", fontVariantNumeric: "tabular-nums" }} className="text-ink-muted uppercase">{getWeekLabel(date)}/{date.split('-')[0]}</span>
+                                        <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.01em", fontVariantNumeric: "tabular-nums" }} className="text-ink">{weightLog[date]}<span style={{ fontSize: 11, fontWeight: 400, marginLeft: 2 }} className="text-ink-muted">kg</span></span>
                                     </div>
-                                    <button onClick={() => deleteWeight(date)} className="p-1.5 text-ink-faint hover:text-orange-deep bg-cream-soft hover:bg-orange-soft rounded-lg transition opacity-0 group-hover:opacity-100" aria-label="Xóa"><IconTrash /></button>
+                                    <button onClick={() => deleteWeight(date)} className="p-1.5 text-ink-faint hover:text-orange-deep rounded-lg transition opacity-0 group-hover:opacity-100" aria-label="Xóa"><IconTrash /></button>
                                 </div>
                             ))
                         )}
                     </div>
-                </section>
+                </Tile>
 
-                {/* BIỂU ĐỒ CÂN NẶNG */}
-                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 relative md:p-6">
-                    <header className="flex items-center gap-3 mb-4">
-                        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sage-soft text-xl">📈</span>
-                        <div>
-                            <h3 className="text-[15px] font-bold tracking-tight text-ink">Biểu đồ cân nặng</h3>
-                            <p className="mt-0.5 text-[11px] font-medium text-ink-muted">14 ngày gần nhất</p>
-                        </div>
-                    </header>
-                    {sortedDates.length === 0 && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-white/85 backdrop-blur-sm rounded-3xl z-10">
-                            <p className="text-[12px] font-medium text-ink-muted italic">Chưa có dữ liệu</p>
-                        </div>
-                    )}
-                    <div className="h-48 relative w-full"><canvas ref={weightChartRef}></canvas></div>
-                </section>
+                {/* DARK TILE — Biểu đồ cân nặng (chart on light card centered, dark frame around) */}
+                <Tile tone="espresso">
+                    <div className="text-center mb-8">
+                        <Eyebrow accent="on-dark">📈 Biểu đồ</Eyebrow>
+                        <Display className="text-white">Cân nặng qua 14 ngày.</Display>
+                        {sortedDates.length === 0 && (
+                            <p style={{ ...T_LEAD, color: "rgba(255,255,255,0.7)" }} className="mt-3">
+                                Ghi cân nặng để xem biểu đồ.
+                            </p>
+                        )}
+                    </div>
 
-                {/* PAGINATION */}
-                <div className="flex justify-between items-center bg-white p-1.5 rounded-2xl shadow-soft ring-1 ring-cream-deep/60 sticky top-[64px] z-10">
-                    <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-cream-soft hover:bg-orange-soft hover:text-orange-deep text-ink-muted rounded-xl text-[11px] font-semibold transition">‹ 14 ngày trước</button>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted text-center px-2 tabular-nums">
-                        {getWeekLabel(currentChartDates[0])} – {getWeekLabel(currentChartDates[currentChartDates.length-1])}
-                    </span>
-                    <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-xl text-[11px] font-semibold transition ${chartOffset === 0 ? 'text-cream-deep cursor-not-allowed' : 'bg-cream-soft hover:bg-orange-soft hover:text-orange-deep text-ink-muted'}`}>Tiếp ›</button>
-                </div>
-
-                {/* KCAL CHART */}
-                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
-                    <header className="flex items-center justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-3">
-                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-clay-soft text-xl">🔥</span>
-                            <div>
-                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Năng lượng đã nạp</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Theo bữa ăn mỗi ngày</p>
+                    <div className="bg-white rounded-3xl p-5 ring-1 ring-white/10 relative">
+                        {sortedDates.length === 0 && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/95 rounded-3xl z-10">
+                                <p style={{ fontSize: 13 }} className="text-ink-muted italic">Chưa có dữ liệu</p>
                             </div>
-                        </div>
-                        <span className="text-[10px] text-ink-faint italic shrink-0">tap để xem</span>
-                    </header>
-                    <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
-                </section>
+                        )}
+                        <div className="h-48 relative w-full"><canvas ref={weightChartRef}></canvas></div>
+                    </div>
 
-                {/* MACRO CHART */}
-                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
-                    <header className="flex items-center justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-3">
-                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lilac-soft text-xl">🥗</span>
-                            <div>
-                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Protein · Carb · Fat</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Xu hướng macro</p>
-                            </div>
-                        </div>
-                        <span className="text-[10px] text-ink-faint italic shrink-0">tap để xem</span>
-                    </header>
-                    <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
-                </section>
+                    {/* Pagination */}
+                    <div className="mt-5 flex justify-between items-center gap-2">
+                        <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition" style={{ fontSize: 12, fontWeight: 500 }}>‹ Trước</button>
+                        <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.04em", fontVariantNumeric: "tabular-nums", color: "rgba(255,255,255,0.7)" }} className="uppercase">
+                            {getWeekLabel(currentChartDates[0])} – {getWeekLabel(currentChartDates[currentChartDates.length-1])}
+                        </span>
+                        <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-full transition ${chartOffset === 0 ? 'text-white/30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20 text-white'}`} style={{ fontSize: 12, fontWeight: 500 }}>Sau ›</button>
+                    </div>
+                </Tile>
+
+                {/* LIGHT TILE — Năng lượng đã nạp */}
+                <Tile tone="cream">
+                    <div className="text-center mb-8">
+                        <Eyebrow accent="clay-deep">🔥 Năng lượng</Eyebrow>
+                        <Display>Đã nạp theo từng bữa.</Display>
+                        <Lead className="mt-3 text-ink-muted">Chạm vào cột để xem chi tiết ngày đó.</Lead>
+                    </div>
+                    <div className="bg-white rounded-3xl p-5 ring-1 ring-ink/[0.08]">
+                        <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
+                    </div>
+                </Tile>
+
+                {/* LIGHT TILE — Macro chart */}
+                <Tile tone="white">
+                    <div className="text-center mb-8">
+                        <Eyebrow accent="lilac-deep">🥗 Macro</Eyebrow>
+                        <Display>Protein · Carb · Fat.</Display>
+                        <Lead className="mt-3 text-ink-muted">Xu hướng ba chất chính theo thời gian.</Lead>
+                    </div>
+                    <div className="bg-cream-soft rounded-3xl p-5 ring-1 ring-ink/[0.06]">
+                        <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
+                    </div>
+                </Tile>
             </main>
             <BottomNav view={view} setView={setView} />
         </div>
@@ -702,17 +711,38 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
 }
 
 function BottomNav({view, setView}) {
+    const items = [
+        { key: "journal", label: "Nhật ký", Icon: IconJournal },
+        { key: "stats",   label: "Thống kê", Icon: IconStats },
+        { key: "profile", label: "Hồ sơ",   Icon: IconUser },
+    ];
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-cream-deep p-4 z-40 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] max-w-md mx-auto">
-            <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='journal' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
-                <IconJournal /><span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
-            </button>
-            <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='stats' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
-                <IconStats /><span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
-            </button>
-            <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='profile' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
-                <IconUser /><span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
-            </button>
+        <div
+            className="fixed bottom-0 left-0 right-0 z-40"
+            style={{
+                fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif`,
+                background: "rgba(251, 248, 242, 0.92)",
+                backdropFilter: "saturate(180%) blur(20px)",
+                WebkitBackdropFilter: "saturate(180%) blur(20px)",
+                borderTop: "1px solid rgba(45, 38, 32, 0.08)",
+            }}
+        >
+            <div className="max-w-md md:max-w-2xl mx-auto px-2 py-2 flex justify-around items-center">
+                {items.map(({ key, label, Icon }) => {
+                    const active = view === key;
+                    return (
+                        <button
+                            key={key}
+                            onClick={() => setView(key)}
+                            className={`flex flex-col items-center gap-1 px-5 py-2 rounded-2xl transition active:scale-[0.97] ${active ? "text-orange-deep" : "text-ink-muted hover:text-ink"}`}
+                            style={{ minWidth: 80 }}
+                        >
+                            <span className={`transition ${active ? "scale-110" : ""}`}><Icon /></span>
+                            <span style={{ fontSize: 10, fontWeight: active ? 600 : 500, letterSpacing: "-0.005em" }}>{label}</span>
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 }
@@ -1163,18 +1193,66 @@ export default function App() {
 
     if (!userId || !password) {
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-orange flex flex-col items-center justify-center p-8 text-white relative overflow-hidden font-sans">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-orange rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-deep rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/3"></div>
-                <div className="bg-white/10 p-8 rounded-[2.5rem] w-full backdrop-blur-xl border border-white/20 text-center shadow-2xl relative z-10">
-                    <h1 className="text-4xl font-black tracking-tighter italic mb-8">STAYFIT</h1>
-                    <div className="space-y-3 mb-6">
-                        <input type="text" value={inputUser} onChange={e=>setInputUser(e.target.value)} placeholder="Tên ID (vd: quy2026)" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" />
-                        <input type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="Mật khẩu" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} />
+            <div className="min-h-screen bg-cream text-ink flex flex-col" style={{ fontFamily: WARM_FONT, letterSpacing: "-0.005em" }}>
+                {/* HERO TILE — login */}
+                <section className="flex-1 flex flex-col justify-center px-5 md:px-8 py-16 md:py-20">
+                    <div className="mx-auto max-w-sm w-full text-center">
+                        <div className="flex justify-center mb-8">
+                            <span
+                                className="grid h-20 w-20 place-items-center rounded-3xl text-3xl font-bold text-white"
+                                style={{
+                                    background: "linear-gradient(135deg, #E89B7B 0%, #D97757 100%)",
+                                    filter: "drop-shadow(rgba(45,38,32,0.18) 3px 5px 30px)",
+                                    letterSpacing: "-0.02em",
+                                }}
+                            >S</span>
+                        </div>
+                        <Eyebrow accent="orange-deep">StayFit · stayfit.id.vn</Eyebrow>
+                        <HeroDisplay>Bắt đầu nuôi dưỡng.</HeroDisplay>
+                        <Lead className="mt-3 text-ink-muted">Nhật ký calo &amp; sức khỏe đồng bộ liền mạch.</Lead>
+
+                        <div className="mt-10 space-y-3 text-left">
+                            <div>
+                                <label style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted block mb-2 ml-1">Tên ID</label>
+                                <input
+                                    type="text"
+                                    value={inputUser}
+                                    onChange={e=>setInputUser(e.target.value)}
+                                    placeholder="vd: quy2026"
+                                    className="w-full bg-white ring-1 ring-ink/[0.08] p-4 rounded-2xl outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition text-ink"
+                                    style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted block mb-2 ml-1">Mật khẩu</label>
+                                <input
+                                    type="password"
+                                    value={inputPass}
+                                    onChange={e=>setInputPass(e.target.value)}
+                                    placeholder="••••••"
+                                    className="w-full bg-white ring-1 ring-ink/[0.08] p-4 rounded-2xl outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition text-ink"
+                                    style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }}
+                                    onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
+                            <PillButton onClick={handleLogin} disabled={loginLoading} className="w-full">
+                                {loginLoading ? "Đang kết nối…" : "Đăng nhập"}
+                            </PillButton>
+                        </div>
+
+                        <p style={{ fontSize: 12, lineHeight: 1.5, letterSpacing: "-0.005em" }} className="mt-5 text-ink-muted">
+                            Chưa có tài khoản? Nhập ID &amp; mật khẩu mới để tự động đăng ký.
+                        </p>
                     </div>
-                    <button onClick={handleLogin} disabled={loginLoading} className="w-full py-4 bg-white text-orange rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng Nhập"}</button>
-                    <p className="text-[9px] text-white/50 font-bold mt-4 px-4 leading-relaxed">Nếu chưa có tài khoản, hãy nhập ID & Mật khẩu mới để tự động đăng ký.</p>
-                </div>
+                </section>
+
+                {/* PARCHMENT FOOTER */}
+                <footer style={{ background: "#F4EFE6", borderTop: "1px solid rgba(45,38,32,0.08)" }} className="px-5 md:px-8 py-8 text-center">
+                    <p style={{ fontSize: 12, letterSpacing: "-0.005em" }} className="text-ink-muted">© 2026 StayFit · Đồng hành cùng bạn</p>
+                </footer>
             </div>
         );
     }
@@ -1186,202 +1264,203 @@ export default function App() {
     if (view === "profile") {
         const userInitial = (userId || "?").trim().charAt(0).toUpperCase();
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-500 relative font-sans text-ink">
+            <div className="min-h-screen bg-cream pb-28 animate-in fade-in duration-500 text-ink" style={{ fontFamily: WARM_FONT, letterSpacing: "-0.005em" }}>
                 {/* Slim sticky header */}
-                <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex items-center justify-center">
-                    <div className="text-center">
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">Cài đặt</span>
-                        <p className="text-sm font-bold text-ink">Hồ sơ cá nhân</p>
+                <header className="sticky top-0 z-30 backdrop-blur-md border-b border-ink/[0.08] px-5" style={{ background: "rgba(251, 248, 242, 0.85)" }}>
+                    <div className="max-w-md md:max-w-2xl mx-auto py-3 text-center">
+                        <span style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted">Cài đặt</span>
+                        <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }} className="text-ink">Hồ sơ cá nhân</p>
                     </div>
                 </header>
 
-                <main className="p-4 space-y-5">
-                    {/* PROFILE HERO — avatar + ID */}
-                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
-                        <div className="flex items-center gap-4">
-                            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange to-orange-deep text-2xl font-bold text-white shadow-soft">
+                <main>
+                    {/* HERO TILE — avatar + tagline */}
+                    <Tile tone="cream" className="text-center">
+                        <div className="flex justify-center mb-6">
+                            <span
+                                className="grid h-24 w-24 place-items-center rounded-full text-3xl font-bold text-white"
+                                style={{
+                                    background: "linear-gradient(135deg, #E89B7B 0%, #D97757 100%)",
+                                    filter: "drop-shadow(rgba(45,38,32,0.18) 3px 5px 30px)",
+                                    letterSpacing: "-0.02em",
+                                }}
+                            >
                                 {userInitial}
                             </span>
-                            <div className="min-w-0 flex-1">
-                                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-orange-deep">Thành viên</span>
-                                <h2 className="mt-0.5 text-[16px] font-bold tracking-tight text-ink truncate">{userId || "Khách"}</h2>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Lắng nghe cơ thể, nuôi dưỡng nhẹ nhàng</p>
-                            </div>
                         </div>
-                    </section>
+                        <Eyebrow accent="orange-deep">Thành viên</Eyebrow>
+                        <HeroDisplay>{userId || "Khách"}</HeroDisplay>
+                        <Lead className="mt-3 text-ink-muted">Lắng nghe cơ thể, nuôi dưỡng nhẹ nhàng.</Lead>
+                    </Tile>
 
-                    {/* GIỚI TÍNH */}
-                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
-                        <header className="flex items-center gap-3 mb-4">
-                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lilac-soft text-xl">👤</span>
-                            <div>
-                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Giới tính</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Để tính BMR chính xác</p>
-                            </div>
-                        </header>
-                        <div className="flex gap-1.5 p-1 bg-cream-soft rounded-2xl ring-1 ring-cream-deep/40">
-                            <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition ${profile.gender==='male' ? 'bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60' : 'text-ink-muted hover:text-ink'}`}>Nam</button>
-                            <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition ${profile.gender==='female' ? 'bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60' : 'text-ink-muted hover:text-ink'}`}>Nữ</button>
+                    {/* WHITE TILE — Giới tính */}
+                    <Tile tone="white">
+                        <div className="text-center mb-8">
+                            <Eyebrow accent="lilac-deep">👤 Giới tính</Eyebrow>
+                            <Display>Cơ thể bạn nói gì?</Display>
+                            <Lead className="mt-3 text-ink-muted">Để tính nhu cầu năng lượng chính xác hơn.</Lead>
                         </div>
-                    </section>
-
-                    {/* CHỈ SỐ CƠ THỂ */}
-                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
-                        <header className="flex items-center gap-3 mb-4">
-                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sage-soft text-xl">📏</span>
-                            <div>
-                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Chỉ số cơ thể</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Tuổi · Cân nặng · Chiều cao</p>
-                            </div>
-                        </header>
-                        <div className="grid grid-cols-3 gap-2.5">
-                            <div>
-                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Tuổi</label>
-                                <div className="relative">
-                                    <input type="number" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3 pr-7 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
-                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">y</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Cân nặng</label>
-                                <div className="relative">
-                                    <input type="number" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
-                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">kg</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Chiều cao</label>
-                                <div className="relative">
-                                    <input type="number" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
-                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">cm</span>
-                                </div>
-                            </div>
+                        <div className="flex gap-2 p-1.5 bg-cream-soft rounded-full ring-1 ring-ink/[0.06] max-w-sm mx-auto">
+                            <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-3 rounded-full transition active:scale-[0.97] ${profile.gender==='male' ? 'bg-white text-orange-deep ring-1 ring-ink/[0.08] shadow-soft' : 'text-ink-muted'}`} style={{ fontSize: 14, fontWeight: 500, letterSpacing: "-0.005em" }}>Nam</button>
+                            <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-3 rounded-full transition active:scale-[0.97] ${profile.gender==='female' ? 'bg-white text-orange-deep ring-1 ring-ink/[0.08] shadow-soft' : 'text-ink-muted'}`} style={{ fontSize: 14, fontWeight: 500, letterSpacing: "-0.005em" }}>Nữ</button>
                         </div>
-                    </section>
+                    </Tile>
 
-                    {/* VẬN ĐỘNG + MỤC TIÊU */}
-                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
-                        <header className="flex items-center gap-3 mb-4">
-                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-clay-soft text-xl">🎯</span>
+                    {/* CREAM TILE — Chỉ số cơ thể */}
+                    <Tile tone="cream">
+                        <div className="text-center mb-8">
+                            <Eyebrow accent="sage-deep">📏 Chỉ số cơ thể</Eyebrow>
+                            <Display>Tuổi · Cân nặng · Chiều cao.</Display>
+                            <Lead className="mt-3 text-ink-muted">Ba con số tạo nền cho mọi tính toán.</Lead>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
+                            {[
+                                { key: "age",    label: "Tuổi",      unit: "y",  value: profile.age,    setter: (v) => setProfile({...profile, age: +v}) },
+                                { key: "weight", label: "Cân nặng",  unit: "kg", value: profile.weight, setter: (v) => setProfile({...profile, weight: +v}) },
+                                { key: "height", label: "Chiều cao", unit: "cm", value: profile.height, setter: (v) => setProfile({...profile, height: +v}) },
+                            ].map((f) => (
+                                <div key={f.key} className="bg-white rounded-2xl ring-1 ring-ink/[0.08] p-4">
+                                    <p style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted text-center mb-2">{f.label}</p>
+                                    <div className="relative flex items-baseline justify-center gap-1">
+                                        <input type="number" value={f.value} onChange={e => f.setter(e.target.value)} className="w-full bg-transparent text-center outline-none text-ink focus:ring-0 tabular-nums" style={{ fontSize: 28, fontWeight: 600, letterSpacing: "-0.025em" }} />
+                                    </div>
+                                    <p style={{ fontSize: 11, fontWeight: 500 }} className="text-ink-muted text-center mt-1">{f.unit}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </Tile>
+
+                    {/* WHITE TILE — Lối sống */}
+                    <Tile tone="white">
+                        <div className="text-center mb-8">
+                            <Eyebrow accent="clay-deep">🎯 Lối sống</Eyebrow>
+                            <Display>Vận động & hướng đi.</Display>
+                            <Lead className="mt-3 text-ink-muted">Hai lựa chọn xác định ngân sách calo của bạn.</Lead>
+                        </div>
+                        <div className="space-y-3 max-w-md mx-auto">
                             <div>
-                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Lối sống</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Mức vận động & hướng đi</p>
-                            </div>
-                        </header>
-                        <div className="space-y-3">
-                            <div>
-                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Mức độ vận động</label>
+                                <label style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted block mb-2 ml-1">Mức độ vận động</label>
                                 <div className="relative">
-                                    <select value={profile.activity} onChange={e=>{ setProfile({...profile, activity:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-9 rounded-2xl font-semibold text-[13px] outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange/30 transition">
+                                    <select value={profile.activity} onChange={e=>{ setProfile({...profile, activity:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-4 pr-10 rounded-2xl outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange-deep/30 transition text-ink" style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }}>
                                         {ACTIVITY_LEVELS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}
                                     </select>
-                                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
                                 </div>
                             </div>
                             <div>
-                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Mục tiêu cân nặng</label>
+                                <label style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted block mb-2 ml-1">Mục tiêu cân nặng</label>
                                 <div className="relative">
-                                    <select value={profile.goal} onChange={e=>{ setProfile({...profile, goal:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-9 rounded-2xl font-semibold text-[13px] outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange/30 transition">
+                                    <select value={profile.goal} onChange={e=>{ setProfile({...profile, goal:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-4 pr-10 rounded-2xl outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange-deep/30 transition text-ink" style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }}>
                                         {GOALS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}
                                     </select>
-                                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
                                 </div>
                             </div>
                         </div>
-                    </section>
+                    </Tile>
 
-                    {/* CALO BUDGET — terracotta card thay vì dark */}
-                    <section className="rounded-3xl bg-gradient-to-br from-orange to-orange-deep p-6 shadow-lift ring-1 ring-orange-deep/20 text-white">
-                        <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/80">Năng lượng mỗi ngày</span>
-                                <p className="mt-0.5 text-[11px] text-white/70 font-medium">Cần khoảng</p>
-                            </div>
-                            <span className="text-3xl">🔥</span>
+                    {/* DARK TILE — Calo budget (hero number on espresso) */}
+                    <Tile tone="espresso" className="text-center">
+                        <Eyebrow accent="on-dark">🔥 Năng lượng mỗi ngày</Eyebrow>
+                        <Display className="text-white">Cần khoảng.</Display>
+                        <p style={{ ...T_LEAD, color: "rgba(255,255,255,0.7)" }} className="mt-3">
+                            Số calo cơ thể bạn cần để duy trì hành trình.
+                        </p>
+
+                        <div className="mt-10 flex items-baseline justify-center gap-2">
+                            <input
+                                type="number"
+                                value={target}
+                                onChange={e => { setProfile({ ...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0 }); }}
+                                className="bg-transparent text-center outline-none w-48 border-b-2 border-dashed transition-colors tabular-nums"
+                                style={{
+                                    fontSize: "clamp(56px, 14vw, 80px)",
+                                    fontWeight: 600,
+                                    letterSpacing: "-0.04em",
+                                    color: "#E89B7B",
+                                    borderColor: "rgba(232, 155, 123, 0.3)",
+                                    lineHeight: 1,
+                                }}
+                            />
+                            <span style={{ fontSize: 20, fontWeight: 400, color: "rgba(255,255,255,0.5)" }}>kcal</span>
                         </div>
-                        <div className="flex items-baseline justify-center gap-1 mt-3">
-                            <input type="number" value={target} onChange={e => { setProfile({ ...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0 }); }} className="text-5xl font-bold tracking-tight bg-transparent text-center outline-none w-36 border-b-2 border-dashed border-white/30 focus:border-white/70 hover:border-white/50 transition-colors tabular-nums text-white" />
-                            <span className="text-base font-medium text-white/70 ml-1">kcal</span>
-                        </div>
+
                         {profile.isManualTarget && (
-                            <button onClick={() => setProfile({...profile, isManualTarget: false})} className="block mx-auto mt-3 text-[10px] text-white/80 font-semibold uppercase tracking-wider bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-full transition tabular-nums">
+                            <button
+                                onClick={() => setProfile({...profile, isManualTarget: false})}
+                                className="mt-6 bg-white/10 hover:bg-white/20 transition rounded-full"
+                                style={{ padding: "8px 16px", fontSize: 12, fontWeight: 500, color: "#E89B7B", letterSpacing: "-0.005em", fontVariantNumeric: "tabular-nums" }}
+                            >
                                 ⟲ Trở về tự động ({calculatedTarget})
                             </button>
                         )}
-                    </section>
+                    </Tile>
 
-                    {/* MACRO TÙY CHỈNH */}
-                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
-                        <header className="flex items-center justify-between gap-3 mb-4">
-                            <div className="flex items-center gap-3">
-                                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">🥑</span>
-                                <div>
-                                    <h3 className="text-[15px] font-bold tracking-tight text-ink">Tùy chỉnh Macro</h3>
-                                    <p className="mt-0.5 text-[11px] font-medium text-ink-muted">{profile.isManualMacro ? "Đang tùy chỉnh tay" : "Theo tỉ lệ mặc định"}</p>
-                                </div>
+                    {/* WHITE TILE — Macro tùy chỉnh */}
+                    <Tile tone="white">
+                        <div className="flex items-start justify-between gap-4 mb-8 max-w-md mx-auto">
+                            <div className="text-left">
+                                <Eyebrow accent="orange-deep">🥑 Macro</Eyebrow>
+                                <Display>{profile.isManualMacro ? "Tự cân chỉnh." : "Theo tỉ lệ chuẩn."}</Display>
                             </div>
-                            <button onClick={() => { const nextState = !profile.isManualMacro; setProfile({...profile, isManualMacro: nextState}); if (nextState) setIsDietModalOpen(true); }} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ring-1 ${profile.isManualMacro ? 'bg-orange ring-orange-deep/20' : 'bg-cream-deep ring-cream-deep'}`} aria-label="Toggle macro tùy chỉnh">
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-soft ${profile.isManualMacro ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <button onClick={() => { const nextState = !profile.isManualMacro; setProfile({...profile, isManualMacro: nextState}); if (nextState) setIsDietModalOpen(true); }} className={`relative inline-flex h-7 w-12 items-center rounded-full transition shrink-0 ring-1 ${profile.isManualMacro ? 'bg-orange ring-orange-deep/20' : 'bg-cream-deep ring-cream-deep'}`} aria-label="Toggle macro">
+                                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition shadow-soft ${profile.isManualMacro ? 'translate-x-6' : 'translate-x-1'}`} />
                             </button>
-                        </header>
+                        </div>
 
-                        {profile.isManualMacro ? (
-                            <div className="animate-in fade-in slide-in-from-top-2">
-                                <div className="flex justify-between items-center mb-3 bg-cream-soft ring-1 ring-cream-deep/40 p-2.5 rounded-2xl">
-                                    <span className="text-[11px] font-semibold text-ink ml-2 truncate">{profile.macroDietMode || "Tự nhập tay"}</span>
-                                    <button onClick={() => setIsDietModalOpen(true)} className="text-[10px] font-semibold bg-white px-3 py-1.5 rounded-full text-orange-deep ring-1 ring-cream-deep/60 hover:bg-orange-soft transition active:scale-95 shrink-0">Đổi chế độ</button>
-                                </div>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep block mb-1 text-center">Protein</label>
-                                        <div className="relative">
-                                            <input type="number" value={profile.manualProtein} onChange={e => setProfile({...profile, manualProtein: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 py-2.5 pr-7 rounded-xl text-center font-bold text-[13px] outline-none focus:ring-2 focus:ring-sage/30 transition tabular-nums" />
-                                            <span className="text-[9px] text-ink-muted absolute bottom-2.5 right-2.5 pointer-events-none font-medium">g</span>
-                                        </div>
+                        <div className="max-w-md mx-auto">
+                            {profile.isManualMacro ? (
+                                <div className="animate-in fade-in slide-in-from-top-2">
+                                    <div className="flex justify-between items-center mb-4 bg-cream-soft ring-1 ring-ink/[0.06] p-3 rounded-2xl">
+                                        <span style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }} className="text-ink truncate">{profile.macroDietMode || "Tự nhập tay"}</span>
+                                        <button onClick={() => setIsDietModalOpen(true)} className="bg-white px-3 py-1.5 rounded-full text-orange-deep ring-1 ring-ink/[0.08] hover:bg-orange-soft transition active:scale-95 shrink-0" style={{ fontSize: 11, fontWeight: 500 }}>Đổi chế độ</button>
                                     </div>
-                                    <div>
-                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep block mb-1 text-center">Carb</label>
-                                        <div className="relative">
-                                            <input type="number" value={profile.manualCarb} onChange={e => setProfile({...profile, manualCarb: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 py-2.5 pr-7 rounded-xl text-center font-bold text-[13px] outline-none focus:ring-2 focus:ring-clay/30 transition tabular-nums" />
-                                            <span className="text-[9px] text-ink-muted absolute bottom-2.5 right-2.5 pointer-events-none font-medium">g</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep block mb-1 text-center">Fat</label>
-                                        <div className="relative">
-                                            <input type="number" value={profile.manualFat} onChange={e => setProfile({...profile, manualFat: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 py-2.5 pr-7 rounded-xl text-center font-bold text-[13px] outline-none focus:ring-2 focus:ring-lilac/30 transition tabular-nums" />
-                                            <span className="text-[9px] text-ink-muted absolute bottom-2.5 right-2.5 pointer-events-none font-medium">g</span>
-                                        </div>
+                                    <div className="grid grid-cols-3 gap-2.5">
+                                        {[
+                                            { key: "manualProtein", label: "Protein", accent: "#5F8266", ring: "sage" },
+                                            { key: "manualCarb",    label: "Carb",    accent: "#C49A4A", ring: "clay" },
+                                            { key: "manualFat",     label: "Fat",     accent: "#9B8AB8", ring: "lilac" },
+                                        ].map(m => (
+                                            <div key={m.key} className="bg-cream-soft ring-1 ring-ink/[0.06] rounded-2xl p-3">
+                                                <p style={{ ...T_EYEBROW, fontSize: 9, color: m.accent }} className="text-center mb-1.5">{m.label}</p>
+                                                <div className="relative flex items-baseline justify-center gap-0.5">
+                                                    <input type="number" value={profile[m.key]} onChange={e => setProfile({...profile, [m.key]: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-transparent text-center outline-none text-ink tabular-nums" style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.025em" }} />
+                                                </div>
+                                                <p style={{ fontSize: 10, fontWeight: 500 }} className="text-center text-ink-muted mt-0.5">g</p>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-3 gap-2 opacity-60">
-                                <div className="text-center bg-cream-soft rounded-xl py-2.5">
-                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep mb-0.5">Protein</p>
-                                    <p className="text-[13px] font-bold tabular-nums text-ink">{Math.round((target * 0.25 / 4) * 10) / 10}<span className="text-[10px] text-ink-muted font-medium ml-0.5">g</span></p>
+                            ) : (
+                                <div className="grid grid-cols-3 gap-2.5 opacity-70">
+                                    {[
+                                        { label: "Protein", accent: "#5F8266", value: Math.round((target * 0.25 / 4) * 10) / 10 },
+                                        { label: "Carb",    accent: "#C49A4A", value: Math.round((target * 0.50 / 4) * 10) / 10 },
+                                        { label: "Fat",     accent: "#9B8AB8", value: Math.round((target * 0.25 / 9) * 10) / 10 },
+                                    ].map(m => (
+                                        <div key={m.label} className="bg-cream-soft rounded-2xl p-3 text-center">
+                                            <p style={{ ...T_EYEBROW, fontSize: 9, color: m.accent }} className="mb-1.5">{m.label}</p>
+                                            <p style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.025em", fontVariantNumeric: "tabular-nums" }} className="text-ink">{m.value}<span style={{ fontSize: 11, fontWeight: 400 }} className="text-ink-muted ml-0.5">g</span></p>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="text-center bg-cream-soft rounded-xl py-2.5">
-                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep mb-0.5">Carb</p>
-                                    <p className="text-[13px] font-bold tabular-nums text-ink">{Math.round((target * 0.50 / 4) * 10) / 10}<span className="text-[10px] text-ink-muted font-medium ml-0.5">g</span></p>
-                                </div>
-                                <div className="text-center bg-cream-soft rounded-xl py-2.5">
-                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep mb-0.5">Fat</p>
-                                    <p className="text-[13px] font-bold tabular-nums text-ink">{Math.round((target * 0.25 / 9) * 10) / 10}<span className="text-[10px] text-ink-muted font-medium ml-0.5">g</span></p>
-                                </div>
-                            </div>
-                        )}
-                    </section>
+                            )}
+                        </div>
+                    </Tile>
 
-                    {/* ACTION BUTTONS */}
-                    <div className="space-y-2.5">
-                        <button onClick={() => setView("journal")} className="w-full py-4 bg-orange text-white rounded-2xl font-bold text-[14px] shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep active:scale-95 transition">
-                            Quay lại nhật ký
-                        </button>
-                        <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-3 bg-cream-soft text-ink-muted rounded-2xl font-semibold text-[12px] ring-1 ring-cream-deep/40 hover:bg-cream-deep hover:text-ink active:scale-95 transition">
-                            Đăng xuất
-                        </button>
-                    </div>
+                    {/* CREAM-SOFT TILE — Action buttons */}
+                    <Tile tone="creamSoft" className="text-center">
+                        <div className="max-w-md mx-auto space-y-3">
+                            <PillButton onClick={() => setView("journal")} className="w-full">Quay lại nhật ký</PillButton>
+                            <button
+                                onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }}
+                                className="block w-full text-ink-muted hover:text-orange-deep transition py-2"
+                                style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }}
+                            >
+                                Đăng xuất
+                            </button>
+                        </div>
+                    </Tile>
                 </main>
 
                 <BottomNav view={view} setView={setView} />
