@@ -70,7 +70,7 @@ export default function RootLayout({ children }) {
                   extend: {
                     colors: {
                       cream:  { DEFAULT: '#FBF8F2', soft: '#F4EFE6', deep: '#EBE3D2' },
-                      ink:    { DEFAULT: '#2D2620', muted: '#8C8378', faint: '#B8AFA4' },
+                      ink:    { DEFAULT: '#2D2620', muted: '#7A7066', faint: '#B8AFA4' },
                       orange: { DEFAULT: '#D97757', soft: '#F7E8DC', deep: '#7A3318' },
                       clay:   { DEFAULT: '#C49A4A', soft: '#F0E5CC', deep: '#5C4015' },
                       sage:   { DEFAULT: '#5F8266', soft: '#DDE7DC', deep: '#2D4632' },
@@ -111,6 +111,33 @@ export default function RootLayout({ children }) {
           input[type=number]::-webkit-inner-spin-button,
           input[type=number]::-webkit-outer-spin-button {
             -webkit-appearance: none; margin: 0;
+          }
+
+          @keyframes gentle-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50%      { transform: scale(1.04); opacity: 0.95; }
+          }
+          .animate-gentle-pulse { animation: gentle-pulse 4s ease-in-out infinite; }
+
+          @keyframes fade-rise {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-rise { animation: fade-rise 0.5s ease-out backwards; }
+
+          *:focus-visible {
+            outline: 2px solid #D97757;
+            outline-offset: 2px;
+            border-radius: 4px;
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+              animation-duration: 0.01ms !important;
+              animation-iteration-count: 1 !important;
+              transition-duration: 0.01ms !important;
+              scroll-behavior: auto !important;
+            }
           }
         `}</style>
       </head>

@@ -44,13 +44,13 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
 
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-muted">
-          Còn lại
+          Còn dư
         </span>
         <span className="mt-1.5 text-5xl font-bold leading-none tracking-tight text-ink tabular-nums">
           {Math.round(remaining).toLocaleString("vi-VN")}
         </span>
         <span className="mt-1.5 text-[11px] font-medium text-ink-muted tabular-nums">
-          / {target.toLocaleString("vi-VN")} kcal
+          / {target.toLocaleString("vi-VN")}
         </span>
       </div>
     </div>

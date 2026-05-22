@@ -1,9 +1,9 @@
 "use client";
 
 const TONE = {
-  protein: { ring: "#5F8266", track: "#DDE7DC", label: "Protein", unit: "g" },
-  carb:    { ring: "#C49A4A", track: "#F0E5CC", label: "Carb",    unit: "g" },
-  fat:     { ring: "#9B8AB8", track: "#E5DDED", label: "Chất béo", unit: "g" },
+  protein: { ring: "#5F8266", track: "#DDE7DC", label: "Protein",  unit: "g" },
+  carb:    { ring: "#C49A4A", track: "#F0E5CC", label: "Carb",     unit: "g" },
+  fat:     { ring: "#9B8AB8", track: "#E5DDED", label: "Béo lành", unit: "g" },
 };
 
 export default function MacroDonut({ kind = "protein", value = 0, target = 0, size = 88 }) {
@@ -44,7 +44,11 @@ export default function MacroDonut({ kind = "protein", value = 0, target = 0, si
       </div>
       <div className="mt-2.5 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-ink">{tone.label}</p>
-        <p className="mt-0.5 text-[10px] font-medium text-ink-muted tabular-nums">còn {Math.round(remaining)}{tone.unit}</p>
+        <p className="mt-0.5 text-[10px] font-medium tabular-nums">
+          {remaining > 0
+            ? <span className="text-ink-muted">thêm {Math.round(remaining)}{tone.unit}</span>
+            : <span className="text-sage-deep">đủ rồi ✓</span>}
+        </p>
       </div>
     </div>
   );

@@ -50,9 +50,9 @@ export default function WeeklyTrendCard({ data = [], target = 2000 }) {
       </div>
 
       <div className="mt-4 flex items-center gap-3 border-t border-cream-deep/50 pt-3 text-[10px] font-medium uppercase tracking-wider text-ink-muted">
-        <span className="flex items-center gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-sage" />Đạt</span>
-        <span className="flex items-center gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-lilac" />Thiếu</span>
-        <span className="flex items-center gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-orange" />Vượt</span>
+        <span className="flex items-center gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-sage" />Cân bằng</span>
+        <span className="flex items-center gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-lilac" />Nhẹ</span>
+        <span className="flex items-center gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-orange" />Đầy</span>
       </div>
     </DashboardCard>
   );

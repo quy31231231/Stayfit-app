@@ -8,6 +8,7 @@ import MacroDonut from "./_components/MacroDonut";
 import FoodLogSection from "./_components/FoodLogSection";
 import GreetingHeader from "./_components/GreetingHeader";
 import WeeklyTrendCard from "./_components/WeeklyTrendCard";
+import BreathingTimer from "./_components/BreathingTimer";
 
 const MEAL_ORDER = ["Bữa sáng", "Bữa trưa", "Bữa tối", "Ăn vặt"];
 
@@ -89,13 +90,13 @@ export default function DashboardPage() {
 
               {/* Calorie equation — Mục tiêu − Đã nạp + Luyện tập = Còn lại */}
               <div className="mt-6 grid grid-cols-7 items-center gap-2 border-t border-cream-deep/50 pt-5 text-center">
-                <EqCell label="Mục tiêu" value={target.kcal.toLocaleString("vi-VN")} tone="neutral" />
+                <EqCell label="Cần khoảng" value={target.kcal.toLocaleString("vi-VN")} tone="neutral" />
                 <span className="text-base font-light text-ink-faint">−</span>
                 <EqCell label="Đã nạp" value={Math.round(totals.kcal).toLocaleString("vi-VN")} tone="sage" />
                 <span className="text-base font-light text-ink-faint">+</span>
-                <EqCell label="Luyện tập" value={exercise} tone="clay" />
+                <EqCell label="Vận động" value={exercise} tone="clay" />
                 <span className="text-base font-light text-ink-faint">=</span>
-                <EqCell label="Còn lại" value={Math.round(kcalRemaining).toLocaleString("vi-VN")} tone="orange" highlight />
+                <EqCell label="Còn dư" value={Math.round(kcalRemaining).toLocaleString("vi-VN")} tone="orange" highlight />
               </div>
             </DashboardCard>
 
@@ -109,14 +110,19 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-3">
-                {MEAL_ORDER.map((meal) => (
-                  <FoodLogSection
+                {MEAL_ORDER.map((meal, i) => (
+                  <div
                     key={meal}
-                    mealName={meal}
-                    items={itemsByMeal[meal] || []}
-                    onAdd={handleAdd}
-                    onRemove={handleRemove}
-                  />
+                    className="animate-fade-rise"
+                    style={{ animationDelay: `${i * 70}ms` }}
+                  >
+                    <FoodLogSection
+                      mealName={meal}
+                      items={itemsByMeal[meal] || []}
+                      onAdd={handleAdd}
+                      onRemove={handleRemove}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
@@ -173,12 +179,12 @@ function WaterCard({ consumed = 0, target = 8 }) {
       <div className="flex items-center justify-between">
         <div>
           <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-mist-deep">Nước</span>
-          <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Uống đủ nước hôm nay</h3>
+          <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Nhâm nhi ly nước nào</h3>
           <p className="mt-0.5 text-[11px] font-medium text-ink-muted tabular-nums">
             <span className="font-bold text-mist-deep">{consumed}</span> / {target} ly · {(consumed * 0.25).toFixed(2)} lít
           </p>
         </div>
-        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-mist-soft text-xl">💧</span>
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-mist-soft text-xl animate-gentle-pulse">💧</span>
       </div>
 
       <div className="mt-4 grid grid-cols-8 gap-1.5">
@@ -194,31 +200,43 @@ function WaterCard({ consumed = 0, target = 8 }) {
         type="button"
         className="mt-4 w-full rounded-2xl bg-cream-soft py-2.5 text-[12px] font-semibold text-ink-muted ring-1 ring-cream-deep/40 transition hover:bg-mist hover:text-white hover:ring-mist-deep/20"
       >
-        + Thêm 250ml
+        Thêm một ly
       </button>
     </DashboardCard>
   );
 }
 
 function MindfulCard() {
+  const [breathing, setBreathing] = useState(false);
+
   return (
-    <DashboardCard tone="sage" padding="lg">
-      <div className="flex items-start gap-3">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-xl shadow-soft">🧘</span>
-        <div className="min-w-0">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sage-deep">Mindful</span>
-          <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Thư giãn 2 phút</h3>
-          <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
-            Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.
-          </p>
-          <button
-            type="button"
-            className="mt-3 rounded-full bg-white px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white"
+    <>
+      <DashboardCard tone="sage" padding="lg">
+        <div className="flex items-start gap-3">
+          <span
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-xl shadow-soft animate-gentle-pulse"
+            style={{ animationDuration: "6s" }}
           >
-            Bắt đầu thở
-          </button>
+            🧘
+          </span>
+          <div className="min-w-0">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sage-deep">Mindful</span>
+            <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Thư giãn 2 phút</h3>
+            <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
+              Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.
+            </p>
+            <button
+              type="button"
+              onClick={() => setBreathing(true)}
+              className="mt-3 rounded-full bg-white px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white"
+            >
+              Bắt đầu thở
+            </button>
+          </div>
         </div>
-      </div>
-    </DashboardCard>
+      </DashboardCard>
+
+      {breathing && <BreathingTimer onClose={() => setBreathing(false)} />}
+    </>
   );
 }

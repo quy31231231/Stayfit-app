@@ -25,9 +25,9 @@ export default function FoodLogSection({ mealName, items = [], targetKcal, onAdd
             <h3 className="text-[15px] font-bold tracking-tight text-ink">{mealName}</h3>
             <p className="mt-0.5 text-[11px] font-medium text-ink-muted tabular-nums">
               {isEmpty
-                ? "Chưa có món nào"
+                ? "Khi nào sẵn sàng, ghi vào nhé"
                 : `${items.length} món · ${Math.round(totalKcal)} kcal`}
-              {targetKcal ? ` · gợi ý ${targetKcal}` : ""}
+              {!isEmpty && targetKcal ? ` · gợi ý ${targetKcal}` : ""}
             </p>
           </div>
         </div>
@@ -59,7 +59,7 @@ export default function FoodLogSection({ mealName, items = [], targetKcal, onAdd
           onClick={() => onAdd?.(mealName)}
           className="mt-4 w-full rounded-2xl border border-dashed border-cream-deep bg-cream-soft/30 py-4 text-[13px] font-medium text-ink-muted transition hover:border-orange/60 hover:bg-orange-soft/30 hover:text-orange-deep"
         >
-          + Thêm món vào {mealName.toLowerCase()}
+          Ghi món cho {mealName.toLowerCase()}
         </button>
       )}
     </section>
