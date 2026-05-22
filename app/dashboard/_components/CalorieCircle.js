@@ -10,19 +10,12 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
   const dashOffset = circumference * (1 - ratio);
 
   return (
-    <div
-      className="relative inline-flex items-center justify-center"
-      style={{
-        width: size,
-        height: size,
-        filter: "drop-shadow(rgba(0, 0, 0, 0.22) 3px 5px 30px)",
-      }}
-    >
+    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id="calorieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#2997FF" />
-            <stop offset="100%" stopColor="#0066CC" />
+            <stop offset="0%" stopColor="#E89B7B" />
+            <stop offset="100%" stopColor="#D97757" />
           </linearGradient>
         </defs>
 
@@ -31,7 +24,7 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#F5F5F7"
+          stroke="#F4EFE6"
           strokeWidth={stroke}
         />
 

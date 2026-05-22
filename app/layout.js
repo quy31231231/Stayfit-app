@@ -48,7 +48,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: '#FFFFFF',
+  themeColor: '#FBF8F2',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -69,29 +69,21 @@ export default function RootLayout({ children }) {
                 theme: {
                   extend: {
                     colors: {
-                      // Apple-aligned tokens (remapped to existing names to keep layout intact)
-                      // cream → canvas/parchment/hairline (white surfaces)
-                      cream:  { DEFAULT: '#FFFFFF', soft: '#F5F5F7', deep: '#E0E0E0' },
-                      // ink → Apple ink hierarchy
-                      ink:    { DEFAULT: '#1D1D1F', muted: '#6E6E73', faint: '#86868B' },
-                      // orange → Action Blue (single brand accent)
-                      orange: { DEFAULT: '#0066CC', soft: '#F5F5F7', deep: '#0071E3' },
-                      // Macro distinguishers (kept distinct but slightly muted toward Apple aesthetic)
-                      clay:   { DEFAULT: '#A87B3F', soft: '#F5F5F7', deep: '#6B4F1A' },
-                      sage:   { DEFAULT: '#4F7155', soft: '#F5F5F7', deep: '#2D4632' },
-                      lilac:  { DEFAULT: '#7E70A0', soft: '#F5F5F7', deep: '#3F2F5C' },
-                      mist:   { DEFAULT: '#5C7E94', soft: '#F5F5F7', deep: '#3D5A6B' },
+                      cream:  { DEFAULT: '#FBF8F2', soft: '#F4EFE6', deep: '#EBE3D2' },
+                      ink:    { DEFAULT: '#2D2620', muted: '#7A7066', faint: '#B8AFA4' },
+                      orange: { DEFAULT: '#D97757', soft: '#F7E8DC', deep: '#7A3318' },
+                      clay:   { DEFAULT: '#C49A4A', soft: '#F0E5CC', deep: '#5C4015' },
+                      sage:   { DEFAULT: '#5F8266', soft: '#DDE7DC', deep: '#2D4632' },
+                      lilac:  { DEFAULT: '#9B8AB8', soft: '#E5DDED', deep: '#3F2F5C' },
+                      mist:   { DEFAULT: '#6B95AB', soft: '#DDE8EF', deep: '#3D5A6B' },
                     },
                     fontFamily: {
-                      sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'SF Pro Display', 'Inter', 'sans-serif'],
+                      sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                     },
                     boxShadow: {
-                      // Apple uses NO shadows on UI — only one product shadow on hero imagery
-                      soft: 'none',
-                      lift: 'none',
-                      ring: 'inset 0 0 0 1px rgba(0, 0, 0, 0.08)',
-                      // single product shadow reserved for calorie ring / hero
-                      product: 'rgba(0, 0, 0, 0.22) 3px 5px 30px 0',
+                      soft: '0 1px 2px rgba(45, 38, 32, 0.04), 0 8px 24px -12px rgba(45, 38, 32, 0.08)',
+                      lift: '0 4px 12px -4px rgba(45, 38, 32, 0.12), 0 16px 40px -16px rgba(45, 38, 32, 0.20)',
+                      ring: 'inset 0 0 0 1px rgba(45, 38, 32, 0.06)',
                     },
                   },
                 },
@@ -104,14 +96,14 @@ export default function RootLayout({ children }) {
 
         <style>{`
           body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', sans-serif;
+            font-family: 'Inter', sans-serif;
             font-feature-settings: 'cv11', 'ss01', 'ss03';
-            letter-spacing: -0.01em;
+            letter-spacing: -0.011em;
             -webkit-tap-highlight-color: transparent;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            background-color: #FFFFFF;
-            color: #1D1D1F;
+            background-color: #FBF8F2;
+            color: #2D2620;
             overscroll-behavior-y: contain;
           }
           .no-scrollbar::-webkit-scrollbar { display: none; }
