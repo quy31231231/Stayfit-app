@@ -4,6 +4,13 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
+import DashboardCard from './dashboard/_components/DashboardCard';
+import CalorieCircle from './dashboard/_components/CalorieCircle';
+import MacroDonut from './dashboard/_components/MacroDonut';
+import FoodLogSection from './dashboard/_components/FoodLogSection';
+import GreetingHeader from './dashboard/_components/GreetingHeader';
+import BreathingTimer from './dashboard/_components/BreathingTimer';
+
 // Khởi tạo Plugin DataLabels
 Chart.register(ChartDataLabels);
 
@@ -1197,60 +1204,84 @@ export default function App() {
 
     if (view === "journal") {
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-cream-soft pb-28 animate-in fade-in duration-300 relative font-sans text-ink">
-             <header className="bg-white p-6 border-b border-cream-deep flex justify-between items-center sticky top-0 z-20 shadow-sm">
-                    <div className="flex items-center gap-2">
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="p-2 text-ink-faint opacity-50 hover:opacity-100 hover:text-orange hover:bg-orange-soft hover:shadow-[0_0_15px_rgba(217,119,87,0.4)] rounded-full transition-all duration-300 active:scale-95">
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
-                        </button>
-                        
-                        <div className="text-center min-w-[90px]">
-                            <span className="font-black text-ink uppercase text-[11px] tracking-widest">{currentDate === formatDate(new Date()) ? "Hôm nay" : currentDate}</span>
-                        </div>
-                        
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="p-2 text-ink-faint opacity-50 hover:opacity-100 hover:text-orange hover:bg-orange-soft hover:shadow-[0_0_15px_rgba(217,119,87,0.4)] rounded-full transition-all duration-300 active:scale-95">
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
-                        </button>
+            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-300 relative font-sans text-ink">
+                {/* DATE NAV — slim sticky bar */}
+                <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex justify-between items-center">
+                    <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-orange-soft hover:text-orange-deep transition" aria-label="Ngày trước">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
+                    </button>
+                    <div className="text-center">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
+                            {currentDate === formatDate(new Date()) ? "Hôm nay" : "Ngày"}
+                        </span>
+                        <p className="text-sm font-bold text-ink tabular-nums">{currentDate}</p>
                     </div>
-                    <div className="w-9 h-9 rounded-xl bg-orange-soft text-orange flex items-center justify-center font-black text-xs shadow-sm">SF</div>
+                    <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-orange-soft hover:text-orange-deep transition" aria-label="Ngày sau">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
+                    </button>
                 </header>
-                <main className="p-4 space-y-6">
-                    <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep flex flex-col gap-6">
-                        <div className="flex items-center justify-between">
-                            <div className="relative w-24 h-24 flex items-center justify-center">
-                                <svg className="transform -rotate-90 w-24 h-24">
-                                    <circle cx="48" cy="48" r="40" stroke="#F4EFE6" strokeWidth="10" fill="transparent" />
-                                    <circle cx="48" cy="48" r="40" stroke={dailyKcal > target ? "#D97757" : "#D97757"} strokeWidth="10" fill="transparent" strokeDasharray={2 * Math.PI * 40} strokeDashoffset={2 * Math.PI * 40 * (1 - Math.min(dailyKcal/target, 1.2))} strokeLinecap="round" className="transition-all duration-1000" />
-                                </svg>
-                                <span className="absolute font-black text-xl text-ink">{Math.round((dailyKcal/target)*100) || 0}%</span>
-                            </div>
-                            <div className="flex-1 text-right">
-                                <p className="text-[10px] font-black text-ink-faint uppercase tracking-widest leading-none mb-1">Mục tiêu: {target}</p>
-                                <h3 className="text-4xl font-black text-ink leading-none">{dailyKcal}</h3>
-                                <p className="text-[10px] font-bold text-ink-muted uppercase mt-1 tracking-tighter">Năng lượng đã nạp</p>
+
+                <main className="p-4 space-y-5">
+                    {/* GREETING */}
+                    <GreetingHeader userName={userId || "bạn"} />
+
+                    {/* CALORIE HERO — vòng tròn + 3 macro donuts + Eq row */}
+                    <DashboardCard tone="white" padding="lg" className="overflow-hidden">
+                        <div className="flex flex-col items-center gap-6">
+                            <CalorieCircle consumed={dailyKcal} target={target} />
+                            <div className="grid grid-cols-3 gap-3 w-full">
+                                <MacroDonut kind="protein" value={dailyProtein} target={targetProtein} />
+                                <MacroDonut kind="carb"    value={dailyCarb}    target={targetCarb} />
+                                <MacroDonut kind="fat"     value={dailyFat}     target={targetFat} />
                             </div>
                         </div>
-                        <div className="border-t border-cream-soft pt-5 space-y-3">
-                            <MacroProgressBar label="Protein" current={dailyProtein} target={targetProtein} colorClass="bg-orange" />
-                            <MacroProgressBar label="Carb" current={dailyCarb} target={targetCarb} colorClass="bg-mist-deep" />
-                            <MacroProgressBar label="Fat" current={dailyFat} target={targetFat} colorClass="bg-clay" />
+
+                        <div className="mt-6 grid grid-cols-7 items-center gap-1.5 border-t border-cream-deep/50 pt-5 text-center">
+                            <EqCell label="Cần khoảng" value={Number(target).toLocaleString("vi-VN")} tone="neutral" />
+                            <span className="text-sm font-light text-ink-faint">−</span>
+                            <EqCell label="Đã nạp" value={Math.round(dailyKcal).toLocaleString("vi-VN")} tone="sage" />
+                            <span className="text-sm font-light text-ink-faint">+</span>
+                            <EqCell label="Vận động" value="0" tone="clay" />
+                            <span className="text-sm font-light text-ink-faint">=</span>
+                            <EqCell label="Còn dư" value={Math.max(0, Math.round(target - dailyKcal)).toLocaleString("vi-VN")} tone="orange" highlight />
                         </div>
-                        <div className="border-t border-cream-soft pt-5 mt-1">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted mb-4">Theo bữa ăn</h3>
-                            {isDailyLogEmpty ? ( <p className="text-center text-[11px] italic text-ink-faint py-2">Chưa có dữ liệu hôm nay</p> ) : (
-                                <div className="space-y-3">
-                                    {mealBreakdown.map(meal => (
-                                        <div key={meal.name} className="flex items-center justify-between gap-3">
-                                            <div className="flex items-center gap-2 w-24"><span className="w-5 h-5 flex items-center justify-center text-sm">{meal.icon}</span><span className="font-bold text-xs text-ink uppercase">{meal.name}</span></div>
-                                            <div className="flex-1 bg-cream-deep rounded-full h-[3px]"><div className={`h-full rounded-full transition-all duration-500 ${meal.color}`} style={{ width: `${meal.kcal > 0 ? (meal.kcal / maxMealKcal) * 100 : 0}%` }}></div></div>
-                                            <div className="text-right min-w-[56px]">{meal.kcal > 0 ? ( <span className="font-black text-sm text-ink">{meal.kcal} <span className="text-[8px] text-ink-muted font-bold ml-0.5">KCAL</span></span> ) : ( <span className="font-black text-sm text-ink-faint">—</span> )}</div>
-                                        </div>
-                                    ))}
-                                </div>
+                    </DashboardCard>
+
+                    {/* 4 MEAL SECTIONS — dùng FoodLogSection từ dashboard */}
+                    <div className="space-y-3">
+                        <div className="flex items-baseline justify-between px-1">
+                            <h2 className="text-[15px] font-bold tracking-tight text-ink">Nhật ký bữa ăn</h2>
+                            {undoStack.length > 0 && (
+                                <button onClick={handleUndo} className="flex items-center gap-1.5 text-[11px] font-semibold text-orange-deep hover:bg-orange-soft px-3 py-1 rounded-full transition">
+                                    <IconUndo /> Hoàn tác
+                                </button>
                             )}
                         </div>
+                        {MEAL_TYPES.map((meal, i) => (
+                            <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
+                                <FoodLogSection
+                                    mealName={meal}
+                                    items={dailyLog.filter(it => it.meal === meal)}
+                                    onAdd={(m) => {
+                                        setSelectedMeal(m);
+                                        if (typeof document !== "undefined") {
+                                            document.getElementById("add-food-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                        }
+                                    }}
+                                    onRemove={removeFood}
+                                />
+                            </div>
+                        ))}
+                        {dailyLog.length === 0 && (
+                            <p className="text-center text-ink-faint text-[11px] uppercase font-semibold italic py-6 border border-dashed border-cream-deep rounded-3xl tracking-wider">
+                                Khi nào sẵn sàng, ghi món vào nhé
+                            </p>
+                        )}
                     </div>
-                    <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep">
+
+                    {/* MINDFUL CARD */}
+                    <MindfulCard />
+                    <section id="add-food-section" className="bg-white rounded-3xl p-6 shadow-soft ring-1 ring-cream-deep/60 scroll-mt-20">
                         <div className="flex justify-between items-center mb-6">
                             <h4 className="text-[10px] font-black text-ink uppercase tracking-[0.2em] flex items-center gap-2"><IconPlus /> Thêm món</h4>
                             <div className="relative">
@@ -1359,35 +1390,6 @@ export default function App() {
                         )}
                     </section>
                     
-                    <div className="space-y-3 pb-4">
-                       <div className="flex justify-between items-center px-2 mb-2 h-8">
-                            <h3 className="text-[10px] font-black text-ink-muted uppercase tracking-[0.2em]">Danh sách nạp vào</h3>
-                            {undoStack.length > 0 && (
-                                <button onClick={handleUndo} className="w-8 h-8 flex items-center justify-center rounded-full text-orange bg-orange-soft border-2 border-transparent hover:border-orange hover:bg-orange-soft transition-all animate-in fade-in zoom-in duration-300 shadow-sm active:scale-95">
-                                    <IconUndo />
-                                </button>
-                            )}
-                        </div>
-                        {dailyLog.map(item => (
-                            <div key={item.id} className="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-cream-soft border-l-4 border-l-orange animate-in slide-in-from-left duration-300 group">
-                                <div className="flex-1 pr-3">
-                                    <div className="relative inline-flex items-center bg-cream-deep hover:bg-orange-soft rounded-md transition-colors mb-1.5 border border-transparent hover:border-orange-soft cursor-pointer">
-                                        <select value={item.meal || "Bữa sáng"} onChange={(e) => updateItemMeal(item.id, e.target.value)} className="text-[9px] font-black text-ink hover:text-orange-deep uppercase tracking-widest bg-transparent outline-none cursor-pointer appearance-none py-1 pl-2 pr-5 w-full h-full focus:outline-none focus:text-orange-deep focus:bg-orange-soft rounded-md transition-all select-none">
-                                            {MEAL_TYPES.map(m => ( <option key={m} value={m} className="font-bold text-ink">{m}</option> ))}
-                                        </select>
-                                        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center text-ink-muted"><svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg></div>
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-2 mb-1.5">
-                                        <p className="text-xs font-bold text-ink uppercase truncate">{item.name} &mdash; {item.quantity}{item.unit}</p>
-                                    </div>
-                                    <p className="text-[9px] font-bold text-ink-muted uppercase tracking-tighter flex items-center gap-1.5 flex-wrap"><span className="text-orange-500 font-black">{item.kcal} kcal</span><span className="text-cream-deep">|</span> P: {item.protein}g <span className="text-cream-deep">|</span> C: {item.carb}g <span className="text-cream-deep">|</span> F: {item.fat}g</p>
-                                </div>
-                                <div className="flex items-center"><button onClick={() => removeFood(item.id)} className="text-cream-deep hover:text-orange-deep transition-colors p-2 bg-cream-soft rounded-xl group-hover:bg-orange-soft"><IconTrash /></button></div>
-                            </div>
-                        ))}
-                        {dailyLog.length === 0 && ( <p className="text-center text-ink-faint text-[10px] uppercase font-bold italic py-8 border-2 border-dashed border-cream-deep rounded-[2.5rem] tracking-[0.2em]">Danh sách trống</p> )}
-                    </div>
                     
                     {/* --- MODAL CHỈNH SỬA THƯ VIỆN MÓN ĂN --- */}
                     {editLibraryModal.isOpen && (
@@ -1467,4 +1469,44 @@ export default function App() {
         );
     }
     return null;
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/*  HELPER COMPONENTS — dùng trong dashboard layout của Nhật ký   */
+/* ────────────────────────────────────────────────────────────── */
+
+function EqCell({ label, value, tone = "neutral", highlight = false }) {
+    const toneClass = {
+        neutral: "bg-cream-soft text-ink",
+        sage:    "bg-sage-soft text-sage-deep",
+        clay:    "bg-clay-soft text-clay-deep",
+        orange:  "bg-orange text-white shadow-soft ring-1 ring-orange-deep/20",
+    }[tone];
+
+    return (
+        <div className={`rounded-2xl py-2.5 ${toneClass}`}>
+            <p className="text-base font-bold leading-none tracking-tight tabular-nums">{value}</p>
+            <p className={`mt-1 text-[9px] font-medium uppercase tracking-wider ${highlight ? "text-white/80" : "opacity-70"}`}>{label}</p>
+        </div>
+    );
+}
+
+function MindfulCard() {
+    const [breathing, setBreathing] = useState(false);
+    return (
+        <>
+            <DashboardCard tone="sage" padding="lg">
+                <div className="flex items-start gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-xl shadow-soft animate-gentle-pulse" style={{ animationDuration: "6s" }}>🧘</span>
+                    <div className="min-w-0">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sage-deep">Mindful</span>
+                        <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Thư giãn 2 phút</h3>
+                        <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.</p>
+                        <button type="button" onClick={() => setBreathing(true)} className="mt-3 rounded-full bg-white px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white">Bắt đầu thở</button>
+                    </div>
+                </div>
+            </DashboardCard>
+            {breathing && <BreathingTimer onClose={() => setBreathing(false)} />}
+        </>
+    );
 }
