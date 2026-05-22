@@ -372,7 +372,7 @@ function MacroProgressBar({ label, current, target, colorClass }) {
     const pct = Math.min((current / target) * 100, 100) || 0;
     return (
         <div className="w-full">
-            <div className="flex justify-between text-[10px] font-black uppercase mb-1.5">
+            <div className="flex justify-between text-[10px] font-semibold uppercase mb-1.5">
                 <span className="text-ink-muted">{label}</span>
                 <span className="text-ink">{current}g <span className="opacity-40">/ {target}g</span></span>
             </div>
@@ -704,13 +704,13 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
 function BottomNav({view, setView}) {
     return (
         <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-cream-deep p-4 z-40 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] max-w-md mx-auto">
-            <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='journal' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
+            <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='journal' ? 'text-orange scale-110 font-semibold':'text-ink-faint opacity-60'}`}>
                 <IconJournal /><span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
             </button>
-            <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='stats' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
+            <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='stats' ? 'text-orange scale-110 font-semibold':'text-ink-faint opacity-60'}`}>
                 <IconStats /><span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
             </button>
-            <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='profile' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
+            <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='profile' ? 'text-orange scale-110 font-semibold':'text-ink-faint opacity-60'}`}>
                 <IconUser /><span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
             </button>
         </div>
@@ -1167,12 +1167,12 @@ export default function App() {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-orange rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-deep rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/3"></div>
                 <div className="bg-white/10 p-8 rounded-[2.5rem] w-full backdrop-blur-xl border border-white/20 text-center shadow-2xl relative z-10">
-                    <h1 className="text-4xl font-black tracking-tighter italic mb-8">STAYFIT</h1>
+                    <h1 className="text-4xl font-semibold tracking-tighter italic mb-8">STAYFIT</h1>
                     <div className="space-y-3 mb-6">
                         <input type="text" value={inputUser} onChange={e=>setInputUser(e.target.value)} placeholder="Tên ID (vd: quy2026)" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" />
                         <input type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="Mật khẩu" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} />
                     </div>
-                    <button onClick={handleLogin} disabled={loginLoading} className="w-full py-4 bg-white text-orange rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng Nhập"}</button>
+                    <button onClick={handleLogin} disabled={loginLoading} className="w-full py-4 bg-white text-orange rounded-2xl font-semibold uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng Nhập"}</button>
                     <p className="text-[9px] text-white/50 font-bold mt-4 px-4 leading-relaxed">Nếu chưa có tài khoản, hãy nhập ID & Mật khẩu mới để tự động đăng ký.</p>
                 </div>
             </div>
@@ -1644,21 +1644,21 @@ export default function App() {
                     {editLibraryModal.isOpen && (
                         <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                             <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200 relative">
-                                 <button onClick={() => setEditLibraryModal({ isOpen: false, item: null, originalName: "" })} className="absolute top-4 right-4 text-ink-muted hover:text-ink w-8 h-8 flex items-center justify-center rounded-full hover:bg-cream-deep transition-colors font-black">✕</button>
-                                <h3 className="text-sm font-black text-ink mb-4 uppercase tracking-widest text-center">Sửa thư viện món</h3>
+                                 <button onClick={() => setEditLibraryModal({ isOpen: false, item: null, originalName: "" })} className="absolute top-4 right-4 text-ink-muted hover:text-ink w-8 h-8 flex items-center justify-center rounded-full hover:bg-cream-deep transition-colors font-semibold">✕</button>
+                                <h3 className="text-sm font-semibold text-ink mb-4 uppercase tracking-widest text-center">Sửa thư viện món</h3>
                                 
                                 <div className="space-y-3">
                                     <div>
-                                        <label className="text-[10px] font-black text-ink-muted uppercase block mb-1">Tên món</label>
+                                        <label className="text-[10px] font-semibold text-ink-muted uppercase block mb-1">Tên món</label>
                                         <input type="text" value={libraryEditForm.name} onChange={e => setLibraryEditForm({...libraryEditForm, name: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                          <div>
-                                            <label className="text-[10px] font-black text-ink-muted uppercase block mb-1">Định lượng (per)</label>
+                                            <label className="text-[10px] font-semibold text-ink-muted uppercase block mb-1">Định lượng (per)</label>
                                             <input type="number" step="any" value={libraryEditForm.per} onChange={e => setLibraryEditForm({...libraryEditForm, per: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20" />
                                          </div>
                                          <div>
-                                            <label className="text-[10px] font-black text-ink-muted uppercase block mb-1">Đơn vị</label>
+                                            <label className="text-[10px] font-semibold text-ink-muted uppercase block mb-1">Đơn vị</label>
                                             <select value={libraryEditForm.unit} onChange={e => setLibraryEditForm({...libraryEditForm, unit: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20 appearance-none cursor-pointer">
                                                 <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
                                             </select>
@@ -1666,23 +1666,23 @@ export default function App() {
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="relative group">
-                                            <label className="text-[10px] font-black text-orange-400 uppercase block mb-1">Kcal</label>
+                                            <label className="text-[10px] font-semibold text-orange-400 uppercase block mb-1">Kcal</label>
                                             <input type="number" step="any" value={libraryEditForm.kcal} onChange={e => setLibraryEditForm({...libraryEditForm, kcal: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange-500/20" />
                                         </div>
                                         <div className="relative group">
-                                            <label className="text-[10px] font-black text-orange uppercase block mb-1">Protein</label>
+                                            <label className="text-[10px] font-semibold text-orange uppercase block mb-1">Protein</label>
                                             <input type="number" step="any" value={libraryEditForm.protein} onChange={e => setLibraryEditForm({...libraryEditForm, protein: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20" />
                                         </div>
                                         <div className="relative group">
-                                            <label className="text-[10px] font-black text-mist uppercase block mb-1">Carb</label>
+                                            <label className="text-[10px] font-semibold text-mist uppercase block mb-1">Carb</label>
                                             <input type="number" step="any" value={libraryEditForm.carb} onChange={e => setLibraryEditForm({...libraryEditForm, carb: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-mist-deep/20" />
                                         </div>
                                         <div className="relative group">
-                                            <label className="text-[10px] font-black text-clay uppercase block mb-1">Fat</label>
+                                            <label className="text-[10px] font-semibold text-clay uppercase block mb-1">Fat</label>
                                             <input type="number" step="any" value={libraryEditForm.fat} onChange={e => setLibraryEditForm({...libraryEditForm, fat: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-clay/20" />
                                         </div>
                                     </div>
-                                    <button onClick={saveLibraryEdit} className="w-full py-3.5 bg-orange text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-soft active:scale-95 transition-all mt-4">Lưu vào thư viện</button>
+                                    <button onClick={saveLibraryEdit} className="w-full py-3.5 bg-orange text-white rounded-xl font-semibold uppercase text-[10px] tracking-widest shadow-lg shadow-orange-soft active:scale-95 transition-all mt-4">Lưu vào thư viện</button>
                                 </div>
                             </div>
                         </div>
@@ -1693,19 +1693,19 @@ export default function App() {
                             <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full shadow-2xl animate-in zoom-in-95 duration-200">
                                 {confirmModal.alertMessage ? (
                                     <div className="text-center">
-                                        <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mx-auto mb-4"><span className="font-black text-xl">!</span></div>
-                                        <h3 className="text-sm font-black text-ink mb-2 uppercase tracking-widest">Thông báo</h3>
+                                        <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mx-auto mb-4"><span className="font-semibold text-xl">!</span></div>
+                                        <h3 className="text-sm font-semibold text-ink mb-2 uppercase tracking-widest">Thông báo</h3>
                                         <p className="text-xs text-ink-muted mb-6 font-medium leading-relaxed">{confirmModal.alertMessage}</p>
-                                        <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="w-full py-3.5 bg-ink text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Đã hiểu</button>
+                                        <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="w-full py-3.5 bg-ink text-white rounded-xl font-semibold uppercase text-[10px] tracking-widest active:scale-95 transition-all">Đã hiểu</button>
                                     </div>
                                 ) : (
                                     <div className="text-center">
                                         <div className="w-12 h-12 rounded-full bg-orange-soft text-orange-deep flex items-center justify-center mx-auto mb-4"><IconTrash /></div>
-                                        <h3 className="text-sm font-black text-ink mb-2 uppercase tracking-widest">Xác nhận xóa</h3>
-                                        <p className="text-xs text-ink-muted mb-6 font-medium leading-relaxed">Bạn có chắc muốn xóa <span className="font-black text-ink">"{confirmModal.foodToDelete?.name}"</span>?</p>
+                                        <h3 className="text-sm font-semibold text-ink mb-2 uppercase tracking-widest">Xác nhận xóa</h3>
+                                        <p className="text-xs text-ink-muted mb-6 font-medium leading-relaxed">Bạn có chắc muốn xóa <span className="font-semibold text-ink">"{confirmModal.foodToDelete?.name}"</span>?</p>
                                         <div className="flex gap-2">
-                                            <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="flex-1 py-3.5 bg-cream-deep text-ink rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">Hủy</button>
-                                            <button onClick={handleConfirmDelete} className="flex-1 py-3.5 bg-orange-deep text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-orange-soft active:scale-95 transition-all">Xóa Món</button>
+                                            <button onClick={() => setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" })} className="flex-1 py-3.5 bg-cream-deep text-ink rounded-xl font-semibold uppercase text-[10px] tracking-widest active:scale-95 transition-all">Hủy</button>
+                                            <button onClick={handleConfirmDelete} className="flex-1 py-3.5 bg-orange-deep text-white rounded-xl font-semibold uppercase text-[10px] tracking-widest shadow-lg shadow-orange-soft active:scale-95 transition-all">Xóa Món</button>
                                         </div>
                                     </div>
                                 )}
