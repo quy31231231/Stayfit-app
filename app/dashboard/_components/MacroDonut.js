@@ -1,9 +1,9 @@
 "use client";
 
 const TONE = {
-  protein: { ring: "#A8C09A", track: "#DCEAD3", label: "Protein", unit: "g" },
-  carb:    { ring: "#E8C892", track: "#F7EAD1", label: "Carb",    unit: "g" },
-  fat:     { ring: "#C8B6E2", track: "#EBE3F5", label: "Chất béo", unit: "g" },
+  protein: { ring: "#5F8266", track: "#DDE7DC", label: "Protein", unit: "g" },
+  carb:    { ring: "#C49A4A", track: "#F0E5CC", label: "Carb",    unit: "g" },
+  fat:     { ring: "#9B8AB8", track: "#E5DDED", label: "Chất béo", unit: "g" },
 };
 
 export default function MacroDonut({ kind = "protein", value = 0, target = 0, size = 88 }) {
@@ -36,15 +36,15 @@ export default function MacroDonut({ kind = "protein", value = 0, target = 0, si
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-base font-bold leading-none text-ink">
+          <span className="text-base font-bold leading-none text-ink tabular-nums">
             {Math.round(value)}
           </span>
-          <span className="text-[10px] font-medium text-ink-muted">/{Math.round(target)}{tone.unit}</span>
+          <span className="mt-0.5 text-[10px] font-medium text-ink-muted tabular-nums">/{Math.round(target)}{tone.unit}</span>
         </div>
       </div>
-      <div className="mt-2 text-center">
-        <p className="text-xs font-semibold text-ink">{tone.label}</p>
-        <p className="text-[11px] text-ink-muted">còn {Math.round(remaining)}{tone.unit}</p>
+      <div className="mt-2.5 text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-ink">{tone.label}</p>
+        <p className="mt-0.5 text-[10px] font-medium text-ink-muted tabular-nums">còn {Math.round(remaining)}{tone.unit}</p>
       </div>
     </div>
   );

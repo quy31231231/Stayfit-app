@@ -2,16 +2,22 @@
 
 export default function FoodLogItem({ item, onRemove }) {
   return (
-    <div className="group flex items-center justify-between rounded-2xl bg-white/60 px-4 py-3 transition hover:bg-white">
+    <div className="group flex items-center justify-between rounded-2xl px-4 py-3 transition hover:bg-cream-soft">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-ink">{item.name}</p>
-        <p className="text-xs text-ink-muted">
-          {item.quantity}{item.unit} · {Math.round(item.protein)}P / {Math.round(item.carb)}C / {Math.round(item.fat)}F
+        <p className="truncate text-[13px] font-semibold tracking-tight text-ink">{item.name}</p>
+        <p className="mt-0.5 text-[11px] font-medium text-ink-muted tabular-nums">
+          {item.quantity}{item.unit}
+          <span className="mx-1.5 text-ink-faint">·</span>
+          <span className="text-sage-deep">{Math.round(item.protein)}P</span>
+          <span className="mx-0.5 text-ink-faint">/</span>
+          <span className="text-clay-deep">{Math.round(item.carb)}C</span>
+          <span className="mx-0.5 text-ink-faint">/</span>
+          <span className="text-lilac-deep">{Math.round(item.fat)}F</span>
         </p>
       </div>
 
       <div className="ml-3 flex items-center gap-3">
-        <span className="text-sm font-bold text-ink whitespace-nowrap">
+        <span className="whitespace-nowrap text-[14px] font-bold tabular-nums text-ink">
           {Math.round(item.kcal)} <span className="text-[10px] font-medium text-ink-muted">kcal</span>
         </span>
         {onRemove && (

@@ -63,46 +63,52 @@ export default function DashboardPage() {
     return map;
   }, [foodLog]);
 
+  const exercise = 0;
+  const kcalRemaining = Math.max(0, target.kcal - totals.kcal + exercise);
+
   return (
     <main className="min-h-screen bg-cream pb-24">
       <div className="mx-auto max-w-6xl px-4 pt-6 md:px-8 md:pt-10">
         <GreetingHeader userName={userName} />
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-6">
           {/* ───── CỘT TRÁI: TỔNG QUAN HÔM NAY ───── */}
-          <div className="space-y-6 lg:col-span-2">
-            <DashboardCard tone="white" padding="lg" className="overflow-hidden">
-              <div className="flex flex-col items-center gap-8 md:flex-row md:items-start md:justify-between">
-                <div className="flex flex-col items-center md:items-start">
-                  <p className="text-sm font-medium text-ink-muted">Hôm nay</p>
-                  <CalorieCircle consumed={totals.kcal} target={target.kcal} />
-                  <div className="mt-4 flex items-center gap-3 text-xs">
-                    <div className="rounded-full bg-cream-soft px-3 py-1.5">
-                      <span className="font-semibold text-ink">{Math.round(totals.kcal)}</span>
-                      <span className="ml-1 text-ink-muted">đã nạp</span>
-                    </div>
-                    <div className="rounded-full bg-cream-soft px-3 py-1.5">
-                      <span className="font-semibold text-ink">0</span>
-                      <span className="ml-1 text-ink-muted">vận động</span>
-                    </div>
-                  </div>
-                </div>
+          <div className="space-y-5 lg:col-span-2 lg:space-y-6">
 
-                <div className="grid grid-cols-3 gap-3 md:gap-4">
+            {/* Calorie Hero Card */}
+            <DashboardCard tone="white" padding="lg" className="overflow-hidden">
+              <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:justify-between">
+                <CalorieCircle consumed={totals.kcal} target={target.kcal} />
+
+                <div className="grid grid-cols-3 gap-4">
                   <MacroDonut kind="protein" value={totals.protein} target={target.protein} />
                   <MacroDonut kind="carb"    value={totals.carb}    target={target.carb} />
                   <MacroDonut kind="fat"     value={totals.fat}     target={target.fat} />
                 </div>
               </div>
+
+              {/* Calorie equation — Mục tiêu − Đã nạp + Luyện tập = Còn lại */}
+              <div className="mt-6 grid grid-cols-7 items-center gap-2 border-t border-cream-deep/50 pt-5 text-center">
+                <EqCell label="Mục tiêu" value={target.kcal.toLocaleString("vi-VN")} tone="neutral" />
+                <span className="text-base font-light text-ink-faint">−</span>
+                <EqCell label="Đã nạp" value={Math.round(totals.kcal).toLocaleString("vi-VN")} tone="sage" />
+                <span className="text-base font-light text-ink-faint">+</span>
+                <EqCell label="Luyện tập" value={exercise} tone="clay" />
+                <span className="text-base font-light text-ink-faint">=</span>
+                <EqCell label="Còn lại" value={Math.round(kcalRemaining).toLocaleString("vi-VN")} tone="orange" highlight />
+              </div>
             </DashboardCard>
 
+            {/* Nhật ký bữa ăn */}
             <div>
-              <div className="mb-3 flex items-baseline justify-between">
-                <h2 className="text-lg font-bold text-ink">Nhật ký bữa ăn</h2>
-                <span className="text-xs text-ink-muted">{foodLog.length} món hôm nay</span>
+              <div className="mb-3 flex items-baseline justify-between px-1">
+                <h2 className="text-[15px] font-bold tracking-tight text-ink">Nhật ký bữa ăn</h2>
+                <span className="text-[11px] font-medium text-ink-muted tabular-nums">
+                  {foodLog.length} món · {Math.round(totals.kcal)} kcal
+                </span>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {MEAL_ORDER.map((meal) => (
                   <FoodLogSection
                     key={meal}
@@ -117,42 +123,10 @@ export default function DashboardPage() {
           </div>
 
           {/* ───── CỘT PHẢI: PANEL PHỤ ───── */}
-          <aside className="space-y-6">
-            <DashboardCard tone="orange" padding="lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-orange-deep">Lời nhắc</p>
-                  <h3 className="mt-2 text-lg font-bold text-ink">Uống đủ nước hôm nay</h3>
-                  <p className="mt-1 text-sm text-ink-muted">5 / 8 ly đã uống</p>
-                </div>
-                <span className="text-4xl">💧</span>
-              </div>
-              <div className="mt-4 flex gap-1.5">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-2 flex-1 rounded-full ${i < 5 ? "bg-orange" : "bg-white/60"}`}
-                  />
-                ))}
-              </div>
-            </DashboardCard>
-
+          <aside className="space-y-5 lg:space-y-6">
+            <WaterCard consumed={5} target={8} />
             <WeeklyTrendCard data={MOCK_WEEK} target={target.kcal} />
-
-            <DashboardCard tone="sage" padding="lg">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">🧘</span>
-                <div>
-                  <h3 className="text-sm font-bold text-ink">Thư giãn 2 phút</h3>
-                  <p className="mt-1 text-xs leading-relaxed text-ink-muted">
-                    Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.
-                  </p>
-                  <button className="mt-3 rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-sage-deep shadow-soft transition hover:bg-sage hover:text-white">
-                    Bắt đầu thở
-                  </button>
-                </div>
-              </div>
-            </DashboardCard>
+            <MindfulCard />
           </aside>
         </div>
       </div>
@@ -161,7 +135,7 @@ export default function DashboardPage() {
       <button
         type="button"
         onClick={() => handleAdd("Ăn vặt")}
-        className="fixed bottom-6 right-6 grid h-14 w-14 place-items-center rounded-full bg-orange text-white shadow-lift transition hover:bg-orange-deep md:hidden"
+        className="fixed bottom-6 right-6 grid h-14 w-14 place-items-center rounded-full bg-orange text-white shadow-lift ring-1 ring-orange-deep/20 transition hover:bg-orange-deep md:hidden"
         aria-label="Thêm món nhanh"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -170,5 +144,81 @@ export default function DashboardPage() {
         </svg>
       </button>
     </main>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/*  HELPER COMPONENTS (chỉ dùng nội bộ page này)                 */
+/* ────────────────────────────────────────────────────────────── */
+
+function EqCell({ label, value, tone = "neutral", highlight = false }) {
+  const toneClass = {
+    neutral: "bg-cream-soft text-ink",
+    sage:    "bg-sage-soft text-sage-deep",
+    clay:    "bg-clay-soft text-clay-deep",
+    orange:  "bg-orange text-white shadow-soft ring-1 ring-orange-deep/20",
+  }[tone];
+
+  return (
+    <div className={`rounded-2xl py-2.5 ${toneClass}`}>
+      <p className={`text-lg font-bold leading-none tracking-tight tabular-nums ${highlight ? "" : ""}`}>{value}</p>
+      <p className={`mt-1 text-[10px] font-medium uppercase tracking-wider ${highlight ? "text-white/80" : "opacity-70"}`}>{label}</p>
+    </div>
+  );
+}
+
+function WaterCard({ consumed = 0, target = 8 }) {
+  return (
+    <DashboardCard tone="white" padding="lg">
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-mist-deep">Nước</span>
+          <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Uống đủ nước hôm nay</h3>
+          <p className="mt-0.5 text-[11px] font-medium text-ink-muted tabular-nums">
+            <span className="font-bold text-mist-deep">{consumed}</span> / {target} ly · {(consumed * 0.25).toFixed(2)} lít
+          </p>
+        </div>
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-mist-soft text-xl">💧</span>
+      </div>
+
+      <div className="mt-4 grid grid-cols-8 gap-1.5">
+        {Array.from({ length: target }).map((_, i) => (
+          <div
+            key={i}
+            className={`h-9 rounded-lg transition ${i < consumed ? "bg-mist ring-1 ring-mist-deep/10" : "bg-cream-soft ring-1 ring-cream-deep/40"}`}
+          />
+        ))}
+      </div>
+
+      <button
+        type="button"
+        className="mt-4 w-full rounded-2xl bg-cream-soft py-2.5 text-[12px] font-semibold text-ink-muted ring-1 ring-cream-deep/40 transition hover:bg-mist hover:text-white hover:ring-mist-deep/20"
+      >
+        + Thêm 250ml
+      </button>
+    </DashboardCard>
+  );
+}
+
+function MindfulCard() {
+  return (
+    <DashboardCard tone="sage" padding="lg">
+      <div className="flex items-start gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-xl shadow-soft">🧘</span>
+        <div className="min-w-0">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sage-deep">Mindful</span>
+          <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Thư giãn 2 phút</h3>
+          <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
+            Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.
+          </p>
+          <button
+            type="button"
+            className="mt-3 rounded-full bg-white px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white"
+          >
+            Bắt đầu thở
+          </button>
+        </div>
+      </div>
+    </DashboardCard>
   );
 }

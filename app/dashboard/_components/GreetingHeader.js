@@ -17,25 +17,33 @@ export default function GreetingHeader({ userName = "bạn", now = new Date() })
   const greet = greetingFor(hour);
   const dateLabel = `${WEEKDAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
 
+  const initial = (userName || "?").trim().charAt(0).toUpperCase();
+
   return (
-    <header className="flex items-center justify-between">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wider text-ink-muted">{dateLabel}</p>
-        <h1 className="mt-1 text-2xl font-bold text-ink md:text-3xl">
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-sage-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-sage-deep ring-1 ring-sage/15">
+          <span className="h-1.5 w-1.5 rounded-full bg-sage" />
+          {dateLabel}
+        </span>
+        <h1 className="mt-3 text-[26px] font-bold leading-tight tracking-tight text-ink md:text-[32px]">
           {greet}, <span className="text-orange-deep">{userName}</span>
         </h1>
-        <p className="mt-1 text-sm text-ink-muted">Hôm nay là một ngày tuyệt vời để chăm sóc bản thân ✨</p>
+        <p className="mt-1 text-[13px] text-ink-muted">Hôm nay là một ngày tuyệt vời để chăm sóc bản thân.</p>
       </div>
 
       <button
         type="button"
-        className="hidden h-12 w-12 place-items-center rounded-full bg-white shadow-soft md:grid"
+        className="flex items-center gap-3 self-start rounded-2xl bg-white p-2 pr-4 shadow-soft ring-1 ring-cream-deep/60 transition hover:shadow-lift sm:self-auto"
         aria-label="Hồ sơ"
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ink">
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
+        <span className="grid h-10 w-10 place-items-center rounded-xl bg-orange text-base font-bold text-white">
+          {initial}
+        </span>
+        <span className="hidden text-left sm:block">
+          <span className="block text-[10px] font-medium uppercase tracking-wider text-ink-muted">Thành viên</span>
+          <span className="block text-[13px] font-semibold text-ink">{userName}</span>
+        </span>
       </button>
     </header>
   );

@@ -14,8 +14,8 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id="calorieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#F2A65A" />
-            <stop offset="100%" stopColor="#D4853F" />
+            <stop offset="0%" stopColor="#E89B7B" />
+            <stop offset="100%" stopColor="#D97757" />
           </linearGradient>
         </defs>
 
@@ -24,7 +24,7 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#F6F1E7"
+          stroke="#F4EFE6"
           strokeWidth={stroke}
         />
 
@@ -43,13 +43,13 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="text-xs font-medium uppercase tracking-wider text-ink-muted">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-muted">
           Còn lại
         </span>
-        <span className="mt-1 text-5xl font-bold leading-none text-ink">
+        <span className="mt-1.5 text-5xl font-bold leading-none tracking-tight text-ink tabular-nums">
           {Math.round(remaining).toLocaleString("vi-VN")}
         </span>
-        <span className="mt-1 text-xs font-medium text-ink-muted">
+        <span className="mt-1.5 text-[11px] font-medium text-ink-muted tabular-nums">
           / {target.toLocaleString("vi-VN")} kcal
         </span>
       </div>

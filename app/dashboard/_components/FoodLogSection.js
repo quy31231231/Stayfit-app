@@ -15,19 +15,19 @@ export default function FoodLogSection({ mealName, items = [], targetKcal, onAdd
   const isEmpty = items.length === 0;
 
   return (
-    <section className="rounded-3xl bg-white p-5 shadow-soft md:p-6">
+    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 transition-shadow hover:shadow-lift md:p-6">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className={`grid h-11 w-11 place-items-center rounded-2xl text-xl ${theme.tone}`}>
             {theme.icon}
           </span>
           <div>
-            <h3 className="text-base font-bold text-ink">{mealName}</h3>
-            <p className="text-xs text-ink-muted">
+            <h3 className="text-[15px] font-bold tracking-tight text-ink">{mealName}</h3>
+            <p className="mt-0.5 text-[11px] font-medium text-ink-muted tabular-nums">
               {isEmpty
-                ? "Chưa có món nào hôm nay"
+                ? "Chưa có món nào"
                 : `${items.length} món · ${Math.round(totalKcal)} kcal`}
-              {targetKcal ? ` · gợi ý ${targetKcal} kcal` : ""}
+              {targetKcal ? ` · gợi ý ${targetKcal}` : ""}
             </p>
           </div>
         </div>
@@ -35,7 +35,7 @@ export default function FoodLogSection({ mealName, items = [], targetKcal, onAdd
         <button
           type="button"
           onClick={() => onAdd?.(mealName)}
-          className="grid h-10 w-10 place-items-center rounded-full bg-cream-soft text-ink transition hover:bg-orange hover:text-white"
+          className="grid h-10 w-10 place-items-center rounded-full bg-cream-soft text-ink ring-1 ring-cream-deep/40 transition hover:bg-orange hover:text-white hover:ring-orange"
           aria-label={`Thêm món vào ${mealName}`}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -46,7 +46,7 @@ export default function FoodLogSection({ mealName, items = [], targetKcal, onAdd
       </header>
 
       {!isEmpty && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-4 space-y-1.5">
           {items.map((item) => (
             <FoodLogItem key={item.id} item={item} onRemove={onRemove} />
           ))}
@@ -57,7 +57,7 @@ export default function FoodLogSection({ mealName, items = [], targetKcal, onAdd
         <button
           type="button"
           onClick={() => onAdd?.(mealName)}
-          className="mt-4 w-full rounded-2xl border-2 border-dashed border-cream-deep py-4 text-sm font-medium text-ink-muted transition hover:border-orange hover:bg-orange-soft/40 hover:text-orange-deep"
+          className="mt-4 w-full rounded-2xl border border-dashed border-cream-deep bg-cream-soft/30 py-4 text-[13px] font-medium text-ink-muted transition hover:border-orange/60 hover:bg-orange-soft/30 hover:text-orange-deep"
         >
           + Thêm món vào {mealName.toLowerCase()}
         </button>

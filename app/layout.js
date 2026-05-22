@@ -16,19 +16,21 @@ export default function RootLayout({ children }) {
                 theme: {
                   extend: {
                     colors: {
-                      cream: { DEFAULT: '#FDFBF7', soft: '#F6F1E7', deep: '#EDE5D3' },
-                      ink:   { DEFAULT: '#3D3935', muted: '#8B847D', faint: '#B8B2AB' },
-                      orange:{ DEFAULT: '#F2A65A', soft: '#FBE0C4', deep: '#D4853F' },
-                      clay:  { DEFAULT: '#E8C892', soft: '#F7EAD1', deep: '#C9A766' },
-                      sage:  { DEFAULT: '#A8C09A', soft: '#DCEAD3', deep: '#769566' },
-                      lilac: { DEFAULT: '#C8B6E2', soft: '#EBE3F5', deep: '#9A82C2' },
+                      cream:  { DEFAULT: '#FBF8F2', soft: '#F4EFE6', deep: '#EBE3D2' },
+                      ink:    { DEFAULT: '#2D2620', muted: '#8C8378', faint: '#B8AFA4' },
+                      orange: { DEFAULT: '#D97757', soft: '#F7E8DC', deep: '#7A3318' },
+                      clay:   { DEFAULT: '#C49A4A', soft: '#F0E5CC', deep: '#5C4015' },
+                      sage:   { DEFAULT: '#5F8266', soft: '#DDE7DC', deep: '#2D4632' },
+                      lilac:  { DEFAULT: '#9B8AB8', soft: '#E5DDED', deep: '#3F2F5C' },
+                      mist:   { DEFAULT: '#6B95AB', soft: '#DDE8EF', deep: '#3D5A6B' },
                     },
                     fontFamily: {
                       sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                     },
                     boxShadow: {
-                      soft: '0 4px 24px -8px rgba(60, 50, 40, 0.08)',
-                      lift: '0 12px 40px -12px rgba(60, 50, 40, 0.18)',
+                      soft: '0 1px 2px rgba(45, 38, 32, 0.04), 0 8px 24px -12px rgba(45, 38, 32, 0.08)',
+                      lift: '0 4px 12px -4px rgba(45, 38, 32, 0.12), 0 16px 40px -16px rgba(45, 38, 32, 0.20)',
+                      ring: 'inset 0 0 0 1px rgba(45, 38, 32, 0.06)',
                     },
                   },
                 },
@@ -42,9 +44,13 @@ export default function RootLayout({ children }) {
         <style>{`
           body {
             font-family: 'Inter', sans-serif;
+            font-feature-settings: 'cv11', 'ss01', 'ss03';
+            letter-spacing: -0.011em;
             -webkit-tap-highlight-color: transparent;
-            background-color: #FDFBF7;
-            color: #3D3935;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #FBF8F2;
+            color: #2D2620;
           }
           .no-scrollbar::-webkit-scrollbar { display: none; }
           .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
