@@ -3,7 +3,7 @@
 const TONE = {
   protein: { ring: "#5F8266", track: "#DDE7DC", label: "Protein",  unit: "g" },
   carb:    { ring: "#C49A4A", track: "#F0E5CC", label: "Carb",     unit: "g" },
-  fat:     { ring: "#9B8AB8", track: "#E5DDED", label: "Béo lành", unit: "g" },
+  fat:     { ring: "#9B8AB8", track: "#E5DDED", label: "Fat", unit: "g" },
 };
 
 export default function MacroDonut({ kind = "protein", value = 0, target = 0, size = 88 }) {
