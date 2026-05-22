@@ -591,119 +591,110 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
 
     const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
 
-    const latestWeight = sortedDates.length > 0 ? weightLog[sortedDates[0]] : null;
-
     return (
-        <div className="min-h-screen bg-cream pb-28 animate-in fade-in duration-300 text-ink" style={{ fontFamily: WARM_FONT, letterSpacing: "-0.005em" }}>
+        <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-300 relative text-ink">
             {/* Slim sticky header */}
-            <header className="sticky top-0 z-30 backdrop-blur-md border-b border-ink/[0.08] px-5" style={{ background: "rgba(251, 248, 242, 0.85)" }}>
-                <div className="max-w-md md:max-w-2xl mx-auto py-3 text-center">
-                    <span style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted">Tổng quan</span>
-                    <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }} className="text-ink">Thống kê & Biểu đồ</p>
+            <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex items-center justify-center">
+                <div className="text-center">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">Tổng quan</span>
+                    <p className="text-sm font-bold text-ink">Thống kê & Biểu đồ</p>
                 </div>
             </header>
 
-            <main>
-                {/* HERO TILE — intro */}
-                <Tile tone="cream" className="text-center">
-                    <Eyebrow accent="orange-deep">Hành trình</Eyebrow>
-                    <HeroDisplay>
-                        {latestWeight ? `${latestWeight} kg.` : "Hiểu cơ thể qua thời gian."}
-                    </HeroDisplay>
-                    <Lead className="mt-3 text-ink-muted">
-                        {latestWeight ? "Tiếp tục lắng nghe — mỗi con số là một câu chuyện." : "Ghi lại con số đầu tiên để bắt đầu hành trình."}
-                    </Lead>
-                </Tile>
-
-                {/* WHITE TILE — Cập nhật cân nặng */}
-                <Tile tone="white">
-                    <div className="text-center mb-8">
-                        <Eyebrow accent="orange-deep">⚖️ Cân nặng</Eyebrow>
-                        <Display>Ghi lại để theo dõi.</Display>
-                    </div>
-
-                    <div className="flex items-center bg-cream-soft p-1.5 rounded-full mb-5 ring-1 ring-ink/[0.08] focus-within:ring-2 focus-within:ring-orange-deep/30 transition">
-                        <div className="relative flex items-center pl-1">
-                            <svg className="w-4 h-4 text-orange-deep absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[120px] bg-transparent py-2.5 pl-9 pr-1 outline-none text-ink cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }} />
+            <main className="p-4 space-y-5">
+                {/* CẬP NHẬT CÂN NẶNG */}
+                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                    <header className="flex items-center gap-3 mb-4">
+                        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">⚖️</span>
+                        <div>
+                            <h3 className="text-[15px] font-bold tracking-tight text-ink">Cập nhật cân nặng</h3>
+                            <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Ghi lại để theo dõi tiến trình</p>
                         </div>
-                        <div className="w-px h-6 bg-ink/[0.1] mx-1 shrink-0"/>
-                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-2.5 outline-none text-ink placeholder:text-ink-faint min-w-[60px] tabular-nums" style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }} />
-                        <PillButton onClick={saveWeight} className="shrink-0">Ghi</PillButton>
+                    </header>
+
+                    <div className="flex items-center bg-cream-soft p-1.5 rounded-2xl mb-4 ring-1 ring-cream-deep/40 focus-within:ring-2 focus-within:ring-orange/30 transition">
+                        <div className="relative flex items-center">
+                            <svg className="w-4 h-4 text-orange-deep absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[120px] bg-transparent py-2.5 pl-9 pr-1 outline-none text-[11px] font-semibold text-ink tracking-wider cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
+                        </div>
+                        <div className="w-px h-6 bg-cream-deep mx-1 shrink-0"></div>
+                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-2.5 outline-none font-semibold text-[13px] text-ink placeholder:text-ink-faint min-w-[60px] tabular-nums" />
+                        <button onClick={saveWeight} className="h-9 px-4 bg-orange text-white rounded-xl font-bold text-[11px] active:scale-95 transition shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep shrink-0">Ghi</button>
                     </div>
 
-                    <p style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted mb-3 px-1">Lịch sử gần nhất</p>
-                    <div className="max-h-40 overflow-y-auto no-scrollbar space-y-1.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-muted mb-2">Lịch sử gần nhất</p>
+                    <div className="max-h-36 overflow-y-auto no-scrollbar bg-cream-soft rounded-2xl p-1.5 ring-1 ring-cream-deep/40">
                         {sortedDates.length === 0 ? (
-                            <p className="text-center text-ink-faint italic py-6" style={{ fontSize: 13 }}>Chưa có bản ghi</p>
+                            <p className="text-center text-ink-faint text-[11px] italic font-medium py-4">Chưa có bản ghi</p>
                         ) : (
                             sortedDates.slice(0, 14).map(date => (
-                                <div key={date} className="flex justify-between items-center px-3 py-2.5 bg-cream-soft rounded-2xl ring-1 ring-ink/[0.06] group">
-                                    <div className="flex items-center gap-3">
-                                        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", fontVariantNumeric: "tabular-nums" }} className="text-ink-muted uppercase">{getWeekLabel(date)}/{date.split('-')[0]}</span>
-                                        <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.01em", fontVariantNumeric: "tabular-nums" }} className="text-ink">{weightLog[date]}<span style={{ fontSize: 11, fontWeight: 400, marginLeft: 2 }} className="text-ink-muted">kg</span></span>
+                                <div key={date} className="flex justify-between items-center p-2.5 bg-white rounded-xl mb-1 last:mb-0 group hover:ring-1 hover:ring-cream-deep transition">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="text-[10px] font-semibold text-ink-muted bg-cream-soft px-2 py-1 rounded-lg tabular-nums">{getWeekLabel(date)}/{date.split('-')[0]}</span>
+                                        <span className="text-[13px] font-bold text-ink tabular-nums">{weightLog[date]}<span className="text-[10px] font-medium text-ink-muted ml-0.5">kg</span></span>
                                     </div>
-                                    <button onClick={() => deleteWeight(date)} className="p-1.5 text-ink-faint hover:text-orange-deep rounded-lg transition opacity-0 group-hover:opacity-100" aria-label="Xóa"><IconTrash /></button>
+                                    <button onClick={() => deleteWeight(date)} className="p-1.5 text-ink-faint hover:text-orange-deep bg-cream-soft hover:bg-orange-soft rounded-lg transition opacity-0 group-hover:opacity-100" aria-label="Xóa"><IconTrash /></button>
                                 </div>
                             ))
                         )}
                     </div>
-                </Tile>
+                </section>
 
-                {/* DARK TILE — Biểu đồ cân nặng (chart on light card centered, dark frame around) */}
-                <Tile tone="espresso">
-                    <div className="text-center mb-8">
-                        <Eyebrow accent="on-dark">📈 Biểu đồ</Eyebrow>
-                        <Display className="text-white">Cân nặng qua 14 ngày.</Display>
-                        {sortedDates.length === 0 && (
-                            <p style={{ ...T_LEAD, color: "rgba(255,255,255,0.7)" }} className="mt-3">
-                                Ghi cân nặng để xem biểu đồ.
-                            </p>
-                        )}
-                    </div>
+                {/* BIỂU ĐỒ CÂN NẶNG */}
+                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 relative md:p-6">
+                    <header className="flex items-center gap-3 mb-4">
+                        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sage-soft text-xl">📈</span>
+                        <div>
+                            <h3 className="text-[15px] font-bold tracking-tight text-ink">Biểu đồ cân nặng</h3>
+                            <p className="mt-0.5 text-[11px] font-medium text-ink-muted">14 ngày gần nhất</p>
+                        </div>
+                    </header>
+                    {sortedDates.length === 0 && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/85 backdrop-blur-sm rounded-3xl z-10">
+                            <p className="text-[12px] font-medium text-ink-muted italic">Chưa có dữ liệu</p>
+                        </div>
+                    )}
+                    <div className="h-48 relative w-full"><canvas ref={weightChartRef}></canvas></div>
+                </section>
 
-                    <div className="bg-white rounded-3xl p-5 ring-1 ring-white/10 relative">
-                        {sortedDates.length === 0 && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/95 rounded-3xl z-10">
-                                <p style={{ fontSize: 13 }} className="text-ink-muted italic">Chưa có dữ liệu</p>
+                {/* PAGINATION */}
+                <div className="flex justify-between items-center bg-white p-1.5 rounded-2xl shadow-soft ring-1 ring-cream-deep/60 sticky top-[64px] z-10">
+                    <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-cream-soft hover:bg-orange-soft hover:text-orange-deep text-ink-muted rounded-xl text-[11px] font-semibold transition">‹ 14 ngày trước</button>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted text-center px-2 tabular-nums">
+                        {getWeekLabel(currentChartDates[0])} – {getWeekLabel(currentChartDates[currentChartDates.length-1])}
+                    </span>
+                    <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-xl text-[11px] font-semibold transition ${chartOffset === 0 ? 'text-cream-deep cursor-not-allowed' : 'bg-cream-soft hover:bg-orange-soft hover:text-orange-deep text-ink-muted'}`}>Tiếp ›</button>
+                </div>
+
+                {/* KCAL CHART */}
+                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                    <header className="flex items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-clay-soft text-xl">🔥</span>
+                            <div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Năng lượng đã nạp</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Theo bữa ăn mỗi ngày</p>
                             </div>
-                        )}
-                        <div className="h-48 relative w-full"><canvas ref={weightChartRef}></canvas></div>
-                    </div>
+                        </div>
+                        <span className="text-[10px] text-ink-faint italic shrink-0">tap để xem</span>
+                    </header>
+                    <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
+                </section>
 
-                    {/* Pagination */}
-                    <div className="mt-5 flex justify-between items-center gap-2">
-                        <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition" style={{ fontSize: 12, fontWeight: 500 }}>‹ Trước</button>
-                        <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: "0.04em", fontVariantNumeric: "tabular-nums", color: "rgba(255,255,255,0.7)" }} className="uppercase">
-                            {getWeekLabel(currentChartDates[0])} – {getWeekLabel(currentChartDates[currentChartDates.length-1])}
-                        </span>
-                        <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-full transition ${chartOffset === 0 ? 'text-white/30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20 text-white'}`} style={{ fontSize: 12, fontWeight: 500 }}>Sau ›</button>
-                    </div>
-                </Tile>
-
-                {/* LIGHT TILE — Năng lượng đã nạp */}
-                <Tile tone="cream">
-                    <div className="text-center mb-8">
-                        <Eyebrow accent="clay-deep">🔥 Năng lượng</Eyebrow>
-                        <Display>Đã nạp theo từng bữa.</Display>
-                        <Lead className="mt-3 text-ink-muted">Chạm vào cột để xem chi tiết ngày đó.</Lead>
-                    </div>
-                    <div className="bg-white rounded-3xl p-5 ring-1 ring-ink/[0.08]">
-                        <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
-                    </div>
-                </Tile>
-
-                {/* LIGHT TILE — Macro chart */}
-                <Tile tone="white">
-                    <div className="text-center mb-8">
-                        <Eyebrow accent="lilac-deep">🥗 Macro</Eyebrow>
-                        <Display>Protein · Carb · Fat.</Display>
-                        <Lead className="mt-3 text-ink-muted">Xu hướng ba chất chính theo thời gian.</Lead>
-                    </div>
-                    <div className="bg-cream-soft rounded-3xl p-5 ring-1 ring-ink/[0.06]">
-                        <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
-                    </div>
-                </Tile>
+                {/* MACRO CHART */}
+                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                    <header className="flex items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lilac-soft text-xl">🥗</span>
+                            <div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Protein · Carb · Fat</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Xu hướng macro</p>
+                            </div>
+                        </div>
+                        <span className="text-[10px] text-ink-faint italic shrink-0">tap để xem</span>
+                    </header>
+                    <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
+                </section>
             </main>
             <BottomNav view={view} setView={setView} />
         </div>
@@ -711,38 +702,17 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
 }
 
 function BottomNav({view, setView}) {
-    const items = [
-        { key: "journal", label: "Nhật ký", Icon: IconJournal },
-        { key: "stats",   label: "Thống kê", Icon: IconStats },
-        { key: "profile", label: "Hồ sơ",   Icon: IconUser },
-    ];
     return (
-        <div
-            className="fixed bottom-0 left-0 right-0 z-40"
-            style={{
-                fontFamily: `system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif`,
-                background: "rgba(251, 248, 242, 0.92)",
-                backdropFilter: "saturate(180%) blur(20px)",
-                WebkitBackdropFilter: "saturate(180%) blur(20px)",
-                borderTop: "1px solid rgba(45, 38, 32, 0.08)",
-            }}
-        >
-            <div className="max-w-md md:max-w-2xl mx-auto px-2 py-2 flex justify-around items-center">
-                {items.map(({ key, label, Icon }) => {
-                    const active = view === key;
-                    return (
-                        <button
-                            key={key}
-                            onClick={() => setView(key)}
-                            className={`flex flex-col items-center gap-1 px-5 py-2 rounded-2xl transition active:scale-[0.97] ${active ? "text-orange-deep" : "text-ink-muted hover:text-ink"}`}
-                            style={{ minWidth: 80 }}
-                        >
-                            <span className={`transition ${active ? "scale-110" : ""}`}><Icon /></span>
-                            <span style={{ fontSize: 10, fontWeight: active ? 600 : 500, letterSpacing: "-0.005em" }}>{label}</span>
-                        </button>
-                    );
-                })}
-            </div>
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-cream-deep p-4 z-40 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] max-w-md mx-auto">
+            <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='journal' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
+                <IconJournal /><span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
+            </button>
+            <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='stats' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
+                <IconStats /><span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
+            </button>
+            <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='profile' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
+                <IconUser /><span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
+            </button>
         </div>
     );
 }
@@ -1193,66 +1163,18 @@ export default function App() {
 
     if (!userId || !password) {
         return (
-            <div className="min-h-screen bg-cream text-ink flex flex-col" style={{ fontFamily: WARM_FONT, letterSpacing: "-0.005em" }}>
-                {/* HERO TILE — login */}
-                <section className="flex-1 flex flex-col justify-center px-5 md:px-8 py-16 md:py-20">
-                    <div className="mx-auto max-w-sm w-full text-center">
-                        <div className="flex justify-center mb-8">
-                            <span
-                                className="grid h-20 w-20 place-items-center rounded-3xl text-3xl font-bold text-white"
-                                style={{
-                                    background: "linear-gradient(135deg, #E89B7B 0%, #D97757 100%)",
-                                    filter: "drop-shadow(rgba(45,38,32,0.18) 3px 5px 30px)",
-                                    letterSpacing: "-0.02em",
-                                }}
-                            >S</span>
-                        </div>
-                        <Eyebrow accent="orange-deep">StayFit · stayfit.id.vn</Eyebrow>
-                        <HeroDisplay>Bắt đầu nuôi dưỡng.</HeroDisplay>
-                        <Lead className="mt-3 text-ink-muted">Nhật ký calo &amp; sức khỏe đồng bộ liền mạch.</Lead>
-
-                        <div className="mt-10 space-y-3 text-left">
-                            <div>
-                                <label style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted block mb-2 ml-1">Tên ID</label>
-                                <input
-                                    type="text"
-                                    value={inputUser}
-                                    onChange={e=>setInputUser(e.target.value)}
-                                    placeholder="vd: quy2026"
-                                    className="w-full bg-white ring-1 ring-ink/[0.08] p-4 rounded-2xl outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition text-ink"
-                                    style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted block mb-2 ml-1">Mật khẩu</label>
-                                <input
-                                    type="password"
-                                    value={inputPass}
-                                    onChange={e=>setInputPass(e.target.value)}
-                                    placeholder="••••••"
-                                    className="w-full bg-white ring-1 ring-ink/[0.08] p-4 rounded-2xl outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition text-ink"
-                                    style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }}
-                                    onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="mt-6">
-                            <PillButton onClick={handleLogin} disabled={loginLoading} className="w-full">
-                                {loginLoading ? "Đang kết nối…" : "Đăng nhập"}
-                            </PillButton>
-                        </div>
-
-                        <p style={{ fontSize: 12, lineHeight: 1.5, letterSpacing: "-0.005em" }} className="mt-5 text-ink-muted">
-                            Chưa có tài khoản? Nhập ID &amp; mật khẩu mới để tự động đăng ký.
-                        </p>
+            <div className="max-w-md mx-auto min-h-screen bg-orange flex flex-col items-center justify-center p-8 text-white relative overflow-hidden font-sans">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-orange rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-deep rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/3"></div>
+                <div className="bg-white/10 p-8 rounded-[2.5rem] w-full backdrop-blur-xl border border-white/20 text-center shadow-2xl relative z-10">
+                    <h1 className="text-4xl font-black tracking-tighter italic mb-8">STAYFIT</h1>
+                    <div className="space-y-3 mb-6">
+                        <input type="text" value={inputUser} onChange={e=>setInputUser(e.target.value)} placeholder="Tên ID (vd: quy2026)" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" />
+                        <input type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="Mật khẩu" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} />
                     </div>
-                </section>
-
-                {/* PARCHMENT FOOTER */}
-                <footer style={{ background: "#F4EFE6", borderTop: "1px solid rgba(45,38,32,0.08)" }} className="px-5 md:px-8 py-8 text-center">
-                    <p style={{ fontSize: 12, letterSpacing: "-0.005em" }} className="text-ink-muted">© 2026 StayFit · Đồng hành cùng bạn</p>
-                </footer>
+                    <button onClick={handleLogin} disabled={loginLoading} className="w-full py-4 bg-white text-orange rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng Nhập"}</button>
+                    <p className="text-[9px] text-white/50 font-bold mt-4 px-4 leading-relaxed">Nếu chưa có tài khoản, hãy nhập ID & Mật khẩu mới để tự động đăng ký.</p>
+                </div>
             </div>
         );
     }
@@ -1264,203 +1186,202 @@ export default function App() {
     if (view === "profile") {
         const userInitial = (userId || "?").trim().charAt(0).toUpperCase();
         return (
-            <div className="min-h-screen bg-cream pb-28 animate-in fade-in duration-500 text-ink" style={{ fontFamily: WARM_FONT, letterSpacing: "-0.005em" }}>
+            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-500 relative font-sans text-ink">
                 {/* Slim sticky header */}
-                <header className="sticky top-0 z-30 backdrop-blur-md border-b border-ink/[0.08] px-5" style={{ background: "rgba(251, 248, 242, 0.85)" }}>
-                    <div className="max-w-md md:max-w-2xl mx-auto py-3 text-center">
-                        <span style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted">Cài đặt</span>
-                        <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }} className="text-ink">Hồ sơ cá nhân</p>
+                <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex items-center justify-center">
+                    <div className="text-center">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">Cài đặt</span>
+                        <p className="text-sm font-bold text-ink">Hồ sơ cá nhân</p>
                     </div>
                 </header>
 
-                <main>
-                    {/* HERO TILE — avatar + tagline */}
-                    <Tile tone="cream" className="text-center">
-                        <div className="flex justify-center mb-6">
-                            <span
-                                className="grid h-24 w-24 place-items-center rounded-full text-3xl font-bold text-white"
-                                style={{
-                                    background: "linear-gradient(135deg, #E89B7B 0%, #D97757 100%)",
-                                    filter: "drop-shadow(rgba(45,38,32,0.18) 3px 5px 30px)",
-                                    letterSpacing: "-0.02em",
-                                }}
-                            >
+                <main className="p-4 space-y-5">
+                    {/* PROFILE HERO — avatar + ID */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <div className="flex items-center gap-4">
+                            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange to-orange-deep text-2xl font-bold text-white shadow-soft">
                                 {userInitial}
                             </span>
+                            <div className="min-w-0 flex-1">
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-orange-deep">Thành viên</span>
+                                <h2 className="mt-0.5 text-[16px] font-bold tracking-tight text-ink truncate">{userId || "Khách"}</h2>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Lắng nghe cơ thể, nuôi dưỡng nhẹ nhàng</p>
+                            </div>
                         </div>
-                        <Eyebrow accent="orange-deep">Thành viên</Eyebrow>
-                        <HeroDisplay>{userId || "Khách"}</HeroDisplay>
-                        <Lead className="mt-3 text-ink-muted">Lắng nghe cơ thể, nuôi dưỡng nhẹ nhàng.</Lead>
-                    </Tile>
+                    </section>
 
-                    {/* WHITE TILE — Giới tính */}
-                    <Tile tone="white">
-                        <div className="text-center mb-8">
-                            <Eyebrow accent="lilac-deep">👤 Giới tính</Eyebrow>
-                            <Display>Cơ thể bạn nói gì?</Display>
-                            <Lead className="mt-3 text-ink-muted">Để tính nhu cầu năng lượng chính xác hơn.</Lead>
-                        </div>
-                        <div className="flex gap-2 p-1.5 bg-cream-soft rounded-full ring-1 ring-ink/[0.06] max-w-sm mx-auto">
-                            <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-3 rounded-full transition active:scale-[0.97] ${profile.gender==='male' ? 'bg-white text-orange-deep ring-1 ring-ink/[0.08] shadow-soft' : 'text-ink-muted'}`} style={{ fontSize: 14, fontWeight: 500, letterSpacing: "-0.005em" }}>Nam</button>
-                            <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-3 rounded-full transition active:scale-[0.97] ${profile.gender==='female' ? 'bg-white text-orange-deep ring-1 ring-ink/[0.08] shadow-soft' : 'text-ink-muted'}`} style={{ fontSize: 14, fontWeight: 500, letterSpacing: "-0.005em" }}>Nữ</button>
-                        </div>
-                    </Tile>
-
-                    {/* CREAM TILE — Chỉ số cơ thể */}
-                    <Tile tone="cream">
-                        <div className="text-center mb-8">
-                            <Eyebrow accent="sage-deep">📏 Chỉ số cơ thể</Eyebrow>
-                            <Display>Tuổi · Cân nặng · Chiều cao.</Display>
-                            <Lead className="mt-3 text-ink-muted">Ba con số tạo nền cho mọi tính toán.</Lead>
-                        </div>
-                        <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
-                            {[
-                                { key: "age",    label: "Tuổi",      unit: "y",  value: profile.age,    setter: (v) => setProfile({...profile, age: +v}) },
-                                { key: "weight", label: "Cân nặng",  unit: "kg", value: profile.weight, setter: (v) => setProfile({...profile, weight: +v}) },
-                                { key: "height", label: "Chiều cao", unit: "cm", value: profile.height, setter: (v) => setProfile({...profile, height: +v}) },
-                            ].map((f) => (
-                                <div key={f.key} className="bg-white rounded-2xl ring-1 ring-ink/[0.08] p-4">
-                                    <p style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted text-center mb-2">{f.label}</p>
-                                    <div className="relative flex items-baseline justify-center gap-1">
-                                        <input type="number" value={f.value} onChange={e => f.setter(e.target.value)} className="w-full bg-transparent text-center outline-none text-ink focus:ring-0 tabular-nums" style={{ fontSize: 28, fontWeight: 600, letterSpacing: "-0.025em" }} />
-                                    </div>
-                                    <p style={{ fontSize: 11, fontWeight: 500 }} className="text-ink-muted text-center mt-1">{f.unit}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </Tile>
-
-                    {/* WHITE TILE — Lối sống */}
-                    <Tile tone="white">
-                        <div className="text-center mb-8">
-                            <Eyebrow accent="clay-deep">🎯 Lối sống</Eyebrow>
-                            <Display>Vận động & hướng đi.</Display>
-                            <Lead className="mt-3 text-ink-muted">Hai lựa chọn xác định ngân sách calo của bạn.</Lead>
-                        </div>
-                        <div className="space-y-3 max-w-md mx-auto">
+                    {/* GIỚI TÍNH */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <header className="flex items-center gap-3 mb-4">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lilac-soft text-xl">👤</span>
                             <div>
-                                <label style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted block mb-2 ml-1">Mức độ vận động</label>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Giới tính</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Để tính BMR chính xác</p>
+                            </div>
+                        </header>
+                        <div className="flex gap-1.5 p-1 bg-cream-soft rounded-2xl ring-1 ring-cream-deep/40">
+                            <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition ${profile.gender==='male' ? 'bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60' : 'text-ink-muted hover:text-ink'}`}>Nam</button>
+                            <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition ${profile.gender==='female' ? 'bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60' : 'text-ink-muted hover:text-ink'}`}>Nữ</button>
+                        </div>
+                    </section>
+
+                    {/* CHỈ SỐ CƠ THỂ */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <header className="flex items-center gap-3 mb-4">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sage-soft text-xl">📏</span>
+                            <div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Chỉ số cơ thể</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Tuổi · Cân nặng · Chiều cao</p>
+                            </div>
+                        </header>
+                        <div className="grid grid-cols-3 gap-2.5">
+                            <div>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Tuổi</label>
                                 <div className="relative">
-                                    <select value={profile.activity} onChange={e=>{ setProfile({...profile, activity:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-4 pr-10 rounded-2xl outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange-deep/30 transition text-ink" style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }}>
+                                    <input type="number" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3 pr-7 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">y</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Cân nặng</label>
+                                <div className="relative">
+                                    <input type="number" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">kg</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Chiều cao</label>
+                                <div className="relative">
+                                    <input type="number" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">cm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* VẬN ĐỘNG + MỤC TIÊU */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <header className="flex items-center gap-3 mb-4">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-clay-soft text-xl">🎯</span>
+                            <div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Lối sống</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Mức vận động & hướng đi</p>
+                            </div>
+                        </header>
+                        <div className="space-y-3">
+                            <div>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Mức độ vận động</label>
+                                <div className="relative">
+                                    <select value={profile.activity} onChange={e=>{ setProfile({...profile, activity:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-9 rounded-2xl font-semibold text-[13px] outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange/30 transition">
                                         {ACTIVITY_LEVELS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}
                                     </select>
-                                    <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
                                 </div>
                             </div>
                             <div>
-                                <label style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted block mb-2 ml-1">Mục tiêu cân nặng</label>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Mục tiêu cân nặng</label>
                                 <div className="relative">
-                                    <select value={profile.goal} onChange={e=>{ setProfile({...profile, goal:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-4 pr-10 rounded-2xl outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange-deep/30 transition text-ink" style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }}>
+                                    <select value={profile.goal} onChange={e=>{ setProfile({...profile, goal:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-9 rounded-2xl font-semibold text-[13px] outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange/30 transition">
                                         {GOALS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}
                                     </select>
-                                    <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
                                 </div>
                             </div>
                         </div>
-                    </Tile>
+                    </section>
 
-                    {/* DARK TILE — Calo budget (hero number on espresso) */}
-                    <Tile tone="espresso" className="text-center">
-                        <Eyebrow accent="on-dark">🔥 Năng lượng mỗi ngày</Eyebrow>
-                        <Display className="text-white">Cần khoảng.</Display>
-                        <p style={{ ...T_LEAD, color: "rgba(255,255,255,0.7)" }} className="mt-3">
-                            Số calo cơ thể bạn cần để duy trì hành trình.
-                        </p>
-
-                        <div className="mt-10 flex items-baseline justify-center gap-2">
-                            <input
-                                type="number"
-                                value={target}
-                                onChange={e => { setProfile({ ...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0 }); }}
-                                className="bg-transparent text-center outline-none w-48 border-b-2 border-dashed transition-colors tabular-nums"
-                                style={{
-                                    fontSize: "clamp(56px, 14vw, 80px)",
-                                    fontWeight: 600,
-                                    letterSpacing: "-0.04em",
-                                    color: "#E89B7B",
-                                    borderColor: "rgba(232, 155, 123, 0.3)",
-                                    lineHeight: 1,
-                                }}
-                            />
-                            <span style={{ fontSize: 20, fontWeight: 400, color: "rgba(255,255,255,0.5)" }}>kcal</span>
+                    {/* CALO BUDGET — terracotta card thay vì dark */}
+                    <section className="rounded-3xl bg-gradient-to-br from-orange to-orange-deep p-6 shadow-lift ring-1 ring-orange-deep/20 text-white">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/80">Năng lượng mỗi ngày</span>
+                                <p className="mt-0.5 text-[11px] text-white/70 font-medium">Cần khoảng</p>
+                            </div>
+                            <span className="text-3xl">🔥</span>
                         </div>
-
+                        <div className="flex items-baseline justify-center gap-1 mt-3">
+                            <input type="number" value={target} onChange={e => { setProfile({ ...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0 }); }} className="text-5xl font-bold tracking-tight bg-transparent text-center outline-none w-36 border-b-2 border-dashed border-white/30 focus:border-white/70 hover:border-white/50 transition-colors tabular-nums text-white" />
+                            <span className="text-base font-medium text-white/70 ml-1">kcal</span>
+                        </div>
                         {profile.isManualTarget && (
-                            <button
-                                onClick={() => setProfile({...profile, isManualTarget: false})}
-                                className="mt-6 bg-white/10 hover:bg-white/20 transition rounded-full"
-                                style={{ padding: "8px 16px", fontSize: 12, fontWeight: 500, color: "#E89B7B", letterSpacing: "-0.005em", fontVariantNumeric: "tabular-nums" }}
-                            >
+                            <button onClick={() => setProfile({...profile, isManualTarget: false})} className="block mx-auto mt-3 text-[10px] text-white/80 font-semibold uppercase tracking-wider bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-full transition tabular-nums">
                                 ⟲ Trở về tự động ({calculatedTarget})
                             </button>
                         )}
-                    </Tile>
+                    </section>
 
-                    {/* WHITE TILE — Macro tùy chỉnh */}
-                    <Tile tone="white">
-                        <div className="flex items-start justify-between gap-4 mb-8 max-w-md mx-auto">
-                            <div className="text-left">
-                                <Eyebrow accent="orange-deep">🥑 Macro</Eyebrow>
-                                <Display>{profile.isManualMacro ? "Tự cân chỉnh." : "Theo tỉ lệ chuẩn."}</Display>
+                    {/* MACRO TÙY CHỈNH */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <header className="flex items-center justify-between gap-3 mb-4">
+                            <div className="flex items-center gap-3">
+                                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">🥑</span>
+                                <div>
+                                    <h3 className="text-[15px] font-bold tracking-tight text-ink">Tùy chỉnh Macro</h3>
+                                    <p className="mt-0.5 text-[11px] font-medium text-ink-muted">{profile.isManualMacro ? "Đang tùy chỉnh tay" : "Theo tỉ lệ mặc định"}</p>
+                                </div>
                             </div>
-                            <button onClick={() => { const nextState = !profile.isManualMacro; setProfile({...profile, isManualMacro: nextState}); if (nextState) setIsDietModalOpen(true); }} className={`relative inline-flex h-7 w-12 items-center rounded-full transition shrink-0 ring-1 ${profile.isManualMacro ? 'bg-orange ring-orange-deep/20' : 'bg-cream-deep ring-cream-deep'}`} aria-label="Toggle macro">
-                                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition shadow-soft ${profile.isManualMacro ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <button onClick={() => { const nextState = !profile.isManualMacro; setProfile({...profile, isManualMacro: nextState}); if (nextState) setIsDietModalOpen(true); }} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ring-1 ${profile.isManualMacro ? 'bg-orange ring-orange-deep/20' : 'bg-cream-deep ring-cream-deep'}`} aria-label="Toggle macro tùy chỉnh">
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-soft ${profile.isManualMacro ? 'translate-x-6' : 'translate-x-1'}`} />
                             </button>
-                        </div>
+                        </header>
 
-                        <div className="max-w-md mx-auto">
-                            {profile.isManualMacro ? (
-                                <div className="animate-in fade-in slide-in-from-top-2">
-                                    <div className="flex justify-between items-center mb-4 bg-cream-soft ring-1 ring-ink/[0.06] p-3 rounded-2xl">
-                                        <span style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }} className="text-ink truncate">{profile.macroDietMode || "Tự nhập tay"}</span>
-                                        <button onClick={() => setIsDietModalOpen(true)} className="bg-white px-3 py-1.5 rounded-full text-orange-deep ring-1 ring-ink/[0.08] hover:bg-orange-soft transition active:scale-95 shrink-0" style={{ fontSize: 11, fontWeight: 500 }}>Đổi chế độ</button>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2.5">
-                                        {[
-                                            { key: "manualProtein", label: "Protein", accent: "#5F8266", ring: "sage" },
-                                            { key: "manualCarb",    label: "Carb",    accent: "#C49A4A", ring: "clay" },
-                                            { key: "manualFat",     label: "Fat",     accent: "#9B8AB8", ring: "lilac" },
-                                        ].map(m => (
-                                            <div key={m.key} className="bg-cream-soft ring-1 ring-ink/[0.06] rounded-2xl p-3">
-                                                <p style={{ ...T_EYEBROW, fontSize: 9, color: m.accent }} className="text-center mb-1.5">{m.label}</p>
-                                                <div className="relative flex items-baseline justify-center gap-0.5">
-                                                    <input type="number" value={profile[m.key]} onChange={e => setProfile({...profile, [m.key]: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-transparent text-center outline-none text-ink tabular-nums" style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.025em" }} />
-                                                </div>
-                                                <p style={{ fontSize: 10, fontWeight: 500 }} className="text-center text-ink-muted mt-0.5">g</p>
-                                            </div>
-                                        ))}
-                                    </div>
+                        {profile.isManualMacro ? (
+                            <div className="animate-in fade-in slide-in-from-top-2">
+                                <div className="flex justify-between items-center mb-3 bg-cream-soft ring-1 ring-cream-deep/40 p-2.5 rounded-2xl">
+                                    <span className="text-[11px] font-semibold text-ink ml-2 truncate">{profile.macroDietMode || "Tự nhập tay"}</span>
+                                    <button onClick={() => setIsDietModalOpen(true)} className="text-[10px] font-semibold bg-white px-3 py-1.5 rounded-full text-orange-deep ring-1 ring-cream-deep/60 hover:bg-orange-soft transition active:scale-95 shrink-0">Đổi chế độ</button>
                                 </div>
-                            ) : (
-                                <div className="grid grid-cols-3 gap-2.5 opacity-70">
-                                    {[
-                                        { label: "Protein", accent: "#5F8266", value: Math.round((target * 0.25 / 4) * 10) / 10 },
-                                        { label: "Carb",    accent: "#C49A4A", value: Math.round((target * 0.50 / 4) * 10) / 10 },
-                                        { label: "Fat",     accent: "#9B8AB8", value: Math.round((target * 0.25 / 9) * 10) / 10 },
-                                    ].map(m => (
-                                        <div key={m.label} className="bg-cream-soft rounded-2xl p-3 text-center">
-                                            <p style={{ ...T_EYEBROW, fontSize: 9, color: m.accent }} className="mb-1.5">{m.label}</p>
-                                            <p style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.025em", fontVariantNumeric: "tabular-nums" }} className="text-ink">{m.value}<span style={{ fontSize: 11, fontWeight: 400 }} className="text-ink-muted ml-0.5">g</span></p>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep block mb-1 text-center">Protein</label>
+                                        <div className="relative">
+                                            <input type="number" value={profile.manualProtein} onChange={e => setProfile({...profile, manualProtein: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 py-2.5 pr-7 rounded-xl text-center font-bold text-[13px] outline-none focus:ring-2 focus:ring-sage/30 transition tabular-nums" />
+                                            <span className="text-[9px] text-ink-muted absolute bottom-2.5 right-2.5 pointer-events-none font-medium">g</span>
                                         </div>
-                                    ))}
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep block mb-1 text-center">Carb</label>
+                                        <div className="relative">
+                                            <input type="number" value={profile.manualCarb} onChange={e => setProfile({...profile, manualCarb: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 py-2.5 pr-7 rounded-xl text-center font-bold text-[13px] outline-none focus:ring-2 focus:ring-clay/30 transition tabular-nums" />
+                                            <span className="text-[9px] text-ink-muted absolute bottom-2.5 right-2.5 pointer-events-none font-medium">g</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep block mb-1 text-center">Fat</label>
+                                        <div className="relative">
+                                            <input type="number" value={profile.manualFat} onChange={e => setProfile({...profile, manualFat: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 py-2.5 pr-7 rounded-xl text-center font-bold text-[13px] outline-none focus:ring-2 focus:ring-lilac/30 transition tabular-nums" />
+                                            <span className="text-[9px] text-ink-muted absolute bottom-2.5 right-2.5 pointer-events-none font-medium">g</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    </Tile>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-3 gap-2 opacity-60">
+                                <div className="text-center bg-cream-soft rounded-xl py-2.5">
+                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep mb-0.5">Protein</p>
+                                    <p className="text-[13px] font-bold tabular-nums text-ink">{Math.round((target * 0.25 / 4) * 10) / 10}<span className="text-[10px] text-ink-muted font-medium ml-0.5">g</span></p>
+                                </div>
+                                <div className="text-center bg-cream-soft rounded-xl py-2.5">
+                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep mb-0.5">Carb</p>
+                                    <p className="text-[13px] font-bold tabular-nums text-ink">{Math.round((target * 0.50 / 4) * 10) / 10}<span className="text-[10px] text-ink-muted font-medium ml-0.5">g</span></p>
+                                </div>
+                                <div className="text-center bg-cream-soft rounded-xl py-2.5">
+                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep mb-0.5">Fat</p>
+                                    <p className="text-[13px] font-bold tabular-nums text-ink">{Math.round((target * 0.25 / 9) * 10) / 10}<span className="text-[10px] text-ink-muted font-medium ml-0.5">g</span></p>
+                                </div>
+                            </div>
+                        )}
+                    </section>
 
-                    {/* CREAM-SOFT TILE — Action buttons */}
-                    <Tile tone="creamSoft" className="text-center">
-                        <div className="max-w-md mx-auto space-y-3">
-                            <PillButton onClick={() => setView("journal")} className="w-full">Quay lại nhật ký</PillButton>
-                            <button
-                                onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }}
-                                className="block w-full text-ink-muted hover:text-orange-deep transition py-2"
-                                style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }}
-                            >
-                                Đăng xuất
-                            </button>
-                        </div>
-                    </Tile>
+                    {/* ACTION BUTTONS */}
+                    <div className="space-y-2.5">
+                        <button onClick={() => setView("journal")} className="w-full py-4 bg-orange text-white rounded-2xl font-bold text-[14px] shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep active:scale-95 transition">
+                            Quay lại nhật ký
+                        </button>
+                        <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-3 bg-cream-soft text-ink-muted rounded-2xl font-semibold text-[12px] ring-1 ring-cream-deep/40 hover:bg-cream-deep hover:text-ink active:scale-95 transition">
+                            Đăng xuất
+                        </button>
+                    </div>
                 </main>
 
                 <BottomNav view={view} setView={setView} />
@@ -1502,276 +1423,222 @@ export default function App() {
     }
 
     if (view === "journal") {
-        const now = new Date();
-        const greet = timeGreeting(now.getHours());
-        const quote = WELLNESS_QUOTES[Math.floor(now.getTime() / 3600000) % WELLNESS_QUOTES.length];
-        const isToday = currentDate === formatDate(new Date());
-        const remaining = Math.max(0, Math.round(target - dailyKcal));
-        const MEAL_ICONS = { "Bữa sáng": "☀️", "Bữa trưa": "🌤", "Bữa tối": "🌙", "Ăn vặt": "⭐" };
-        const MEAL_ACCENTS = { "Bữa sáng": "#C49A4A", "Bữa trưa": "#5F8266", "Bữa tối": "#9B8AB8", "Ăn vặt": "#D97757" };
-        const scrollToPicker = () => {
-            if (typeof document !== "undefined") {
-                document.getElementById("add-food-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-        };
-
         return (
-            <div className="min-h-screen bg-cream pb-28 animate-in fade-in duration-300 text-ink" style={{ fontFamily: WARM_FONT, letterSpacing: "-0.005em" }}>
-                {/* DATE NAV — slim sticky frosted */}
-                <header className="sticky top-0 z-30 backdrop-blur-md border-b border-ink/[0.08] px-5" style={{ background: "rgba(251, 248, 242, 0.85)" }}>
-                    <div className="max-w-md md:max-w-2xl mx-auto py-3 flex justify-between items-center">
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-cream-soft hover:text-orange-deep transition" aria-label="Ngày trước">
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
-                        </button>
-                        <div className="text-center">
-                            <span style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted">{isToday ? "Hôm nay" : "Ngày"}</span>
-                            <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }} className="text-ink tabular-nums">{currentDate}</p>
-                        </div>
-                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-cream-soft hover:text-orange-deep transition" aria-label="Ngày sau">
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
-                        </button>
+            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-300 relative font-sans text-ink">
+                {/* DATE NAV — slim sticky bar */}
+                <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex justify-between items-center">
+                    <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-orange-soft hover:text-orange-deep transition" aria-label="Ngày trước">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
+                    </button>
+                    <div className="text-center">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
+                            {currentDate === formatDate(new Date()) ? "Hôm nay" : "Ngày"}
+                        </span>
+                        <p className="text-sm font-bold text-ink tabular-nums">{currentDate}</p>
                     </div>
+                    <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-orange-soft hover:text-orange-deep transition" aria-label="Ngày sau">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
+                    </button>
                 </header>
 
-                <main>
-                    {/* ───── HERO TILE — cream, calorie ring as "the product" ───── */}
-                    <Tile tone="cream" className="text-center">
-                        <Eyebrow accent="orange-deep">{greet}{userId ? `, ${userId}` : ""}</Eyebrow>
-                        <HeroDisplay>
-                            {isToday ? `Còn dư ${remaining.toLocaleString("vi-VN")} kcal.` : `Đã nạp ${Math.round(dailyKcal).toLocaleString("vi-VN")} kcal.`}
-                        </HeroDisplay>
-                        <Lead className="mt-3 text-ink-muted">{quote}</Lead>
+                <main className="p-4 space-y-5">
+                    {/* GREETING */}
+                    <GreetingHeader userName={userId || "bạn"} />
 
-                        <div className="mt-6 flex flex-wrap gap-3 justify-center">
-                            <PillButton onClick={scrollToPicker}>Thêm món</PillButton>
-                            {!isToday && (
-                                <PillButton variant="ghost" onClick={() => setCurrentDate(formatDate(new Date()))}>Về hôm nay</PillButton>
-                            )}
-                        </div>
-
-                        <div className="mt-14 flex justify-center">
-                            <CalorieRingWarm consumed={dailyKcal} target={target} />
-                        </div>
-                    </Tile>
-
-                    {/* ───── DARK TILE — espresso, dinh dưỡng ───── */}
-                    <Tile tone="espresso" className="text-center">
-                        <Eyebrow accent="on-dark">Dinh dưỡng</Eyebrow>
-                        <Display className="text-white">Cân đối là một dạng chăm sóc.</Display>
-                        <Lead className="mt-3" style={{ color: "rgba(255,255,255,0.7)" }}>Theo dõi ba chất chính qua ngày.</Lead>
-
-                        <div className="mt-12 grid grid-cols-3 gap-4 md:gap-8">
-                            <MacroBlockWarm label="Protein" value={dailyProtein} target={targetProtein} accent="#A8C09A" />
-                            <MacroBlockWarm label="Carb"    value={dailyCarb}    target={targetCarb}    accent="#E8C892" />
-                            <MacroBlockWarm label="Fat"     value={dailyFat}     target={targetFat}     accent="#C8B6E2" />
-                        </div>
-
-                        <div className="mt-10 flex items-center justify-center gap-2 text-[13px] tabular-nums" style={{ color: "rgba(255,255,255,0.75)", letterSpacing: "-0.005em" }}>
-                            <span>Cần {Number(target).toLocaleString("vi-VN")}</span>
-                            <span className="text-white/30">·</span>
-                            <span>Đã nạp {Math.round(dailyKcal).toLocaleString("vi-VN")}</span>
-                            <span className="text-white/30">·</span>
-                            <span className="text-[#E89B7B] font-semibold">Còn dư {remaining.toLocaleString("vi-VN")}</span>
-                        </div>
-                    </Tile>
-
-                    {/* ───── LIGHT TILE — white, add food picker ───── */}
-                    <section id="add-food-section" className={`bg-white scroll-mt-20 ${SECTION_PY} px-5 md:px-8`}>
-                        <div className="mx-auto max-w-md md:max-w-2xl">
-                            <div className="text-center mb-10">
-                                <Eyebrow accent="orange-deep">Thêm món</Eyebrow>
-                                <Display>Vào {selectedMeal.toLowerCase()}.</Display>
-                                <Lead className="mt-3 text-ink-muted">Tìm món có sẵn hoặc nhập tay.</Lead>
+                    {/* CALORIE HERO — vòng tròn + 3 macro donuts + Eq row */}
+                    <DashboardCard tone="white" padding="lg" className="overflow-hidden">
+                        <div className="flex flex-col items-center gap-6">
+                            <CalorieCircle consumed={dailyKcal} target={target} />
+                            <div className="grid grid-cols-3 gap-3 w-full">
+                                <MacroDonut kind="protein" value={dailyProtein} target={targetProtein} />
+                                <MacroDonut kind="carb"    value={dailyCarb}    target={targetCarb} />
+                                <MacroDonut kind="fat"     value={dailyFat}     target={targetFat} />
                             </div>
+                        </div>
 
-                            {/* Meal selector + tabs */}
-                            <div className="flex flex-wrap gap-2 justify-center mb-6">
-                                {MEAL_TYPES.map(m => (
-                                    <button
-                                        key={m}
-                                        onClick={() => setSelectedMeal(m)}
-                                        className="rounded-full transition active:scale-[0.97]"
-                                        style={{
-                                            padding: "8px 16px",
-                                            fontSize: 13,
-                                            fontWeight: 500,
-                                            letterSpacing: "-0.005em",
-                                            background: selectedMeal === m ? "#D97757" : "#F4EFE6",
-                                            color: selectedMeal === m ? "#fff" : "#2D2620",
-                                            boxShadow: selectedMeal === m ? "inset 0 0 0 1px rgba(122,51,24,0.2)" : "inset 0 0 0 1px rgba(45,38,32,0.08)",
-                                        }}
-                                    >
-                                        {MEAL_ICONS[m]} {m}
-                                    </button>
-                                ))}
+                        <div className="mt-6 flex items-stretch gap-1 border-t border-cream-deep/50 pt-5 text-center">
+                            <EqCell label="Cần khoảng" value={Number(target).toLocaleString("vi-VN")} tone="neutral" />
+                            <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">−</span>
+                            <EqCell label="Đã nạp" value={Math.round(dailyKcal).toLocaleString("vi-VN")} tone="sage" />
+                            <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">+</span>
+                            <EqCell label="Vận động" value="0" tone="clay" />
+                            <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">=</span>
+                            <EqCell label="Còn dư" value={Math.max(0, Math.round(target - dailyKcal)).toLocaleString("vi-VN")} tone="orange" highlight />
+                        </div>
+                    </DashboardCard>
+
+                    <section id="add-food-section" className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 scroll-mt-20 md:p-6">
+                        {/* Header — icon-chip pattern giống FoodLogSection */}
+                        <header className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-orange-deep">
+                                    <IconPlus />
+                                </span>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink leading-none">Thêm món</h3>
                             </div>
-
-                            <div className="flex gap-1 p-1 bg-cream-soft rounded-full ring-1 ring-ink/[0.06]">
-                                <button onClick={() => setTab("quick")} className={`flex-1 py-2.5 rounded-full transition ${tab === "quick" ? "bg-white text-orange-deep ring-1 ring-ink/[0.08] shadow-soft" : "text-ink-muted"}`} style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }}>Chọn nhanh</button>
-                                <button onClick={() => setTab("custom")} className={`flex-1 py-2.5 rounded-full transition ${tab === "custom" ? "bg-white text-orange-deep ring-1 ring-ink/[0.08] shadow-soft" : "text-ink-muted"}`} style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }}>Nhập tay</button>
+                            <div className="relative">
+                                <select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="appearance-none bg-cream-soft hover:bg-cream-deep text-[11px] font-semibold text-ink py-2 pl-3.5 pr-9 rounded-full outline-none cursor-pointer ring-1 ring-cream-deep/60 focus:ring-2 focus:ring-orange/30 transition">
+                                    {MEAL_TYPES.map(m => ( <option key={m} value={m}>{m}</option> ))}
+                                </select>
+                                <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
                             </div>
+                        </header>
 
-                            {tab === "quick" ? (
-                                <div className="mt-5">
-                                    {/* Search — pill shape */}
-                                    <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none"><IconSearch /></span>
-                                        <input
-                                            type="text"
-                                            placeholder="Tìm món ăn..."
-                                            value={searchQuery}
-                                            onChange={e => setSearchQuery(e.target.value)}
-                                            className="w-full bg-white ring-1 ring-ink/[0.08] rounded-full py-3 pl-11 pr-5 outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition"
-                                            style={{ fontSize: 15, letterSpacing: "-0.005em" }}
-                                        />
-                                    </div>
+                        {/* Tabs */}
+                        <div className="mt-5 flex gap-1 p-1 bg-cream-soft rounded-2xl">
+                            <button onClick={() => setTab("quick")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "quick" ? "bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60" : "text-ink-muted hover:text-ink"}`}>Chọn nhanh</button>
+                            <button onClick={() => setTab("custom")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "custom" ? "bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60" : "text-ink-muted hover:text-ink"}`}>Nhập tay</button>
+                        </div>
 
-                                    {/* Food grid — utility cards on cream-soft */}
-                                    <div className="mt-4 grid grid-cols-2 gap-2.5 max-h-72 overflow-y-auto no-scrollbar pb-1">
-                                        {filteredFoods.map((f, idx) => (
-                                            <div key={f.name + idx} className="relative group">
-                                                <button
-                                                    onClick={() => { setSelectedFood(f); setQty(f.per); }}
-                                                    className={`w-full p-4 pr-11 rounded-2xl text-left transition ring-1 ${selectedFood?.name === f.name ? "bg-orange-soft ring-orange-deep/30" : "bg-cream-soft ring-ink/[0.06] hover:ring-ink/[0.14]"} active:scale-[0.98]`}
-                                                >
-                                                    <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "-0.005em" }} className="truncate text-ink mb-1">{f.name}</p>
-                                                    <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em", fontVariantNumeric: "tabular-nums" }} className="text-ink">
-                                                        {f.kcal}<span style={{ fontSize: 11, fontWeight: 400 }} className="text-ink-muted ml-1">kcal/{f.per}{f.unit}</span>
-                                                    </p>
-                                                </button>
-                                                <div className="absolute right-1 top-2 flex gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                                                    <button onClick={(e) => { e.stopPropagation(); openLibraryEditModal(f); }} className="p-1.5 text-ink-faint hover:text-orange-deep hover:bg-white rounded-lg transition" aria-label="Sửa"><IconEdit /></button>
-                                                    <button onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} className="p-1.5 text-ink-faint hover:text-orange-deep hover:bg-white rounded-lg transition" aria-label="Xóa"><IconTrash /></button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {filteredFoods.length === 0 && (
-                                            <p className="col-span-2 text-center py-8 text-ink-muted text-[13px] italic">Không tìm thấy món ăn</p>
-                                        )}
-                                    </div>
-
-                                    {/* Selected food preview */}
-                                    {selectedFood && (() => {
-                                        let weightInGrams = qty; const u = selectedFood.unit.toLowerCase();
-                                        if (['kg', 'l', 'lít'].includes(u)) { weightInGrams = qty * 1000; }
-                                        else if (['ml', 'g', 'gram'].includes(u)) { weightInGrams = qty; }
-                                        else { const mockWeights = { 'tô': 400, 'ly': 250, 'quả': 100 }; weightInGrams = qty * (mockWeights[u] || 100); }
-
-                                        const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty);
-                                        const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty);
-                                        const totalCarb = calcMacro(selectedFood.carb, selectedFood.per, qty);
-                                        const totalFat = calcMacro(selectedFood.fat, selectedFood.per, qty);
-
-                                        return (
-                                            <div className="mt-6 pt-5 border-t border-ink/[0.08] animate-in slide-in-from-top-2">
-                                                <div className="rounded-2xl bg-cream-soft ring-1 ring-ink/[0.06] p-5 mb-4">
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <div className="min-w-0 flex-1 pr-3">
-                                                            <h5 style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.01em" }} className="text-ink truncate">{selectedFood.name}</h5>
-                                                            <p style={{ fontSize: 12, fontVariantNumeric: "tabular-nums" }} className="text-ink-muted mt-0.5">{qty} {selectedFood.unit} · ~{Math.round(weightInGrams)}g</p>
-                                                        </div>
-                                                        <div className="text-right shrink-0">
-                                                            <p style={{ fontSize: 32, fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }} className="text-orange-deep">{totalKcal}</p>
-                                                            <p style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted mt-1">kcal</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        <div className="text-center bg-white rounded-xl py-2 ring-1 ring-ink/[0.06]">
-                                                            <p style={{ ...T_EYEBROW, fontSize: 9 }} className="text-sage-deep">Protein</p>
-                                                            <p style={{ fontSize: 14, fontWeight: 600, fontVariantNumeric: "tabular-nums" }} className="text-ink mt-1">{totalPro}g</p>
-                                                        </div>
-                                                        <div className="text-center bg-white rounded-xl py-2 ring-1 ring-ink/[0.06]">
-                                                            <p style={{ ...T_EYEBROW, fontSize: 9 }} className="text-clay-deep">Carb</p>
-                                                            <p style={{ fontSize: 14, fontWeight: 600, fontVariantNumeric: "tabular-nums" }} className="text-ink mt-1">{totalCarb}g</p>
-                                                        </div>
-                                                        <div className="text-center bg-white rounded-xl py-2 ring-1 ring-ink/[0.06]">
-                                                            <p style={{ ...T_EYEBROW, fontSize: 9 }} className="text-lilac-deep">Fat</p>
-                                                            <p style={{ fontSize: 14, fontWeight: 600, fontVariantNumeric: "tabular-nums" }} className="text-ink mt-1">{totalFat}g</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-24">
-                                                        <label style={{ ...T_EYEBROW, fontSize: 9 }} className="text-ink-muted block mb-1.5">Số lượng</label>
-                                                        <input type="number" value={qty} step="any" min="0.1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-2.5 rounded-xl outline-none text-center focus:ring-2 focus:ring-orange-deep/30 transition tabular-nums" style={{ fontSize: 14, fontWeight: 600 }} />
-                                                    </div>
-                                                    <PillButton onClick={() => handleAddSelectedFood()} className="flex-1 mt-[22px]">Ghi vào nhật ký</PillButton>
-                                                    <button onClick={() => { setSelectedFood(null); setQty(1); }} className="grid place-items-center h-11 w-11 mt-[22px] text-ink-faint hover:text-orange-deep bg-cream-soft ring-1 ring-ink/[0.08] rounded-full transition" aria-label="Hủy"><IconTrash /></button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })()}
+                        {tab === "quick" ? (
+                            <div className="mt-4">
+                                {/* Search */}
+                                <div className="relative">
+                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none"><IconSearch /></span>
+                                    <input type="text" placeholder="Tìm món ăn..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 rounded-2xl py-3 pl-10 pr-4 text-[13px] font-medium outline-none focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition" />
                                 </div>
-                            ) : (
-                                <div className="mt-5 space-y-3">
-                                    <input placeholder="Tên món (vd: Gà rán...)" value={customFood.name} onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-3.5 rounded-2xl outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition" style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }} />
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <input type="number" placeholder="Số lượng" value={customFood.quantity} onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} className="bg-cream-soft ring-1 ring-ink/[0.08] p-3.5 rounded-2xl outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition tabular-nums" style={{ fontSize: 15, fontWeight: 500 }} />
-                                        <div className="relative">
-                                            <select value={customFood.unit} onChange={e => setCustomFood(p=>({...p, unit:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-3.5 pr-9 rounded-2xl outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange-deep/30 transition" style={{ fontSize: 15, fontWeight: 500 }}>
-                                                <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
-                                            </select>
-                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {[
-                                            { key: "kcal",    label: "kcal", accent: "#D97757" },
-                                            { key: "protein", label: "Pro",  accent: "#5F8266" },
-                                            { key: "carb",    label: "Carb", accent: "#C49A4A" },
-                                            { key: "fat",     label: "Fat",  accent: "#9B8AB8" },
-                                        ].map(field => (
-                                            <div key={field.key} className="relative">
-                                                <input type="number" placeholder={field.key === "kcal" ? "Kcal" : field.label === "Pro" ? "Protein" : field.label} value={customFood[field.key]} onChange={e => setCustomFood(p=>({...p, [field.key]:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-3.5 pr-12 rounded-2xl outline-none font-semibold focus:ring-2 placeholder:text-ink-faint transition tabular-nums" style={{ fontSize: 15, "--tw-ring-color": `${field.accent}4D` }} />
-                                                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: field.accent }} className="absolute right-3 top-1/2 -translate-y-1/2">{field.label}</span>
+
+                                {/* Food grid */}
+                                <div className="mt-3 grid grid-cols-2 gap-2 max-h-64 overflow-y-auto no-scrollbar pb-1">
+                                    {filteredFoods.map((f, idx) => (
+                                        <div key={f.name + idx} className="relative group">
+                                            <button onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`w-full p-3.5 pr-11 rounded-2xl text-left transition ring-1 ${selectedFood?.name === f.name ? "bg-orange-soft ring-orange/30" : "bg-cream-soft ring-transparent hover:ring-cream-deep"} active:scale-[0.98]`}>
+                                                <p className="truncate text-[11px] font-semibold tracking-tight text-ink mb-0.5">{f.name}</p>
+                                                <p className="text-[12px] font-bold text-ink tabular-nums">{f.kcal} <span className="text-[9px] font-medium text-ink-muted">kcal/{f.per}{f.unit}</span></p>
+                                            </button>
+                                            <div className="absolute right-1 top-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                                <button onClick={(e) => { e.stopPropagation(); openLibraryEditModal(f); }} className="p-1.5 text-ink-faint hover:text-orange hover:bg-white rounded-lg transition" aria-label="Sửa món"><IconEdit /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} className="p-1.5 text-ink-faint hover:text-orange-deep hover:bg-white rounded-lg transition" aria-label="Xóa món"><IconTrash /></button>
                                             </div>
-                                        ))}
-                                    </div>
-                                    {customFood.name.trim() !== "" && parseFloat(customFood.kcal) > 0 && (
-                                        <PillButton onClick={addCustom} className="w-full mt-2 animate-in slide-in-from-bottom-2 fade-in duration-300">
-                                            Xác nhận thêm
-                                        </PillButton>
+                                        </div>
+                                    ))}
+                                    {filteredFoods.length === 0 && (
+                                        <p className="col-span-2 text-center py-6 text-ink-muted text-[12px] italic">Không tìm thấy món ăn</p>
                                     )}
                                 </div>
-                            )}
-                        </div>
+
+                                {/* Selected preview */}
+                                {selectedFood && (() => {
+                                    let weightInGrams = qty; const u = selectedFood.unit.toLowerCase();
+                                    if (['kg', 'l', 'lít'].includes(u)) { weightInGrams = qty * 1000; }
+                                    else if (['ml', 'g', 'gram'].includes(u)) { weightInGrams = qty; }
+                                    else { const mockWeights = { 'tô': 400, 'ly': 250, 'quả': 100 }; weightInGrams = qty * (mockWeights[u] || 100); }
+
+                                    const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty);
+                                    const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty);
+                                    const totalCarb = calcMacro(selectedFood.carb, selectedFood.per, qty);
+                                    const totalFat = calcMacro(selectedFood.fat, selectedFood.per, qty);
+                                    const projectedKcal = Math.round((dailyKcal + totalKcal) * 10) / 10;
+                                    const projectedPro = Math.round((dailyProtein + totalPro) * 10) / 10;
+                                    const projectedCarb = Math.round((dailyCarb + totalCarb) * 10) / 10;
+                                    const projectedFat = Math.round((dailyFat + totalFat) * 10) / 10;
+
+                                    return (
+                                        <div className="mt-4 pt-4 border-t border-cream-deep/50 animate-in slide-in-from-top-2">
+                                            <div className="rounded-2xl bg-cream-soft ring-1 ring-cream-deep/60 p-4 mb-3">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div className="min-w-0 flex-1 pr-3">
+                                                        <h5 className="text-[14px] font-bold tracking-tight text-ink truncate">{selectedFood.name}</h5>
+                                                        <p className="text-[11px] text-ink-muted font-medium tabular-nums mt-0.5">{qty} {selectedFood.unit} · ~{Math.round(weightInGrams)}g</p>
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <p className="text-2xl font-bold text-orange-deep leading-none tabular-nums">{totalKcal}</p>
+                                                        <p className="text-[10px] text-ink-muted font-semibold uppercase tracking-wider mt-1">kcal</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-between gap-1.5">
+                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 ring-1 ring-cream-deep/40">
+                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep">Protein</p>
+                                                        <p className="text-[12px] font-bold text-ink tabular-nums mt-0.5">{totalPro}g</p>
+                                                        <p className="text-[9px] text-ink-muted tabular-nums">→ {projectedPro}g</p>
+                                                    </div>
+                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 ring-1 ring-cream-deep/40">
+                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep">Carb</p>
+                                                        <p className="text-[12px] font-bold text-ink tabular-nums mt-0.5">{totalCarb}g</p>
+                                                        <p className="text-[9px] text-ink-muted tabular-nums">→ {projectedCarb}g</p>
+                                                    </div>
+                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 ring-1 ring-cream-deep/40">
+                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep">Fat</p>
+                                                        <p className="text-[12px] font-bold text-ink tabular-nums mt-0.5">{totalFat}g</p>
+                                                        <p className="text-[9px] text-ink-muted tabular-nums">→ {projectedFat}g</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-end gap-2">
+                                                <div className="w-20">
+                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng</label>
+                                                    <input type="number" value={qty} step="any" min="0.1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 text-ink p-2.5 rounded-xl text-[14px] outline-none font-bold text-center focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
+                                                </div>
+                                                <button onClick={() => handleAddSelectedFood()} className="flex-1 h-11 bg-orange text-white rounded-xl text-[12px] font-bold flex items-center justify-center gap-1.5 active:scale-95 transition hover:bg-orange-deep shadow-soft ring-1 ring-orange-deep/20">
+                                                    Ghi vào nhật ký <IconPlus />
+                                                </button>
+                                                <button onClick={() => { setSelectedFood(null); setQty(1); }} className="grid place-items-center h-11 w-11 text-ink-faint hover:text-orange-deep bg-cream-soft ring-1 ring-cream-deep/40 rounded-xl transition" aria-label="Hủy">
+                                                    <IconTrash />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        ) : (
+                            <div className="mt-4 space-y-2.5">
+                                <input placeholder="Tên món ăn (vd: Gà rán...)" value={customFood.name} onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition" />
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <input type="number" placeholder="Số lượng" value={customFood.quantity} onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} className="bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition tabular-nums" />
+                                    <div className="relative">
+                                        <select value={customFood.unit} onChange={e => setCustomFood(p=>({...p, unit:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-9 rounded-2xl text-[13px] outline-none font-semibold cursor-pointer appearance-none focus:ring-2 focus:ring-orange/30 transition">
+                                            <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
+                                        </select>
+                                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <div className="relative"><input type="number" placeholder="Kcal" value={customFood.kcal} onChange={e => setCustomFood(p=>({...p, kcal:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-12 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition tabular-nums" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-orange uppercase tracking-wider">kcal</span></div>
+                                    <div className="relative"><input type="number" placeholder="Protein" value={customFood.protein} onChange={e => setCustomFood(p=>({...p, protein:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-12 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-sage/30 placeholder:text-ink-faint transition tabular-nums" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-sage-deep uppercase tracking-wider">Pro</span></div>
+                                    <div className="relative"><input type="number" placeholder="Carb" value={customFood.carb} onChange={e => setCustomFood(p=>({...p, carb:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-12 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-clay/30 placeholder:text-ink-faint transition tabular-nums" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-clay-deep uppercase tracking-wider">Carb</span></div>
+                                    <div className="relative"><input type="number" placeholder="Fat" value={customFood.fat} onChange={e => setCustomFood(p=>({...p, fat:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-12 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-lilac/30 placeholder:text-ink-faint transition tabular-nums" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-lilac-deep uppercase tracking-wider">Fat</span></div>
+                                </div>
+                                {customFood.name.trim() !== "" && parseFloat(customFood.kcal) > 0 && (
+                                    <button onClick={addCustom} className="w-full bg-orange text-white p-3.5 rounded-2xl font-bold text-[13px] mt-3 active:scale-95 transition shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep animate-in slide-in-from-bottom-2 fade-in duration-300">
+                                        Xác nhận thêm
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </section>
 
-                    {/* ───── LIGHT TILE — cream, meal log ───── */}
-                    <Tile tone="cream">
-                        <div className="text-center mb-10">
-                            <Eyebrow accent="orange-deep">Nhật ký bữa ăn</Eyebrow>
-                            <Display>Ghi từng món, thấy cả ngày.</Display>
-                            <Lead className="mt-3 text-ink-muted">
-                                {dailyLog.length === 0 ? "Khi nào sẵn sàng, ghi món vào nhé." : `${dailyLog.length} món · ${Math.round(dailyKcal).toLocaleString("vi-VN")} kcal hôm nay.`}
-                            </Lead>
+                    {/* 4 MEAL SECTIONS — dùng FoodLogSection từ dashboard */}
+                    <div className="space-y-3">
+                        <div className="flex items-baseline justify-between px-1">
+                            <h2 className="text-[15px] font-bold tracking-tight text-ink">Nhật ký bữa ăn</h2>
                             {undoStack.length > 0 && (
-                                <div className="mt-4">
-                                    <PillButton variant="ghost" onClick={handleUndo}>↶ Hoàn tác</PillButton>
-                                </div>
+                                <button onClick={handleUndo} className="flex items-center gap-1.5 text-[11px] font-semibold text-orange-deep hover:bg-orange-soft px-3 py-1 rounded-full transition">
+                                    <IconUndo /> Hoàn tác
+                                </button>
                             )}
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {MEAL_TYPES.map((meal, i) => (
-                                <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
-                                    <MealUtilityCard
-                                        meal={meal}
-                                        icon={MEAL_ICONS[meal]}
-                                        accent={MEAL_ACCENTS[meal]}
-                                        items={dailyLog.filter(it => it.meal === meal)}
-                                        onAdd={(m) => { setSelectedMeal(m); scrollToPicker(); }}
-                                        onRemove={removeFood}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </Tile>
-
-                    {/* ───── MINDFUL TILE ───── */}
-                    <MindfulSection />
-
-
+                        {MEAL_TYPES.map((meal, i) => (
+                            <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
+                                <FoodLogSection
+                                    mealName={meal}
+                                    items={dailyLog.filter(it => it.meal === meal)}
+                                    onAdd={(m) => {
+                                        setSelectedMeal(m);
+                                        if (typeof document !== "undefined") {
+                                            document.getElementById("add-food-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                        }
+                                    }}
+                                    onRemove={removeFood}
+                                />
+                            </div>
+                        ))}
+                        {dailyLog.length === 0 && (
+                            <p className="text-center text-ink-faint text-[11px] uppercase font-semibold italic py-6 border border-dashed border-cream-deep rounded-3xl tracking-wider">
+                                Khi nào sẵn sàng, ghi món vào nhé
+                            </p>
+                        )}
+                    </div>
 
                     {/* --- MODAL CHỈNH SỬA THƯ VIỆN MÓN ĂN --- */}
                     {editLibraryModal.isOpen && (
@@ -1854,271 +1721,41 @@ export default function App() {
 }
 
 /* ────────────────────────────────────────────────────────────── */
-/*  APPLE-QUIET × WARM PALETTE — Helpers                          */
+/*  HELPER COMPONENTS — dùng trong dashboard layout của Nhật ký   */
 /* ────────────────────────────────────────────────────────────── */
 
-const WARM_FONT = `system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, sans-serif`;
-
-// Typography tokens (inline để precise letter-spacing)
-const T_EYEBROW    = { fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", lineHeight: 1.4 };
-const T_HERO       = { fontSize: "clamp(34px, 8vw, 48px)", fontWeight: 600, lineHeight: 1.08, letterSpacing: "-0.028em" };
-const T_DISPLAY    = { fontSize: "clamp(26px, 6vw, 36px)", fontWeight: 600, lineHeight: 1.12, letterSpacing: "-0.022em" };
-const T_LEAD       = { fontSize: 17, fontWeight: 400, lineHeight: 1.47, letterSpacing: "-0.01em" };
-const T_BODY       = { fontSize: 15, fontWeight: 400, lineHeight: 1.5, letterSpacing: "-0.005em" };
-const T_CAPTION    = { fontSize: 13, fontWeight: 400, lineHeight: 1.43, letterSpacing: "-0.01em" };
-
-// Section padding token
-const SECTION_PY   = "py-16 md:py-20";
-
-// Reusable section wrapper — full-bleed tile with center container
-function Tile({ tone = "cream", children, className = "" }) {
+function EqCell({ label, value, tone = "neutral", highlight = false }) {
     const toneClass = {
-        cream:     "bg-cream",
-        white:     "bg-white",
-        creamSoft: "bg-cream-soft",
-        espresso:  "bg-ink text-white",
-        forest:    "text-white",
-    }[tone] || "bg-cream";
-    const inlineBg = tone === "forest" ? { background: "#2D4632" } : {};
+        neutral: "bg-cream-soft text-ink",
+        sage:    "bg-sage-soft text-sage-deep",
+        clay:    "bg-clay-soft text-clay-deep",
+        orange:  "bg-orange text-white shadow-soft ring-1 ring-orange-deep/20",
+    }[tone];
 
     return (
-        <section className={`${toneClass} ${SECTION_PY} px-5 md:px-8 ${className}`} style={inlineBg}>
-            <div className="mx-auto max-w-md md:max-w-2xl">{children}</div>
-        </section>
-    );
-}
-
-function Eyebrow({ children, accent = "orange-deep", className = "" }) {
-    const colorClass = {
-        "orange-deep": "text-orange-deep",
-        "sage-deep":   "text-sage-deep",
-        "clay-deep":   "text-clay-deep",
-        "lilac-deep":  "text-lilac-deep",
-        "muted":       "text-ink-muted",
-        "on-dark":     "text-[#E89B7B]",
-    }[accent];
-    return <p style={T_EYEBROW} className={`m-0 mb-3 ${colorClass} ${className}`}>{children}</p>;
-}
-
-function Display({ as: Tag = "h2", children, className = "" }) {
-    return <Tag style={T_DISPLAY} className={`m-0 ${className}`}>{children}</Tag>;
-}
-
-function HeroDisplay({ children, className = "" }) {
-    return <h1 style={T_HERO} className={`m-0 ${className}`}>{children}</h1>;
-}
-
-function Lead({ children, className = "" }) {
-    return <p style={T_LEAD} className={`m-0 ${className}`}>{children}</p>;
-}
-
-function PillButton({ children, onClick, variant = "primary", className = "", type = "button", disabled = false }) {
-    const baseStyle = {
-        fontSize: 16,
-        fontWeight: 500,
-        letterSpacing: "-0.01em",
-        lineHeight: 1.24,
-        padding: "11px 22px",
-    };
-    const variants = {
-        primary: "bg-orange text-white hover:bg-orange-deep ring-1 ring-orange-deep/10 shadow-soft",
-        ghost:   "bg-transparent text-orange-deep ring-1 ring-orange-deep/40 hover:bg-orange-soft",
-        dark:    "bg-white text-ink ring-1 ring-cream-deep/60 hover:bg-cream-soft",
-        onDark:  "bg-white text-ink hover:bg-cream-soft",
-        ghostOnDark: "bg-transparent text-[#E89B7B] ring-1 ring-white/30 hover:bg-white/10",
-    };
-    return (
-        <button
-            type={type}
-            onClick={onClick}
-            disabled={disabled}
-            style={baseStyle}
-            className={`inline-flex items-center justify-center rounded-full transition active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
-        >
-            {children}
-        </button>
-    );
-}
-
-// Inline link styled as Apple text-link
-function TextLink({ children, onClick, onDark = false, className = "" }) {
-    const color = onDark ? "#E89B7B" : "#7A3318";
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            style={{ color, fontSize: 15, letterSpacing: "-0.01em", fontWeight: 500 }}
-            className={`hover:underline transition ${className}`}
-        >
-            {children}
-        </button>
-    );
-}
-
-// Big calorie ring — "the product" với 1 product-shadow duy nhất
-function CalorieRingWarm({ consumed, target, size = 280 }) {
-    const stroke = 20;
-    const r = (size - stroke) / 2;
-    const c = 2 * Math.PI * r;
-    const ratio = Math.min(1, target > 0 ? consumed / target : 0);
-    const offset = c * (1 - ratio);
-    const remaining = Math.max(0, target - consumed);
-    const fmt = (n) => Math.round(n).toLocaleString("vi-VN");
-
-    return (
-        <div
-            className="relative inline-flex items-center justify-center"
-            style={{
-                width: size,
-                height: size,
-                filter: "drop-shadow(rgba(45, 38, 32, 0.18) 3px 5px 30px)",
-            }}
-        >
-            <svg width={size} height={size} className="-rotate-90">
-                <defs>
-                    <linearGradient id="ringWarmJournal" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#E89B7B"/>
-                        <stop offset="100%" stopColor="#D97757"/>
-                    </linearGradient>
-                </defs>
-                <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#EBE3D2" strokeWidth={stroke}/>
-                <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#ringWarmJournal)" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset} style={{ transition: "stroke-dashoffset 0.6s ease-out" }}/>
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span style={{ fontSize: "clamp(40px, 10vw, 56px)", fontWeight: 600, letterSpacing: "-0.04em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }} className="text-ink">{fmt(remaining)}</span>
-                <span style={{ fontSize: 13, letterSpacing: "-0.005em", fontVariantNumeric: "tabular-nums" }} className="mt-2 text-ink-muted">kcal còn dư</span>
-                <span style={{ fontSize: 11, letterSpacing: "0.04em", fontVariantNumeric: "tabular-nums" }} className="mt-1 uppercase text-ink-faint">{fmt(consumed)} / {fmt(target)}</span>
-            </div>
+        <div className={`flex-1 min-w-0 rounded-2xl py-2.5 px-1 ${toneClass}`}>
+            <p className="text-base font-bold leading-none tracking-tight tabular-nums">{value}</p>
+            <p className={`mt-1 text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap ${highlight ? "text-white/80" : "opacity-70"}`}>{label}</p>
         </div>
     );
 }
 
-// Macro block trên dark tile
-function MacroBlockWarm({ label, value, target, accent }) {
-    const pct = target > 0 ? Math.min(100, Math.round((value / target) * 100)) : 0;
-    return (
-        <div className="text-center">
-            <p style={{ ...T_EYEBROW, color: accent }} className="m-0 mb-3">{label}</p>
-            <p style={{ fontSize: "clamp(32px, 8vw, 44px)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }} className="m-0 text-white">
-                {Math.round(value)}<span style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 4, fontWeight: 400 }}>g</span>
-            </p>
-            <p style={{ fontSize: 12, fontVariantNumeric: "tabular-nums" }} className="mt-2 text-white/60">{Math.round(target)}g · {pct}%</p>
-            <div className="mx-auto mt-3 h-[3px] max-w-[160px] overflow-hidden rounded-full bg-white/15">
-                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: accent }}/>
-            </div>
-        </div>
-    );
-}
-
-// Meal utility card (hairline border, no shadow)
-function MealUtilityCard({ meal, items, icon, onAdd, onRemove, accent }) {
-    const totalKcal = items.reduce((s, i) => s + (i.kcal || 0), 0);
-    const isEmpty = items.length === 0;
-    return (
-        <div className="bg-white rounded-[18px] ring-1 ring-ink/[0.08] p-5 md:p-6 flex flex-col gap-3 transition hover:ring-ink/[0.16]">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-2xl shrink-0">{icon}</span>
-                    <div className="min-w-0">
-                        <p style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }} className="m-0 text-ink truncate">{meal}</p>
-                        <p style={{ fontSize: 12, fontVariantNumeric: "tabular-nums" }} className="m-0 mt-0.5 text-ink-muted">
-                            {isEmpty ? "Chưa có món" : `${items.length} món`}
-                        </p>
-                    </div>
-                </div>
-                <button
-                    type="button"
-                    onClick={() => onAdd?.(meal)}
-                    aria-label={`Thêm ${meal}`}
-                    className="grid h-9 w-9 place-items-center rounded-full bg-cream-soft text-ink ring-1 ring-cream-deep/60 hover:bg-orange hover:text-white hover:ring-orange transition shrink-0"
-                >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
-            </div>
-
-            {!isEmpty && (
-                <>
-                    <div className="flex items-baseline gap-1.5">
-                        <span style={{ fontSize: "clamp(28px, 6vw, 36px)", fontWeight: 600, letterSpacing: "-0.025em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }} className="text-ink">{Math.round(totalKcal)}</span>
-                        <span style={{ fontSize: 14 }} className="text-ink-muted">kcal</span>
-                    </div>
-                    <div className="space-y-1.5 mt-1">
-                        {items.map((item) => (
-                            <div key={item.id} className="group flex items-center justify-between gap-2 py-1">
-                                <div className="min-w-0 flex-1">
-                                    <p style={{ fontSize: 14, fontWeight: 500 }} className="m-0 truncate text-ink">{item.name}</p>
-                                    <p style={{ fontSize: 11, fontVariantNumeric: "tabular-nums" }} className="m-0 mt-0.5 text-ink-muted">
-                                        {item.quantity}{item.unit} · {Math.round(item.protein)}P / {Math.round(item.carb)}C / {Math.round(item.fat)}F
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                    <span style={{ fontSize: 14, fontWeight: 600, fontVariantNumeric: "tabular-nums" }} className="text-ink">{Math.round(item.kcal)}</span>
-                                    <button onClick={() => onRemove(item.id)} aria-label="Xóa" className="text-ink-faint hover:text-orange-deep opacity-0 group-hover:opacity-100 transition p-1">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </>
-            )}
-
-            {isEmpty && (
-                <button
-                    onClick={() => onAdd?.(meal)}
-                    className="mt-1 w-full text-left"
-                    style={{ fontSize: 15, color: accent, fontWeight: 500, letterSpacing: "-0.01em" }}
-                >
-                    Ghi món cho {meal.toLowerCase()} ›
-                </button>
-            )}
-        </div>
-    );
-}
-
-// MindfulCard — apple-quiet treatment
-function MindfulSection() {
+function MindfulCard() {
     const [breathing, setBreathing] = useState(false);
     return (
         <>
-            <Tile tone="creamSoft" className="text-center">
-                <Eyebrow accent="sage-deep">Mindful</Eyebrow>
-                <Display>Thư giãn hai phút.</Display>
-                <Lead className="mt-3 text-ink-muted">Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.</Lead>
-                <div className="mt-10 flex justify-center">
-                    <div
-                        className="grid h-40 w-40 place-items-center rounded-full text-5xl animate-gentle-pulse"
-                        style={{
-                            background: "radial-gradient(circle, #A8C09A, #5F8266)",
-                            filter: "drop-shadow(rgba(45,38,32,0.18) 3px 5px 30px)",
-                            animationDuration: "6s",
-                        }}
-                    >🧘</div>
+            <DashboardCard tone="sage" padding="lg">
+                <div className="flex items-start gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-xl shadow-soft animate-gentle-pulse" style={{ animationDuration: "6s" }}>🧘</span>
+                    <div className="min-w-0">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sage-deep">Mindful</span>
+                        <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Thư giãn 2 phút</h3>
+                        <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.</p>
+                        <button type="button" onClick={() => setBreathing(true)} className="mt-3 rounded-full bg-white px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white">Bắt đầu thở</button>
+                    </div>
                 </div>
-                <div className="mt-10">
-                    <PillButton variant="ghost" onClick={() => setBreathing(true)}>Bắt đầu thở</PillButton>
-                </div>
-            </Tile>
+            </DashboardCard>
             {breathing && <BreathingTimer onClose={() => setBreathing(false)} />}
         </>
     );
 }
-
-// Helper for greeting in journal hero
-function timeGreeting(hour) {
-    if (hour >= 5 && hour < 11) return "Chào buổi sáng";
-    if (hour >= 11 && hour < 14) return "Chào buổi trưa";
-    if (hour >= 14 && hour < 18) return "Chào buổi chiều";
-    if (hour >= 18 && hour < 22) return "Chào buổi tối";
-    return "Đêm an lành";
-}
-
-const WELLNESS_QUOTES = [
-    "Cơ thể bạn đang lắng nghe — hãy nuôi dưỡng nó nhẹ nhàng.",
-    "Mỗi bữa ăn là một cách nói cảm ơn với cơ thể.",
-    "Bạn không cần hoàn hảo, chỉ cần có mặt.",
-    "Một ngụm nước cũng là chăm sóc.",
-    "Cân bằng quan trọng hơn kỷ luật.",
-    "Lắng nghe đói no — cơ thể biết điều nó cần.",
-    "Bước nhỏ mỗi ngày tạo nên thay đổi lớn.",
-];
