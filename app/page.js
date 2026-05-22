@@ -1423,222 +1423,276 @@ export default function App() {
     }
 
     if (view === "journal") {
+        const now = new Date();
+        const greet = timeGreeting(now.getHours());
+        const quote = WELLNESS_QUOTES[Math.floor(now.getTime() / 3600000) % WELLNESS_QUOTES.length];
+        const isToday = currentDate === formatDate(new Date());
+        const remaining = Math.max(0, Math.round(target - dailyKcal));
+        const MEAL_ICONS = { "Bữa sáng": "☀️", "Bữa trưa": "🌤", "Bữa tối": "🌙", "Ăn vặt": "⭐" };
+        const MEAL_ACCENTS = { "Bữa sáng": "#C49A4A", "Bữa trưa": "#5F8266", "Bữa tối": "#9B8AB8", "Ăn vặt": "#D97757" };
+        const scrollToPicker = () => {
+            if (typeof document !== "undefined") {
+                document.getElementById("add-food-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        };
+
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-300 relative font-sans text-ink">
-                {/* DATE NAV — slim sticky bar */}
-                <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex justify-between items-center">
-                    <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-orange-soft hover:text-orange-deep transition" aria-label="Ngày trước">
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
-                    </button>
-                    <div className="text-center">
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
-                            {currentDate === formatDate(new Date()) ? "Hôm nay" : "Ngày"}
-                        </span>
-                        <p className="text-sm font-bold text-ink tabular-nums">{currentDate}</p>
+            <div className="min-h-screen bg-cream pb-28 animate-in fade-in duration-300 text-ink" style={{ fontFamily: WARM_FONT, letterSpacing: "-0.005em" }}>
+                {/* DATE NAV — slim sticky frosted */}
+                <header className="sticky top-0 z-30 backdrop-blur-md border-b border-ink/[0.08] px-5" style={{ background: "rgba(251, 248, 242, 0.85)" }}>
+                    <div className="max-w-md md:max-w-2xl mx-auto py-3 flex justify-between items-center">
+                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-cream-soft hover:text-orange-deep transition" aria-label="Ngày trước">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M15 19l-7-7 7-7v14z"/></svg>
+                        </button>
+                        <div className="text-center">
+                            <span style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted">{isToday ? "Hôm nay" : "Ngày"}</span>
+                            <p style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }} className="text-ink tabular-nums">{currentDate}</p>
+                        </div>
+                        <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-cream-soft hover:text-orange-deep transition" aria-label="Ngày sau">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
+                        </button>
                     </div>
-                    <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()+1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-orange-soft hover:text-orange-deep transition" aria-label="Ngày sau">
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7V5z"/></svg>
-                    </button>
                 </header>
 
-                <main className="p-4 space-y-5">
-                    {/* GREETING */}
-                    <GreetingHeader userName={userId || "bạn"} />
+                <main>
+                    {/* ───── HERO TILE — cream, calorie ring as "the product" ───── */}
+                    <Tile tone="cream" className="text-center">
+                        <Eyebrow accent="orange-deep">{greet}{userId ? `, ${userId}` : ""}</Eyebrow>
+                        <HeroDisplay>
+                            {isToday ? `Còn dư ${remaining.toLocaleString("vi-VN")} kcal.` : `Đã nạp ${Math.round(dailyKcal).toLocaleString("vi-VN")} kcal.`}
+                        </HeroDisplay>
+                        <Lead className="mt-3 text-ink-muted">{quote}</Lead>
 
-                    {/* CALORIE HERO — vòng tròn + 3 macro donuts + Eq row */}
-                    <DashboardCard tone="white" padding="lg" className="overflow-hidden">
-                        <div className="flex flex-col items-center gap-6">
-                            <CalorieCircle consumed={dailyKcal} target={target} />
-                            <div className="grid grid-cols-3 gap-3 w-full">
-                                <MacroDonut kind="protein" value={dailyProtein} target={targetProtein} />
-                                <MacroDonut kind="carb"    value={dailyCarb}    target={targetCarb} />
-                                <MacroDonut kind="fat"     value={dailyFat}     target={targetFat} />
-                            </div>
-                        </div>
-
-                        <div className="mt-6 flex items-stretch gap-1 border-t border-cream-deep/50 pt-5 text-center">
-                            <EqCell label="Cần khoảng" value={Number(target).toLocaleString("vi-VN")} tone="neutral" />
-                            <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">−</span>
-                            <EqCell label="Đã nạp" value={Math.round(dailyKcal).toLocaleString("vi-VN")} tone="sage" />
-                            <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">+</span>
-                            <EqCell label="Vận động" value="0" tone="clay" />
-                            <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">=</span>
-                            <EqCell label="Còn dư" value={Math.max(0, Math.round(target - dailyKcal)).toLocaleString("vi-VN")} tone="orange" highlight />
-                        </div>
-                    </DashboardCard>
-
-                    <section id="add-food-section" className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 scroll-mt-20 md:p-6">
-                        {/* Header — icon-chip pattern giống FoodLogSection */}
-                        <header className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-orange-deep">
-                                    <IconPlus />
-                                </span>
-                                <h3 className="text-[15px] font-bold tracking-tight text-ink leading-none">Thêm món</h3>
-                            </div>
-                            <div className="relative">
-                                <select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="appearance-none bg-cream-soft hover:bg-cream-deep text-[11px] font-semibold text-ink py-2 pl-3.5 pr-9 rounded-full outline-none cursor-pointer ring-1 ring-cream-deep/60 focus:ring-2 focus:ring-orange/30 transition">
-                                    {MEAL_TYPES.map(m => ( <option key={m} value={m}>{m}</option> ))}
-                                </select>
-                                <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
-                            </div>
-                        </header>
-
-                        {/* Tabs */}
-                        <div className="mt-5 flex gap-1 p-1 bg-cream-soft rounded-2xl">
-                            <button onClick={() => setTab("quick")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "quick" ? "bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60" : "text-ink-muted hover:text-ink"}`}>Chọn nhanh</button>
-                            <button onClick={() => setTab("custom")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "custom" ? "bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60" : "text-ink-muted hover:text-ink"}`}>Nhập tay</button>
-                        </div>
-
-                        {tab === "quick" ? (
-                            <div className="mt-4">
-                                {/* Search */}
-                                <div className="relative">
-                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none"><IconSearch /></span>
-                                    <input type="text" placeholder="Tìm món ăn..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 rounded-2xl py-3 pl-10 pr-4 text-[13px] font-medium outline-none focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition" />
-                                </div>
-
-                                {/* Food grid */}
-                                <div className="mt-3 grid grid-cols-2 gap-2 max-h-64 overflow-y-auto no-scrollbar pb-1">
-                                    {filteredFoods.map((f, idx) => (
-                                        <div key={f.name + idx} className="relative group">
-                                            <button onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`w-full p-3.5 pr-11 rounded-2xl text-left transition ring-1 ${selectedFood?.name === f.name ? "bg-orange-soft ring-orange/30" : "bg-cream-soft ring-transparent hover:ring-cream-deep"} active:scale-[0.98]`}>
-                                                <p className="truncate text-[11px] font-semibold tracking-tight text-ink mb-0.5">{f.name}</p>
-                                                <p className="text-[12px] font-bold text-ink tabular-nums">{f.kcal} <span className="text-[9px] font-medium text-ink-muted">kcal/{f.per}{f.unit}</span></p>
-                                            </button>
-                                            <div className="absolute right-1 top-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                                                <button onClick={(e) => { e.stopPropagation(); openLibraryEditModal(f); }} className="p-1.5 text-ink-faint hover:text-orange hover:bg-white rounded-lg transition" aria-label="Sửa món"><IconEdit /></button>
-                                                <button onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} className="p-1.5 text-ink-faint hover:text-orange-deep hover:bg-white rounded-lg transition" aria-label="Xóa món"><IconTrash /></button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {filteredFoods.length === 0 && (
-                                        <p className="col-span-2 text-center py-6 text-ink-muted text-[12px] italic">Không tìm thấy món ăn</p>
-                                    )}
-                                </div>
-
-                                {/* Selected preview */}
-                                {selectedFood && (() => {
-                                    let weightInGrams = qty; const u = selectedFood.unit.toLowerCase();
-                                    if (['kg', 'l', 'lít'].includes(u)) { weightInGrams = qty * 1000; }
-                                    else if (['ml', 'g', 'gram'].includes(u)) { weightInGrams = qty; }
-                                    else { const mockWeights = { 'tô': 400, 'ly': 250, 'quả': 100 }; weightInGrams = qty * (mockWeights[u] || 100); }
-
-                                    const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty);
-                                    const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty);
-                                    const totalCarb = calcMacro(selectedFood.carb, selectedFood.per, qty);
-                                    const totalFat = calcMacro(selectedFood.fat, selectedFood.per, qty);
-                                    const projectedKcal = Math.round((dailyKcal + totalKcal) * 10) / 10;
-                                    const projectedPro = Math.round((dailyProtein + totalPro) * 10) / 10;
-                                    const projectedCarb = Math.round((dailyCarb + totalCarb) * 10) / 10;
-                                    const projectedFat = Math.round((dailyFat + totalFat) * 10) / 10;
-
-                                    return (
-                                        <div className="mt-4 pt-4 border-t border-cream-deep/50 animate-in slide-in-from-top-2">
-                                            <div className="rounded-2xl bg-cream-soft ring-1 ring-cream-deep/60 p-4 mb-3">
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <div className="min-w-0 flex-1 pr-3">
-                                                        <h5 className="text-[14px] font-bold tracking-tight text-ink truncate">{selectedFood.name}</h5>
-                                                        <p className="text-[11px] text-ink-muted font-medium tabular-nums mt-0.5">{qty} {selectedFood.unit} · ~{Math.round(weightInGrams)}g</p>
-                                                    </div>
-                                                    <div className="text-right shrink-0">
-                                                        <p className="text-2xl font-bold text-orange-deep leading-none tabular-nums">{totalKcal}</p>
-                                                        <p className="text-[10px] text-ink-muted font-semibold uppercase tracking-wider mt-1">kcal</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex justify-between gap-1.5">
-                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 ring-1 ring-cream-deep/40">
-                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep">Protein</p>
-                                                        <p className="text-[12px] font-bold text-ink tabular-nums mt-0.5">{totalPro}g</p>
-                                                        <p className="text-[9px] text-ink-muted tabular-nums">→ {projectedPro}g</p>
-                                                    </div>
-                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 ring-1 ring-cream-deep/40">
-                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep">Carb</p>
-                                                        <p className="text-[12px] font-bold text-ink tabular-nums mt-0.5">{totalCarb}g</p>
-                                                        <p className="text-[9px] text-ink-muted tabular-nums">→ {projectedCarb}g</p>
-                                                    </div>
-                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 ring-1 ring-cream-deep/40">
-                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep">Fat</p>
-                                                        <p className="text-[12px] font-bold text-ink tabular-nums mt-0.5">{totalFat}g</p>
-                                                        <p className="text-[9px] text-ink-muted tabular-nums">→ {projectedFat}g</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-end gap-2">
-                                                <div className="w-20">
-                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng</label>
-                                                    <input type="number" value={qty} step="any" min="0.1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 text-ink p-2.5 rounded-xl text-[14px] outline-none font-bold text-center focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
-                                                </div>
-                                                <button onClick={() => handleAddSelectedFood()} className="flex-1 h-11 bg-orange text-white rounded-xl text-[12px] font-bold flex items-center justify-center gap-1.5 active:scale-95 transition hover:bg-orange-deep shadow-soft ring-1 ring-orange-deep/20">
-                                                    Ghi vào nhật ký <IconPlus />
-                                                </button>
-                                                <button onClick={() => { setSelectedFood(null); setQty(1); }} className="grid place-items-center h-11 w-11 text-ink-faint hover:text-orange-deep bg-cream-soft ring-1 ring-cream-deep/40 rounded-xl transition" aria-label="Hủy">
-                                                    <IconTrash />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
-                            </div>
-                        ) : (
-                            <div className="mt-4 space-y-2.5">
-                                <input placeholder="Tên món ăn (vd: Gà rán...)" value={customFood.name} onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition" />
-                                <div className="grid grid-cols-2 gap-2.5">
-                                    <input type="number" placeholder="Số lượng" value={customFood.quantity} onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} className="bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition tabular-nums" />
-                                    <div className="relative">
-                                        <select value={customFood.unit} onChange={e => setCustomFood(p=>({...p, unit:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-9 rounded-2xl text-[13px] outline-none font-semibold cursor-pointer appearance-none focus:ring-2 focus:ring-orange/30 transition">
-                                            <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
-                                        </select>
-                                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-2.5">
-                                    <div className="relative"><input type="number" placeholder="Kcal" value={customFood.kcal} onChange={e => setCustomFood(p=>({...p, kcal:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-12 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition tabular-nums" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-orange uppercase tracking-wider">kcal</span></div>
-                                    <div className="relative"><input type="number" placeholder="Protein" value={customFood.protein} onChange={e => setCustomFood(p=>({...p, protein:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-12 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-sage/30 placeholder:text-ink-faint transition tabular-nums" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-sage-deep uppercase tracking-wider">Pro</span></div>
-                                    <div className="relative"><input type="number" placeholder="Carb" value={customFood.carb} onChange={e => setCustomFood(p=>({...p, carb:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-12 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-clay/30 placeholder:text-ink-faint transition tabular-nums" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-clay-deep uppercase tracking-wider">Carb</span></div>
-                                    <div className="relative"><input type="number" placeholder="Fat" value={customFood.fat} onChange={e => setCustomFood(p=>({...p, fat:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-12 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-lilac/30 placeholder:text-ink-faint transition tabular-nums" /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-lilac-deep uppercase tracking-wider">Fat</span></div>
-                                </div>
-                                {customFood.name.trim() !== "" && parseFloat(customFood.kcal) > 0 && (
-                                    <button onClick={addCustom} className="w-full bg-orange text-white p-3.5 rounded-2xl font-bold text-[13px] mt-3 active:scale-95 transition shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep animate-in slide-in-from-bottom-2 fade-in duration-300">
-                                        Xác nhận thêm
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </section>
-
-                    {/* 4 MEAL SECTIONS — dùng FoodLogSection từ dashboard */}
-                    <div className="space-y-3">
-                        <div className="flex items-baseline justify-between px-1">
-                            <h2 className="text-[15px] font-bold tracking-tight text-ink">Nhật ký bữa ăn</h2>
-                            {undoStack.length > 0 && (
-                                <button onClick={handleUndo} className="flex items-center gap-1.5 text-[11px] font-semibold text-orange-deep hover:bg-orange-soft px-3 py-1 rounded-full transition">
-                                    <IconUndo /> Hoàn tác
-                                </button>
+                        <div className="mt-6 flex flex-wrap gap-3 justify-center">
+                            <PillButton onClick={scrollToPicker}>Thêm món</PillButton>
+                            {!isToday && (
+                                <PillButton variant="ghost" onClick={() => setCurrentDate(formatDate(new Date()))}>Về hôm nay</PillButton>
                             )}
                         </div>
-                        {MEAL_TYPES.map((meal, i) => (
-                            <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
-                                <FoodLogSection
-                                    mealName={meal}
-                                    items={dailyLog.filter(it => it.meal === meal)}
-                                    onAdd={(m) => {
-                                        setSelectedMeal(m);
-                                        if (typeof document !== "undefined") {
-                                            document.getElementById("add-food-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                                        }
-                                    }}
-                                    onRemove={removeFood}
-                                />
+
+                        <div className="mt-14 flex justify-center">
+                            <CalorieRingWarm consumed={dailyKcal} target={target} />
+                        </div>
+                    </Tile>
+
+                    {/* ───── DARK TILE — espresso, dinh dưỡng ───── */}
+                    <Tile tone="espresso" className="text-center">
+                        <Eyebrow accent="on-dark">Dinh dưỡng</Eyebrow>
+                        <Display className="text-white">Cân đối là một dạng chăm sóc.</Display>
+                        <Lead className="mt-3" style={{ color: "rgba(255,255,255,0.7)" }}>Theo dõi ba chất chính qua ngày.</Lead>
+
+                        <div className="mt-12 grid grid-cols-3 gap-4 md:gap-8">
+                            <MacroBlockWarm label="Protein" value={dailyProtein} target={targetProtein} accent="#A8C09A" />
+                            <MacroBlockWarm label="Carb"    value={dailyCarb}    target={targetCarb}    accent="#E8C892" />
+                            <MacroBlockWarm label="Fat"     value={dailyFat}     target={targetFat}     accent="#C8B6E2" />
+                        </div>
+
+                        <div className="mt-10 flex items-center justify-center gap-2 text-[13px] tabular-nums" style={{ color: "rgba(255,255,255,0.75)", letterSpacing: "-0.005em" }}>
+                            <span>Cần {Number(target).toLocaleString("vi-VN")}</span>
+                            <span className="text-white/30">·</span>
+                            <span>Đã nạp {Math.round(dailyKcal).toLocaleString("vi-VN")}</span>
+                            <span className="text-white/30">·</span>
+                            <span className="text-[#E89B7B] font-semibold">Còn dư {remaining.toLocaleString("vi-VN")}</span>
+                        </div>
+                    </Tile>
+
+                    {/* ───── LIGHT TILE — white, add food picker ───── */}
+                    <section id="add-food-section" className={`bg-white scroll-mt-20 ${SECTION_PY} px-5 md:px-8`}>
+                        <div className="mx-auto max-w-md md:max-w-2xl">
+                            <div className="text-center mb-10">
+                                <Eyebrow accent="orange-deep">Thêm món</Eyebrow>
+                                <Display>Vào {selectedMeal.toLowerCase()}.</Display>
+                                <Lead className="mt-3 text-ink-muted">Tìm món có sẵn hoặc nhập tay.</Lead>
                             </div>
-                        ))}
-                        {dailyLog.length === 0 && (
-                            <p className="text-center text-ink-faint text-[11px] uppercase font-semibold italic py-6 border border-dashed border-cream-deep rounded-3xl tracking-wider">
-                                Khi nào sẵn sàng, ghi món vào nhé
-                            </p>
-                        )}
-                    </div>
+
+                            {/* Meal selector + tabs */}
+                            <div className="flex flex-wrap gap-2 justify-center mb-6">
+                                {MEAL_TYPES.map(m => (
+                                    <button
+                                        key={m}
+                                        onClick={() => setSelectedMeal(m)}
+                                        className="rounded-full transition active:scale-[0.97]"
+                                        style={{
+                                            padding: "8px 16px",
+                                            fontSize: 13,
+                                            fontWeight: 500,
+                                            letterSpacing: "-0.005em",
+                                            background: selectedMeal === m ? "#D97757" : "#F4EFE6",
+                                            color: selectedMeal === m ? "#fff" : "#2D2620",
+                                            boxShadow: selectedMeal === m ? "inset 0 0 0 1px rgba(122,51,24,0.2)" : "inset 0 0 0 1px rgba(45,38,32,0.08)",
+                                        }}
+                                    >
+                                        {MEAL_ICONS[m]} {m}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="flex gap-1 p-1 bg-cream-soft rounded-full ring-1 ring-ink/[0.06]">
+                                <button onClick={() => setTab("quick")} className={`flex-1 py-2.5 rounded-full transition ${tab === "quick" ? "bg-white text-orange-deep ring-1 ring-ink/[0.08] shadow-soft" : "text-ink-muted"}`} style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }}>Chọn nhanh</button>
+                                <button onClick={() => setTab("custom")} className={`flex-1 py-2.5 rounded-full transition ${tab === "custom" ? "bg-white text-orange-deep ring-1 ring-ink/[0.08] shadow-soft" : "text-ink-muted"}`} style={{ fontSize: 13, fontWeight: 500, letterSpacing: "-0.005em" }}>Nhập tay</button>
+                            </div>
+
+                            {tab === "quick" ? (
+                                <div className="mt-5">
+                                    {/* Search — pill shape */}
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none"><IconSearch /></span>
+                                        <input
+                                            type="text"
+                                            placeholder="Tìm món ăn..."
+                                            value={searchQuery}
+                                            onChange={e => setSearchQuery(e.target.value)}
+                                            className="w-full bg-white ring-1 ring-ink/[0.08] rounded-full py-3 pl-11 pr-5 outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition"
+                                            style={{ fontSize: 15, letterSpacing: "-0.005em" }}
+                                        />
+                                    </div>
+
+                                    {/* Food grid — utility cards on cream-soft */}
+                                    <div className="mt-4 grid grid-cols-2 gap-2.5 max-h-72 overflow-y-auto no-scrollbar pb-1">
+                                        {filteredFoods.map((f, idx) => (
+                                            <div key={f.name + idx} className="relative group">
+                                                <button
+                                                    onClick={() => { setSelectedFood(f); setQty(f.per); }}
+                                                    className={`w-full p-4 pr-11 rounded-2xl text-left transition ring-1 ${selectedFood?.name === f.name ? "bg-orange-soft ring-orange-deep/30" : "bg-cream-soft ring-ink/[0.06] hover:ring-ink/[0.14]"} active:scale-[0.98]`}
+                                                >
+                                                    <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "-0.005em" }} className="truncate text-ink mb-1">{f.name}</p>
+                                                    <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em", fontVariantNumeric: "tabular-nums" }} className="text-ink">
+                                                        {f.kcal}<span style={{ fontSize: 11, fontWeight: 400 }} className="text-ink-muted ml-1">kcal/{f.per}{f.unit}</span>
+                                                    </p>
+                                                </button>
+                                                <div className="absolute right-1 top-2 flex gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                                    <button onClick={(e) => { e.stopPropagation(); openLibraryEditModal(f); }} className="p-1.5 text-ink-faint hover:text-orange-deep hover:bg-white rounded-lg transition" aria-label="Sửa"><IconEdit /></button>
+                                                    <button onClick={(e) => { e.stopPropagation(); setConfirmModal({ isOpen: true, foodToDelete: f, alertMessage: "" }); }} className="p-1.5 text-ink-faint hover:text-orange-deep hover:bg-white rounded-lg transition" aria-label="Xóa"><IconTrash /></button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {filteredFoods.length === 0 && (
+                                            <p className="col-span-2 text-center py-8 text-ink-muted text-[13px] italic">Không tìm thấy món ăn</p>
+                                        )}
+                                    </div>
+
+                                    {/* Selected food preview */}
+                                    {selectedFood && (() => {
+                                        let weightInGrams = qty; const u = selectedFood.unit.toLowerCase();
+                                        if (['kg', 'l', 'lít'].includes(u)) { weightInGrams = qty * 1000; }
+                                        else if (['ml', 'g', 'gram'].includes(u)) { weightInGrams = qty; }
+                                        else { const mockWeights = { 'tô': 400, 'ly': 250, 'quả': 100 }; weightInGrams = qty * (mockWeights[u] || 100); }
+
+                                        const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty);
+                                        const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty);
+                                        const totalCarb = calcMacro(selectedFood.carb, selectedFood.per, qty);
+                                        const totalFat = calcMacro(selectedFood.fat, selectedFood.per, qty);
+
+                                        return (
+                                            <div className="mt-6 pt-5 border-t border-ink/[0.08] animate-in slide-in-from-top-2">
+                                                <div className="rounded-2xl bg-cream-soft ring-1 ring-ink/[0.06] p-5 mb-4">
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div className="min-w-0 flex-1 pr-3">
+                                                            <h5 style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.01em" }} className="text-ink truncate">{selectedFood.name}</h5>
+                                                            <p style={{ fontSize: 12, fontVariantNumeric: "tabular-nums" }} className="text-ink-muted mt-0.5">{qty} {selectedFood.unit} · ~{Math.round(weightInGrams)}g</p>
+                                                        </div>
+                                                        <div className="text-right shrink-0">
+                                                            <p style={{ fontSize: 32, fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }} className="text-orange-deep">{totalKcal}</p>
+                                                            <p style={{ ...T_EYEBROW, fontSize: 10 }} className="text-ink-muted mt-1">kcal</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <div className="text-center bg-white rounded-xl py-2 ring-1 ring-ink/[0.06]">
+                                                            <p style={{ ...T_EYEBROW, fontSize: 9 }} className="text-sage-deep">Protein</p>
+                                                            <p style={{ fontSize: 14, fontWeight: 600, fontVariantNumeric: "tabular-nums" }} className="text-ink mt-1">{totalPro}g</p>
+                                                        </div>
+                                                        <div className="text-center bg-white rounded-xl py-2 ring-1 ring-ink/[0.06]">
+                                                            <p style={{ ...T_EYEBROW, fontSize: 9 }} className="text-clay-deep">Carb</p>
+                                                            <p style={{ fontSize: 14, fontWeight: 600, fontVariantNumeric: "tabular-nums" }} className="text-ink mt-1">{totalCarb}g</p>
+                                                        </div>
+                                                        <div className="text-center bg-white rounded-xl py-2 ring-1 ring-ink/[0.06]">
+                                                            <p style={{ ...T_EYEBROW, fontSize: 9 }} className="text-lilac-deep">Fat</p>
+                                                            <p style={{ fontSize: 14, fontWeight: 600, fontVariantNumeric: "tabular-nums" }} className="text-ink mt-1">{totalFat}g</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-24">
+                                                        <label style={{ ...T_EYEBROW, fontSize: 9 }} className="text-ink-muted block mb-1.5">Số lượng</label>
+                                                        <input type="number" value={qty} step="any" min="0.1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-2.5 rounded-xl outline-none text-center focus:ring-2 focus:ring-orange-deep/30 transition tabular-nums" style={{ fontSize: 14, fontWeight: 600 }} />
+                                                    </div>
+                                                    <PillButton onClick={() => handleAddSelectedFood()} className="flex-1 mt-[22px]">Ghi vào nhật ký</PillButton>
+                                                    <button onClick={() => { setSelectedFood(null); setQty(1); }} className="grid place-items-center h-11 w-11 mt-[22px] text-ink-faint hover:text-orange-deep bg-cream-soft ring-1 ring-ink/[0.08] rounded-full transition" aria-label="Hủy"><IconTrash /></button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            ) : (
+                                <div className="mt-5 space-y-3">
+                                    <input placeholder="Tên món (vd: Gà rán...)" value={customFood.name} onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-3.5 rounded-2xl outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition" style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-0.005em" }} />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <input type="number" placeholder="Số lượng" value={customFood.quantity} onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} className="bg-cream-soft ring-1 ring-ink/[0.08] p-3.5 rounded-2xl outline-none focus:ring-2 focus:ring-orange-deep/30 placeholder:text-ink-faint transition tabular-nums" style={{ fontSize: 15, fontWeight: 500 }} />
+                                        <div className="relative">
+                                            <select value={customFood.unit} onChange={e => setCustomFood(p=>({...p, unit:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-3.5 pr-9 rounded-2xl outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange-deep/30 transition" style={{ fontSize: 15, fontWeight: 500 }}>
+                                                <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
+                                            </select>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[
+                                            { key: "kcal",    label: "kcal", accent: "#D97757" },
+                                            { key: "protein", label: "Pro",  accent: "#5F8266" },
+                                            { key: "carb",    label: "Carb", accent: "#C49A4A" },
+                                            { key: "fat",     label: "Fat",  accent: "#9B8AB8" },
+                                        ].map(field => (
+                                            <div key={field.key} className="relative">
+                                                <input type="number" placeholder={field.key === "kcal" ? "Kcal" : field.label === "Pro" ? "Protein" : field.label} value={customFood[field.key]} onChange={e => setCustomFood(p=>({...p, [field.key]:e.target.value}))} className="w-full bg-cream-soft ring-1 ring-ink/[0.08] p-3.5 pr-12 rounded-2xl outline-none font-semibold focus:ring-2 placeholder:text-ink-faint transition tabular-nums" style={{ fontSize: 15, "--tw-ring-color": `${field.accent}4D` }} />
+                                                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: field.accent }} className="absolute right-3 top-1/2 -translate-y-1/2">{field.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {customFood.name.trim() !== "" && parseFloat(customFood.kcal) > 0 && (
+                                        <PillButton onClick={addCustom} className="w-full mt-2 animate-in slide-in-from-bottom-2 fade-in duration-300">
+                                            Xác nhận thêm
+                                        </PillButton>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* ───── LIGHT TILE — cream, meal log ───── */}
+                    <Tile tone="cream">
+                        <div className="text-center mb-10">
+                            <Eyebrow accent="orange-deep">Nhật ký bữa ăn</Eyebrow>
+                            <Display>Ghi từng món, thấy cả ngày.</Display>
+                            <Lead className="mt-3 text-ink-muted">
+                                {dailyLog.length === 0 ? "Khi nào sẵn sàng, ghi món vào nhé." : `${dailyLog.length} món · ${Math.round(dailyKcal).toLocaleString("vi-VN")} kcal hôm nay.`}
+                            </Lead>
+                            {undoStack.length > 0 && (
+                                <div className="mt-4">
+                                    <PillButton variant="ghost" onClick={handleUndo}>↶ Hoàn tác</PillButton>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {MEAL_TYPES.map((meal, i) => (
+                                <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
+                                    <MealUtilityCard
+                                        meal={meal}
+                                        icon={MEAL_ICONS[meal]}
+                                        accent={MEAL_ACCENTS[meal]}
+                                        items={dailyLog.filter(it => it.meal === meal)}
+                                        onAdd={(m) => { setSelectedMeal(m); scrollToPicker(); }}
+                                        onRemove={removeFood}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </Tile>
+
+                    {/* ───── MINDFUL TILE ───── */}
+                    <MindfulSection />
+
+
 
                     {/* --- MODAL CHỈNH SỬA THƯ VIỆN MÓN ĂN --- */}
                     {editLibraryModal.isOpen && (
@@ -1721,41 +1775,271 @@ export default function App() {
 }
 
 /* ────────────────────────────────────────────────────────────── */
-/*  HELPER COMPONENTS — dùng trong dashboard layout của Nhật ký   */
+/*  APPLE-QUIET × WARM PALETTE — Helpers                          */
 /* ────────────────────────────────────────────────────────────── */
 
-function EqCell({ label, value, tone = "neutral", highlight = false }) {
+const WARM_FONT = `system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, sans-serif`;
+
+// Typography tokens (inline để precise letter-spacing)
+const T_EYEBROW    = { fontSize: 12, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", lineHeight: 1.4 };
+const T_HERO       = { fontSize: "clamp(34px, 8vw, 48px)", fontWeight: 600, lineHeight: 1.08, letterSpacing: "-0.028em" };
+const T_DISPLAY    = { fontSize: "clamp(26px, 6vw, 36px)", fontWeight: 600, lineHeight: 1.12, letterSpacing: "-0.022em" };
+const T_LEAD       = { fontSize: 17, fontWeight: 400, lineHeight: 1.47, letterSpacing: "-0.01em" };
+const T_BODY       = { fontSize: 15, fontWeight: 400, lineHeight: 1.5, letterSpacing: "-0.005em" };
+const T_CAPTION    = { fontSize: 13, fontWeight: 400, lineHeight: 1.43, letterSpacing: "-0.01em" };
+
+// Section padding token
+const SECTION_PY   = "py-16 md:py-20";
+
+// Reusable section wrapper — full-bleed tile with center container
+function Tile({ tone = "cream", children, className = "" }) {
     const toneClass = {
-        neutral: "bg-cream-soft text-ink",
-        sage:    "bg-sage-soft text-sage-deep",
-        clay:    "bg-clay-soft text-clay-deep",
-        orange:  "bg-orange text-white shadow-soft ring-1 ring-orange-deep/20",
-    }[tone];
+        cream:     "bg-cream",
+        white:     "bg-white",
+        creamSoft: "bg-cream-soft",
+        espresso:  "bg-ink text-white",
+        forest:    "text-white",
+    }[tone] || "bg-cream";
+    const inlineBg = tone === "forest" ? { background: "#2D4632" } : {};
 
     return (
-        <div className={`flex-1 min-w-0 rounded-2xl py-2.5 px-1 ${toneClass}`}>
-            <p className="text-base font-bold leading-none tracking-tight tabular-nums">{value}</p>
-            <p className={`mt-1 text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap ${highlight ? "text-white/80" : "opacity-70"}`}>{label}</p>
+        <section className={`${toneClass} ${SECTION_PY} px-5 md:px-8 ${className}`} style={inlineBg}>
+            <div className="mx-auto max-w-md md:max-w-2xl">{children}</div>
+        </section>
+    );
+}
+
+function Eyebrow({ children, accent = "orange-deep", className = "" }) {
+    const colorClass = {
+        "orange-deep": "text-orange-deep",
+        "sage-deep":   "text-sage-deep",
+        "clay-deep":   "text-clay-deep",
+        "lilac-deep":  "text-lilac-deep",
+        "muted":       "text-ink-muted",
+        "on-dark":     "text-[#E89B7B]",
+    }[accent];
+    return <p style={T_EYEBROW} className={`m-0 mb-3 ${colorClass} ${className}`}>{children}</p>;
+}
+
+function Display({ as: Tag = "h2", children, className = "" }) {
+    return <Tag style={T_DISPLAY} className={`m-0 ${className}`}>{children}</Tag>;
+}
+
+function HeroDisplay({ children, className = "" }) {
+    return <h1 style={T_HERO} className={`m-0 ${className}`}>{children}</h1>;
+}
+
+function Lead({ children, className = "" }) {
+    return <p style={T_LEAD} className={`m-0 ${className}`}>{children}</p>;
+}
+
+function PillButton({ children, onClick, variant = "primary", className = "", type = "button", disabled = false }) {
+    const baseStyle = {
+        fontSize: 16,
+        fontWeight: 500,
+        letterSpacing: "-0.01em",
+        lineHeight: 1.24,
+        padding: "11px 22px",
+    };
+    const variants = {
+        primary: "bg-orange text-white hover:bg-orange-deep ring-1 ring-orange-deep/10 shadow-soft",
+        ghost:   "bg-transparent text-orange-deep ring-1 ring-orange-deep/40 hover:bg-orange-soft",
+        dark:    "bg-white text-ink ring-1 ring-cream-deep/60 hover:bg-cream-soft",
+        onDark:  "bg-white text-ink hover:bg-cream-soft",
+        ghostOnDark: "bg-transparent text-[#E89B7B] ring-1 ring-white/30 hover:bg-white/10",
+    };
+    return (
+        <button
+            type={type}
+            onClick={onClick}
+            disabled={disabled}
+            style={baseStyle}
+            className={`inline-flex items-center justify-center rounded-full transition active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+        >
+            {children}
+        </button>
+    );
+}
+
+// Inline link styled as Apple text-link
+function TextLink({ children, onClick, onDark = false, className = "" }) {
+    const color = onDark ? "#E89B7B" : "#7A3318";
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            style={{ color, fontSize: 15, letterSpacing: "-0.01em", fontWeight: 500 }}
+            className={`hover:underline transition ${className}`}
+        >
+            {children}
+        </button>
+    );
+}
+
+// Big calorie ring — "the product" với 1 product-shadow duy nhất
+function CalorieRingWarm({ consumed, target, size = 280 }) {
+    const stroke = 20;
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const ratio = Math.min(1, target > 0 ? consumed / target : 0);
+    const offset = c * (1 - ratio);
+    const remaining = Math.max(0, target - consumed);
+    const fmt = (n) => Math.round(n).toLocaleString("vi-VN");
+
+    return (
+        <div
+            className="relative inline-flex items-center justify-center"
+            style={{
+                width: size,
+                height: size,
+                filter: "drop-shadow(rgba(45, 38, 32, 0.18) 3px 5px 30px)",
+            }}
+        >
+            <svg width={size} height={size} className="-rotate-90">
+                <defs>
+                    <linearGradient id="ringWarmJournal" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#E89B7B"/>
+                        <stop offset="100%" stopColor="#D97757"/>
+                    </linearGradient>
+                </defs>
+                <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#EBE3D2" strokeWidth={stroke}/>
+                <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#ringWarmJournal)" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset} style={{ transition: "stroke-dashoffset 0.6s ease-out" }}/>
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span style={{ fontSize: "clamp(40px, 10vw, 56px)", fontWeight: 600, letterSpacing: "-0.04em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }} className="text-ink">{fmt(remaining)}</span>
+                <span style={{ fontSize: 13, letterSpacing: "-0.005em", fontVariantNumeric: "tabular-nums" }} className="mt-2 text-ink-muted">kcal còn dư</span>
+                <span style={{ fontSize: 11, letterSpacing: "0.04em", fontVariantNumeric: "tabular-nums" }} className="mt-1 uppercase text-ink-faint">{fmt(consumed)} / {fmt(target)}</span>
+            </div>
         </div>
     );
 }
 
-function MindfulCard() {
+// Macro block trên dark tile
+function MacroBlockWarm({ label, value, target, accent }) {
+    const pct = target > 0 ? Math.min(100, Math.round((value / target) * 100)) : 0;
+    return (
+        <div className="text-center">
+            <p style={{ ...T_EYEBROW, color: accent }} className="m-0 mb-3">{label}</p>
+            <p style={{ fontSize: "clamp(32px, 8vw, 44px)", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }} className="m-0 text-white">
+                {Math.round(value)}<span style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 4, fontWeight: 400 }}>g</span>
+            </p>
+            <p style={{ fontSize: 12, fontVariantNumeric: "tabular-nums" }} className="mt-2 text-white/60">{Math.round(target)}g · {pct}%</p>
+            <div className="mx-auto mt-3 h-[3px] max-w-[160px] overflow-hidden rounded-full bg-white/15">
+                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: accent }}/>
+            </div>
+        </div>
+    );
+}
+
+// Meal utility card (hairline border, no shadow)
+function MealUtilityCard({ meal, items, icon, onAdd, onRemove, accent }) {
+    const totalKcal = items.reduce((s, i) => s + (i.kcal || 0), 0);
+    const isEmpty = items.length === 0;
+    return (
+        <div className="bg-white rounded-[18px] ring-1 ring-ink/[0.08] p-5 md:p-6 flex flex-col gap-3 transition hover:ring-ink/[0.16]">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-2xl shrink-0">{icon}</span>
+                    <div className="min-w-0">
+                        <p style={{ fontSize: 17, fontWeight: 600, letterSpacing: "-0.01em" }} className="m-0 text-ink truncate">{meal}</p>
+                        <p style={{ fontSize: 12, fontVariantNumeric: "tabular-nums" }} className="m-0 mt-0.5 text-ink-muted">
+                            {isEmpty ? "Chưa có món" : `${items.length} món`}
+                        </p>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => onAdd?.(meal)}
+                    aria-label={`Thêm ${meal}`}
+                    className="grid h-9 w-9 place-items-center rounded-full bg-cream-soft text-ink ring-1 ring-cream-deep/60 hover:bg-orange hover:text-white hover:ring-orange transition shrink-0"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+            </div>
+
+            {!isEmpty && (
+                <>
+                    <div className="flex items-baseline gap-1.5">
+                        <span style={{ fontSize: "clamp(28px, 6vw, 36px)", fontWeight: 600, letterSpacing: "-0.025em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }} className="text-ink">{Math.round(totalKcal)}</span>
+                        <span style={{ fontSize: 14 }} className="text-ink-muted">kcal</span>
+                    </div>
+                    <div className="space-y-1.5 mt-1">
+                        {items.map((item) => (
+                            <div key={item.id} className="group flex items-center justify-between gap-2 py-1">
+                                <div className="min-w-0 flex-1">
+                                    <p style={{ fontSize: 14, fontWeight: 500 }} className="m-0 truncate text-ink">{item.name}</p>
+                                    <p style={{ fontSize: 11, fontVariantNumeric: "tabular-nums" }} className="m-0 mt-0.5 text-ink-muted">
+                                        {item.quantity}{item.unit} · {Math.round(item.protein)}P / {Math.round(item.carb)}C / {Math.round(item.fat)}F
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <span style={{ fontSize: 14, fontWeight: 600, fontVariantNumeric: "tabular-nums" }} className="text-ink">{Math.round(item.kcal)}</span>
+                                    <button onClick={() => onRemove(item.id)} aria-label="Xóa" className="text-ink-faint hover:text-orange-deep opacity-0 group-hover:opacity-100 transition p-1">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
+
+            {isEmpty && (
+                <button
+                    onClick={() => onAdd?.(meal)}
+                    className="mt-1 w-full text-left"
+                    style={{ fontSize: 15, color: accent, fontWeight: 500, letterSpacing: "-0.01em" }}
+                >
+                    Ghi món cho {meal.toLowerCase()} ›
+                </button>
+            )}
+        </div>
+    );
+}
+
+// MindfulCard — apple-quiet treatment
+function MindfulSection() {
     const [breathing, setBreathing] = useState(false);
     return (
         <>
-            <DashboardCard tone="sage" padding="lg">
-                <div className="flex items-start gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-xl shadow-soft animate-gentle-pulse" style={{ animationDuration: "6s" }}>🧘</span>
-                    <div className="min-w-0">
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sage-deep">Mindful</span>
-                        <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Thư giãn 2 phút</h3>
-                        <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.</p>
-                        <button type="button" onClick={() => setBreathing(true)} className="mt-3 rounded-full bg-white px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white">Bắt đầu thở</button>
-                    </div>
+            <Tile tone="creamSoft" className="text-center">
+                <Eyebrow accent="sage-deep">Mindful</Eyebrow>
+                <Display>Thư giãn hai phút.</Display>
+                <Lead className="mt-3 text-ink-muted">Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.</Lead>
+                <div className="mt-10 flex justify-center">
+                    <div
+                        className="grid h-40 w-40 place-items-center rounded-full text-5xl animate-gentle-pulse"
+                        style={{
+                            background: "radial-gradient(circle, #A8C09A, #5F8266)",
+                            filter: "drop-shadow(rgba(45,38,32,0.18) 3px 5px 30px)",
+                            animationDuration: "6s",
+                        }}
+                    >🧘</div>
                 </div>
-            </DashboardCard>
+                <div className="mt-10">
+                    <PillButton variant="ghost" onClick={() => setBreathing(true)}>Bắt đầu thở</PillButton>
+                </div>
+            </Tile>
             {breathing && <BreathingTimer onClose={() => setBreathing(false)} />}
         </>
     );
 }
+
+// Helper for greeting in journal hero
+function timeGreeting(hour) {
+    if (hour >= 5 && hour < 11) return "Chào buổi sáng";
+    if (hour >= 11 && hour < 14) return "Chào buổi trưa";
+    if (hour >= 14 && hour < 18) return "Chào buổi chiều";
+    if (hour >= 18 && hour < 22) return "Chào buổi tối";
+    return "Đêm an lành";
+}
+
+const WELLNESS_QUOTES = [
+    "Cơ thể bạn đang lắng nghe — hãy nuôi dưỡng nó nhẹ nhàng.",
+    "Mỗi bữa ăn là một cách nói cảm ơn với cơ thể.",
+    "Bạn không cần hoàn hảo, chỉ cần có mặt.",
+    "Một ngụm nước cũng là chăm sóc.",
+    "Cân bằng quan trọng hơn kỷ luật.",
+    "Lắng nghe đói no — cơ thể biết điều nó cần.",
+    "Bước nhỏ mỗi ngày tạo nên thay đổi lớn.",
+];
