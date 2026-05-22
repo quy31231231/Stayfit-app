@@ -592,57 +592,107 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
 
     return (
-        <div className="max-w-md mx-auto min-h-screen bg-cream-soft pb-28 animate-in fade-in duration-300 relative text-ink">
-            <header className="bg-white p-6 border-b border-cream-deep flex justify-center items-center shadow-sm sticky top-0 z-20">
-                <h1 className="font-black uppercase tracking-widest text-ink text-xs text-center w-full">Thống kê & Biểu đồ</h1>
+        <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-300 relative text-ink">
+            {/* Slim sticky header */}
+            <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex items-center justify-center">
+                <div className="text-center">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">Tổng quan</span>
+                    <p className="text-sm font-bold text-ink">Thống kê & Biểu đồ</p>
+                </div>
             </header>
-            <main className="p-4 space-y-6">
-                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted mb-4">Cập nhật cân nặng</h3>
-                    <div className="flex items-center bg-cream-soft p-1.5 rounded-[1.25rem] mb-4 focus-within:ring-2 focus-within:ring-orange/20 transition-all border border-cream-deep shadow-inner">
+
+            <main className="p-4 space-y-5">
+                {/* CẬP NHẬT CÂN NẶNG */}
+                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                    <header className="flex items-center gap-3 mb-4">
+                        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">⚖️</span>
+                        <div>
+                            <h3 className="text-[15px] font-bold tracking-tight text-ink">Cập nhật cân nặng</h3>
+                            <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Ghi lại để theo dõi tiến trình</p>
+                        </div>
+                    </header>
+
+                    <div className="flex items-center bg-cream-soft p-1.5 rounded-2xl mb-4 ring-1 ring-cream-deep/40 focus-within:ring-2 focus-within:ring-orange/30 transition">
                         <div className="relative flex items-center">
-                            <svg className="w-4 h-4 text-orange absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[115px] bg-transparent py-3 pl-9 pr-1 outline-none font-black text-[10px] uppercase text-ink cursor-pointer tracking-wider [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
+                            <svg className="w-4 h-4 text-orange-deep absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[120px] bg-transparent py-2.5 pl-9 pr-1 outline-none text-[11px] font-semibold text-ink tracking-wider cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
                         </div>
                         <div className="w-px h-6 bg-cream-deep mx-1 shrink-0"></div>
-                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-3 outline-none font-bold text-sm text-ink placeholder:text-ink-faint w-full min-w-[60px]" />
-                        <button onClick={saveWeight} className="h-10 px-5 bg-orange text-white rounded-xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all shadow-md shadow-orange-soft shrink-0">Ghi</button>
+                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-2.5 outline-none font-semibold text-[13px] text-ink placeholder:text-ink-faint min-w-[60px] tabular-nums" />
+                        <button onClick={saveWeight} className="h-9 px-4 bg-orange text-white rounded-xl font-bold text-[11px] active:scale-95 transition shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep shrink-0">Ghi</button>
                     </div>
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-ink-faint mb-2 mt-6">Lịch sử (Gần nhất)</h4>
-                    <div className="max-h-32 overflow-y-auto no-scrollbar bg-cream-soft rounded-2xl p-2 border border-cream-deep">
+
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-muted mb-2">Lịch sử gần nhất</p>
+                    <div className="max-h-36 overflow-y-auto no-scrollbar bg-cream-soft rounded-2xl p-1.5 ring-1 ring-cream-deep/40">
                         {sortedDates.length === 0 ? (
-                            <p className="text-center text-ink-muted text-[10px] uppercase font-bold italic py-4">Chưa có bản ghi</p>
+                            <p className="text-center text-ink-faint text-[11px] italic font-medium py-4">Chưa có bản ghi</p>
                         ) : (
                             sortedDates.slice(0, 14).map(date => (
-                                <div key={date} className="flex justify-between items-center p-3 bg-white rounded-xl mb-1 shadow-sm border border-cream-soft">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-[10px] font-black uppercase text-ink-muted bg-cream-soft px-2 py-1 rounded-lg">{getWeekLabel(date)}/{date.split('-')[0]}</span>
-                                        <span className="text-sm font-black text-ink">{weightLog[date]} <span className="text-[10px] font-bold italic opacity-40">kg</span></span>
+                                <div key={date} className="flex justify-between items-center p-2.5 bg-white rounded-xl mb-1 last:mb-0 group hover:ring-1 hover:ring-cream-deep transition">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="text-[10px] font-semibold text-ink-muted bg-cream-soft px-2 py-1 rounded-lg tabular-nums">{getWeekLabel(date)}/{date.split('-')[0]}</span>
+                                        <span className="text-[13px] font-bold text-ink tabular-nums">{weightLog[date]}<span className="text-[10px] font-medium text-ink-muted ml-0.5">kg</span></span>
                                     </div>
-                                    <button onClick={() => deleteWeight(date)} className="p-2 text-cream-deep hover:text-orange-deep bg-cream-soft rounded-lg transition-colors group"><IconTrash /></button>
+                                    <button onClick={() => deleteWeight(date)} className="p-1.5 text-ink-faint hover:text-orange-deep bg-cream-soft hover:bg-orange-soft rounded-lg transition opacity-0 group-hover:opacity-100" aria-label="Xóa"><IconTrash /></button>
                                 </div>
                             ))
                         )}
                     </div>
                 </section>
-                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep relative">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted mb-4">Biểu đồ cân nặng</h3>
-                    {sortedDates.length === 0 && ( <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-[2.5rem] z-10"><p className="text-xs font-bold text-ink-muted italic">Chưa có dữ liệu</p></div> )}
+
+                {/* BIỂU ĐỒ CÂN NẶNG */}
+                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 relative md:p-6">
+                    <header className="flex items-center gap-3 mb-4">
+                        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sage-soft text-xl">📈</span>
+                        <div>
+                            <h3 className="text-[15px] font-bold tracking-tight text-ink">Biểu đồ cân nặng</h3>
+                            <p className="mt-0.5 text-[11px] font-medium text-ink-muted">14 ngày gần nhất</p>
+                        </div>
+                    </header>
+                    {sortedDates.length === 0 && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/85 backdrop-blur-sm rounded-3xl z-10">
+                            <p className="text-[12px] font-medium text-ink-muted italic">Chưa có dữ liệu</p>
+                        </div>
+                    )}
                     <div className="h-48 relative w-full"><canvas ref={weightChartRef}></canvas></div>
                 </section>
-                <div className="flex justify-between items-center bg-white p-2 rounded-2xl shadow-sm border border-cream-deep sticky top-[80px] z-10">
-                    <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-cream-soft hover:bg-cream-deep text-ink-muted rounded-xl text-[10px] font-black uppercase transition-colors">◀ 14 Ngày Trước</button>
-                    <span className="text-[10px] font-black uppercase text-ink-muted tracking-widest text-center px-2">
-                        {getWeekLabel(currentChartDates[0])} - {getWeekLabel(currentChartDates[currentChartDates.length-1])}
-                    </span>                    
-                    <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase transition-colors ${chartOffset === 0 ? 'bg-transparent text-cream-deep' : 'bg-cream-soft hover:bg-cream-deep text-ink-muted'}`}>Tiếp Theo ▶</button>
+
+                {/* PAGINATION */}
+                <div className="flex justify-between items-center bg-white p-1.5 rounded-2xl shadow-soft ring-1 ring-cream-deep/60 sticky top-[64px] z-10">
+                    <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-cream-soft hover:bg-orange-soft hover:text-orange-deep text-ink-muted rounded-xl text-[11px] font-semibold transition">‹ 14 ngày trước</button>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted text-center px-2 tabular-nums">
+                        {getWeekLabel(currentChartDates[0])} – {getWeekLabel(currentChartDates[currentChartDates.length-1])}
+                    </span>
+                    <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-xl text-[11px] font-semibold transition ${chartOffset === 0 ? 'text-cream-deep cursor-not-allowed' : 'bg-cream-soft hover:bg-orange-soft hover:text-orange-deep text-ink-muted'}`}>Tiếp ›</button>
                 </div>
-                <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep">
-                    <div className="flex justify-between items-center mb-1"><h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted">Năng lượng đã nạp</h3><span className="text-[8px] italic text-ink-faint">Nhấn vào cột để xem</span></div>
+
+                {/* KCAL CHART */}
+                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                    <header className="flex items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-clay-soft text-xl">🔥</span>
+                            <div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Năng lượng đã nạp</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Theo bữa ăn mỗi ngày</p>
+                            </div>
+                        </div>
+                        <span className="text-[10px] text-ink-faint italic shrink-0">tap để xem</span>
+                    </header>
                     <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
                 </section>
-               <section className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-cream-deep">
-                    <div className="flex justify-between items-center mb-4"><h3 className="text-[10px] font-black uppercase tracking-widest text-ink-muted">Protein, Carb & Fat</h3><span className="text-[8px] italic text-ink-faint">Nhấn vào điểm để xem</span></div>
+
+                {/* MACRO CHART */}
+                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                    <header className="flex items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-3">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lilac-soft text-xl">🥗</span>
+                            <div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Protein · Carb · Fat</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Xu hướng macro</p>
+                            </div>
+                        </div>
+                        <span className="text-[10px] text-ink-faint italic shrink-0">tap để xem</span>
+                    </header>
                     <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
                 </section>
             </main>
@@ -1134,62 +1184,232 @@ export default function App() {
     }
     
     if (view === "profile") {
+        const userInitial = (userId || "?").trim().charAt(0).toUpperCase();
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-white p-8 flex flex-col justify-center space-y-6 animate-in fade-in duration-500 pb-28 relative font-sans text-ink">
-                <div className="text-center mb-4"><h1 className="text-4xl font-black text-orange tracking-tighter italic">STAYFIT</h1><p className="text-ink-muted text-[10px] font-black uppercase tracking-[0.3em] mt-2">Hồ sơ cá nhân</p></div>
-                <div className="flex gap-2 p-1 bg-cream-deep rounded-2xl">
-                    <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='male' ? 'bg-white text-orange shadow-sm':'text-ink-muted'}`}>Nam</button>
-                    <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-3 rounded-xl font-bold transition-all ${profile.gender==='female' ? 'bg-white text-orange shadow-sm':'text-ink-muted'}`}>Nữ</button>
-                </div>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="relative"><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Tuổi</label><div className="relative group"><input type="number" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="w-full bg-cream-soft p-4 pr-12 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-orange/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-ink-muted italic">tuổi</span></div></div>
-                        <div className="relative"><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Cân nặng</label><div className="relative group"><input type="number" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="w-full bg-cream-soft p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-orange/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-ink-muted italic">kg</span></div></div>
+            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-500 relative font-sans text-ink">
+                {/* Slim sticky header */}
+                <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex items-center justify-center">
+                    <div className="text-center">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">Cài đặt</span>
+                        <p className="text-sm font-bold text-ink">Hồ sơ cá nhân</p>
                     </div>
-                    <div className="relative"><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Chiều cao</label><div className="relative group"><input type="number" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-cream-soft p-4 pr-10 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-orange/20" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-ink-muted italic">cm</span></div></div>
-                    <div><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Mức độ vận động</label><select value={profile.activity} onChange={e=>{ setProfile({...profile, activity:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{ACTIVITY_LEVELS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}</select></div>
-                    <div><label className="text-[10px] font-black text-ink-muted uppercase ml-2 mb-1 block">Mục tiêu cân nặng</label><select value={profile.goal} onChange={e=>{ setProfile({...profile, goal:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft p-4 rounded-2xl font-bold outline-none cursor-pointer appearance-none">{GOALS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}</select></div>
-                </div>
-                <div className="bg-ink rounded-3xl p-6 text-white text-center shadow-xl flex flex-col items-center">
-                    <span className="text-ink-muted text-[10px] font-black uppercase tracking-widest">Ngân sách Calo/Ngày</span>
-                    <div className="flex justify-center items-end mt-1"><input type="number" value={target} onChange={e => { setProfile({ ...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0 }); }} className="text-4xl font-black text-orange tracking-tighter bg-transparent text-center outline-none w-32 border-b-2 border-dashed border-ink hover:border-orange focus:border-orange transition-colors" /><span className="text-lg font-normal text-ink-muted italic mb-1 ml-1">kcal</span></div>
-                    {profile.isManualTarget && <button onClick={() => setProfile({...profile, isManualTarget: false})} className="text-[9px] text-orange/80 mt-3 font-bold uppercase tracking-widest hover:text-orange transition-colors">⟲ Trở về Mức Tính Tự Động ({calculatedTarget})</button>}
-                </div>
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-cream-deep mt-2">
-                    <div className="flex justify-between items-center mb-4"><span className="text-[10px] font-black uppercase tracking-widest text-ink-muted">Tùy chỉnh Macro</span><button onClick={() => { const nextState = !profile.isManualMacro; setProfile({...profile, isManualMacro: nextState}); if (nextState) setIsDietModalOpen(true); }} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${profile.isManualMacro ? 'bg-orange' : 'bg-cream-deep'}`}><span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${profile.isManualMacro ? 'translate-x-5' : 'translate-x-1'}`} /></button></div>
-                    {profile.isManualMacro ? (
-                        <div className="animate-in fade-in slide-in-from-top-2">
-                            <div className="flex justify-between items-center mb-3 bg-cream-soft p-2 rounded-xl"><span className="text-[10px] font-black uppercase tracking-widest text-ink ml-2">{profile.macroDietMode || "Tự nhập tay (Custom)"}</span><button onClick={() => setIsDietModalOpen(true)} className="text-[9px] font-black bg-white px-3 py-1.5 rounded-lg text-orange shadow-sm border border-cream-deep hover:bg-orange-soft transition-colors uppercase active:scale-95">Đổi chế độ</button></div>
-                            <div className="grid grid-cols-3 gap-2">
-                                <div className="text-center relative"><label className="text-[9px] font-black text-orange uppercase block mb-1">Protein</label><input type="number" value={profile.manualProtein} onChange={e => setProfile({...profile, manualProtein: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-orange/20 transition-all" /><span className="text-[9px] text-ink-muted italic absolute bottom-3 right-3 pointer-events-none">g</span></div>
-                                <div className="text-center relative"><label className="text-[9px] font-black text-mist-deep uppercase block mb-1">Carb</label><input type="number" value={profile.manualCarb} onChange={e => setProfile({...profile, manualCarb: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-mist-deep/20 transition-all" /><span className="text-[9px] text-ink-muted italic absolute bottom-3 right-3 pointer-events-none">g</span></div>
-                                <div className="text-center relative"><label className="text-[9px] font-black text-clay uppercase block mb-1">Fat</label><input type="number" value={profile.manualFat} onChange={e => setProfile({...profile, manualFat: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft py-3 rounded-xl text-center font-bold text-sm outline-none focus:ring-2 focus:ring-clay/20 transition-all" /><span className="text-[9px] text-ink-muted italic absolute bottom-3 right-3 pointer-events-none">g</span></div>
+                </header>
+
+                <main className="p-4 space-y-5">
+                    {/* PROFILE HERO — avatar + ID */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <div className="flex items-center gap-4">
+                            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange to-orange-deep text-2xl font-bold text-white shadow-soft">
+                                {userInitial}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-orange-deep">Thành viên</span>
+                                <h2 className="mt-0.5 text-[16px] font-bold tracking-tight text-ink truncate">{userId || "Khách"}</h2>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Lắng nghe cơ thể, nuôi dưỡng nhẹ nhàng</p>
                             </div>
                         </div>
-                    ) : (
-                        <div className="flex justify-between items-center text-center opacity-50">
-                            <div><p className="text-[9px] font-black text-orange uppercase mb-1">Protein</p><p className="text-xs font-bold">{Math.round((target * 0.25 / 4) * 10) / 10}g</p></div>
-                            <div><p className="text-[9px] font-black text-mist-deep uppercase mb-1">Carb</p><p className="text-xs font-bold">{Math.round((target * 0.50 / 4) * 10) / 10}g</p></div>
-                            <div><p className="text-[9px] font-black text-clay uppercase mb-1">Fat</p><p className="text-xs font-bold">{Math.round((target * 0.25 / 9) * 10) / 10}g</p></div>
+                    </section>
+
+                    {/* GIỚI TÍNH */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <header className="flex items-center gap-3 mb-4">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lilac-soft text-xl">👤</span>
+                            <div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Giới tính</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Để tính BMR chính xác</p>
+                            </div>
+                        </header>
+                        <div className="flex gap-1.5 p-1 bg-cream-soft rounded-2xl ring-1 ring-cream-deep/40">
+                            <button onClick={() => setProfile({...profile, gender: 'male'})} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition ${profile.gender==='male' ? 'bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60' : 'text-ink-muted hover:text-ink'}`}>Nam</button>
+                            <button onClick={() => setProfile({...profile, gender: 'female'})} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition ${profile.gender==='female' ? 'bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60' : 'text-ink-muted hover:text-ink'}`}>Nữ</button>
                         </div>
-                    )}
-                </div>
-                <div className="space-y-3 mt-2">
-                    <button onClick={() => setView("journal")} className="w-full py-5 bg-orange text-white rounded-3xl font-black uppercase shadow-lg shadow-orange-soft active:scale-95 transition-all">Bắt đầu ngay</button>
-                    <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-4 bg-cream-deep text-ink-muted rounded-3xl font-black uppercase tracking-widest hover:bg-cream-deep active:scale-95 transition-all">Đăng xuất</button>
-                </div>
+                    </section>
+
+                    {/* CHỈ SỐ CƠ THỂ */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <header className="flex items-center gap-3 mb-4">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sage-soft text-xl">📏</span>
+                            <div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Chỉ số cơ thể</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Tuổi · Cân nặng · Chiều cao</p>
+                            </div>
+                        </header>
+                        <div className="grid grid-cols-3 gap-2.5">
+                            <div>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Tuổi</label>
+                                <div className="relative">
+                                    <input type="number" value={profile.age} onChange={e=>setProfile({...profile, age:+e.target.value})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3 pr-7 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">y</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Cân nặng</label>
+                                <div className="relative">
+                                    <input type="number" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">kg</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Chiều cao</label>
+                                <div className="relative">
+                                    <input type="number" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">cm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* VẬN ĐỘNG + MỤC TIÊU */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <header className="flex items-center gap-3 mb-4">
+                            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-clay-soft text-xl">🎯</span>
+                            <div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink">Lối sống</h3>
+                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Mức vận động & hướng đi</p>
+                            </div>
+                        </header>
+                        <div className="space-y-3">
+                            <div>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Mức độ vận động</label>
+                                <div className="relative">
+                                    <select value={profile.activity} onChange={e=>{ setProfile({...profile, activity:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-9 rounded-2xl font-semibold text-[13px] outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange/30 transition">
+                                        {ACTIVITY_LEVELS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}
+                                    </select>
+                                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Mục tiêu cân nặng</label>
+                                <div className="relative">
+                                    <select value={profile.goal} onChange={e=>{ setProfile({...profile, goal:+e.target.value, isManualTarget: false}); }} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 p-3.5 pr-9 rounded-2xl font-semibold text-[13px] outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-orange/30 transition">
+                                        {GOALS.map(l => ( <option key={l.value} value={l.value}>{l.label}</option> ))}
+                                    </select>
+                                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* CALO BUDGET — terracotta card thay vì dark */}
+                    <section className="rounded-3xl bg-gradient-to-br from-orange to-orange-deep p-6 shadow-lift ring-1 ring-orange-deep/20 text-white">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/80">Năng lượng mỗi ngày</span>
+                                <p className="mt-0.5 text-[11px] text-white/70 font-medium">Cần khoảng</p>
+                            </div>
+                            <span className="text-3xl">🔥</span>
+                        </div>
+                        <div className="flex items-baseline justify-center gap-1 mt-3">
+                            <input type="number" value={target} onChange={e => { setProfile({ ...profile, isManualTarget: true, manualTargetKcal: parseInt(e.target.value) || 0 }); }} className="text-5xl font-bold tracking-tight bg-transparent text-center outline-none w-36 border-b-2 border-dashed border-white/30 focus:border-white/70 hover:border-white/50 transition-colors tabular-nums text-white" />
+                            <span className="text-base font-medium text-white/70 ml-1">kcal</span>
+                        </div>
+                        {profile.isManualTarget && (
+                            <button onClick={() => setProfile({...profile, isManualTarget: false})} className="block mx-auto mt-3 text-[10px] text-white/80 font-semibold uppercase tracking-wider bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-full transition tabular-nums">
+                                ⟲ Trở về tự động ({calculatedTarget})
+                            </button>
+                        )}
+                    </section>
+
+                    {/* MACRO TÙY CHỈNH */}
+                    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 md:p-6">
+                        <header className="flex items-center justify-between gap-3 mb-4">
+                            <div className="flex items-center gap-3">
+                                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">🥑</span>
+                                <div>
+                                    <h3 className="text-[15px] font-bold tracking-tight text-ink">Tùy chỉnh Macro</h3>
+                                    <p className="mt-0.5 text-[11px] font-medium text-ink-muted">{profile.isManualMacro ? "Đang tùy chỉnh tay" : "Theo tỉ lệ mặc định"}</p>
+                                </div>
+                            </div>
+                            <button onClick={() => { const nextState = !profile.isManualMacro; setProfile({...profile, isManualMacro: nextState}); if (nextState) setIsDietModalOpen(true); }} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ring-1 ${profile.isManualMacro ? 'bg-orange ring-orange-deep/20' : 'bg-cream-deep ring-cream-deep'}`} aria-label="Toggle macro tùy chỉnh">
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-soft ${profile.isManualMacro ? 'translate-x-6' : 'translate-x-1'}`} />
+                            </button>
+                        </header>
+
+                        {profile.isManualMacro ? (
+                            <div className="animate-in fade-in slide-in-from-top-2">
+                                <div className="flex justify-between items-center mb-3 bg-cream-soft ring-1 ring-cream-deep/40 p-2.5 rounded-2xl">
+                                    <span className="text-[11px] font-semibold text-ink ml-2 truncate">{profile.macroDietMode || "Tự nhập tay"}</span>
+                                    <button onClick={() => setIsDietModalOpen(true)} className="text-[10px] font-semibold bg-white px-3 py-1.5 rounded-full text-orange-deep ring-1 ring-cream-deep/60 hover:bg-orange-soft transition active:scale-95 shrink-0">Đổi chế độ</button>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep block mb-1 text-center">Protein</label>
+                                        <div className="relative">
+                                            <input type="number" value={profile.manualProtein} onChange={e => setProfile({...profile, manualProtein: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 py-2.5 pr-7 rounded-xl text-center font-bold text-[13px] outline-none focus:ring-2 focus:ring-sage/30 transition tabular-nums" />
+                                            <span className="text-[9px] text-ink-muted absolute bottom-2.5 right-2.5 pointer-events-none font-medium">g</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep block mb-1 text-center">Carb</label>
+                                        <div className="relative">
+                                            <input type="number" value={profile.manualCarb} onChange={e => setProfile({...profile, manualCarb: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 py-2.5 pr-7 rounded-xl text-center font-bold text-[13px] outline-none focus:ring-2 focus:ring-clay/30 transition tabular-nums" />
+                                            <span className="text-[9px] text-ink-muted absolute bottom-2.5 right-2.5 pointer-events-none font-medium">g</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep block mb-1 text-center">Fat</label>
+                                        <div className="relative">
+                                            <input type="number" value={profile.manualFat} onChange={e => setProfile({...profile, manualFat: e.target.value, macroDietMode: "Tự nhập tay (Custom)"})} className="w-full bg-cream-soft ring-1 ring-cream-deep/40 py-2.5 pr-7 rounded-xl text-center font-bold text-[13px] outline-none focus:ring-2 focus:ring-lilac/30 transition tabular-nums" />
+                                            <span className="text-[9px] text-ink-muted absolute bottom-2.5 right-2.5 pointer-events-none font-medium">g</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-3 gap-2 opacity-60">
+                                <div className="text-center bg-cream-soft rounded-xl py-2.5">
+                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep mb-0.5">Protein</p>
+                                    <p className="text-[13px] font-bold tabular-nums text-ink">{Math.round((target * 0.25 / 4) * 10) / 10}<span className="text-[10px] text-ink-muted font-medium ml-0.5">g</span></p>
+                                </div>
+                                <div className="text-center bg-cream-soft rounded-xl py-2.5">
+                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep mb-0.5">Carb</p>
+                                    <p className="text-[13px] font-bold tabular-nums text-ink">{Math.round((target * 0.50 / 4) * 10) / 10}<span className="text-[10px] text-ink-muted font-medium ml-0.5">g</span></p>
+                                </div>
+                                <div className="text-center bg-cream-soft rounded-xl py-2.5">
+                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep mb-0.5">Fat</p>
+                                    <p className="text-[13px] font-bold tabular-nums text-ink">{Math.round((target * 0.25 / 9) * 10) / 10}<span className="text-[10px] text-ink-muted font-medium ml-0.5">g</span></p>
+                                </div>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* ACTION BUTTONS */}
+                    <div className="space-y-2.5">
+                        <button onClick={() => setView("journal")} className="w-full py-4 bg-orange text-white rounded-2xl font-bold text-[14px] shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep active:scale-95 transition">
+                            Quay lại nhật ký
+                        </button>
+                        <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-3 bg-cream-soft text-ink-muted rounded-2xl font-semibold text-[12px] ring-1 ring-cream-deep/40 hover:bg-cream-deep hover:text-ink active:scale-95 transition">
+                            Đăng xuất
+                        </button>
+                    </div>
+                </main>
+
                 <BottomNav view={view} setView={setView} />
+
+                {/* DIET MODE MODAL */}
                 {isDietModalOpen && (
-                    <div className="fixed inset-0 bg-cream-soft z-50 flex flex-col overflow-hidden max-w-md mx-auto animate-in slide-in-from-bottom-full duration-300">
-                        <div className="sticky top-0 z-20 bg-cream-soft p-6 border-b border-cream-deep flex justify-between items-center shrink-0 shadow-sm"><h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-ink">Chọn chế độ ăn</h3><button onClick={() => setIsDietModalOpen(false)} className="w-8 h-8 bg-white shadow-sm rounded-full flex items-center justify-center text-ink-muted hover:bg-cream-deep transition-colors"><span className="font-black text-xs">X</span></button></div>
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar pb-10">
+                    <div className="fixed inset-0 bg-cream z-50 flex flex-col overflow-hidden max-w-md mx-auto animate-in slide-in-from-bottom-full duration-300">
+                        <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm px-4 py-3 border-b border-cream-deep flex justify-between items-center shrink-0">
+                            <div>
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">Macro</span>
+                                <p className="text-sm font-bold text-ink">Chọn chế độ ăn</p>
+                            </div>
+                            <button onClick={() => setIsDietModalOpen(false)} className="grid h-9 w-9 place-items-center rounded-full bg-white ring-1 ring-cream-deep/60 text-ink-muted hover:bg-cream-soft hover:text-ink transition" aria-label="Đóng">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </header>
+                        <div className="flex-1 overflow-y-auto p-4 space-y-5 no-scrollbar pb-10">
                             {DIET_MODES.map((cat, idx) => (
-                                <div key={idx}><h4 className="text-[10px] font-black uppercase tracking-widest text-orange mb-3 ml-2">{cat.category}</h4>
+                                <div key={idx}>
+                                    <h4 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-orange-deep mb-2.5 ml-1">{cat.category}</h4>
                                     <div className="space-y-2">
                                         {cat.items.map(mode => (
-                                            <button key={mode.id} onClick={() => applyDietMode(mode)} className={`w-full text-left p-4 rounded-2xl border transition-all active:scale-95 ${profile.macroDietMode === mode.name ? 'border-orange bg-orange-soft shadow-md' : 'border-cream-deep bg-white hover:border-orange-soft hover:bg-cream-soft shadow-sm'}`}>
-                                                <div className="flex justify-between items-center mb-1"><span className="text-sm font-black text-ink">{mode.name}</span><span className="text-[9px] font-black bg-cream-deep text-ink-muted px-2 py-1 rounded-lg">{mode.label}</span></div>
-                                                <p className="text-[10px] text-ink-muted font-medium leading-relaxed">{mode.desc}</p>
+                                            <button key={mode.id} onClick={() => applyDietMode(mode)} className={`w-full text-left p-4 rounded-2xl transition active:scale-[0.98] shadow-soft ring-1 ${profile.macroDietMode === mode.name ? 'bg-orange-soft ring-orange/40' : 'bg-white ring-cream-deep/60 hover:ring-orange/20 hover:bg-cream-soft'}`}>
+                                                <div className="flex justify-between items-center gap-2 mb-1">
+                                                    <span className="text-[14px] font-bold text-ink tracking-tight">{mode.name}</span>
+                                                    <span className="text-[9px] font-semibold uppercase tracking-wider bg-cream-soft text-ink-muted px-2 py-1 rounded-lg shrink-0">{mode.label}</span>
+                                                </div>
+                                                <p className="text-[11px] text-ink-muted leading-relaxed">{mode.desc}</p>
                                             </button>
                                         ))}
                                     </div>
