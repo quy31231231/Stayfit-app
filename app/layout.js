@@ -1,7 +1,58 @@
 export const metadata = {
-  title: 'StayFit - Nhật ký Calo & Thống kê',
-  description: 'Ứng dụng theo dõi sức khỏe StayFit',
-}
+  metadataBase: new URL('https://stayfit.id.vn'),
+  applicationName: 'StayFit',
+  title: {
+    default: 'StayFit — Nhật ký Calo & Sức khỏe',
+    template: '%s · StayFit',
+  },
+  description: 'Theo dõi calo, dinh dưỡng và cân nặng mỗi ngày. Đồng bộ liền mạch giữa điện thoại và máy tính qua Google Sheets.',
+  keywords: ['calo', 'kcal', 'dinh dưỡng', 'macro', 'protein', 'sức khỏe', 'giảm cân', 'fitness', 'BMR', 'TDEE'],
+  authors: [{ name: 'Cao Mạnh Quý' }],
+  creator: 'Cao Mạnh Quý',
+  publisher: 'StayFit',
+
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+
+  openGraph: {
+    type: 'website',
+    locale: 'vi_VN',
+    url: 'https://stayfit.id.vn',
+    siteName: 'StayFit',
+    title: 'StayFit — Nhật ký Calo & Sức khỏe',
+    description: 'Theo dõi calo, dinh dưỡng và cân nặng mỗi ngày. Đồng bộ liền mạch giữa điện thoại và máy tính.',
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'StayFit — Nhật ký Calo & Sức khỏe',
+    description: 'Theo dõi calo, dinh dưỡng và cân nặng mỗi ngày.',
+  },
+
+  appleWebApp: {
+    capable: true,
+    title: 'StayFit',
+    statusBarStyle: 'default',
+  },
+
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
+};
+
+export const viewport = {
+  themeColor: '#FBF8F2',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  colorScheme: 'light',
+};
 
 export default function RootLayout({ children }) {
   return (
@@ -51,6 +102,7 @@ export default function RootLayout({ children }) {
             -moz-osx-font-smoothing: grayscale;
             background-color: #FBF8F2;
             color: #2D2620;
+            overscroll-behavior-y: contain;
           }
           .no-scrollbar::-webkit-scrollbar { display: none; }
           .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -65,5 +117,5 @@ export default function RootLayout({ children }) {
         {children}
       </body>
     </html>
-  )
+  );
 }
