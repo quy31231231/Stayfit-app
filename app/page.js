@@ -1467,38 +1467,6 @@ export default function App() {
                         </div>
                     </DashboardCard>
 
-                    {/* 4 MEAL SECTIONS — dùng FoodLogSection từ dashboard */}
-                    <div className="space-y-3">
-                        <div className="flex items-baseline justify-between px-1">
-                            <h2 className="text-[15px] font-bold tracking-tight text-ink">Nhật ký bữa ăn</h2>
-                            {undoStack.length > 0 && (
-                                <button onClick={handleUndo} className="flex items-center gap-1.5 text-[11px] font-semibold text-orange-deep hover:bg-orange-soft px-3 py-1 rounded-full transition">
-                                    <IconUndo /> Hoàn tác
-                                </button>
-                            )}
-                        </div>
-                        {MEAL_TYPES.map((meal, i) => (
-                            <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
-                                <FoodLogSection
-                                    mealName={meal}
-                                    items={dailyLog.filter(it => it.meal === meal)}
-                                    onAdd={(m) => {
-                                        setSelectedMeal(m);
-                                        if (typeof document !== "undefined") {
-                                            document.getElementById("add-food-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                                        }
-                                    }}
-                                    onRemove={removeFood}
-                                />
-                            </div>
-                        ))}
-                        {dailyLog.length === 0 && (
-                            <p className="text-center text-ink-faint text-[11px] uppercase font-semibold italic py-6 border border-dashed border-cream-deep rounded-3xl tracking-wider">
-                                Khi nào sẵn sàng, ghi món vào nhé
-                            </p>
-                        )}
-                    </div>
-
                     <section id="add-food-section" className="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-cream-deep/60 scroll-mt-20 md:p-6">
                         {/* Header — icon-chip pattern giống FoodLogSection */}
                         <header className="flex items-center justify-between">
@@ -1506,10 +1474,7 @@ export default function App() {
                                 <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-orange-deep">
                                     <IconPlus />
                                 </span>
-                                <div>
-                                    <h3 className="text-[15px] font-bold tracking-tight text-ink">Thêm món</h3>
-                                    <p className="mt-0.5 text-[11px] font-medium text-ink-muted">vào {selectedMeal.toLowerCase()}</p>
-                                </div>
+                                <h3 className="text-[15px] font-bold tracking-tight text-ink leading-none">Thêm món</h3>
                             </div>
                             <div className="relative">
                                 <select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="appearance-none bg-cream-soft hover:bg-cream-deep text-[11px] font-semibold text-ink py-2 pl-3.5 pr-9 rounded-full outline-none cursor-pointer ring-1 ring-cream-deep/60 focus:ring-2 focus:ring-orange/30 transition">
@@ -1642,8 +1607,39 @@ export default function App() {
                             </div>
                         )}
                     </section>
-                    
-                    
+
+                    {/* 4 MEAL SECTIONS — dùng FoodLogSection từ dashboard */}
+                    <div className="space-y-3">
+                        <div className="flex items-baseline justify-between px-1">
+                            <h2 className="text-[15px] font-bold tracking-tight text-ink">Nhật ký bữa ăn</h2>
+                            {undoStack.length > 0 && (
+                                <button onClick={handleUndo} className="flex items-center gap-1.5 text-[11px] font-semibold text-orange-deep hover:bg-orange-soft px-3 py-1 rounded-full transition">
+                                    <IconUndo /> Hoàn tác
+                                </button>
+                            )}
+                        </div>
+                        {MEAL_TYPES.map((meal, i) => (
+                            <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
+                                <FoodLogSection
+                                    mealName={meal}
+                                    items={dailyLog.filter(it => it.meal === meal)}
+                                    onAdd={(m) => {
+                                        setSelectedMeal(m);
+                                        if (typeof document !== "undefined") {
+                                            document.getElementById("add-food-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                        }
+                                    }}
+                                    onRemove={removeFood}
+                                />
+                            </div>
+                        ))}
+                        {dailyLog.length === 0 && (
+                            <p className="text-center text-ink-faint text-[11px] uppercase font-semibold italic py-6 border border-dashed border-cream-deep rounded-3xl tracking-wider">
+                                Khi nào sẵn sàng, ghi món vào nhé
+                            </p>
+                        )}
+                    </div>
+
                     {/* --- MODAL CHỈNH SỬA THƯ VIỆN MÓN ĂN --- */}
                     {editLibraryModal.isOpen && (
                         <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
