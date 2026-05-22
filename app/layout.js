@@ -1,3 +1,5 @@
+import { Analytics } from '@vercel/analytics/next';
+
 export const metadata = {
   metadataBase: new URL('https://stayfit.id.vn'),
   applicationName: 'StayFit',
@@ -115,6 +117,7 @@ export default function RootLayout({ children }) {
 
       <body className="bg-cream text-ink">
         {children}
+        <Analytics />
       </body>
     </html>
   );

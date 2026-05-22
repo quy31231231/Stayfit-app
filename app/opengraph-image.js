@@ -49,7 +49,7 @@ export default function OpenGraphImage() {
         />
 
         {/* Top — Logo + brand chip */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 18, zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
           <div
             style={{
               width: 80,
@@ -99,7 +99,7 @@ export default function OpenGraphImage() {
         </div>
 
         {/* Bottom — stat pills */}
-        <div style={{ display: 'flex', gap: 16, zIndex: 1 }}>
+        <div style={{ display: 'flex', gap: 16 }}>
           <div
             style={{
               display: 'flex',
