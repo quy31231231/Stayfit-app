@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('app/page.js','utf8'\\);const m=c.match\\(/\\(?:emerald|slate|red|yellow|blue|green|amber\\)-[0-9]{2,3}/g\\);const u={};\\(m||[]\\).forEach\\(x=>u[x]=\\(u[x]||0\\)+1\\);console.log\\(Object.entries\\(u\\).sort\\(\\(a,b\\)=>b[1]-a[1]\\).map\\(\\([k,v]\\)=>k+': '+v\\).join\\('\\\\n'\\)||'all clean'\\);\")"
+    ]
+  }
+}
