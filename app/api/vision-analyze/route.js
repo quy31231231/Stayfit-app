@@ -2,32 +2,55 @@ import { google } from "googleapis";
 import crypto from "crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const VISION_PROMPT = `Bạn là chuyên gia dinh dưỡng. Phân tích ảnh món ăn và trả về JSON.
+const VISION_PROMPT = `Bạn là chuyên gia dinh dưỡng. Phân tích ảnh và trả về JSON nutrition.
 
-Nếu ảnh có món ăn rõ ràng: ước lượng tên món (tiếng Việt), khối lượng (gram),
-calo và macro dinh dưỡng cho khẩu phần trong ảnh.
-Nếu không có món ăn: trả về { "found": false }.
+PHÂN LOẠI ẢNH trước:
 
-Trả về CHỈ JSON (không markdown, không giải thích):
+A) **SẢN PHẨM ĐÓNG GÓI** (chai, hộp, túi có nhãn dinh dưỡng):
+   - TÌM "Bảng thành phần dinh dưỡng / Nutrition Facts" trên nhãn
+   - ĐỌC giá trị TRỰC TIẾP từ nhãn (KHÔNG ước lượng):
+     * Năng lượng / Energy / Calories → kcal
+     * Chất đạm / Protein → protein
+     * Chất bột đường / Carbohydrate / Carb → carb
+     * Chất béo / Fat → fat
+   - GHI NHẬN "serving size" trên nhãn:
+     * Nếu nhãn ghi "per 100ml" → grams = 100, đơn vị thực ra là ml (cứ ghi grams)
+     * Nếu nhãn ghi "per 100g" → grams = 100
+     * Nếu nhãn ghi "per 1 chai/hộp" → grams = volume tổng (vd: chai 1L = 1000)
+   - Confidence cao (0.85-0.95) khi đọc rõ nhãn
+   - Confidence thấp (0.4-0.6) khi nhãn mờ/không thấy rõ — ghi chú "Vui lòng kiểm tra lại nhãn"
+
+B) **MÓN ĂN CHẾ BIẾN** (cơm, phở, salad, đồ ăn tự làm):
+   - Ước lượng theo kích thước khẩu phần thấy được
+   - Sử dụng dữ liệu dinh dưỡng tiêu chuẩn cho món Việt (USDA / TPHCM Nutrition DB)
+   - grams = khối lượng khẩu phần ước tính
+   - Confidence 0.5-0.85 tuỳ độ rõ ràng
+
+C) **KHÔNG PHẢI ĐỒ ĂN** (phong cảnh, người, vật, etc.): trả về { "found": false }
+
+Trả về CHỈ JSON (không markdown):
 {
   "found": true,
-  "name": "Tên món bằng tiếng Việt (vd: Phở bò, Cơm tấm sườn bì, Bánh mì thịt)",
-  "grams": 350,
-  "kcal": 480,
-  "protein": 25,
-  "carb": 60,
-  "fat": 12,
-  "confidence": 0.85,
-  "meal_suggestion": "Bữa trưa",
-  "note": "Ghi chú ngắn (tuỳ chọn)"
+  "name": "Tên cụ thể (vd: Sữa yến mạch OATSIDE Nguyên Bản — đọc tên brand từ nhãn nếu có)",
+  "grams": 100,
+  "kcal": 65,
+  "protein": 0.6,
+  "carb": 8.1,
+  "fat": 3.2,
+  "confidence": 0.9,
+  "meal_suggestion": "Ăn vặt",
+  "note": "Đọc từ nhãn per 100ml. Số liệu là cho 100ml/g, user cần điều chỉnh số lượng theo lượng thực dùng.",
+  "source": "label"
 }
 
-Quy tắc:
-- "grams" là khối lượng ước tính của toàn bộ khẩu phần trong ảnh.
-- "kcal", "protein", "carb", "fat" là TỔNG cho khẩu phần đó (KHÔNG phải per 100g).
-- "confidence" 0-1 (0.9 = chắc chắn, 0.5 = phân vân).
-- "meal_suggestion" chỉ chọn 1 trong: "Bữa sáng", "Bữa trưa", "Bữa tối", "Ăn vặt".
-- Nếu có nhiều món trong ảnh, mô tả món chính (lớn nhất / nổi bật nhất).`;
+Quy tắc QUAN TRỌNG:
+- "grams" + "kcal" + macros là CÙNG MỘT KHẨU PHẦN.
+- Nếu đọc từ nhãn "per 100ml" → grams=100, kcal=số trên nhãn, KHÔNG nhân/chia.
+- TUYỆT ĐỐI không hallucinate giá trị nếu không đọc được nhãn — đặt confidence thấp.
+- Đối với đồ uống (sữa, nước ép) khẩu phần mặc định là 100 (per 100ml).
+- "source": "label" nếu đọc từ nhãn, "estimate" nếu ước lượng món chế biến.
+- "meal_suggestion": "Bữa sáng" | "Bữa trưa" | "Bữa tối" | "Ăn vặt".
+- Số liệu khẩu phần trong note (giúp user verify): "Theo nhãn: per 100ml = 65 kcal, 0.6g đạm, 8.1g carb, 3.2g béo"`;
 
 function hashPassword(password) {
   if (!password) return "";
@@ -181,7 +204,8 @@ export async function POST(req) {
       fat: safeNum(parsed.fat),
       confidence: Math.min(1, Math.max(0, safeNum(parsed.confidence, 0.5))),
       meal_suggestion: mealSuggestion,
-      note: parsed.note ? String(parsed.note).slice(0, 200) : null,
+      note: parsed.note ? String(parsed.note).slice(0, 300) : null,
+      source: parsed.source === "label" ? "label" : "estimate",
     });
   } catch (err) {
     console.error("[vision-analyze]", err);

@@ -782,6 +782,7 @@ export default function App() {
         error: null,
         result: null,
     });
+    const [scanEditMode, setScanEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
@@ -1055,6 +1056,7 @@ export default function App() {
 
     const closeScanModal = () => {
         setScanModalOpen(false);
+        setScanEditMode(false);
         setTimeout(() => {
             setScanState({ file: null, preview: null, loading: false, error: null, result: null });
         }, 300);
@@ -1138,6 +1140,7 @@ export default function App() {
     const handleScanReset = () => {
         setScanState({ file: null, preview: null, loading: false, error: null, result: null });
         setSelectedFood(null);
+        setScanEditMode(false);
     };
 
     const handleScanConfirm = () => {
@@ -1841,51 +1844,106 @@ export default function App() {
                                         {scanState.error && <p className="text-[12px] text-orange-deep text-center">{scanState.error}</p>}
                                     </div>
                                 ) : (() => {
-                                    /* STEP 3: Đã có result — tính lại macros theo qty */
+                                    /* STEP 3: Đã có result — selectedFood là source of truth, có thể edit */
                                     const r = scanState.result;
-                                    const baseGrams = r.grams || 1;
+                                    if (!selectedFood) return null;
+                                    const baseGrams = selectedFood.per || 1;
                                     const q = parseFloat(qty) || 0;
                                     const factor = q / baseGrams;
                                     const scaled = {
-                                        kcal:    Math.round(r.kcal * factor * 10) / 10,
-                                        protein: Math.round(r.protein * factor * 10) / 10,
-                                        carb:    Math.round(r.carb * factor * 10) / 10,
-                                        fat:     Math.round(r.fat * factor * 10) / 10,
+                                        kcal:    Math.round(selectedFood.kcal * factor * 10) / 10,
+                                        protein: Math.round(selectedFood.protein * factor * 10) / 10,
+                                        carb:    Math.round(selectedFood.carb * factor * 10) / 10,
+                                        fat:     Math.round(selectedFood.fat * factor * 10) / 10,
                                     };
+                                    const updateField = (key, val) => setSelectedFood(f => ({ ...f, [key]: val }));
                                     return (
                                         <div className="space-y-4">
-                                            <img src={scanState.preview} alt={r.name} className="w-full max-h-40 object-cover rounded-2xl ring-1" />
+                                            <img src={scanState.preview} alt={selectedFood.name} className="w-full max-h-36 object-cover rounded-2xl ring-1" />
 
+                                            {/* Source badge */}
+                                            <div className="flex items-center gap-2 -mb-2">
+                                                <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${r.source === "label" ? "bg-sage-soft text-sage-deep" : "bg-clay-soft text-clay-deep"}`}>
+                                                    {r.source === "label" ? "📋 Đọc từ nhãn" : "🤖 AI ước lượng"}
+                                                </span>
+                                                <span className="text-[10px] text-ink-muted tabular-nums">độ tin cậy {Math.round(r.confidence * 100)}%</span>
+                                                <button
+                                                    onClick={() => setScanEditMode(m => !m)}
+                                                    className="ml-auto text-[11px] font-semibold text-orange-deep hover:underline"
+                                                >
+                                                    {scanEditMode ? "✓ Xong" : "✎ Sửa giá trị"}
+                                                </button>
+                                            </div>
+
+                                            {/* Card hiển thị / edit */}
                                             <div className="rounded-2xl bg-cream-soft ring-1 p-4">
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <div className="min-w-0 flex-1 pr-3">
-                                                        <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{r.name}</h5>
-                                                        <p className="text-[11px] text-ink-muted tabular-nums mt-0.5">
-                                                            AI gợi ý ~{r.grams}g · độ tin cậy {Math.round(r.confidence * 100)}%
-                                                        </p>
-                                                        {r.note && (
-                                                            <p className="text-[11px] text-ink-muted italic mt-1">"{r.note}"</p>
-                                                        )}
+                                                {scanEditMode ? (
+                                                    /* EDIT MODE — chỉnh sửa giá trị theo per-khẩu-phần */
+                                                    <div className="space-y-2.5">
+                                                        <div>
+                                                            <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Tên món</label>
+                                                            <input type="text" value={selectedFood.name} onChange={e => updateField("name", e.target.value)} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-semibold outline-none focus:ring-2 focus:ring-orange/30" />
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Per (g/ml)</label>
+                                                                <input type="number" value={selectedFood.per} step="any" min="1" onChange={e => updateField("per", parseFloat(e.target.value) || 1)} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Kcal / per</label>
+                                                                <input type="number" value={selectedFood.kcal} step="any" min="0" onChange={e => updateField("kcal", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-3 gap-2">
+                                                            <div>
+                                                                <label className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep block mb-1 text-center">Protein</label>
+                                                                <input type="number" value={selectedFood.protein} step="any" min="0" onChange={e => updateField("protein", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-sage/30" />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep block mb-1 text-center">Carb</label>
+                                                                <input type="number" value={selectedFood.carb} step="any" min="0" onChange={e => updateField("carb", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-clay/30" />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep block mb-1 text-center">Fat</label>
+                                                                <input type="number" value={selectedFood.fat} step="any" min="0" onChange={e => updateField("fat", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-lilac/30" />
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-[10px] text-ink-muted italic mt-1">Giá trị là cho mỗi {selectedFood.per}g/ml. Số lượng nạp được tính từ "Số lượng" bên dưới.</p>
                                                     </div>
-                                                    <div className="text-right shrink-0">
-                                                        <p className="text-3xl font-bold text-orange-deep tabular-nums leading-none">{scaled.kcal}</p>
-                                                        <p className="text-[10px] text-ink-muted uppercase tracking-wider mt-1">kcal</p>
-                                                    </div>
-                                                </div>
-                                                <div className="grid grid-cols-3 gap-1.5">
-                                                    <div className="text-center bg-white rounded-xl py-2 ring-1">
-                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep">Protein</p>
-                                                        <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.protein}g</p>
-                                                    </div>
-                                                    <div className="text-center bg-white rounded-xl py-2 ring-1">
-                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep">Carb</p>
-                                                        <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.carb}g</p>
-                                                    </div>
-                                                    <div className="text-center bg-white rounded-xl py-2 ring-1">
-                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep">Fat</p>
-                                                        <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.fat}g</p>
-                                                    </div>
-                                                </div>
+                                                ) : (
+                                                    /* DISPLAY MODE */
+                                                    <>
+                                                        <div className="flex justify-between items-start mb-3">
+                                                            <div className="min-w-0 flex-1 pr-3">
+                                                                <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{selectedFood.name}</h5>
+                                                                <p className="text-[11px] text-ink-muted tabular-nums mt-0.5">
+                                                                    Per {selectedFood.per}g/ml: {selectedFood.kcal} kcal · {selectedFood.protein}P / {selectedFood.carb}C / {selectedFood.fat}F
+                                                                </p>
+                                                                {r.note && (
+                                                                    <p className="text-[11px] text-ink-muted italic mt-1">"{r.note}"</p>
+                                                                )}
+                                                            </div>
+                                                            <div className="text-right shrink-0">
+                                                                <p className="text-3xl font-bold text-orange-deep tabular-nums leading-none">{scaled.kcal}</p>
+                                                                <p className="text-[10px] text-ink-muted uppercase tracking-wider mt-1">kcal</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-3 gap-1.5">
+                                                            <div className="text-center bg-white rounded-xl py-2 ring-1">
+                                                                <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep">Protein</p>
+                                                                <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.protein}g</p>
+                                                            </div>
+                                                            <div className="text-center bg-white rounded-xl py-2 ring-1">
+                                                                <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep">Carb</p>
+                                                                <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.carb}g</p>
+                                                            </div>
+                                                            <div className="text-center bg-white rounded-xl py-2 ring-1">
+                                                                <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep">Fat</p>
+                                                                <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.fat}g</p>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-2">
@@ -1899,7 +1957,7 @@ export default function App() {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng (g)</label>
+                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng (g/ml)</label>
                                                     <input type="number" value={qty} step="any" min="1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-soft p-2.5 rounded-xl text-[14px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
                                                 </div>
                                             </div>
