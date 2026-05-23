@@ -145,22 +145,13 @@ export default function SportsPreview() {
             <MacroDonut kind="fat"     value={TODAY.fat.value}     target={TODAY.fat.target} />
           </div>
 
-          {/* EQUATION — thêm "Đã đốt" lime */}
+          {/* EQUATION — 3 cell như app gốc */}
           <div className="mt-5 flex items-stretch gap-1 border-t border-cream-deep/50 pt-5 text-center">
             <EqCell label="Cần khoảng" value={fmt(TODAY.target)} tone="neutral" />
             <Op>−</Op>
             <EqCell label="Đã nạp" value={fmt(TODAY.consumed)} tone="sage" />
-            <Op>+</Op>
-            <EqCell label="Đã đốt" value={fmt(TODAY.burned)} tone="lime" />
             <Op>=</Op>
-            <EqCell label="Còn dư" value={fmt(remaining)} tone="orange" highlight />
-          </div>
-
-          {/* STEPS BADGE */}
-          <div className="mt-4 flex items-center justify-center gap-2 text-[12px] text-ink-muted">
-            <span className="text-base">👟</span>
-            <span className="font-semibold text-ink tabular-nums">{fmt(STEPS)}</span>
-            <span>bước hôm nay</span>
+            <EqCell label="Còn dư" value={fmt(TODAY.target - TODAY.consumed)} tone="orange" highlight />
           </div>
         </section>
 
