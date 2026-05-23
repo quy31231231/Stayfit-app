@@ -81,10 +81,17 @@ export async function POST(req) {
       return Response.json({ error: "Server chưa cấu hình GEMINI_API_KEY" }, { status: 500 });
     }
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Thử nhiều model theo thứ tự ưu tiên — fallback nếu account không có quyền/quota
+    // Ưu tiên model nhẹ/rẻ trước (cheaper = free tier friendly hơn)
     const MODELS_TO_TRY = process.env.GEMINI_MODEL
       ? [process.env.GEMINI_MODEL]
-      : ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
+      : [
+          "gemini-2.5-flash-lite",   // Lite — free tier rộng nhất
+          "gemini-2.0-flash-lite",
+          "gemini-1.5-flash-8b",     // 8B small model
+          "gemini-2.5-flash",
+          "gemini-2.0-flash",
+          "gemini-1.5-flash-latest",
+        ];
 
     let result, lastError, usedModel;
     for (const modelName of MODELS_TO_TRY) {
@@ -105,7 +112,12 @@ export async function POST(req) {
       } catch (err) {
         lastError = err;
         const msg = String(err.message || "");
-        // Nếu lỗi 404 (model không tồn tại) hoặc 429 (quota=0) → thử model kế
+        // 404 / not found / quota=0 → thử model kế
+        // 429 prepayment depleted → fail toàn bộ project, không cần thử tiếp
+        if (msg.includes("prepayment credits are depleted")) {
+          console.error(`[vision-analyze] Project hết credit, dừng thử`);
+          break;
+        }
         if (msg.includes("404") || msg.includes("not found") || msg.includes("limit: 0")) {
           console.warn(`[vision-analyze] Model ${modelName} không khả dụng, thử model kế...`);
           continue;
@@ -116,10 +128,24 @@ export async function POST(req) {
     }
 
     if (!result) {
-      console.error("[vision-analyze] Tất cả models đều fail:", lastError?.message);
-      return Response.json({
-        error: "Không gọi được Gemini API. Account của bạn có thể chưa được enable cho bất kỳ model nào. Vào https://aistudio.google.com để check key + quota.",
-      }, { status: 502 });
+      const errMsg = String(lastError?.message || "");
+      let userMessage;
+      let statusCode = 502;
+
+      if (errMsg.includes("prepayment credits are depleted") || errMsg.includes("billing")) {
+        userMessage = "Tài khoản Google của bạn đã hết credit thanh toán. Vui lòng tạo API key mới từ project FREE tại https://aistudio.google.com/apikey (chọn 'Create API key in new project').";
+        statusCode = 402;
+      } else if (errMsg.includes("API_KEY_INVALID") || errMsg.includes("403")) {
+        userMessage = "API key không hợp lệ. Kiểm tra lại GEMINI_API_KEY trên Vercel.";
+        statusCode = 401;
+      } else if (errMsg.includes("404") || errMsg.includes("not found")) {
+        userMessage = "Không tìm thấy model AI khả dụng cho account của bạn. Tạo API key mới tại https://aistudio.google.com/apikey.";
+      } else {
+        userMessage = `Không gọi được Gemini API: ${errMsg.slice(0, 200)}`;
+      }
+
+      console.error("[vision-analyze] Toàn bộ models fail:", errMsg);
+      return Response.json({ error: userMessage }, { status: statusCode });
     }
 
     console.log(`[vision-analyze] Đã dùng model: ${usedModel}`);
