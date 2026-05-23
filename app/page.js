@@ -772,6 +772,16 @@ export default function App() {
     const [selectedMeal, setSelectedMeal] = useState("Bữa sáng");
     const [selectedFood, setSelectedFood] = useState(null);
     const [qty, setQty] = useState(1);
+
+    // AI Vision scan state
+    const [scanModalOpen, setScanModalOpen] = useState(false);
+    const [scanState, setScanState] = useState({
+        file: null,
+        preview: null,
+        loading: false,
+        error: null,
+        result: null,
+    });
     const [searchQuery, setSearchQuery] = useState("");
     const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
@@ -1030,7 +1040,7 @@ export default function App() {
     const handleAddSelectedFood = () => {
         if (!selectedFood) return;
         const quantity = parseFloat(qty) || 0;
-        const newItem = { 
+        const newItem = {
             name: selectedFood.name, quantity: quantity, unit: selectedFood.unit,
             kcal: calcMacro(selectedFood.kcal, selectedFood.per, quantity), protein: calcMacro(selectedFood.protein, selectedFood.per, quantity),
             carb: calcMacro(selectedFood.carb, selectedFood.per, quantity), fat: calcMacro(selectedFood.fat, selectedFood.per, quantity),
@@ -1038,6 +1048,101 @@ export default function App() {
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
         setSelectedFood(null); setSearchQuery(""); setQty(1);
+    };
+
+    /* ───── AI VISION SCAN HANDLERS ───── */
+    const openScanModal = () => setScanModalOpen(true);
+
+    const closeScanModal = () => {
+        setScanModalOpen(false);
+        setTimeout(() => {
+            setScanState({ file: null, preview: null, loading: false, error: null, result: null });
+        }, 300);
+    };
+
+    const compressImage = (file, maxWidth = 1024, quality = 0.85) => new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const ratio = Math.min(1, maxWidth / img.width);
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(img.width * ratio);
+            canvas.height = Math.round(img.height * ratio);
+            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+                const newFile = new File([blob], file.name || "photo.jpg", { type: "image/jpeg" });
+                const reader = new FileReader();
+                reader.onload = (e) => resolve({ file: newFile, dataUrl: e.target.result });
+                reader.readAsDataURL(blob);
+            }, "image/jpeg", quality);
+        };
+        img.src = URL.createObjectURL(file);
+    });
+
+    const fileToBase64 = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+
+    const handleScanPick = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 8 * 1024 * 1024) {
+            setScanState(s => ({ ...s, error: "Ảnh quá lớn (max 8 MB)" }));
+            return;
+        }
+        try {
+            const compressed = await compressImage(file, 1024, 0.85);
+            setScanState({ file: compressed.file, preview: compressed.dataUrl, loading: false, error: null, result: null });
+        } catch (err) {
+            setScanState(s => ({ ...s, error: "Không đọc được ảnh: " + err.message }));
+        }
+        // Reset input value để có thể chọn lại cùng file
+        if (e.target) e.target.value = "";
+    };
+
+    const handleScanAnalyze = async () => {
+        if (!scanState.file) return;
+        setScanState(s => ({ ...s, loading: true, error: null }));
+        try {
+            const base64 = await fileToBase64(scanState.file);
+            const res = await fetch("/api/vision-analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, password, imageBase64: base64, mimeType: scanState.file.type }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Phân tích thất bại");
+
+            setScanState(s => ({ ...s, loading: false, result: data }));
+            // Auto-fill selectedFood + qty + selectedMeal
+            setSelectedFood({
+                name: data.name,
+                unit: "g",
+                per: data.grams || 100,
+                kcal: data.kcal,
+                protein: data.protein,
+                carb: data.carb,
+                fat: data.fat,
+            });
+            setQty(data.grams || 100);
+            if (data.meal_suggestion && MEAL_TYPES.includes(data.meal_suggestion)) {
+                setSelectedMeal(data.meal_suggestion);
+            }
+        } catch (err) {
+            setScanState(s => ({ ...s, loading: false, error: err.message }));
+        }
+    };
+
+    const handleScanReset = () => {
+        setScanState({ file: null, preview: null, loading: false, error: null, result: null });
+        setSelectedFood(null);
+    };
+
+    const handleScanConfirm = () => {
+        handleAddSelectedFood();
+        closeScanModal();
     };
 
     const addCustom = () => {
@@ -1499,11 +1604,26 @@ export default function App() {
                                 </span>
                                 <h3 className="text-[15px] font-bold tracking-tight text-ink leading-none">Thêm món</h3>
                             </div>
-                            <div className="relative">
-                                <select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="appearance-none bg-cream-soft hover:bg-cream-deep text-[11px] font-semibold text-ink py-2 pl-3.5 pr-9 rounded-full outline-none cursor-pointer ring-1 focus:ring-2 focus:ring-orange/30 transition">
-                                    {MEAL_TYPES.map(m => ( <option key={m} value={m}>{m}</option> ))}
-                                </select>
-                                <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            <div className="flex items-center gap-2">
+                                {/* AI scan icon button */}
+                                <button
+                                    type="button"
+                                    onClick={openScanModal}
+                                    className="grid h-9 w-9 place-items-center rounded-full bg-orange text-white transition hover:bg-orange-deep active:scale-95 shadow-soft"
+                                    aria-label="Quét ảnh món ăn bằng AI"
+                                    title="Quét ảnh món ăn ✨"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                        <circle cx="12" cy="13" r="4"/>
+                                    </svg>
+                                </button>
+                                <div className="relative">
+                                    <select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="appearance-none bg-cream-soft hover:bg-cream-deep text-[11px] font-semibold text-ink py-2 pl-3.5 pr-9 rounded-full outline-none cursor-pointer ring-1 focus:ring-2 focus:ring-orange/30 transition">
+                                        {MEAL_TYPES.map(m => ( <option key={m} value={m}>{m}</option> ))}
+                                    </select>
+                                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                </div>
                             </div>
                         </header>
 
@@ -1662,6 +1782,148 @@ export default function App() {
                             </p>
                         )}
                     </div>
+
+                    {/* --- MODAL QUÉT ẢNH MÓN ĂN BẰNG AI --- */}
+                    {scanModalOpen && (
+                        <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+                            <div className="bg-white rounded-t-[2rem] sm:rounded-[2rem] p-6 max-w-md w-full max-h-[92vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200 relative">
+                                {/* Header */}
+                                <div className="flex justify-between items-center mb-5">
+                                    <h3 className="text-[16px] font-bold text-ink tracking-tight">Quét ảnh món ăn ✨</h3>
+                                    <button onClick={closeScanModal} className="grid h-9 w-9 place-items-center rounded-full bg-cream-soft text-ink-muted hover:bg-cream-deep transition" aria-label="Đóng">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </div>
+
+                                {!scanState.preview ? (
+                                    /* STEP 1: Chưa chọn ảnh */
+                                    <div className="space-y-3">
+                                        <label className="block">
+                                            <input type="file" accept="image/*" capture="environment" onChange={handleScanPick} className="hidden" />
+                                            <span className="block w-full p-5 rounded-2xl bg-orange-soft text-orange-deep text-center font-semibold cursor-pointer hover:bg-orange-soft/80 transition flex items-center justify-center gap-2">
+                                                📷 Chụp ảnh món ăn
+                                            </span>
+                                        </label>
+                                        <label className="block">
+                                            <input type="file" accept="image/*" onChange={handleScanPick} className="hidden" />
+                                            <span className="block w-full p-5 rounded-2xl bg-cream-soft text-ink text-center font-semibold cursor-pointer hover:bg-cream-deep transition flex items-center justify-center gap-2">
+                                                🖼 Chọn từ thư viện
+                                            </span>
+                                        </label>
+                                        <p className="text-[12px] text-ink-faint text-center italic px-4 mt-4">
+                                            AI sẽ ước lượng tên món, khối lượng, kcal và macro dinh dưỡng trong ảnh.
+                                        </p>
+                                        {scanState.error && <p className="text-[12px] text-orange-deep text-center mt-2">{scanState.error}</p>}
+                                    </div>
+                                ) : !scanState.result ? (
+                                    /* STEP 2: Có ảnh, chưa analyze */
+                                    <div className="space-y-3">
+                                        <img src={scanState.preview} alt="Món vừa chọn" className="w-full max-h-72 object-cover rounded-2xl ring-1" />
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleScanAnalyze}
+                                                disabled={scanState.loading}
+                                                className="flex-1 h-12 bg-orange text-white rounded-xl font-bold disabled:opacity-50 transition hover:bg-orange-deep flex items-center justify-center gap-2"
+                                            >
+                                                {scanState.loading ? (
+                                                    <><span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/> Đang phân tích...</>
+                                                ) : "✨ Phân tích bằng AI"}
+                                            </button>
+                                            <button
+                                                onClick={handleScanReset}
+                                                disabled={scanState.loading}
+                                                className="grid place-items-center h-12 w-12 text-ink-faint bg-cream-soft rounded-xl hover:bg-cream-deep transition disabled:opacity-50"
+                                                aria-label="Chọn ảnh khác"
+                                            >
+                                                <IconTrash />
+                                            </button>
+                                        </div>
+                                        {scanState.error && <p className="text-[12px] text-orange-deep text-center">{scanState.error}</p>}
+                                    </div>
+                                ) : (() => {
+                                    /* STEP 3: Đã có result — tính lại macros theo qty */
+                                    const r = scanState.result;
+                                    const baseGrams = r.grams || 1;
+                                    const q = parseFloat(qty) || 0;
+                                    const factor = q / baseGrams;
+                                    const scaled = {
+                                        kcal:    Math.round(r.kcal * factor * 10) / 10,
+                                        protein: Math.round(r.protein * factor * 10) / 10,
+                                        carb:    Math.round(r.carb * factor * 10) / 10,
+                                        fat:     Math.round(r.fat * factor * 10) / 10,
+                                    };
+                                    return (
+                                        <div className="space-y-4">
+                                            <img src={scanState.preview} alt={r.name} className="w-full max-h-40 object-cover rounded-2xl ring-1" />
+
+                                            <div className="rounded-2xl bg-cream-soft ring-1 p-4">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div className="min-w-0 flex-1 pr-3">
+                                                        <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{r.name}</h5>
+                                                        <p className="text-[11px] text-ink-muted tabular-nums mt-0.5">
+                                                            AI gợi ý ~{r.grams}g · độ tin cậy {Math.round(r.confidence * 100)}%
+                                                        </p>
+                                                        {r.note && (
+                                                            <p className="text-[11px] text-ink-muted italic mt-1">"{r.note}"</p>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <p className="text-3xl font-bold text-orange-deep tabular-nums leading-none">{scaled.kcal}</p>
+                                                        <p className="text-[10px] text-ink-muted uppercase tracking-wider mt-1">kcal</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-1.5">
+                                                    <div className="text-center bg-white rounded-xl py-2 ring-1">
+                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep">Protein</p>
+                                                        <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.protein}g</p>
+                                                    </div>
+                                                    <div className="text-center bg-white rounded-xl py-2 ring-1">
+                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep">Carb</p>
+                                                        <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.carb}g</p>
+                                                    </div>
+                                                    <div className="text-center bg-white rounded-xl py-2 ring-1">
+                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep">Fat</p>
+                                                        <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.fat}g</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Bữa</label>
+                                                    <div className="relative">
+                                                        <select value={selectedMeal} onChange={e => setSelectedMeal(e.target.value)} className="w-full bg-cream-soft p-2.5 pr-8 rounded-xl text-[13px] font-semibold outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-orange/30">
+                                                            {MEAL_TYPES.map(m => <option key={m} value={m}>{m}</option>)}
+                                                        </select>
+                                                        <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng (g)</label>
+                                                    <input type="number" value={qty} step="any" min="1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-soft p-2.5 rounded-xl text-[14px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={handleScanReset}
+                                                    className="px-4 h-12 text-ink bg-cream-soft rounded-xl font-semibold text-[13px] transition hover:bg-cream-deep"
+                                                >
+                                                    Chụp lại
+                                                </button>
+                                                <button
+                                                    onClick={handleScanConfirm}
+                                                    className="flex-1 h-12 bg-orange text-white rounded-xl font-bold text-[13px] transition hover:bg-orange-deep shadow-soft flex items-center justify-center gap-2"
+                                                >
+                                                    Ghi vào nhật ký <IconPlus />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                    )}
 
                     {/* --- MODAL CHỈNH SỬA THƯ VIỆN MÓN ĂN --- */}
                     {editLibraryModal.isOpen && (
