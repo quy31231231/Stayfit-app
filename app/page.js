@@ -432,9 +432,11 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
         const inputVal = parseFloat(weightInput);
         if (!inputVal || inputVal <= 0) return alert("Vui lòng nhập số kg hợp lệ!");
         const newLog = { ...weightLog, [weightDate]: inputVal };
-        setWeightLog(newLog); 
+        setWeightLog(newLog);
         localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog));
-        setProfile({...profile, weight: inputVal}); setWeightInput("");
+        // Functional updater để tránh stale closure khi save liên tục
+        setProfile(prev => ({ ...prev, weight: inputVal }));
+        setWeightInput("");
     };
 
     const deleteWeight = (date) => { 
@@ -814,7 +816,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                         const start = parseFloat(goalDraft.start);
                                         const tgt = parseFloat(goalDraft.target);
                                         if (!start || !tgt || start <= 0 || tgt <= 0) { alert("Vui lòng nhập số kg hợp lệ!"); return; }
-                                        setProfile({ ...profile, startWeight: start, targetWeight: tgt });
+                                        setProfile(prev => ({ ...prev, startWeight: start, targetWeight: tgt }));
                                         setWeightModal(null);
                                     }}
                                     className="w-full h-12 bg-orange text-white rounded-2xl font-bold text-[14px] transition hover:bg-orange-deep shadow-soft mt-2"
