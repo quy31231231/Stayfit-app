@@ -2071,26 +2071,14 @@ export default function App() {
                         <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
                             <div className="bg-white rounded-t-[2rem] sm:rounded-[2rem] p-6 max-w-md w-full max-h-[92vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200 relative">
                                 {/* Header */}
-                                <div className="flex justify-between items-center mb-3">
-                                    <h3 className="text-[16px] font-bold text-ink tracking-tight">Thêm món bằng AI ✨</h3>
+                                <div className="flex justify-between items-center mb-5">
+                                    <h3 className="text-[16px] font-bold text-ink tracking-tight">
+                                        {scanMode === 'image' ? '📷 Quét ảnh món ăn ✨' : '✍️ Mô tả bữa ăn ✨'}
+                                    </h3>
                                     <button onClick={closeScanModal} className="grid h-9 w-9 place-items-center rounded-full bg-cream-soft text-ink-muted hover:bg-cream-deep transition" aria-label="Đóng">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                     </button>
                                 </div>
-
-                                {/* Tab switcher — chỉ hiện khi chưa có preview & items */}
-                                {!scanState.preview && !scanState.items && (
-                                    <div className="flex gap-1 bg-cream-soft rounded-2xl p-1 mb-4">
-                                        <button
-                                            onClick={() => setScanMode('image')}
-                                            className={`flex-1 py-2 rounded-xl text-[12px] font-bold transition ${scanMode === 'image' ? 'bg-white shadow-soft text-ink' : 'text-ink-muted hover:text-ink'}`}
-                                        >📷 Quét ảnh</button>
-                                        <button
-                                            onClick={() => setScanMode('text')}
-                                            className={`flex-1 py-2 rounded-xl text-[12px] font-bold transition ${scanMode === 'text' ? 'bg-white shadow-soft text-ink' : 'text-ink-muted hover:text-ink'}`}
-                                        >✍️ Mô tả</button>
-                                    </div>
-                                )}
 
                                 {!scanState.preview && !scanState.items ? (
                                     scanMode === 'image' ? (
