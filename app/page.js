@@ -666,7 +666,11 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
             <main className="p-4 space-y-5">
                 {/* TIẾN TRÌNH CÂN NẶNG */}
                 {(() => {
-                    const currentWeight = Number(profile?.weight) || 0;
+                    // Lấy weight hiện tại từ weightLog (entry mới nhất theo ngày) — source of truth.
+                    // Tránh dùng profile.weight vì hay bị race condition với sync.
+                    const weightLogDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
+                    const latestLogWeight = weightLogDates.length > 0 ? Number(weightLog[weightLogDates[0]]) : null;
+                    const currentWeight = latestLogWeight ?? Number(profile?.weight) ?? 0;
                     const startWeight = Number(profile?.startWeight) || currentWeight;
                     const targetWeight = Number(profile?.targetWeight) || currentWeight;
                     const change = currentWeight - startWeight;

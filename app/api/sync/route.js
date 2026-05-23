@@ -175,21 +175,30 @@ export async function POST(req) {
         }
       }
 
-      // 3. SYNC CÂN NẶNG
+      // 3. SYNC CÂN NẶNG — UPSERT: update nếu đã tồn tại (cùng userId + ngày), append nếu chưa
       if (weightLog && typeof weightLog === 'object') {
-        // Get existing weight data to check for duplicates
         const weightRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Weight!A:C" });
         const weightRows = weightRes.data.values || [];
-        
+
         for (const [date, weight] of Object.entries(weightLog)) {
-          // Check if weight entry for this date already exists
-          const exists = weightRows.some(row => row[0] === userId && row[1] === date);
-          
-          if (!exists) {
+          const existingIdx = weightRows.findIndex(row => row[0] === userId && row[1] === date);
+          if (existingIdx === -1) {
+            // Append entry mới
             await sheets.spreadsheets.values.append({
               spreadsheetId: SHEET_ID, range: "Weight!A:C", valueInputOption: "USER_ENTERED",
               requestBody: { values: [[userId, date, weight]] }
             });
+          } else {
+            // Update giá trị cũ nếu khác (tránh write thừa)
+            const existingWeight = parseFloat(weightRows[existingIdx][2]);
+            if (existingWeight !== Number(weight)) {
+              await sheets.spreadsheets.values.update({
+                spreadsheetId: SHEET_ID,
+                range: `Weight!A${existingIdx + 1}:C${existingIdx + 1}`,
+                valueInputOption: "USER_ENTERED",
+                requestBody: { values: [[userId, date, weight]] }
+              });
+            }
           }
         }
       }
