@@ -516,11 +516,11 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                         { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#2D2620', font: { weight: '600', size: 10 }, formatter: (val) => val > 0 ? val.toLocaleString('vi-VN') : '' } },
                         { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#B8AFA4', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
 
-                        // 4 bữa ăn — pastel nhạt match meal accent của journal
-                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#ECD09C', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#BFD7B6', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#D5C8E5', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
-                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#F3BBA3', borderWidth: 0, borderRadius: 4, datalabels: { display: false } }
+                        // 4 bữa ăn — pastel match meal accent của journal, đậm hơn 1 notch
+                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#DCBE85', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#A8C29D', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#C0AFD3', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
+                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#ECA890', borderWidth: 0, borderRadius: 4, datalabels: { display: false } }
                     ]
                 },
                 options: {
@@ -573,9 +573,9 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
            macroChartInstance.current = new Chart(ctx, {
                 type: 'line',
                 data: { labels: labels, datasets: [
-                    { label: 'Protein', data: dataProtein, borderColor: '#8FAD97', backgroundColor: '#8FAD97', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } },
-                    { label: 'Carb',    data: dataCarb,    borderColor: '#D8B26B', backgroundColor: '#D8B26B', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } },
-                    { label: 'Fat',     data: dataFat,     borderColor: '#B5A4D0', backgroundColor: '#B5A4D0', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } }
+                    { label: 'Protein', data: dataProtein, borderColor: '#7E9D88', backgroundColor: '#7E9D88', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } },
+                    { label: 'Carb',    data: dataCarb,    borderColor: '#CFA75A', backgroundColor: '#CFA75A', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } },
+                    { label: 'Fat',     data: dataFat,     borderColor: '#A998C0', backgroundColor: '#A998C0', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } }
                 ]},
                 options: {
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25, bottom: 15 } },
