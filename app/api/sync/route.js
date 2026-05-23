@@ -49,7 +49,7 @@ export async function POST(req) {
       }
       await sheets.spreadsheets.values.append({
         spreadsheetId: SHEET_ID,
-        range: "ScanFeedback!A:G",
+        range: "ScanFeedback!A:K",
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: [[
@@ -60,6 +60,10 @@ export async function POST(req) {
             body.userCorrectedName || "",
             String(body.confidence ?? ""),
             body.fuzzyMatched ? "1" : "0",
+            String(body.kcal ?? ""),
+            String(body.protein ?? ""),
+            String(body.carb ?? ""),
+            String(body.fat ?? ""),
           ]],
         },
       });
@@ -339,7 +343,33 @@ export async function GET(req) {
       }
     });
 
-    return Response.json({ profile, history, weightLog, customFoods, deletedCommonFoods });
+    // 4. LẤY SCAN FEEDBACK (cho client tính suggestion)
+    let scanFeedback = [];
+    try {
+      const fbRes = await sheets.spreadsheets.values.get({
+        spreadsheetId: SHEET_ID, range: "ScanFeedback!A:K"
+      });
+      const fbRows = fbRes.data.values || [];
+      scanFeedback = fbRows.slice(1)
+        .filter(row => row && row[0] === userId && row[2] && row[4])
+        .slice(-200)
+        .map(row => ({
+          timestamp: row[1] || "",
+          aiPredictedName: row[2] || "",
+          libraryMatchedName: row[3] || "",
+          userCorrectedName: row[4] || "",
+          confidence: parseFloat(row[5]) || 0,
+          fuzzyMatched: row[6] === "1",
+          kcal: parseFloat(row[7]) || 0,
+          protein: parseFloat(row[8]) || 0,
+          carb: parseFloat(row[9]) || 0,
+          fat: parseFloat(row[10]) || 0,
+        }));
+    } catch (e) {
+      console.warn("[sync GET] ScanFeedback fetch failed:", e.message);
+    }
+
+    return Response.json({ profile, history, weightLog, customFoods, deletedCommonFoods, scanFeedback });
 
   } catch (err) {
     console.error(err);

@@ -1097,6 +1097,10 @@ export default function App() {
         error: null,
         items: null,
     });
+    const [scanFeedbackCache, setScanFeedbackCache] = useState([]);
+    const [dismissedSuggestions, setDismissedSuggestions] = useState([]);
+    const [librarySuggestion, setLibrarySuggestion] = useState(null);
+    const [suggestionForm, setSuggestionForm] = useState({ name: "", per: 100, kcal: 0, protein: 0, carb: 0, fat: 0 });
     const [searchQuery, setSearchQuery] = useState("");
     const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
@@ -1115,6 +1119,19 @@ export default function App() {
             const h = localStorage.getItem('stayfit_history'); if(h) setHistory(JSON.parse(h));
             const c = localStorage.getItem('stayfit_custom_foods'); if(c) setCustomFoodList(JSON.parse(c));
             const d = localStorage.getItem('stayfit_deleted_common'); if(d) setDeletedCommonFoods(JSON.parse(d));
+            try {
+                const fb = localStorage.getItem('stayfit_scan_feedback');
+                if (fb) {
+                    const parsed = JSON.parse(fb);
+                    if (parsed.data && parsed.ts && Date.now() - parsed.ts < 24*60*60*1000) {
+                        setScanFeedbackCache(parsed.data);
+                    }
+                }
+            } catch (e) {}
+            try {
+                const dis = localStorage.getItem('stayfit_dismissed_suggestions');
+                if (dis) setDismissedSuggestions(JSON.parse(dis));
+            } catch (e) {}
             setView(localStorage.getItem('stayfit_setup') ? "journal" : "profile");
             
             try {
@@ -1134,9 +1151,10 @@ export default function App() {
             localStorage.setItem('stayfit_history', JSON.stringify(history));
             localStorage.setItem('stayfit_custom_foods', JSON.stringify(customFoodList));
             localStorage.setItem('stayfit_deleted_common', JSON.stringify(deletedCommonFoods));
+            localStorage.setItem('stayfit_dismissed_suggestions', JSON.stringify(dismissedSuggestions));
             if (view !== "profile" && userId) localStorage.setItem('stayfit_setup', 'done');
         }
-    }, [profile, history, customFoodList, deletedCommonFoods, view, userId, isClient]);
+    }, [profile, history, customFoodList, deletedCommonFoods, dismissedSuggestions, view, userId, isClient]);
 
     // Mốc thời gian pull gần nhất — dùng để skip push echo ngay sau khi pull
     const lastPullAtRef = useRef(0);
@@ -1204,6 +1222,12 @@ export default function App() {
             if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
             if (Array.isArray(data.customFoods)) setCustomFoodList(data.customFoods);
             if (Array.isArray(data.deletedCommonFoods)) setDeletedCommonFoods(data.deletedCommonFoods);
+            if (Array.isArray(data.scanFeedback)) {
+                setScanFeedbackCache(data.scanFeedback);
+                localStorage.setItem('stayfit_scan_feedback', JSON.stringify({
+                    data: data.scanFeedback, ts: Date.now()
+                }));
+            }
 
             lastPullAtRef.current = Date.now();
 
@@ -1400,7 +1424,9 @@ export default function App() {
         setScanModalOpen(false);
         setTimeout(() => {
             setScanState({ file: null, preview: null, loading: false, error: null, items: null });
-        }, 300);
+            const suggestion = detectLibrarySuggestion();
+            if (suggestion) setLibrarySuggestion(suggestion);
+        }, 350);
     };
 
     const compressImage = (file, maxWidth = 1024, quality = 0.85) => new Promise((resolve) => {
@@ -1494,23 +1520,35 @@ export default function App() {
 
     const submitScanItemEdit = (idx) => {
         const item = scanState.items[idx];
-        // Đóng edit mode
         updateScanItem(idx, { _editMode: false });
-        // Fire-and-forget feedback nếu original là library match & user đã đổi tên
         if (item.source === "library" && item.libraryName && item._origName !== item.name && userId && password) {
+            const feedbackEntry = {
+                timestamp: new Date().toISOString(),
+                aiPredictedName: item.aiPredictedName,
+                libraryMatchedName: item.libraryName,
+                userCorrectedName: item.name,
+                confidence: item.confidence,
+                fuzzyMatched: item.fuzzyMatched,
+                kcal: item.kcal,
+                protein: item.protein,
+                carb: item.carb,
+                fat: item.fat,
+            };
+            // Optimistic update local cache để pattern detect kích ngay sau lần thứ 3
+            setScanFeedbackCache(prev => {
+                const next = [...prev, feedbackEntry];
+                try {
+                    localStorage.setItem('stayfit_scan_feedback', JSON.stringify({
+                        data: next, ts: Date.now()
+                    }));
+                } catch (e) {}
+                return next;
+            });
+            // Fire-and-forget POST sang Sheets
             fetch("/api/sync", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    action: "scan_feedback",
-                    userId, password,
-                    timestamp: new Date().toISOString(),
-                    aiPredictedName: item.aiPredictedName,
-                    libraryMatchedName: item.libraryName,
-                    userCorrectedName: item.name,
-                    confidence: item.confidence,
-                    fuzzyMatched: item.fuzzyMatched,
-                }),
+                body: JSON.stringify({ action: "scan_feedback", userId, password, ...feedbackEntry }),
             }).catch(err => console.warn("Feedback log failed:", err));
         }
     };
@@ -1539,6 +1577,79 @@ export default function App() {
             [currentDate]: [...(prev[currentDate] || []), ...newEntries],
         }));
         closeScanModal();
+    };
+
+    /* ───── LIBRARY SUGGESTION (auto-grow library từ feedback) ───── */
+    const detectLibrarySuggestion = () => {
+        const THRESHOLD = 3;
+        const groups = new Map();
+        for (const fb of scanFeedbackCache) {
+            if (!fb.aiPredictedName || !fb.userCorrectedName) continue;
+            if (fb.aiPredictedName.trim() === fb.userCorrectedName.trim()) continue;
+            const key = `${fb.aiPredictedName}::${fb.userCorrectedName}`;
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(fb);
+        }
+        const libraryNames = new Set(allFoods.map(f => f.name.toLowerCase()));
+        for (const [key, entries] of groups) {
+            if (entries.length < THRESHOLD) continue;
+            const first = entries[0];
+            if (libraryNames.has(first.userCorrectedName.toLowerCase())) continue;
+            if (dismissedSuggestions.includes(key)) continue;
+            // Trung bình macros từ các entry có macros > 0 (entry cũ A:G chưa có macros sẽ bị skip)
+            const avg = {};
+            for (const k of ['kcal', 'protein', 'carb', 'fat']) {
+                const valid = entries.filter(e => Number(e[k]) > 0);
+                avg[k] = valid.length > 0
+                    ? Math.round(valid.reduce((s, e) => s + Number(e[k]), 0) / valid.length * 10) / 10
+                    : 0;
+            }
+            return {
+                key,
+                aiPredictedName: first.aiPredictedName,
+                libraryMatchedName: first.libraryMatchedName,
+                userCorrectedName: first.userCorrectedName,
+                count: entries.length,
+                ...avg,
+            };
+        }
+        return null;
+    };
+
+    const dismissSuggestion = () => {
+        if (!librarySuggestion) return;
+        setDismissedSuggestions(prev => [...prev, librarySuggestion.key]);
+        setLibrarySuggestion(null);
+    };
+
+    useEffect(() => {
+        if (librarySuggestion) {
+            setSuggestionForm({
+                name: librarySuggestion.userCorrectedName,
+                per: 100,
+                kcal: librarySuggestion.kcal,
+                protein: librarySuggestion.protein,
+                carb: librarySuggestion.carb,
+                fat: librarySuggestion.fat,
+            });
+        }
+    }, [librarySuggestion]);
+
+    const addSuggestionToLibrary = (formValues) => {
+        if (!librarySuggestion) return;
+        const newFood = {
+            name: (formValues.name || librarySuggestion.userCorrectedName).trim(),
+            unit: "g",
+            per: parseFloat(formValues.per) || 100,
+            kcal: parseFloat(formValues.kcal) || 0,
+            protein: parseFloat(formValues.protein) || 0,
+            carb: parseFloat(formValues.carb) || 0,
+            fat: parseFloat(formValues.fat) || 0,
+        };
+        if (!newFood.name) return;
+        setCustomFoodList(prev => [newFood, ...prev.filter(f => f.name !== newFood.name)]);
+        setDismissedSuggestions(prev => [...prev, librarySuggestion.key]);
+        setLibrarySuggestion(null);
     };
 
     const addCustom = () => {
@@ -2496,6 +2607,65 @@ export default function App() {
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- MODAL GỢI Ý MỞ RỘNG THƯ VIỆN (từ ScanFeedback patterns) --- */}
+                    {librarySuggestion && (
+                        <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                            <div className="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
+                                <div className="text-center mb-3">
+                                    <span className="inline-block px-3 py-1 rounded-full bg-sage-soft text-sage-deep text-[9px] font-bold uppercase tracking-wider">
+                                        💡 Gợi ý mở rộng thư viện
+                                    </span>
+                                </div>
+                                <h3 className="text-sm font-bold text-ink text-center mb-2">
+                                    Thêm "{librarySuggestion.userCorrectedName}" vào thư viện?
+                                </h3>
+                                <p className="text-[11px] text-ink-muted text-center mb-4 leading-relaxed">
+                                    Bạn đã sửa <span className="font-semibold text-ink">"{librarySuggestion.libraryMatchedName}"</span> → <span className="font-semibold text-ink">"{librarySuggestion.userCorrectedName}"</span> <strong className="text-orange-deep">{librarySuggestion.count} lần</strong>. Thêm vào thư viện để lần sau AI nhận đúng luôn.
+                                </p>
+
+                                <div className="space-y-2 mb-4">
+                                    <div>
+                                        <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Tên món</label>
+                                        <input type="text" value={suggestionForm.name} onChange={e => setSuggestionForm(s => ({ ...s, name: e.target.value }))} className="w-full bg-cream-soft p-2.5 rounded-xl text-[13px] font-semibold outline-none focus:ring-2 focus:ring-orange/30" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Khẩu phần (g)</label>
+                                            <input type="number" value={suggestionForm.per} step="any" min="1" onChange={e => setSuggestionForm(s => ({ ...s, per: parseFloat(e.target.value) || 1 }))} className="w-full bg-cream-soft p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Kcal / khẩu phần</label>
+                                            <input type="number" value={suggestionForm.kcal} step="any" min="0" onChange={e => setSuggestionForm(s => ({ ...s, kcal: parseFloat(e.target.value) || 0 }))} className="w-full bg-cream-soft p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep block mb-1 text-center">Protein</label>
+                                            <input type="number" value={suggestionForm.protein} step="any" min="0" onChange={e => setSuggestionForm(s => ({ ...s, protein: parseFloat(e.target.value) || 0 }))} className="w-full bg-cream-soft p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-sage/30" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep block mb-1 text-center">Carb</label>
+                                            <input type="number" value={suggestionForm.carb} step="any" min="0" onChange={e => setSuggestionForm(s => ({ ...s, carb: parseFloat(e.target.value) || 0 }))} className="w-full bg-cream-soft p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-clay/30" />
+                                        </div>
+                                        <div>
+                                            <label className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep block mb-1 text-center">Fat</label>
+                                            <input type="number" value={suggestionForm.fat} step="any" min="0" onChange={e => setSuggestionForm(s => ({ ...s, fat: parseFloat(e.target.value) || 0 }))} className="w-full bg-cream-soft p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-lilac/30" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <button onClick={dismissSuggestion} className="flex-1 py-3 bg-cream-deep text-ink rounded-xl font-bold text-[11px] uppercase tracking-wider active:scale-95 transition">
+                                        Bỏ qua
+                                    </button>
+                                    <button onClick={() => addSuggestionToLibrary(suggestionForm)} disabled={!suggestionForm.name.trim()} className="flex-1 py-3 bg-orange text-white rounded-xl font-bold text-[11px] uppercase tracking-wider active:scale-95 transition disabled:opacity-50">
+                                        Thêm vào thư viện
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
