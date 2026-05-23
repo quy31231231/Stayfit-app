@@ -10,8 +10,8 @@ const PALETTE = {
   bg:         "#FBF8F2",
   bgHeader:   "rgba(251, 248, 242, 0.85)",
   card:       "#FFFFFF",
-  // Viền sage tone — opacity 0.10 cho cảm giác whisper-soft
-  hairline:   "rgba(74, 139, 94, 0.10)",
+  // Viền sage tươi hơn — opacity vừa để thấy rõ xanh trên nền cream ấm mà vẫn soft
+  hairline:   "rgba(60, 145, 100, 0.22)",
   neutralSoft:"#F4EFE6",
 
   ink:        "#2D2620",
