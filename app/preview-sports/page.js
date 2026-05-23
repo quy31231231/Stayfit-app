@@ -130,34 +130,22 @@ export default function SportsPreview() {
           </div>
         </section>
 
-        {/* HERO CARD — Calorie + Activity rings + Macros */}
+        {/* HERO CARD — Calorie + Macros + Equation (no activity rings) */}
         <section className="rounded-3xl bg-white p-5 md:p-6 shadow-soft ring-1 ring-cream-deep/60">
 
-          {/* TOP ROW: Calorie circle + Activity rings */}
-          <div className="flex items-center justify-between gap-4">
-
-            {/* Big Calorie Ring */}
+          {/* Calorie ring centered */}
+          <div className="flex justify-center">
             <CalorieRing consumed={TODAY.consumed} target={TODAY.target} burned={TODAY.burned} />
-
-            {/* Activity Rings — 3 đồng tâm */}
-            <ActivityRings move={movePct} exercise={exercisePct} stand={standPct} />
-          </div>
-
-          {/* RING LEGEND */}
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            <RingLegend color={C.ringMove}     label="ĐỐT"    value={TODAY.move.value}    target={TODAY.move.target}    unit="kcal" />
-            <RingLegend color={C.ringExercise} label="VẬN ĐỘNG" value={TODAY.exercise.value} target={TODAY.exercise.target} unit="phút" />
-            <RingLegend color={C.ringStand}    label="ACTIVE"  value={TODAY.stand.value}    target={TODAY.stand.target}    unit="giờ" />
           </div>
 
           {/* MACROS */}
-          <div className="mt-5 pt-5 border-t border-cream-deep/50 grid grid-cols-3 gap-3">
+          <div className="mt-6 pt-5 border-t border-cream-deep/50 grid grid-cols-3 gap-3">
             <MacroDonut kind="protein" value={TODAY.protein.value} target={TODAY.protein.target} />
             <MacroDonut kind="carb"    value={TODAY.carb.value}    target={TODAY.carb.target} />
             <MacroDonut kind="fat"     value={TODAY.fat.value}     target={TODAY.fat.target} />
           </div>
 
-          {/* EQUATION — thêm Burn vào */}
+          {/* EQUATION — thêm "Đã đốt" lime */}
           <div className="mt-5 flex items-stretch gap-1 border-t border-cream-deep/50 pt-5 text-center">
             <EqCell label="Cần khoảng" value={fmt(TODAY.target)} tone="neutral" />
             <Op>−</Op>
@@ -173,64 +161,6 @@ export default function SportsPreview() {
             <span className="text-base">👟</span>
             <span className="font-semibold text-ink tabular-nums">{fmt(STEPS)}</span>
             <span>bước hôm nay</span>
-          </div>
-        </section>
-
-        {/* VẬN ĐỘNG — Exercise log */}
-        <section className="rounded-3xl bg-white p-5 md:p-6 shadow-soft ring-1 ring-cream-deep/60">
-          <header className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <span
-                className="grid h-11 w-11 place-items-center rounded-2xl text-xl"
-                style={{ background: C.limeSoft }}
-              >💪</span>
-              <div>
-                <h3 className="text-[15px] font-bold tracking-tight text-ink">Vận động</h3>
-                <p className="mt-0.5 text-[11px] font-medium text-ink-muted tabular-nums">
-                  {WORKOUTS.length} bài · <span className="font-bold" style={{ color: C.limeDeep }}>{TODAY.burned} kcal</span> đốt cháy
-                </p>
-              </div>
-            </div>
-            <button
-              className="grid h-10 w-10 place-items-center rounded-full text-ink ring-1 ring-cream-deep transition hover:text-white"
-              style={{ background: C.cream }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = C.lime; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = C.cream; }}
-              aria-label="Thêm vận động"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-          </header>
-
-          <div className="space-y-2">
-            {WORKOUTS.map(w => (
-              <div key={w.id} className="flex items-center justify-between px-3 py-2.5 rounded-2xl bg-cream-soft ring-1 ring-cream-deep/40">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-xl">{w.icon}</span>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold tracking-tight text-ink truncate">{w.name}</p>
-                    <p className="text-[11px] font-medium text-ink-muted tabular-nums">{w.duration} · cường độ {w.intensity}</p>
-                  </div>
-                </div>
-                <div className="shrink-0 flex items-center gap-1.5 rounded-full px-2.5 py-1 ring-1" style={{ background: C.limeSoft, color: C.limeDeep, borderColor: `${C.lime}40` }}>
-                  <span className="text-[10px] font-semibold tracking-wider">−</span>
-                  <span className="text-[13px] font-bold tabular-nums">{w.kcal}</span>
-                  <span className="text-[9px] font-semibold uppercase">kcal</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* PR BANNER */}
-          <div
-            className="mt-4 p-3 rounded-2xl flex items-center gap-3 ring-1"
-            style={{ background: "linear-gradient(135deg, #F0F8D6 0%, #FBE0C4 100%)", borderColor: `${C.lime}30` }}
-          >
-            <span className="text-2xl">🏆</span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: C.limeDeep }}>Kỷ lục cá nhân</p>
-              <p className="text-[13px] font-bold text-ink mt-0.5">Chuỗi 7 ngày + đốt 2,100 kcal tuần này</p>
-            </div>
           </div>
         </section>
 
@@ -252,7 +182,6 @@ export default function SportsPreview() {
       {/* BOTTOM NAV */}
       <div className="fixed bottom-0 left-0 right-0 z-40 max-w-md md:max-w-2xl mx-auto bg-white/90 backdrop-blur-xl border-t border-cream-deep p-4 flex justify-around items-center rounded-t-[2.5rem]">
         <NavItem icon="📝" label="Nhật ký" active />
-        <NavItem icon="💪" label="Vận động" />
         <NavItem icon="📊" label="Thống kê" />
         <NavItem icon="👤" label="Hồ sơ" />
       </div>
@@ -420,7 +349,7 @@ function MealCard({ name, icon, items, kcal }) {
 
 function NavItem({ icon, label, active }) {
   return (
-    <button className={`flex flex-col items-center gap-1 w-1/4 transition ${active ? "text-orange-deep" : "text-ink-faint opacity-60"}`}>
+    <button className={`flex flex-col items-center gap-1 w-1/3 transition ${active ? "text-orange-deep" : "text-ink-faint opacity-60"}`}>
       <span className="text-xl">{icon}</span>
       <span className="text-[9px] uppercase font-bold tracking-tighter">{label}</span>
     </button>
