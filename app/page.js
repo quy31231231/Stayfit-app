@@ -34,6 +34,14 @@ const GOALS = [
     { label: "Duy trì", value: 0 }, { label: "Tăng cân", value: 300 }
 ];
 const MEAL_TYPES = ["Bữa sáng", "Bữa trưa", "Bữa tối", "Ăn vặt"];
+const getMealByHour = () => {
+    const h = new Date().getHours();
+    if (h >= 4 && h < 10) return "Bữa sáng";
+    if (h >= 10 && h < 14) return "Bữa trưa";
+    if (h >= 14 && h < 17) return "Ăn vặt";
+    if (h >= 17 && h < 21) return "Bữa tối";
+    return "Ăn vặt";
+};
 const TEXT_SUGGESTIONS = [
     "Bữa sáng tôi ăn 2 quả trứng luộc với 1 bát salad rau trộn",
     "Bữa tối tôi ăn 150g bò bít tết nướng với rau củ hấp",
@@ -859,14 +867,7 @@ export default function App() {
             } catch (e) {}
             setView(localStorage.getItem('stayfit_setup') ? "journal" : "profile");
             
-            try {
-                const hour = new Date().getHours();
-                if (hour >= 4 && hour < 10) setSelectedMeal("Bữa sáng");
-                else if (hour >= 10 && hour < 14) setSelectedMeal("Bữa trưa");
-                else if (hour >= 14 && hour < 17) setSelectedMeal("Ăn vặt");
-                else if (hour >= 17 && hour < 21) setSelectedMeal("Bữa tối");
-                else setSelectedMeal("Ăn vặt");
-            } catch (e) {}
+            try { setSelectedMeal(getMealByHour()); } catch (e) {}
         }
     }, []);
 
@@ -1145,6 +1146,7 @@ export default function App() {
     /* ───── AI VISION SCAN HANDLERS ───── */
     const openScanModal = (mode = 'image') => {
         setScanMode(mode);
+        setSelectedMeal(getMealByHour());
         setScanModalOpen(true);
     };
 
@@ -1227,7 +1229,7 @@ export default function App() {
                 ...it,
                 _checked: true,
                 _qty: it.grams,
-                _meal: MEAL_TYPES.includes(it.meal_suggestion) ? it.meal_suggestion : selectedMeal,
+                _meal: MEAL_TYPES.includes(it.meal_suggestion) ? it.meal_suggestion : getMealByHour(),
                 _editMode: false,
                 _origName: it.name,
             }));
@@ -1265,7 +1267,7 @@ export default function App() {
                 ...it,
                 _checked: true,
                 _qty: it.grams,
-                _meal: MEAL_TYPES.includes(it.meal_suggestion) ? it.meal_suggestion : selectedMeal,
+                _meal: MEAL_TYPES.includes(it.meal_suggestion) ? it.meal_suggestion : getMealByHour(),
                 _editMode: false,
                 _origName: it.name,
             }));
