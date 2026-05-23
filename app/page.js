@@ -1130,6 +1130,9 @@ export default function App() {
             if (!res.ok) throw new Error(data.error);
             if (Object.keys(data).length === 0 || (!data.profile && !data.history)) return;
 
+            // Re-check sau khi GET xong: nếu user đã save trong lúc fetch, bỏ qua merge để giữ data local
+            if (pendingChangeRef.current) return;
+
             if (data.profile) {
                 data.profile.isManualTarget = typeof data.profile.manualTargetKcal === 'number' && !isNaN(data.profile.manualTargetKcal);
                 if (!data.profile.isManualTarget) data.profile.manualTargetKcal = 2000;
@@ -1138,7 +1141,11 @@ export default function App() {
                 data.profile.manualCarb = profile.manualCarb || 250;
                 data.profile.manualFat = profile.manualFat || 55;
                 data.profile.macroDietMode = profile.macroDietMode || "Tiêu chuẩn (Standard)";
-                setProfile(prev => ({ ...prev, ...data.profile }));
+                setProfile(prev => {
+                    // Nếu có pending change vào phút chót thì giữ nguyên prev
+                    if (pendingChangeRef.current) return prev;
+                    return { ...prev, ...data.profile };
+                });
             }
             if (data.history) setHistory(data.history);
             if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
