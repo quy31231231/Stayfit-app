@@ -2282,14 +2282,15 @@ export default function App() {
                                                                 </span>
                                                             )
                                                         )}
-                                                        {/* Checkbox top-right */}
+                                                        {/* Toggle chọn/bỏ — checked: trash (loại khỏi danh sách); unchecked: plus (thêm lại) */}
                                                         {!item._editMode && (
                                                             <button
                                                                 onClick={() => updateScanItem(idx, { _checked: !item._checked })}
-                                                                className={`absolute top-3 right-3 z-10 grid h-8 w-8 place-items-center rounded-full text-[14px] font-bold transition shadow-sm ${item._checked ? "bg-orange text-white" : "bg-white text-ink-muted ring-1 ring-cream-deep"}`}
-                                                                aria-label={item._checked ? "Bỏ chọn" : "Chọn"}
+                                                                className={`absolute top-3 right-3 z-10 grid h-8 w-8 place-items-center rounded-full transition shadow-sm ${item._checked ? "bg-orange text-white hover:bg-orange-deep" : "bg-white text-ink-muted ring-1 ring-cream-deep hover:text-orange-deep hover:ring-orange/40"}`}
+                                                                aria-label={item._checked ? "Bỏ chọn món này" : "Thêm món này lại"}
+                                                                title={item._checked ? "Bỏ chọn" : "Thêm lại"}
                                                             >
-                                                                {item._checked ? "✓" : ""}
+                                                                {item._checked ? <IconTrash /> : <IconPlus />}
                                                             </button>
                                                         )}
                                                         {/* Edit pencil — dưới checkbox */}
