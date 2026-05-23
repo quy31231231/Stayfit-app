@@ -383,7 +383,7 @@ function MacroProgressBar({ label, current, target, colorClass }) {
     );
 }
 
-function StatsView({ history, profile, setProfile, target, targetLog, setView, view, setCurrentDate }) {
+function StatsView({ history, profile, setProfile, target, targetLog, setView, view, setCurrentDate, userId, password, pendingChangeRef }) {
     const [weightLog, setWeightLog] = useState(() => {
         if (typeof window !== "undefined") {
             const s = localStorage.getItem('stayfit_weight_log'); return s ? JSON.parse(s) : {};
@@ -428,15 +428,45 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
         return dayLog.reduce((sum, item) => sum + (item[field] || 0), 0); 
     };
 
-   const saveWeight = () => {
+   const saveWeight = async () => {
         const inputVal = parseFloat(weightInput);
         if (!inputVal || inputVal <= 0) return alert("Vui lòng nhập số kg hợp lệ!");
         const newLog = { ...weightLog, [weightDate]: inputVal };
         setWeightLog(newLog);
         localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog));
-        // Functional updater để tránh stale closure khi save liên tục
-        setProfile(prev => ({ ...prev, weight: inputVal }));
+
+        // Set pendingChangeRef IMMEDIATELY để chặn bất kỳ pull nào đang chạy
+        if (pendingChangeRef) pendingChangeRef.current = true;
+
+        // Tính profile mới và cập nhật state
+        const newProfile = { ...profile, weight: inputVal };
+        setProfile(newProfile);
         setWeightInput("");
+
+        // Push trực tiếp lên server NGAY thay vì chờ debounce 2.5s
+        // — loại bỏ race window với pull
+        if (userId && password) {
+            try {
+                const profileToSave = { ...newProfile };
+                if (!profileToSave.isManualTarget) profileToSave.manualTargetKcal = "";
+                if (!profileToSave.isManualMacro) {
+                    profileToSave.manualProtein = ""; profileToSave.manualCarb = ""; profileToSave.manualFat = ""; profileToSave.macroDietMode = "";
+                }
+                await fetch("/api/sync", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        action: "upload",
+                        userId, password,
+                        profile: profileToSave,
+                        weightLog: newLog,
+                    }),
+                });
+                if (pendingChangeRef) pendingChangeRef.current = false;
+            } catch (err) {
+                console.error("Lỗi lưu cân nặng ngay:", err.message);
+            }
+        }
     };
 
     const deleteWeight = (date) => { 
@@ -812,12 +842,32 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                     "Bắt đầu" là cân nặng tại thời điểm đặt mục tiêu. "Mục tiêu" là số kg bạn muốn đạt.
                                 </p>
                                 <button
-                                    onClick={() => {
+                                    onClick={async () => {
                                         const start = parseFloat(goalDraft.start);
                                         const tgt = parseFloat(goalDraft.target);
                                         if (!start || !tgt || start <= 0 || tgt <= 0) { alert("Vui lòng nhập số kg hợp lệ!"); return; }
-                                        setProfile(prev => ({ ...prev, startWeight: start, targetWeight: tgt }));
+                                        if (pendingChangeRef) pendingChangeRef.current = true;
+                                        const newProfile = { ...profile, startWeight: start, targetWeight: tgt };
+                                        setProfile(newProfile);
                                         setWeightModal(null);
+                                        // Push goal NGAY để không bị pull overwrite
+                                        if (userId && password) {
+                                            try {
+                                                const profileToSave = { ...newProfile };
+                                                if (!profileToSave.isManualTarget) profileToSave.manualTargetKcal = "";
+                                                if (!profileToSave.isManualMacro) {
+                                                    profileToSave.manualProtein = ""; profileToSave.manualCarb = ""; profileToSave.manualFat = ""; profileToSave.macroDietMode = "";
+                                                }
+                                                await fetch("/api/sync", {
+                                                    method: "POST",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify({ action: "upload", userId, password, profile: profileToSave }),
+                                                });
+                                                if (pendingChangeRef) pendingChangeRef.current = false;
+                                            } catch (err) {
+                                                console.error("Lỗi lưu mục tiêu:", err.message);
+                                            }
+                                        }
                                     }}
                                     className="w-full h-12 bg-orange text-white rounded-2xl font-bold text-[14px] transition hover:bg-orange-deep shadow-soft mt-2"
                                 >
@@ -1609,7 +1659,7 @@ export default function App() {
     }
 
     if (view === "stats") {
-        return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} targetLog={targetLog} setView={setView} view={view} setCurrentDate={setCurrentDate} />;
+        return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} targetLog={targetLog} setView={setView} view={view} setCurrentDate={setCurrentDate} userId={userId} password={password} pendingChangeRef={pendingChangeRef} />;
     }
     
     if (view === "profile") {
