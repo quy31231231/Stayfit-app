@@ -81,21 +81,48 @@ export async function POST(req) {
       return Response.json({ error: "Server chưa cấu hình GEMINI_API_KEY" }, { status: 500 });
     }
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // gemini-1.5-flash: model có free tier ổn định nhất (15 RPM, 1500 RPD).
-    // Có thể override qua env GEMINI_MODEL nếu account có quota cho 2.0/2.5.
-    const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-1.5-flash";
-    const model = genAI.getGenerativeModel({
-      model: MODEL_NAME,
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.3,
-      },
-    });
+    // Thử nhiều model theo thứ tự ưu tiên — fallback nếu account không có quyền/quota
+    const MODELS_TO_TRY = process.env.GEMINI_MODEL
+      ? [process.env.GEMINI_MODEL]
+      : ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
 
-    const result = await model.generateContent([
-      VISION_PROMPT,
-      { inlineData: { data: imageBase64, mimeType } },
-    ]);
+    let result, lastError, usedModel;
+    for (const modelName of MODELS_TO_TRY) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.3,
+          },
+        });
+        result = await model.generateContent([
+          VISION_PROMPT,
+          { inlineData: { data: imageBase64, mimeType } },
+        ]);
+        usedModel = modelName;
+        break;
+      } catch (err) {
+        lastError = err;
+        const msg = String(err.message || "");
+        // Nếu lỗi 404 (model không tồn tại) hoặc 429 (quota=0) → thử model kế
+        if (msg.includes("404") || msg.includes("not found") || msg.includes("limit: 0")) {
+          console.warn(`[vision-analyze] Model ${modelName} không khả dụng, thử model kế...`);
+          continue;
+        }
+        // Lỗi khác (network, parse) → throw ngay
+        throw err;
+      }
+    }
+
+    if (!result) {
+      console.error("[vision-analyze] Tất cả models đều fail:", lastError?.message);
+      return Response.json({
+        error: "Không gọi được Gemini API. Account của bạn có thể chưa được enable cho bất kỳ model nào. Vào https://aistudio.google.com để check key + quota.",
+      }, { status: 502 });
+    }
+
+    console.log(`[vision-analyze] Đã dùng model: ${usedModel}`);
 
     const text = result.response.text();
     let parsed;
