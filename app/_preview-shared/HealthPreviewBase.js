@@ -54,7 +54,7 @@ export default function HealthPreviewBase({ palette: P, label }) {
 
         {/* Greeting */}
         <section>
-          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ring-1" style={{ background: P.sageSoft, color: P.sageDeep, borderColor: `${P.sage}40` }}>
+          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ background: P.sageSoft, color: P.sageDeep, boxShadow: `inset 0 0 0 1px ${P.sage}33` }}>
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: P.sage }}/>
             Thứ Bảy, 23 tháng 5
           </span>
@@ -65,7 +65,7 @@ export default function HealthPreviewBase({ palette: P, label }) {
         </section>
 
         {/* Hero card */}
-        <section className="rounded-3xl p-5 md:p-6 ring-1" style={{ background: P.card, borderColor: P.hairline, boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.08)" }}>
+        <section className="rounded-3xl p-5 md:p-6" style={{ background: P.card, boxShadow: `inset 0 0 0 1px ${P.hairline}, 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.08)` }}>
           <div className="flex justify-center">
             <CalorieRing consumed={TODAY.consumed} target={TODAY.target} palette={P} />
           </div>
@@ -86,7 +86,7 @@ export default function HealthPreviewBase({ palette: P, label }) {
         </section>
 
         {/* Thêm món */}
-        <section className="rounded-3xl p-5 md:p-6 ring-1" style={{ background: P.card, borderColor: P.hairline, boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.08)" }}>
+        <section className="rounded-3xl p-5 md:p-6" style={{ background: P.card, boxShadow: `inset 0 0 0 1px ${P.hairline}, 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.08)` }}>
           <header className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="grid h-11 w-11 place-items-center rounded-2xl" style={{ background: P.primarySoft, color: P.primaryDeep }}>
@@ -94,14 +94,14 @@ export default function HealthPreviewBase({ palette: P, label }) {
               </span>
               <h3 className="text-[15px] font-bold tracking-tight leading-none" style={{ color: P.ink }}>Thêm món</h3>
             </div>
-            <div className="rounded-full px-3.5 py-2 text-[11px] font-semibold ring-1 flex items-center gap-2" style={{ background: P.neutralSoft, color: P.ink, borderColor: P.hairline }}>
+            <div className="rounded-full px-3.5 py-2 text-[11px] font-semibold flex items-center gap-2" style={{ background: P.neutralSoft, color: P.ink, boxShadow: `inset 0 0 0 1px ${P.hairline}` }}>
               Bữa trưa
               <svg className="w-3 h-3" style={{ color: P.inkMuted }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
             </div>
           </header>
 
           <div className="mt-5 flex gap-1 p-1 rounded-2xl" style={{ background: P.neutralSoft }}>
-            <button className="flex-1 py-2.5 text-[12px] font-semibold rounded-xl ring-1" style={{ background: P.card, color: P.primaryDeep, borderColor: P.hairline, boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>Chọn nhanh</button>
+            <button className="flex-1 py-2.5 text-[12px] font-semibold rounded-xl" style={{ background: P.card, color: P.primaryDeep, boxShadow: `inset 0 0 0 1px ${P.hairline}, 0 1px 2px rgba(0,0,0,0.05)` }}>Chọn nhanh</button>
             <button className="flex-1 py-2.5 text-[12px] font-semibold" style={{ color: P.inkMuted }}>Nhập tay</button>
           </div>
 
@@ -109,7 +109,7 @@ export default function HealthPreviewBase({ palette: P, label }) {
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: P.inkMuted }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             </span>
-            <input type="text" placeholder="Tìm món ăn..." className="w-full rounded-2xl py-3 pl-10 pr-4 text-[13px] font-medium outline-none ring-1" style={{ background: P.neutralSoft, borderColor: P.hairline, color: P.ink }} />
+            <input type="text" placeholder="Tìm món ăn..." className="w-full rounded-2xl py-3 pl-10 pr-4 text-[13px] font-medium outline-none" style={{ background: P.neutralSoft, boxShadow: `inset 0 0 0 1px ${P.hairline}`, color: P.ink }} />
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-2">
@@ -119,7 +119,7 @@ export default function HealthPreviewBase({ palette: P, label }) {
               { name: "Cà chua", kcal: 18 },
               { name: "Khoai tây", kcal: 77 },
             ].map((f, i) => (
-              <button key={i} className="p-3.5 rounded-2xl text-left ring-1 transition" style={{ background: P.neutralSoft, borderColor: "transparent" }}>
+              <button key={i} className="p-3.5 rounded-2xl text-left transition" style={{ background: P.neutralSoft, boxShadow: `inset 0 0 0 1px ${P.hairline}` }}>
                 <p className="truncate text-[11px] font-semibold tracking-tight mb-0.5" style={{ color: P.ink }}>{f.name}</p>
                 <p className="text-[12px] font-bold tabular-nums" style={{ color: P.ink }}>{f.kcal} <span className="text-[9px] font-medium" style={{ color: P.inkMuted }}>kcal/100g</span></p>
               </button>
@@ -227,7 +227,7 @@ function Op({ children, color }) {
 
 function MealCard({ name, icon, items, kcal, palette: P }) {
   return (
-    <section className="rounded-3xl p-5 ring-1" style={{ background: P.card, borderColor: P.hairline, boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.08)" }}>
+    <section className="rounded-3xl p-5" style={{ background: P.card, boxShadow: `inset 0 0 0 1px ${P.hairline}, 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px -12px rgba(0,0,0,0.08)` }}>
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-2xl text-xl" style={{ background: P.neutralSoft }}>{icon}</span>
@@ -238,7 +238,7 @@ function MealCard({ name, icon, items, kcal, palette: P }) {
             </p>
           </div>
         </div>
-        <button className="grid h-10 w-10 place-items-center rounded-full ring-1 transition" style={{ background: P.neutralSoft, color: P.ink, borderColor: P.hairline }} aria-label="Thêm món">
+        <button className="grid h-10 w-10 place-items-center rounded-full transition" style={{ background: P.neutralSoft, color: P.ink, boxShadow: `inset 0 0 0 1px ${P.hairline}` }} aria-label="Thêm món">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
       </header>
