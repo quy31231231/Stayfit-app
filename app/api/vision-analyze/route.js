@@ -2,21 +2,43 @@ import { google } from "googleapis";
 import crypto from "crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const VISION_PROMPT = `Bạn là chuyên gia dinh dưỡng có kiến thức sâu về món ăn Việt Nam và quốc tế.
+function buildPrompt(libraryListStr) {
+  const libraryBlock = libraryListStr
+    ? `═══════════════════════════════════════════════════════════════
+THƯ VIỆN MÓN CỦA USER (ưu tiên match nếu có)
+═══════════════════════════════════════════════════════════════
 
-NHIỆM VỤ: Quan sát ảnh và **ước lượng tổng dinh dưỡng** (kcal, protein, carb, fat) cho TOÀN BỘ khẩu phần thức ăn/đồ uống thấy trong ảnh.
+${libraryListStr}
+
+QUY TRÌNH MATCH:
+- Sau khi nhận diện món + ước lượng khẩu phần, SO tên món với THƯ VIỆN trên.
+- Nếu món trong ảnh KHỚP với 1 entry (cùng món hoặc rất gần) → trả "matched": true.
+  • "name" = EXACT tên từ thư viện (copy-paste từng ký tự, KHÔNG SỬA, KHÔNG dịch).
+  • "qty" = số đơn vị thấy trong ảnh, tính theo "per" + "unit" của entry đó.
+     VD: entry "Tỏi" (per: 100 g) thấy 50g → qty = 50
+     VD: entry "Phở bò (1 tô lớn)" (per: 1 tô) thấy 1 tô đầy → qty = 1
+     VD: entry "Phở bò (1 tô lớn)" thấy tô đầy hơn (cỡ XL) → qty = 1.3
+  • KHÔNG trả kcal/protein/carb/fat khi matched=true (server tự lookup).
+- Nếu KHÔNG có entry nào khớp đủ tin cậy (confidence match < 0.7) → trả "matched": false và estimate đầy đủ kcal/macro.
+
+`
+    : "";
+
+  return `Bạn là chuyên gia dinh dưỡng có kiến thức sâu về món ăn Việt Nam và quốc tế.
+
+NHIỆM VỤ: Quan sát ảnh và (a) nhận diện món + (b) ước lượng khẩu phần. Sau đó hoặc match với thư viện của user, hoặc tự ước lượng kcal/macro.
 
 KHÔNG ĐỌC nhãn dinh dưỡng (kể cả khi thấy). LUÔN ước lượng dựa trên KÍCH THƯỚC THẤY được.
 
 ═══════════════════════════════════════════════════════════════
-QUY TRÌNH 4 BƯỚC — bắt buộc thực hiện trước khi trả JSON
+QUY TRÌNH BẮT BUỘC
 ═══════════════════════════════════════════════════════════════
 
 【BƯỚC 1】 NHẬN DIỆN MÓN ĂN
 - Xác định tên cụ thể (vd: phở bò tái, cơm tấm sườn nướng bì chả, sữa yến mạch trong ly thủy tinh)
 - Liệt kê các thành phần chính nếu là món hỗn hợp
 
-【BƯỚC 2】 ƯỚC LƯỢNG KÍCH THƯỚC KHẨU PHẦN (cực kỳ quan trọng)
+【BƯỚC 2】 ƯỚC LƯỢNG KÍCH THƯỚC KHẨU PHẦN
 Dùng vật chứa làm thước đo, tham khảo bảng dưới:
 
   VẬT CHỨA RẮN (thức ăn):
@@ -26,7 +48,7 @@ Dùng vật chứa làm thước đo, tham khảo bảng dưới:
   - Tô phở (tô lớn): đường kính ~20cm, chứa 600-800ml/g
   - Tô bún/canh (tô nhỏ): chứa ~400-500ml/g
   - Bát cơm: chứa ~150-250g cơm
-  - Khay com tấm: chứa ~400-500g (cơm + thịt + đồ ăn kèm)
+  - Khay cơm tấm: chứa ~400-500g (cơm + thịt + đồ ăn kèm)
 
   VẬT CHỨA LỎNG (đồ uống):
   - Ly nước thủy tinh thường: 200-300ml
@@ -40,52 +62,35 @@ Dùng vật chứa làm thước đo, tham khảo bảng dưới:
   VẬT THAM CHIẾU KHÁC:
   - Muỗng canh: ~15ml; muỗng cà phê: ~5ml
   - Đũa Việt: dài ~25cm
-  - Tay người trung bình: lòng bàn tay ~10-12cm
   - Quả trứng gà: ~50-55g
   - Lát bánh mì sandwich: ~25-30g
 
 Mô tả vật chứa thấy trong ảnh và mức độ đầy (đầy / 3/4 / nửa / ít).
-Cuối bước này: ước tính KHỐI LƯỢNG/THỂ TÍCH tổng = ? gram (hoặc ml cho lỏng, vẫn ghi vào "grams")
 
-【BƯỚC 3】 TRA DỮ LIỆU DINH DƯỠNG CHUẨN per 100g/ml
-Tham khảo (dùng kiến thức của bạn về món Việt + USDA + dữ liệu dinh dưỡng quốc tế):
-
-  CƠ BẢN VIỆT NAM (per 100g):
-  - Cơm trắng: 130 kcal, 2.7P, 28C, 0.3F
-  - Phở bò (cả nước): ~50 kcal, 3P, 6C, 1F
-  - Bún bò Huế: ~60 kcal, 3.5P, 7C, 1.5F
-  - Bánh mì thịt: ~250 kcal, 10P, 35C, 8F
-  - Ức gà luộc: 165 kcal, 31P, 0C, 3.6F
-  - Thịt heo nạc: 150 kcal, 22P, 0C, 6F
-  - Rau xào: 60 kcal, 2P, 6C, 3F
-
-  ĐỒ UỐNG (per 100ml):
-  - Sữa tươi nguyên kem: ~62 kcal, 3.3P, 4.9C, 3.4F
-  - Sữa tươi không đường: ~42 kcal, 3.4P, 5C, 1F
-  - Sữa yến mạch nguyên bản: ~50-65 kcal, 0.6-1P, 6.5-8C, 1.5-3F
-  - Sữa hạnh nhân không đường: ~17 kcal, 0.5P, 0.3C, 1.5F
-  - Cà phê đen: ~2 kcal/100ml; cà phê sữa: ~70 kcal/100ml
-  - Trà sữa trân châu: ~80-120 kcal/100ml tùy thành phần
-  - Nước cam vắt: 45 kcal, 1P, 10C, 0F
-
-(Dùng kiến thức của bạn nếu món không có trong danh sách trên — nhưng phải dựa trên dữ liệu thực tế, không bịa)
-
-【BƯỚC 4】 TÍNH TỔNG cho khẩu phần
-TỔNG = (giá trị per 100) × (grams ước tính / 100)
-
-VD: Thấy 1 ly thủy tinh chứa ~250ml sữa yến mạch nguyên bản
-→ kcal = 55 × 2.5 = 138
-→ protein = 0.8 × 2.5 = 2.0
-→ carb = 7.3 × 2.5 = 18.3
-→ fat = 2.3 × 2.5 = 5.8
+${libraryBlock}【BƯỚC 3】 TRA DỮ LIỆU DINH DƯỠNG (chỉ dùng khi matched=false)
+Dùng kiến thức của bạn về món Việt + USDA + dữ liệu dinh dưỡng quốc tế.
+TỔNG = (giá trị per 100g/ml) × (grams ước tính / 100)
 
 ═══════════════════════════════════════════════════════════════
 TRẢ VỀ CHỈ JSON (không markdown, không text thừa)
 ═══════════════════════════════════════════════════════════════
 
+Trường hợp MATCHED (có entry phù hợp trong thư viện):
 {
   "found": true,
-  "name": "Sữa yến mạch trong ly thủy tinh",
+  "matched": true,
+  "name": "<tên EXACT copy-paste từ thư viện>",
+  "qty": 50,
+  "confidence": 0.85,
+  "meal_suggestion": "Bữa trưa",
+  "note": "<lời khen hoặc Bạn-có-biết, 15-30 từ>"
+}
+
+Trường hợp KHÔNG matched (không có entry nào phù hợp):
+{
+  "found": true,
+  "matched": false,
+  "name": "<tên tự đặt>",
   "grams": 250,
   "kcal": 138,
   "protein": 2.0,
@@ -93,29 +98,27 @@ TRẢ VỀ CHỈ JSON (không markdown, không text thừa)
   "fat": 5.8,
   "confidence": 0.75,
   "meal_suggestion": "Ăn vặt",
-  "note": "Sữa yến mạch giàu beta-glucan giúp hạ cholesterol và no lâu — lựa chọn tuyệt vời cho bữa nhẹ buổi chiều của bạn!",
-  "source": "estimate"
+  "note": "<lời khen hoặc Bạn-có-biết>"
 }
 
 ═══════════════════════════════════════════════════════════════
 QUY TẮC QUAN TRỌNG
 ═══════════════════════════════════════════════════════════════
 
-1. LUÔN ước lượng từ ảnh, KHÔNG đọc nhãn dinh dưỡng (bỏ qua nhãn).
-2. "grams" = TỔNG khẩu phần ước tính (gram cho rắn, ml cho lỏng).
-3. "kcal/protein/carb/fat" = TỔNG cho khẩu phần đó (đã nhân với grams/100).
-4. "note" KHÔNG giải thích cách ước lượng. Thay vào đó, viết 1 câu (15-30 từ) ẤM ÁP về món:
-   - Lời khen tích cực ("Lựa chọn rất tốt cho...", "Món này giúp...") khi món lành mạnh, HOẶC
+1. Ưu tiên matched=true khi tên match có confidence ≥ 0.7. Nếu nghi ngờ → matched=false.
+2. KHÔNG BAO GIỜ bịa tên không có trong thư viện cho "matched": true. Tên PHẢI là 1 trong các entry liệt kê ở trên.
+3. LUÔN ước lượng từ ảnh, KHÔNG đọc nhãn dinh dưỡng.
+4. "note" KHÔNG giải thích cách ước lượng. Viết 1 câu (15-30 từ) ẤM ÁP về món:
+   - Lời khen tích cực ("Lựa chọn rất tốt cho...", "Món này giúp..."), HOẶC
    - Fact "Bạn có biết?" thú vị về dinh dưỡng/văn hóa/lịch sử món đó.
-   KHÔNG nhắc tới gram, kcal, vật chứa, hay "ước lượng". Văn phong thân thiện, tiếng Việt tự nhiên.
-   KHÔNG dùng dấu ngoặc kép ở đầu/cuối câu.
+   KHÔNG nhắc gram, kcal, vật chứa, "ước lượng". Văn phong thân thiện, tiếng Việt tự nhiên. KHÔNG dùng dấu ngoặc kép ở đầu/cuối câu.
 5. "confidence":
    - 0.85-0.95: thấy rõ vật chứa + thức ăn + ước lượng chắc
    - 0.65-0.84: thấy được nhưng góc/ánh sáng không hoàn hảo
    - 0.4-0.64: ảnh mờ, góc xấu, hoặc món không quen
 6. "meal_suggestion": "Bữa sáng" | "Bữa trưa" | "Bữa tối" | "Ăn vặt".
-7. Nếu KHÔNG có thức ăn/đồ uống trong ảnh → { "found": false }.
-8. "source" luôn là "estimate".`;
+7. Nếu KHÔNG có thức ăn/đồ uống trong ảnh → { "found": false }.`;
+}
 
 function hashPassword(password) {
   if (!password) return "";
@@ -135,7 +138,7 @@ async function getSheets() {
 
 export async function POST(req) {
   try {
-    const { userId, password, imageBase64, mimeType } = await req.json();
+    const { userId, password, imageBase64, mimeType, library: rawLibrary = [] } = await req.json();
 
     // 1. Auth
     if (!userId || !password) {
@@ -164,19 +167,38 @@ export async function POST(req) {
       return Response.json({ error: "Ảnh quá lớn (max 4.5 MB)" }, { status: 400 });
     }
 
-    // 3. Call Gemini
+    // 3. Sanitize library
+    const library = Array.isArray(rawLibrary)
+      ? rawLibrary
+          .filter(
+            (f) =>
+              f &&
+              typeof f.name === "string" &&
+              f.name.trim() &&
+              typeof f.unit === "string" &&
+              Number.isFinite(Number(f.per)) &&
+              Number(f.per) > 0
+          )
+          .slice(0, 600)
+      : [];
+
+    const libraryListStr = library
+      .map((f) => `- "${f.name}" (per: ${f.per} ${f.unit})`)
+      .join("\n");
+
+    const prompt = buildPrompt(libraryListStr);
+
+    // 4. Call Gemini
     if (!process.env.GEMINI_API_KEY) {
       return Response.json({ error: "Server chưa cấu hình GEMINI_API_KEY" }, { status: 500 });
     }
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Ưu tiên model vision tốt hơn cho portion estimation accuracy
-    // (Pro/2.5-flash có reasoning tốt hơn lite/8b cho task này)
     const MODELS_TO_TRY = process.env.GEMINI_MODEL
       ? [process.env.GEMINI_MODEL]
       : [
-          "gemini-2.5-flash",          // Best balance accuracy/cost
+          "gemini-2.5-flash",
           "gemini-2.0-flash",
-          "gemini-2.5-flash-lite",     // Fallback rẻ
+          "gemini-2.5-flash-lite",
           "gemini-2.0-flash-lite",
           "gemini-1.5-flash-latest",
           "gemini-1.5-flash-8b",
@@ -189,13 +211,13 @@ export async function POST(req) {
           model: modelName,
           generationConfig: {
             responseMimeType: "application/json",
-            temperature: 0.2,          // thấp hơn → ổn định hơn
+            temperature: 0.2,
             topP: 0.8,
-            maxOutputTokens: 2048,     // đủ chỗ cho reasoning + JSON
+            maxOutputTokens: 2048,
           },
         });
         result = await model.generateContent([
-          VISION_PROMPT,
+          prompt,
           { inlineData: { data: imageBase64, mimeType } },
         ]);
         usedModel = modelName;
@@ -203,8 +225,6 @@ export async function POST(req) {
       } catch (err) {
         lastError = err;
         const msg = String(err.message || "");
-        // 404 / not found / quota=0 → thử model kế
-        // 429 prepayment depleted → fail toàn bộ project, không cần thử tiếp
         if (msg.includes("prepayment credits are depleted")) {
           console.error(`[vision-analyze] Project hết credit, dừng thử`);
           break;
@@ -213,7 +233,6 @@ export async function POST(req) {
           console.warn(`[vision-analyze] Model ${modelName} không khả dụng, thử model kế...`);
           continue;
         }
-        // Lỗi khác (network, parse) → throw ngay
         throw err;
       }
     }
@@ -254,26 +273,62 @@ export async function POST(req) {
       return Response.json({ error: "Không nhận diện được món ăn trong ảnh" }, { status: 422 });
     }
 
-    // 4. Sanitize
     const safeNum = (v, fallback = 0) => {
       const n = Number(v);
       return Number.isFinite(n) && n >= 0 ? Math.round(n * 10) / 10 : fallback;
     };
     const MEAL_TYPES = ["Bữa sáng", "Bữa trưa", "Bữa tối", "Ăn vặt"];
     const mealSuggestion = MEAL_TYPES.includes(parsed.meal_suggestion) ? parsed.meal_suggestion : null;
+    const note = parsed.note ? String(parsed.note).slice(0, 300) : null;
+    const confidence = Math.min(1, Math.max(0, safeNum(parsed.confidence, 0.5)));
 
+    // 5. MATCHED path — lookup library entry
+    if (parsed.matched === true && typeof parsed.name === "string" && parsed.name.trim()) {
+      const libEntry = library.find((f) => f.name === parsed.name);
+      if (libEntry) {
+        const qty = Math.max(0.1, safeNum(parsed.qty, libEntry.per));
+        return Response.json({
+          found: true,
+          source: "library",
+          matched: true,
+          name: libEntry.name,
+          unit: libEntry.unit,
+          per: Number(libEntry.per),
+          grams: qty,
+          kcal: safeNum(libEntry.kcal),
+          protein: safeNum(libEntry.protein),
+          carb: safeNum(libEntry.carb),
+          fat: safeNum(libEntry.fat),
+          confidence,
+          meal_suggestion: mealSuggestion,
+          note,
+        });
+      }
+      // Hallucination: matched=true nhưng name không có trong library
+      console.warn(`[vision-analyze] Hallucination: "${parsed.name}" không có trong library`);
+      return Response.json(
+        { error: "AI phân tích chưa chuẩn, vui lòng thử lại." },
+        { status: 502 }
+      );
+    }
+
+    // 6. ESTIMATE path
+    const grams = Math.max(1, safeNum(parsed.grams, 100));
     return Response.json({
       found: true,
+      source: "estimate",
+      matched: false,
       name: String(parsed.name || "Món không xác định").slice(0, 100),
-      grams: Math.max(1, safeNum(parsed.grams, 100)),
+      unit: "g",
+      per: grams,
+      grams,
       kcal: safeNum(parsed.kcal),
       protein: safeNum(parsed.protein),
       carb: safeNum(parsed.carb),
       fat: safeNum(parsed.fat),
-      confidence: Math.min(1, Math.max(0, safeNum(parsed.confidence, 0.5))),
+      confidence,
       meal_suggestion: mealSuggestion,
-      note: parsed.note ? String(parsed.note).slice(0, 300) : null,
-      source: parsed.source === "label" ? "label" : "estimate",
+      note,
     });
   } catch (err) {
     console.error("[vision-analyze]", err);

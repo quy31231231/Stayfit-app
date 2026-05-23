@@ -1109,10 +1109,26 @@ export default function App() {
         setScanState(s => ({ ...s, loading: true, error: null }));
         try {
             const base64 = await fileToBase64(scanState.file);
+            // Build library payload: custom foods (ưu tiên match) + common foods not deleted
+            const libraryPayload = allFoods.map(f => ({
+                name: f.name,
+                unit: f.unit,
+                per: f.per,
+                kcal: f.kcal,
+                protein: f.protein,
+                carb: f.carb,
+                fat: f.fat,
+            }));
             const res = await fetch("/api/vision-analyze", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, password, imageBase64: base64, mimeType: scanState.file.type }),
+                body: JSON.stringify({
+                    userId,
+                    password,
+                    imageBase64: base64,
+                    mimeType: scanState.file.type,
+                    library: libraryPayload,
+                }),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Phân tích thất bại");
@@ -1121,14 +1137,14 @@ export default function App() {
             // Auto-fill selectedFood + qty + selectedMeal
             setSelectedFood({
                 name: data.name,
-                unit: "g",
-                per: data.grams || 100,
+                unit: data.unit || "g",
+                per: data.per || data.grams || 100,
                 kcal: data.kcal,
                 protein: data.protein,
                 carb: data.carb,
                 fat: data.fat,
             });
-            setQty(data.grams || 100);
+            setQty(data.grams || data.per || 100);
             if (data.meal_suggestion && MEAL_TYPES.includes(data.meal_suggestion)) {
                 setSelectedMeal(data.meal_suggestion);
             }
