@@ -384,9 +384,9 @@ function MacroProgressBar({ label, current, target, colorClass }) {
 }
 
 function StatsView({ history, profile, setProfile, target, targetLog, setView, view, setCurrentDate }) {
-    const [weightLog, setWeightLog] = useState(() => { 
+    const [weightLog, setWeightLog] = useState(() => {
         if (typeof window !== "undefined") {
-            const s = localStorage.getItem('stayfit_weight_log'); return s ? JSON.parse(s) : {}; 
+            const s = localStorage.getItem('stayfit_weight_log'); return s ? JSON.parse(s) : {};
         }
         return {};
     });
@@ -394,6 +394,11 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     const [weightDate, setWeightDate] = useState(() => formatDate(new Date()));
     const [chartOffset, setChartOffset] = useState(0);
     const daysPerPage = 14;
+
+    // Weight menu / modals
+    const [weightMenuOpen, setWeightMenuOpen] = useState(false);
+    const [weightModal, setWeightModal] = useState(null); // "log" | "goal" | "history" | null
+    const [goalDraft, setGoalDraft] = useState({ start: "", target: "" });
 
     const weightChartRef = useRef(null); 
     const kcalChartRef = useRef(null); 
@@ -627,43 +632,228 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
             </header>
 
             <main className="p-4 space-y-5">
-                {/* CẬP NHẬT CÂN NẶNG */}
-                <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 md:p-6">
-                    <header className="flex items-center gap-3 mb-4">
-                        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">⚖️</span>
-                        <div>
-                            <h3 className="text-[15px] font-bold tracking-tight text-ink">Cập nhật cân nặng</h3>
-                            <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Ghi lại để theo dõi tiến trình</p>
-                        </div>
-                    </header>
+                {/* TIẾN TRÌNH CÂN NẶNG */}
+                {(() => {
+                    const currentWeight = Number(profile?.weight) || 0;
+                    const startWeight = Number(profile?.startWeight) || currentWeight;
+                    const targetWeight = Number(profile?.targetWeight) || currentWeight;
+                    const change = currentWeight - startWeight;
+                    const totalRange = Math.abs(targetWeight - startWeight);
+                    let progressPct = 0;
+                    if (totalRange > 0) {
+                        if (targetWeight < startWeight) {
+                            progressPct = ((startWeight - currentWeight) / totalRange) * 100;
+                        } else {
+                            progressPct = ((currentWeight - startWeight) / totalRange) * 100;
+                        }
+                        progressPct = Math.max(0, Math.min(100, progressPct));
+                    }
+                    const hasGoal = !!profile?.targetWeight && targetWeight !== startWeight;
 
-                    <div className="flex items-center bg-cream-soft p-1.5 rounded-2xl mb-4 ring-1 focus-within:ring-2 focus-within:ring-orange/30 transition">
-                        <div className="relative flex items-center">
-                            <svg className="w-4 h-4 text-orange-deep absolute left-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-[120px] bg-transparent py-2.5 pl-9 pr-1 outline-none text-[11px] font-semibold text-ink tracking-wider cursor-pointer tabular-nums [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer" />
-                        </div>
-                        <div className="w-px h-6 bg-cream-deep mx-1 shrink-0"></div>
-                        <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="flex-1 bg-transparent p-2.5 outline-none font-semibold text-[13px] text-ink placeholder:text-ink-faint min-w-[60px] tabular-nums" />
-                        <button onClick={saveWeight} className="h-9 px-4 bg-orange text-white rounded-xl font-bold text-[11px] active:scale-95 transition shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep shrink-0">Ghi</button>
-                    </div>
-
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-muted mb-2">Lịch sử gần nhất</p>
-                    <div className="max-h-36 overflow-y-auto no-scrollbar bg-cream-soft rounded-2xl p-1.5 ring-1">
-                        {sortedDates.length === 0 ? (
-                            <p className="text-center text-ink-faint text-[11px] italic font-medium py-4">Chưa có bản ghi</p>
-                        ) : (
-                            sortedDates.slice(0, 14).map(date => (
-                                <div key={date} className="flex justify-between items-center p-2.5 bg-white rounded-xl mb-1 last:mb-0 group hover:ring-1 hover:ring-cream-deep transition">
-                                    <div className="flex items-center gap-2.5">
-                                        <span className="text-[10px] font-semibold text-ink-muted bg-cream-soft px-2 py-1 rounded-lg tabular-nums">{getWeekLabel(date)}/{date.split('-')[0]}</span>
-                                        <span className="text-[13px] font-bold text-ink tabular-nums">{weightLog[date]}<span className="text-[10px] font-medium text-ink-muted ml-0.5">kg</span></span>
+                    return (
+                        <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 md:p-6 relative">
+                            <header className="flex items-start justify-between gap-3 mb-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">⚖️</span>
+                                    <div>
+                                        <h3 className="text-[15px] font-bold tracking-tight text-ink">Tiến trình cân nặng</h3>
+                                        <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Theo dõi hành trình của bạn</p>
                                     </div>
-                                    <button onClick={() => deleteWeight(date)} className="p-1.5 text-ink-faint hover:text-orange-deep bg-cream-soft hover:bg-orange-soft rounded-lg transition opacity-0 group-hover:opacity-100" aria-label="Xóa"><IconTrash /></button>
                                 </div>
-                            ))
-                        )}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setWeightMenuOpen(o => !o)}
+                                        className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-cream-soft hover:text-ink transition"
+                                        aria-label="Tùy chọn"
+                                    >
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                                    </button>
+                                    {weightMenuOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-30" onClick={() => setWeightMenuOpen(false)} />
+                                            <div className="absolute right-0 top-11 z-40 w-60 bg-white rounded-2xl shadow-lift ring-1 py-1.5 overflow-hidden">
+                                                <button
+                                                    onClick={() => { setWeightInput(""); setWeightDate(formatDate(new Date())); setWeightModal("log"); setWeightMenuOpen(false); }}
+                                                    className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-cream-soft transition text-left"
+                                                >
+                                                    <span className="text-[13px] font-semibold text-ink">Ghi lại cân nặng</span>
+                                                    <span className="grid h-7 w-7 place-items-center rounded-full bg-orange-soft text-orange-deep">
+                                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                                    </span>
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setGoalDraft({
+                                                            start: profile?.startWeight ?? profile?.weight ?? "",
+                                                            target: profile?.targetWeight ?? "",
+                                                        });
+                                                        setWeightModal("goal");
+                                                        setWeightMenuOpen(false);
+                                                    }}
+                                                    className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-cream-soft transition text-left"
+                                                >
+                                                    <span className="text-[13px] font-semibold text-ink">Chỉnh sửa mục tiêu</span>
+                                                    <span className="grid h-7 w-7 place-items-center rounded-full bg-sage-soft text-sage-deep">
+                                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+                                                    </span>
+                                                </button>
+                                                <button
+                                                    onClick={() => { setWeightModal("history"); setWeightMenuOpen(false); }}
+                                                    className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-cream-soft transition text-left"
+                                                >
+                                                    <span className="text-[13px] font-semibold text-ink">Lịch sử cân nặng</span>
+                                                    <span className="grid h-7 w-7 place-items-center rounded-full bg-lilac-soft text-lilac-deep">
+                                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><polyline points="12 7 12 12 15 14"/></svg>
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </header>
+
+                            <div className="mb-3">
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-muted mb-1">Thay đổi</p>
+                                <p className={`text-[40px] font-bold tabular-nums leading-none ${change > 0 ? 'text-orange-deep' : change < 0 ? 'text-sage-deep' : 'text-ink'}`}>
+                                    {change > 0 ? '+' : ''}{change.toFixed(1)}
+                                    <span className="text-[16px] font-bold text-ink-muted ml-1">kg</span>
+                                </p>
+                            </div>
+
+                            <div className="border-t border-cream-deep/60 pt-4">
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-muted mb-2">
+                                    Đã đạt được <span className="text-orange-deep tabular-nums">{Math.round(progressPct)}%</span> mục tiêu
+                                </p>
+                                <div
+                                    className="relative h-5 rounded-full ring-1 overflow-hidden"
+                                    style={{
+                                        backgroundImage: 'repeating-linear-gradient(135deg, #F4EFE6 0 8px, #EBE3D2 8px 16px)',
+                                    }}
+                                >
+                                    {hasGoal && progressPct > 0 && (
+                                        <div
+                                            className="absolute inset-y-0 left-0 rounded-full transition-all"
+                                            style={{
+                                                width: `${progressPct}%`,
+                                                backgroundImage: 'repeating-linear-gradient(135deg, #D97757 0 8px, #C56A4A 8px 16px)',
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                                <div className="flex items-center justify-between mt-2.5 text-[12px]">
+                                    <span className="font-bold tabular-nums text-ink">{startWeight} kg</span>
+                                    <svg className="w-3.5 h-3.5 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                    <span className="font-bold tabular-nums text-ink">{targetWeight} kg</span>
+                                </div>
+                                {!hasGoal && (
+                                    <p className="text-[10px] text-ink-faint italic text-center mt-3">
+                                        Chưa đặt mục tiêu — bấm <span className="font-semibold">⋯</span> để bắt đầu
+                                    </p>
+                                )}
+                            </div>
+                        </section>
+                    );
+                })()}
+
+                {/* MODAL: GHI LẠI CÂN NẶNG */}
+                {weightModal === "log" && (
+                    <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+                        <div className="bg-white rounded-t-[2rem] sm:rounded-[2rem] p-6 max-w-md w-full shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+                            <div className="flex justify-between items-center mb-5">
+                                <h3 className="text-[16px] font-bold text-ink tracking-tight">Ghi lại cân nặng</h3>
+                                <button onClick={() => setWeightModal(null)} className="grid h-9 w-9 place-items-center rounded-full bg-cream-soft text-ink-muted hover:bg-cream-deep transition" aria-label="Đóng">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Ngày</label>
+                                    <input type="date" value={weightDate} max={todayStr} onChange={e=>setWeightDate(e.target.value)} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-semibold text-[13px] text-ink tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Cân nặng (kg)</label>
+                                    <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-bold text-[18px] text-ink placeholder:text-ink-faint text-center tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" autoFocus />
+                                </div>
+                                <button
+                                    onClick={() => { saveWeight(); setWeightModal(null); }}
+                                    className="w-full h-12 bg-orange text-white rounded-2xl font-bold text-[14px] transition hover:bg-orange-deep shadow-soft mt-2"
+                                >
+                                    Lưu cân nặng
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </section>
+                )}
+
+                {/* MODAL: CHỈNH SỬA MỤC TIÊU */}
+                {weightModal === "goal" && (
+                    <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+                        <div className="bg-white rounded-t-[2rem] sm:rounded-[2rem] p-6 max-w-md w-full shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+                            <div className="flex justify-between items-center mb-5">
+                                <h3 className="text-[16px] font-bold text-ink tracking-tight">Chỉnh sửa mục tiêu</h3>
+                                <button onClick={() => setWeightModal(null)} className="grid h-9 w-9 place-items-center rounded-full bg-cream-soft text-ink-muted hover:bg-cream-deep transition" aria-label="Đóng">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Bắt đầu (kg)</label>
+                                        <input type="number" value={goalDraft.start} step="0.1" onChange={e => setGoalDraft(d => ({ ...d, start: e.target.value }))} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-bold text-[16px] text-ink text-center tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Mục tiêu (kg)</label>
+                                        <input type="number" value={goalDraft.target} step="0.1" onChange={e => setGoalDraft(d => ({ ...d, target: e.target.value }))} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-bold text-[16px] text-orange-deep text-center tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" />
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-ink-muted italic px-1">
+                                    "Bắt đầu" là cân nặng tại thời điểm đặt mục tiêu. "Mục tiêu" là số kg bạn muốn đạt.
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        const start = parseFloat(goalDraft.start);
+                                        const tgt = parseFloat(goalDraft.target);
+                                        if (!start || !tgt || start <= 0 || tgt <= 0) { alert("Vui lòng nhập số kg hợp lệ!"); return; }
+                                        setProfile({ ...profile, startWeight: start, targetWeight: tgt });
+                                        setWeightModal(null);
+                                    }}
+                                    className="w-full h-12 bg-orange text-white rounded-2xl font-bold text-[14px] transition hover:bg-orange-deep shadow-soft mt-2"
+                                >
+                                    Lưu mục tiêu
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* MODAL: LỊCH SỬ CÂN NẶNG */}
+                {weightModal === "history" && (
+                    <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+                        <div className="bg-white rounded-t-[2rem] sm:rounded-[2rem] p-6 max-w-md w-full max-h-[80vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-[16px] font-bold text-ink tracking-tight">Lịch sử cân nặng</h3>
+                                <button onClick={() => setWeightModal(null)} className="grid h-9 w-9 place-items-center rounded-full bg-cream-soft text-ink-muted hover:bg-cream-deep transition" aria-label="Đóng">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto no-scrollbar bg-cream-soft rounded-2xl p-2 ring-1">
+                                {sortedDates.length === 0 ? (
+                                    <p className="text-center text-ink-faint text-[12px] italic font-medium py-8">Chưa có bản ghi nào</p>
+                                ) : (
+                                    sortedDates.map(date => (
+                                        <div key={date} className="flex justify-between items-center p-3 bg-white rounded-xl mb-1.5 last:mb-0 ring-1 ring-cream-deep/40">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-[10px] font-semibold text-ink-muted bg-cream-soft px-2 py-1 rounded-lg tabular-nums">{getWeekLabel(date)}/{date.split('-')[0]}</span>
+                                                <span className="text-[14px] font-bold text-ink tabular-nums">{weightLog[date]}<span className="text-[11px] font-medium text-ink-muted ml-0.5">kg</span></span>
+                                            </div>
+                                            <button onClick={() => deleteWeight(date)} className="p-2 text-ink-faint hover:text-orange-deep bg-cream-soft hover:bg-orange-soft rounded-lg transition" aria-label="Xóa"><IconTrash /></button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* BIỂU ĐỒ CÂN NẶNG */}
                 <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 relative md:p-6">
