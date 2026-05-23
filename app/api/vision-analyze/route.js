@@ -2,6 +2,45 @@ import { google } from "googleapis";
 import crypto from "crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// Diacritic-strip + lowercase + collapse whitespace, for fuzzy comparison.
+function normalize(str) {
+  return (str || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// 0.0-1.0 similarity score. Exact > substring > token-Jaccard.
+function fuzzyScore(query, target) {
+  const q = normalize(query);
+  const t = normalize(target);
+  if (!q || !t) return 0;
+  if (q === t) return 1.0;
+  if (t.includes(q) || q.includes(t)) return 0.85;
+  const qTokens = new Set(q.split(" ").filter(Boolean));
+  const tTokens = new Set(t.split(" ").filter(Boolean));
+  if (qTokens.size === 0 || tTokens.size === 0) return 0;
+  const intersection = [...qTokens].filter((x) => tTokens.has(x)).length;
+  const union = new Set([...qTokens, ...tTokens]).size;
+  return intersection / union;
+}
+
+function fuzzyMatch(query, library, threshold = 0.7) {
+  let best = null;
+  let bestScore = 0;
+  for (const entry of library) {
+    const score = fuzzyScore(query, entry.name);
+    if (score > bestScore && score >= threshold) {
+      best = entry;
+      bestScore = score;
+    }
+  }
+  return best ? { entry: best, score: bestScore } : null;
+}
+
 function buildPrompt(libraryListStr) {
   const libraryBlock = libraryListStr
     ? `═══════════════════════════════════════════════════════════════
@@ -10,23 +49,17 @@ THƯ VIỆN MÓN CỦA USER (ưu tiên match nếu có)
 
 ${libraryListStr}
 
-QUY TRÌNH MATCH:
+QUY TRÌNH MATCH (cho TỪNG món):
 - Sau khi nhận diện món + ước lượng khẩu phần, SO tên món với THƯ VIỆN trên.
-- Nếu món trong ảnh KHỚP với 1 entry (cùng món hoặc rất gần) → trả "matched": true.
-  • "name" = EXACT tên từ thư viện (copy-paste từng ký tự, KHÔNG SỬA, KHÔNG dịch).
-  • "qty" = số đơn vị thấy trong ảnh, tính theo "per" + "unit" của entry đó.
-     VD: entry "Tỏi" (per: 100 g) thấy 50g → qty = 50
-     VD: entry "Phở bò (1 tô lớn)" (per: 1 tô) thấy 1 tô đầy → qty = 1
-     VD: entry "Phở bò (1 tô lớn)" thấy tô đầy hơn (cỡ XL) → qty = 1.3
-  • KHÔNG trả kcal/protein/carb/fat khi matched=true (server tự lookup).
-- Nếu KHÔNG có entry nào khớp đủ tin cậy (confidence match < 0.7) → trả "matched": false và estimate đầy đủ kcal/macro.
+- Nếu món trong ảnh KHỚP với 1 entry → "matched": true, "name" = EXACT tên từ thư viện (copy-paste).
+- Nếu KHÔNG có entry nào khớp đủ tin cậy → "matched": false, "name" = tên tự đặt.
 
 `
     : "";
 
   return `Bạn là chuyên gia dinh dưỡng có kiến thức sâu về món ăn Việt Nam và quốc tế.
 
-NHIỆM VỤ: Quan sát ảnh và (a) nhận diện món + (b) ước lượng khẩu phần. Sau đó hoặc match với thư viện của user, hoặc tự ước lượng kcal/macro.
+NHIỆM VỤ: Quan sát ảnh, nhận diện TẤT CẢ món ăn/đồ uống thấy được (tối đa 5 món), ước lượng khẩu phần và macro cho TỪNG món.
 
 KHÔNG ĐỌC nhãn dinh dưỡng (kể cả khi thấy). LUÔN ước lượng dựa trên KÍCH THƯỚC THẤY được.
 
@@ -34,11 +67,12 @@ KHÔNG ĐỌC nhãn dinh dưỡng (kể cả khi thấy). LUÔN ước lượng 
 QUY TRÌNH BẮT BUỘC
 ═══════════════════════════════════════════════════════════════
 
-【BƯỚC 1】 NHẬN DIỆN MÓN ĂN
-- Xác định tên cụ thể (vd: phở bò tái, cơm tấm sườn nướng bì chả, sữa yến mạch trong ly thủy tinh)
-- Liệt kê các thành phần chính nếu là món hỗn hợp
+【BƯỚC 1】 NHẬN DIỆN TẤT CẢ MÓN TRONG ẢNH
+- Liệt kê tối đa 5 món (ưu tiên món lớn nhất/rõ nhất nếu nhiều hơn).
+- Mỗi món xác định tên cụ thể (vd: phở bò tái, cơm trắng, canh chua cá).
+- Nếu là tô/đĩa hỗn hợp KHÔNG tách (vd cơm tấm có cơm + sườn + bì + chả) → coi là 1 món "Cơm tấm sườn bì chả".
 
-【BƯỚC 2】 ƯỚC LƯỢNG KÍCH THƯỚC KHẨU PHẦN
+【BƯỚC 2】 ƯỚC LƯỢNG KÍCH THƯỚC TỪNG MÓN
 Dùng vật chứa làm thước đo, tham khảo bảng dưới:
 
   VẬT CHỨA RẮN (thức ăn):
@@ -65,59 +99,55 @@ Dùng vật chứa làm thước đo, tham khảo bảng dưới:
   - Quả trứng gà: ~50-55g
   - Lát bánh mì sandwich: ~25-30g
 
-Mô tả vật chứa thấy trong ảnh và mức độ đầy (đầy / 3/4 / nửa / ít).
-
-${libraryBlock}【BƯỚC 3】 TRA DỮ LIỆU DINH DƯỠNG (chỉ dùng khi matched=false)
-Dùng kiến thức của bạn về món Việt + USDA + dữ liệu dinh dưỡng quốc tế.
+${libraryBlock}【BƯỚC 3】 TRA DỮ LIỆU DINH DƯỠNG (LUÔN trả macros cho mọi món)
+Dùng kiến thức của bạn về món Việt + USDA. LUÔN trả kcal/protein/carb/fat cho từng món, dù matched=true hay false.
 TỔNG = (giá trị per 100g/ml) × (grams ước tính / 100)
 
 ═══════════════════════════════════════════════════════════════
 TRẢ VỀ CHỈ JSON (không markdown, không text thừa)
 ═══════════════════════════════════════════════════════════════
 
-Trường hợp MATCHED (có entry phù hợp trong thư viện):
 {
   "found": true,
-  "matched": true,
-  "name": "<tên EXACT copy-paste từ thư viện>",
-  "qty": 50,
-  "confidence": 0.85,
-  "meal_suggestion": "Bữa trưa",
-  "note": "<lời khen hoặc Bạn-có-biết, 15-30 từ>"
+  "items": [
+    {
+      "matched": true,
+      "name": "<tên EXACT từ thư viện hoặc tên tự đặt>",
+      "qty": 50,
+      "grams": 50,
+      "kcal": 89,
+      "protein": 1.1,
+      "carb": 22.8,
+      "fat": 0.3,
+      "confidence": 0.85,
+      "meal_suggestion": "Bữa trưa",
+      "note": "<lời khen hoặc Bạn-có-biết, 15-30 từ>"
+    }
+  ]
 }
 
-Trường hợp KHÔNG matched (không có entry nào phù hợp):
-{
-  "found": true,
-  "matched": false,
-  "name": "<tên tự đặt>",
-  "grams": 250,
-  "kcal": 138,
-  "protein": 2.0,
-  "carb": 18.3,
-  "fat": 5.8,
-  "confidence": 0.75,
-  "meal_suggestion": "Ăn vặt",
-  "note": "<lời khen hoặc Bạn-có-biết>"
-}
+Nếu không có món nào trong ảnh: { "found": false, "items": [] }
 
 ═══════════════════════════════════════════════════════════════
 QUY TẮC QUAN TRỌNG
 ═══════════════════════════════════════════════════════════════
 
-1. Ưu tiên matched=true khi tên match có confidence ≥ 0.7. Nếu nghi ngờ → matched=false.
-2. KHÔNG BAO GIỜ bịa tên không có trong thư viện cho "matched": true. Tên PHẢI là 1 trong các entry liệt kê ở trên.
-3. LUÔN ước lượng từ ảnh, KHÔNG đọc nhãn dinh dưỡng.
-4. "note" KHÔNG giải thích cách ước lượng. Viết 1 câu (15-30 từ) ẤM ÁP về món:
-   - Lời khen tích cực ("Lựa chọn rất tốt cho...", "Món này giúp..."), HOẶC
-   - Fact "Bạn có biết?" thú vị về dinh dưỡng/văn hóa/lịch sử món đó.
-   KHÔNG nhắc gram, kcal, vật chứa, "ước lượng". Văn phong thân thiện, tiếng Việt tự nhiên. KHÔNG dùng dấu ngoặc kép ở đầu/cuối câu.
-5. "confidence":
-   - 0.85-0.95: thấy rõ vật chứa + thức ăn + ước lượng chắc
-   - 0.65-0.84: thấy được nhưng góc/ánh sáng không hoàn hảo
-   - 0.4-0.64: ảnh mờ, góc xấu, hoặc món không quen
-6. "meal_suggestion": "Bữa sáng" | "Bữa trưa" | "Bữa tối" | "Ăn vặt".
-7. Nếu KHÔNG có thức ăn/đồ uống trong ảnh → { "found": false }.`;
+1. TỐI ĐA 5 món/ảnh. Nếu ảnh có nhiều hơn, chọn 5 món LỚN NHẤT.
+2. LUÔN trả đầy đủ kcal/protein/carb/fat cho TỪNG món (dù matched hay không).
+3. "matched": true CHỈ KHI tên trùng/rất gần entry thư viện. Tên matched=true PHẢI là 1 entry có trong thư viện.
+4. "qty" cho matched=true: số đơn vị thấy theo "per" + "unit" của entry (VD: entry "Tỏi" per 100g, thấy 50g → qty=50; entry "Phở bò (1 tô)" thấy 1 tô → qty=1).
+5. "grams" cho matched=false: gram ước tính.
+6. LUÔN ước lượng từ ảnh, KHÔNG đọc nhãn dinh dưỡng.
+7. "note" KHÔNG giải thích cách ước lượng. Viết 1 câu (15-30 từ) ẤM ÁP về món:
+   - Lời khen tích cực ("Lựa chọn rất tốt cho..."), HOẶC
+   - Fact "Bạn có biết?" thú vị về món.
+   KHÔNG nhắc gram, kcal, vật chứa, "ước lượng". Tiếng Việt tự nhiên. KHÔNG dùng dấu ngoặc kép.
+8. "confidence":
+   - 0.85-0.95: thấy rõ + match chắc
+   - 0.65-0.84: thấy được nhưng không hoàn hảo
+   - 0.4-0.64: ảnh mờ, góc xấu, hoặc món không quen → confidence thấp
+9. "meal_suggestion": "Bữa sáng" | "Bữa trưa" | "Bữa tối" | "Ăn vặt".
+10. Nếu KHÔNG có thức ăn/đồ uống nào trong ảnh → { "found": false, "items": [] }.`;
 }
 
 function hashPassword(password) {
@@ -278,20 +308,59 @@ export async function POST(req) {
       return Number.isFinite(n) && n >= 0 ? Math.round(n * 10) / 10 : fallback;
     };
     const MEAL_TYPES = ["Bữa sáng", "Bữa trưa", "Bữa tối", "Ăn vặt"];
-    const mealSuggestion = MEAL_TYPES.includes(parsed.meal_suggestion) ? parsed.meal_suggestion : null;
-    const note = parsed.note ? String(parsed.note).slice(0, 300) : null;
-    const confidence = Math.min(1, Math.max(0, safeNum(parsed.confidence, 0.5)));
+    const FUZZY_THRESHOLD_EXPLICIT = 0.7; // AI nói matched=true → cho fuzzy nới hơn
+    const FUZZY_THRESHOLD_IMPLICIT = 0.85; // AI nói matched=false → ngưỡng cao hơn để tránh false-positive
+    const MIN_CONFIDENCE = 0.5;
 
-    // 5. MATCHED path — lookup library entry
-    if (parsed.matched === true && typeof parsed.name === "string" && parsed.name.trim()) {
-      const libEntry = library.find((f) => f.name === parsed.name);
+    const rawItems = Array.isArray(parsed.items) ? parsed.items : [];
+    if (rawItems.length === 0) {
+      return Response.json({ error: "Không nhận diện được món ăn trong ảnh" }, { status: 422 });
+    }
+
+    const results = rawItems.slice(0, 5).map((item) => {
+      const name = typeof item.name === "string" ? item.name.trim().slice(0, 100) : "";
+      const confidence = Math.min(1, Math.max(0, safeNum(item.confidence, 0.5)));
+      const mealSuggestion = MEAL_TYPES.includes(item.meal_suggestion) ? item.meal_suggestion : null;
+      const note = item.note ? String(item.note).slice(0, 300) : null;
+
+      let libEntry = null;
+      let fuzzyUsed = false;
+
+      if (name && library.length > 0) {
+        if (item.matched === true) {
+          libEntry = library.find((f) => f.name === name);
+          if (!libEntry) {
+            const m = fuzzyMatch(name, library, FUZZY_THRESHOLD_EXPLICIT);
+            if (m) {
+              libEntry = m.entry;
+              fuzzyUsed = true;
+            }
+          }
+        } else {
+          // matched=false: vẫn thử fuzzy với ngưỡng cao
+          const m = fuzzyMatch(name, library, FUZZY_THRESHOLD_IMPLICIT);
+          if (m) {
+            libEntry = m.entry;
+            fuzzyUsed = true;
+          }
+        }
+      }
+
+      // Confidence threshold: revert sang estimate
+      if (libEntry && confidence < MIN_CONFIDENCE) {
+        libEntry = null;
+        fuzzyUsed = false;
+      }
+
       if (libEntry) {
-        const qty = Math.max(0.1, safeNum(parsed.qty, libEntry.per));
-        return Response.json({
-          found: true,
+        const qty = Math.max(0.1, safeNum(item.qty, libEntry.per));
+        return {
           source: "library",
           matched: true,
           name: libEntry.name,
+          aiPredictedName: name,
+          libraryName: libEntry.name,
+          fuzzyMatched: fuzzyUsed,
           unit: libEntry.unit,
           per: Number(libEntry.per),
           grams: qty,
@@ -302,34 +371,31 @@ export async function POST(req) {
           confidence,
           meal_suggestion: mealSuggestion,
           note,
-        });
+        };
       }
-      // Hallucination: matched=true nhưng name không có trong library
-      console.warn(`[vision-analyze] Hallucination: "${parsed.name}" không có trong library`);
-      return Response.json(
-        { error: "AI phân tích chưa chuẩn, vui lòng thử lại." },
-        { status: 502 }
-      );
-    }
 
-    // 6. ESTIMATE path
-    const grams = Math.max(1, safeNum(parsed.grams, 100));
-    return Response.json({
-      found: true,
-      source: "estimate",
-      matched: false,
-      name: String(parsed.name || "Món không xác định").slice(0, 100),
-      unit: "g",
-      per: grams,
-      grams,
-      kcal: safeNum(parsed.kcal),
-      protein: safeNum(parsed.protein),
-      carb: safeNum(parsed.carb),
-      fat: safeNum(parsed.fat),
-      confidence,
-      meal_suggestion: mealSuggestion,
-      note,
+      const grams = Math.max(1, safeNum(item.grams, 100));
+      return {
+        source: "estimate",
+        matched: false,
+        name: name || "Món không xác định",
+        aiPredictedName: name,
+        libraryName: null,
+        fuzzyMatched: false,
+        unit: "g",
+        per: grams,
+        grams,
+        kcal: safeNum(item.kcal),
+        protein: safeNum(item.protein),
+        carb: safeNum(item.carb),
+        fat: safeNum(item.fat),
+        confidence,
+        meal_suggestion: mealSuggestion,
+        note,
+      };
     });
+
+    return Response.json({ found: true, items: results });
   } catch (err) {
     console.error("[vision-analyze]", err);
     return Response.json({ error: err.message || "Lỗi server" }, { status: 500 });

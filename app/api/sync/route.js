@@ -30,7 +30,45 @@ export async function POST(req) {
   if (!SHEET_ID) return Response.json({ error: "Missing SPREADSHEET_ID" }, { status: 400 });
 
   const sheets = await getSheets();
-  const { action, userId, password, profile, history, weightLog, customFoods, deletedCommonFoods } = await req.json();
+  const body = await req.json();
+  const { action, userId, password, profile, history, weightLog, customFoods, deletedCommonFoods } = body;
+
+  // === LOG FEEDBACK KHI USER SỬA MÓN ĐÃ LIBRARY-MATCH ===
+  if (action === "scan_feedback") {
+    if (!userId || !password) {
+      return Response.json({ error: "Missing credentials" }, { status: 400 });
+    }
+    try {
+      const hashedPassword = hashPassword(password);
+      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:J" });
+      const profileRows = profileRes.data.values || [];
+      const profileRow = profileRows.find((r) => r[0] === userId);
+      if (!profileRow) return Response.json({ error: "User không tồn tại" }, { status: 404 });
+      if (profileRow[9] && profileRow[9] !== hashedPassword) {
+        return Response.json({ error: "Sai mật khẩu" }, { status: 401 });
+      }
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: SHEET_ID,
+        range: "ScanFeedback!A:G",
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+          values: [[
+            userId,
+            body.timestamp || new Date().toISOString(),
+            body.aiPredictedName || "",
+            body.libraryMatchedName || "",
+            body.userCorrectedName || "",
+            String(body.confidence ?? ""),
+            body.fuzzyMatched ? "1" : "0",
+          ]],
+        },
+      });
+      return Response.json({ ok: true });
+    } catch (err) {
+      console.error("[scan_feedback]", err);
+      return Response.json({ error: err.message }, { status: 500 });
+    }
+  }
 
   // === UPLOAD DỮ LIỆU TỪ APP LÊN SHEETS ===
   if (action === "upload") {

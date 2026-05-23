@@ -1097,9 +1097,8 @@ export default function App() {
         preview: null,
         loading: false,
         error: null,
-        result: null,
+        items: null,
     });
-    const [scanEditMode, setScanEditMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
@@ -1390,9 +1389,8 @@ export default function App() {
 
     const closeScanModal = () => {
         setScanModalOpen(false);
-        setScanEditMode(false);
         setTimeout(() => {
-            setScanState({ file: null, preview: null, loading: false, error: null, result: null });
+            setScanState({ file: null, preview: null, loading: false, error: null, items: null });
         }, 300);
     };
 
@@ -1430,7 +1428,7 @@ export default function App() {
         }
         try {
             const compressed = await compressImage(file, 1024, 0.85);
-            setScanState({ file: compressed.file, preview: compressed.dataUrl, loading: false, error: null, result: null });
+            setScanState({ file: compressed.file, preview: compressed.dataUrl, loading: false, error: null, items: null });
         } catch (err) {
             setScanState(s => ({ ...s, error: "Không đọc được ảnh: " + err.message }));
         }
@@ -1443,22 +1441,15 @@ export default function App() {
         setScanState(s => ({ ...s, loading: true, error: null }));
         try {
             const base64 = await fileToBase64(scanState.file);
-            // Build library payload: custom foods (ưu tiên match) + common foods not deleted
             const libraryPayload = allFoods.map(f => ({
-                name: f.name,
-                unit: f.unit,
-                per: f.per,
-                kcal: f.kcal,
-                protein: f.protein,
-                carb: f.carb,
-                fat: f.fat,
+                name: f.name, unit: f.unit, per: f.per,
+                kcal: f.kcal, protein: f.protein, carb: f.carb, fat: f.fat,
             }));
             const res = await fetch("/api/vision-analyze", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    userId,
-                    password,
+                    userId, password,
                     imageBase64: base64,
                     mimeType: scanState.file.type,
                     library: libraryPayload,
@@ -1467,34 +1458,77 @@ export default function App() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Phân tích thất bại");
 
-            setScanState(s => ({ ...s, loading: false, result: data }));
-            // Auto-fill selectedFood + qty + selectedMeal
-            setSelectedFood({
-                name: data.name,
-                unit: data.unit || "g",
-                per: data.per || data.grams || 100,
-                kcal: data.kcal,
-                protein: data.protein,
-                carb: data.carb,
-                fat: data.fat,
-            });
-            setQty(data.grams || data.per || 100);
-            if (data.meal_suggestion && MEAL_TYPES.includes(data.meal_suggestion)) {
-                setSelectedMeal(data.meal_suggestion);
-            }
+            const items = (data.items || []).map((it) => ({
+                ...it,
+                _checked: true,
+                _qty: it.grams,
+                _meal: MEAL_TYPES.includes(it.meal_suggestion) ? it.meal_suggestion : selectedMeal,
+                _editMode: false,
+                _origName: it.name,
+            }));
+            setScanState(s => ({ ...s, loading: false, items }));
         } catch (err) {
             setScanState(s => ({ ...s, loading: false, error: err.message }));
         }
     };
 
     const handleScanReset = () => {
-        setScanState({ file: null, preview: null, loading: false, error: null, result: null });
-        setSelectedFood(null);
-        setScanEditMode(false);
+        setScanState({ file: null, preview: null, loading: false, error: null, items: null });
     };
 
-    const handleScanConfirm = () => {
-        handleAddSelectedFood();
+    const updateScanItem = (idx, patch) => {
+        setScanState(s => ({
+            ...s,
+            items: s.items.map((it, i) => i === idx ? { ...it, ...patch } : it),
+        }));
+    };
+
+    const submitScanItemEdit = (idx) => {
+        const item = scanState.items[idx];
+        // Đóng edit mode
+        updateScanItem(idx, { _editMode: false });
+        // Fire-and-forget feedback nếu original là library match & user đã đổi tên
+        if (item.source === "library" && item.libraryName && item._origName !== item.name && userId && password) {
+            fetch("/api/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "scan_feedback",
+                    userId, password,
+                    timestamp: new Date().toISOString(),
+                    aiPredictedName: item.aiPredictedName,
+                    libraryMatchedName: item.libraryName,
+                    userCorrectedName: item.name,
+                    confidence: item.confidence,
+                    fuzzyMatched: item.fuzzyMatched,
+                }),
+            }).catch(err => console.warn("Feedback log failed:", err));
+        }
+    };
+
+    const addAllScannedItems = () => {
+        const checked = (scanState.items || []).filter(it => it._checked);
+        if (checked.length === 0) return;
+        const baseTs = Date.now();
+        const newEntries = checked.map((item, i) => {
+            const quantity = parseFloat(item._qty) || 0;
+            return {
+                name: item.name,
+                quantity,
+                unit: item.unit,
+                kcal: calcMacro(item.kcal, item.per, quantity),
+                protein: calcMacro(item.protein, item.per, quantity),
+                carb: calcMacro(item.carb, item.per, quantity),
+                fat: calcMacro(item.fat, item.per, quantity),
+                meal: item._meal,
+                id: baseTs + i,
+                timestamp: `${baseTs + i}-${Math.random().toString(36).slice(2, 7)}`,
+            };
+        });
+        setHistory(prev => ({
+            ...prev,
+            [currentDate]: [...(prev[currentDate] || []), ...newEntries],
+        }));
         closeScanModal();
     };
 
@@ -2168,7 +2202,7 @@ export default function App() {
                                         </p>
                                         {scanState.error && <p className="text-[12px] text-orange-deep text-center mt-2">{scanState.error}</p>}
                                     </div>
-                                ) : !scanState.result ? (
+                                ) : !scanState.items ? (
                                     /* STEP 2: Có ảnh, chưa analyze */
                                     <div className="space-y-3">
                                         <img src={scanState.preview} alt="Món vừa chọn" className="w-full max-h-72 object-cover rounded-2xl ring-1" />
@@ -2194,146 +2228,174 @@ export default function App() {
                                         {scanState.error && <p className="text-[12px] text-orange-deep text-center">{scanState.error}</p>}
                                     </div>
                                 ) : (() => {
-                                    /* STEP 3: Đã có result — selectedFood là source of truth, có thể edit */
-                                    const r = scanState.result;
-                                    if (!selectedFood) return null;
-                                    const baseGrams = selectedFood.per || 1;
-                                    const q = parseFloat(qty) || 0;
-                                    const factor = q / baseGrams;
-                                    const scaled = {
-                                        kcal:    Math.round(selectedFood.kcal * factor * 10) / 10,
-                                        protein: Math.round(selectedFood.protein * factor * 10) / 10,
-                                        carb:    Math.round(selectedFood.carb * factor * 10) / 10,
-                                        fat:     Math.round(selectedFood.fat * factor * 10) / 10,
-                                    };
-                                    const updateField = (key, val) => setSelectedFood(f => ({ ...f, [key]: val }));
+                                    /* STEP 3: Đã có items — render list multi-item */
+                                    const items = scanState.items;
+                                    if (items.length === 0) {
+                                        return (
+                                            <div className="space-y-3 text-center">
+                                                <p className="text-[13px] text-ink-muted italic py-4">Không nhận diện được món nào trong ảnh.</p>
+                                                <button onClick={handleScanReset} className="w-full h-12 bg-cream-soft text-ink rounded-xl font-semibold">
+                                                    Thử ảnh khác
+                                                </button>
+                                            </div>
+                                        );
+                                    }
+                                    const checkedCount = items.filter(it => it._checked).length;
                                     return (
-                                        <div className="space-y-4">
-                                            <img src={scanState.preview} alt={selectedFood.name} className="w-full max-h-36 object-cover rounded-2xl ring-1" />
+                                        <div className="space-y-3">
+                                            <img src={scanState.preview} alt="Ảnh đã quét" className="w-full max-h-36 object-cover rounded-2xl ring-1" />
+                                            <p className="text-[11px] text-ink-muted text-center">
+                                                Phát hiện <span className="font-semibold text-ink">{items.length}</span> món · bỏ chọn món không muốn ghi
+                                            </p>
 
-                                            {/* Card hiển thị / edit */}
-                                            <div className="rounded-2xl bg-cream-soft ring-1 p-4 relative">
-                                                {/* Source badge - top left */}
-                                                {!scanEditMode && (
-                                                    r.source === "library" ? (
-                                                        <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sage-soft text-sage-deep ring-1 ring-sage/30">
-                                                            📚 Thư viện
-                                                        </span>
-                                                    ) : (
-                                                        <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-clay-soft text-clay-deep ring-1 ring-clay/30">
-                                                            ✨ AI ước tính
-                                                        </span>
-                                                    )
-                                                )}
-                                                {!scanEditMode && (
-                                                    <button
-                                                        onClick={() => setScanEditMode(true)}
-                                                        className="absolute top-3 right-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-white text-orange-deep ring-1 ring-orange/30 hover:bg-orange-soft hover:ring-orange/50 transition shadow-sm"
-                                                        aria-label="Chỉnh sửa giá trị"
-                                                        title="Chỉnh sửa"
-                                                    >
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                                                    </button>
-                                                )}
-                                                {scanEditMode ? (
-                                                    /* EDIT MODE — chỉnh sửa giá trị theo per-khẩu-phần */
-                                                    <div className="space-y-2.5">
-                                                        <div>
-                                                            <div className="flex items-center justify-between mb-1">
-                                                                <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider">Tên món</label>
-                                                                <button
-                                                                    onClick={() => setScanEditMode(false)}
-                                                                    className="text-[11px] font-semibold text-orange-deep hover:underline inline-flex items-center gap-1"
-                                                                    aria-label="Xong"
-                                                                >
-                                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                                                    Xong
-                                                                </button>
-                                                            </div>
-                                                            <input type="text" value={selectedFood.name} onChange={e => updateField("name", e.target.value)} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-semibold outline-none focus:ring-2 focus:ring-orange/30" />
-                                                        </div>
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            <div>
-                                                                <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Khẩu phần (g/ml)</label>
-                                                                <input type="number" value={selectedFood.per} step="any" min="1" onChange={e => updateField("per", parseFloat(e.target.value) || 1)} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Kcal / khẩu phần</label>
-                                                                <input type="number" value={selectedFood.kcal} step="any" min="0" onChange={e => updateField("kcal", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
-                                                            </div>
-                                                        </div>
-                                                        <div className="grid grid-cols-3 gap-2">
-                                                            <div>
-                                                                <label className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep block mb-1 text-center">Protein</label>
-                                                                <input type="number" value={selectedFood.protein} step="any" min="0" onChange={e => updateField("protein", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-sage/30" />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep block mb-1 text-center">Carb</label>
-                                                                <input type="number" value={selectedFood.carb} step="any" min="0" onChange={e => updateField("carb", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-clay/30" />
-                                                            </div>
-                                                            <div>
-                                                                <label className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep block mb-1 text-center">Fat</label>
-                                                                <input type="number" value={selectedFood.fat} step="any" min="0" onChange={e => updateField("fat", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-lilac/30" />
-                                                            </div>
-                                                        </div>
-                                                        <p className="text-[10px] text-ink-muted italic mt-1">Giá trị là cho mỗi {selectedFood.per}g/ml. Số lượng nạp được tính từ ô Số lượng bên dưới.</p>
-                                                    </div>
-                                                ) : (
-                                                    /* DISPLAY MODE */
-                                                    <>
-                                                        <div className="flex justify-between items-start mb-3 gap-3 pr-10 pt-7">
-                                                            <div className="min-w-0 flex-1">
-                                                                <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{selectedFood.name}</h5>
-                                                                <p className="text-[11px] text-ink-muted tabular-nums mt-0.5">
-                                                                    Khẩu phần ~{selectedFood.per}{(selectedFood.unit === "g" || selectedFood.unit === "ml") ? selectedFood.unit : ` ${selectedFood.unit}`}
-                                                                </p>
-                                                            </div>
-                                                            <div className="text-right shrink-0">
-                                                                <p className="text-3xl font-bold text-orange-deep tabular-nums leading-none">{scaled.kcal}</p>
-                                                                <p className="text-[10px] text-ink-muted uppercase tracking-wider mt-1">kcal</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="grid grid-cols-3 gap-1.5">
-                                                            <div className="text-center bg-white rounded-xl py-2 ring-1">
-                                                                <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep">Protein</p>
-                                                                <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.protein}g</p>
-                                                            </div>
-                                                            <div className="text-center bg-white rounded-xl py-2 ring-1">
-                                                                <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep">Carb</p>
-                                                                <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.carb}g</p>
-                                                            </div>
-                                                            <div className="text-center bg-white rounded-xl py-2 ring-1">
-                                                                <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep">Fat</p>
-                                                                <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.fat}g</p>
-                                                            </div>
-                                                        </div>
-                                                        {r.note && (
-                                                            <div className="mt-3 pt-3 border-t border-cream-deep/50">
-                                                                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted mb-1">Bạn có biết?</p>
-                                                                <p className="text-[11px] text-ink leading-relaxed">{String(r.note).replace(/^["'“”‘’\s]+|["'“”‘’\s]+$/g, "")}</p>
-                                                            </div>
+                                            {items.map((item, idx) => {
+                                                const baseGrams = item.per || 1;
+                                                const q = parseFloat(item._qty) || 0;
+                                                const factor = q / baseGrams;
+                                                const scaled = {
+                                                    kcal:    Math.round(item.kcal * factor * 10) / 10,
+                                                    protein: Math.round(item.protein * factor * 10) / 10,
+                                                    carb:    Math.round(item.carb * factor * 10) / 10,
+                                                    fat:     Math.round(item.fat * factor * 10) / 10,
+                                                };
+                                                const showFuzzyHint = item.source === "library" && item.libraryName && item.aiPredictedName && item.aiPredictedName !== item.libraryName;
+                                                return (
+                                                    <div key={idx} className={`rounded-2xl ring-1 p-4 relative transition ${item._checked ? "bg-cream-soft" : "bg-cream-soft/40 opacity-60"}`}>
+                                                        {/* Badge top-left */}
+                                                        {!item._editMode && (
+                                                            item.source === "library" ? (
+                                                                <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sage-soft text-sage-deep ring-1 ring-sage/30">
+                                                                    📚 Thư viện
+                                                                </span>
+                                                            ) : (
+                                                                <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-clay-soft text-clay-deep ring-1 ring-clay/30">
+                                                                    ✨ AI ước tính
+                                                                </span>
+                                                            )
                                                         )}
-                                                    </>
-                                                )}
-                                            </div>
+                                                        {/* Checkbox top-right */}
+                                                        {!item._editMode && (
+                                                            <button
+                                                                onClick={() => updateScanItem(idx, { _checked: !item._checked })}
+                                                                className={`absolute top-3 right-3 z-10 grid h-8 w-8 place-items-center rounded-full text-[14px] font-bold transition shadow-sm ${item._checked ? "bg-orange text-white" : "bg-white text-ink-muted ring-1 ring-cream-deep"}`}
+                                                                aria-label={item._checked ? "Bỏ chọn" : "Chọn"}
+                                                            >
+                                                                {item._checked ? "✓" : ""}
+                                                            </button>
+                                                        )}
+                                                        {/* Edit pencil — dưới checkbox */}
+                                                        {!item._editMode && item._checked && (
+                                                            <button
+                                                                onClick={() => updateScanItem(idx, { _editMode: true })}
+                                                                className="absolute top-12 right-3 z-10 grid h-7 w-7 place-items-center rounded-full bg-white text-orange-deep ring-1 ring-orange/30 hover:bg-orange-soft transition shadow-sm"
+                                                                aria-label="Chỉnh sửa"
+                                                                title="Chỉnh sửa"
+                                                            >
+                                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                                            </button>
+                                                        )}
 
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <div>
-                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Bữa</label>
-                                                    <div className="relative">
-                                                        <select value={selectedMeal} onChange={e => setSelectedMeal(e.target.value)} className="w-full bg-cream-soft p-2.5 pr-8 rounded-xl text-[13px] font-semibold outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-orange/30">
-                                                            {MEAL_TYPES.map(m => <option key={m} value={m}>{m}</option>)}
-                                                        </select>
-                                                        <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                                        {item._editMode ? (
+                                                            <div className="space-y-2.5">
+                                                                <div>
+                                                                    <div className="flex items-center justify-between mb-1">
+                                                                        <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider">Tên món</label>
+                                                                        <button
+                                                                            onClick={() => submitScanItemEdit(idx)}
+                                                                            className="text-[11px] font-semibold text-orange-deep hover:underline inline-flex items-center gap-1"
+                                                                        >
+                                                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                                                            Xong
+                                                                        </button>
+                                                                    </div>
+                                                                    <input type="text" value={item.name} onChange={e => updateScanItem(idx, { name: e.target.value })} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-semibold outline-none focus:ring-2 focus:ring-orange/30" />
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    <div>
+                                                                        <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Khẩu phần (g/ml)</label>
+                                                                        <input type="number" value={item.per} step="any" min="1" onChange={e => updateScanItem(idx, { per: parseFloat(e.target.value) || 1 })} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Kcal / khẩu phần</label>
+                                                                        <input type="number" value={item.kcal} step="any" min="0" onChange={e => updateScanItem(idx, { kcal: parseFloat(e.target.value) || 0 })} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="grid grid-cols-3 gap-2">
+                                                                    <div>
+                                                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep block mb-1 text-center">Protein</label>
+                                                                        <input type="number" value={item.protein} step="any" min="0" onChange={e => updateScanItem(idx, { protein: parseFloat(e.target.value) || 0 })} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-sage/30" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep block mb-1 text-center">Carb</label>
+                                                                        <input type="number" value={item.carb} step="any" min="0" onChange={e => updateScanItem(idx, { carb: parseFloat(e.target.value) || 0 })} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-clay/30" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep block mb-1 text-center">Fat</label>
+                                                                        <input type="number" value={item.fat} step="any" min="0" onChange={e => updateScanItem(idx, { fat: parseFloat(e.target.value) || 0 })} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-lilac/30" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <div className="flex justify-between items-start mb-3 gap-3 pr-10 pt-7">
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{item.name}</h5>
+                                                                        <p className="text-[11px] text-ink-muted tabular-nums mt-0.5">
+                                                                            Khẩu phần ~{item.per}{(item.unit === "g" || item.unit === "ml") ? item.unit : ` ${item.unit}`}
+                                                                            {showFuzzyHint && (
+                                                                                <span className="text-sage-deep font-medium"> · Khớp với "{item.libraryName}"</span>
+                                                                            )}
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="text-right shrink-0">
+                                                                        <p className="text-3xl font-bold text-orange-deep tabular-nums leading-none">{scaled.kcal}</p>
+                                                                        <p className="text-[10px] text-ink-muted uppercase tracking-wider mt-1">kcal</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="grid grid-cols-3 gap-1.5">
+                                                                    <div className="text-center bg-white rounded-xl py-2 ring-1">
+                                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep">Protein</p>
+                                                                        <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.protein}g</p>
+                                                                    </div>
+                                                                    <div className="text-center bg-white rounded-xl py-2 ring-1">
+                                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep">Carb</p>
+                                                                        <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.carb}g</p>
+                                                                    </div>
+                                                                    <div className="text-center bg-white rounded-xl py-2 ring-1">
+                                                                        <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep">Fat</p>
+                                                                        <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.fat}g</p>
+                                                                    </div>
+                                                                </div>
+                                                                {item._checked && (
+                                                                    <div className="grid grid-cols-2 gap-2 mt-3">
+                                                                        <div>
+                                                                            <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Bữa</label>
+                                                                            <div className="relative">
+                                                                                <select value={item._meal} onChange={e => updateScanItem(idx, { _meal: e.target.value })} className="w-full bg-white p-2 pr-8 rounded-xl text-[12px] font-semibold outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-orange/30">
+                                                                                    {MEAL_TYPES.map(m => <option key={m} value={m}>{m}</option>)}
+                                                                                </select>
+                                                                                <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng ({item.unit || "g"})</label>
+                                                                            <input type="number" value={item._qty} step="any" min="0" onChange={e => updateScanItem(idx, { _qty: parseFloat(e.target.value) || 0 })} className="w-full bg-white p-2 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {item.note && item._checked && (
+                                                                    <div className="mt-3 pt-3 border-t border-cream-deep/50">
+                                                                        <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted mb-1">Bạn có biết?</p>
+                                                                        <p className="text-[11px] text-ink leading-relaxed">{String(item.note).replace(/^["'“”‘’\s]+|["'“”‘’\s]+$/g, "")}</p>
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        )}
                                                     </div>
-                                                </div>
-                                                <div>
-                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng ({selectedFood.unit || "g/ml"})</label>
-                                                    <input type="number" value={qty} step="any" min="1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-soft p-2.5 rounded-xl text-[14px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
-                                                </div>
-                                            </div>
+                                                );
+                                            })}
 
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 pt-1">
                                                 <button
                                                     onClick={handleScanReset}
                                                     className="px-4 h-12 text-ink bg-cream-soft rounded-xl font-semibold text-[13px] transition hover:bg-cream-deep"
@@ -2341,10 +2403,11 @@ export default function App() {
                                                     Chụp lại
                                                 </button>
                                                 <button
-                                                    onClick={handleScanConfirm}
-                                                    className="flex-1 h-12 bg-orange text-white rounded-xl font-bold text-[13px] transition hover:bg-orange-deep shadow-soft flex items-center justify-center gap-2"
+                                                    onClick={addAllScannedItems}
+                                                    disabled={checkedCount === 0}
+                                                    className="flex-1 h-12 bg-orange text-white rounded-xl font-bold text-[13px] transition hover:bg-orange-deep shadow-soft flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
-                                                    Ghi vào nhật ký <IconPlus />
+                                                    Thêm {checkedCount} món <IconPlus />
                                                 </button>
                                             </div>
                                         </div>
