@@ -1926,7 +1926,7 @@ export default function App() {
                                                                     Khẩu phần ~{selectedFood.per}g/ml
                                                                 </p>
                                                             </div>
-                                                            <div className="text-right shrink-0 mt-6">
+                                                            <div className="text-right shrink-0">
                                                                 <p className="text-3xl font-bold text-orange-deep tabular-nums leading-none">{scaled.kcal}</p>
                                                                 <p className="text-[10px] text-ink-muted uppercase tracking-wider mt-1">kcal</p>
                                                             </div>
