@@ -747,7 +747,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                             <div className="mb-3">
                                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-muted mb-1">Thay đổi</p>
                                 <p className={`text-[40px] font-bold tabular-nums leading-none ${change > 0 ? 'text-orange-deep' : change < 0 ? 'text-sage-deep' : 'text-ink'}`}>
-                                    {change > 0 ? '+' : ''}{change.toFixed(1)}
+                                    {change > 0 ? '+' : ''}{change.toFixed(2).replace(/\.?0+$/, '') || '0'}
                                     <span className="text-[16px] font-bold text-ink-muted ml-1">kg</span>
                                 </p>
                             </div>
@@ -804,7 +804,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Cân nặng (kg)</label>
-                                    <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.1" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-bold text-[18px] text-ink placeholder:text-ink-faint text-center tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" autoFocus />
+                                    <input type="number" value={weightInput} onChange={e=>setWeightInput(e.target.value)} step="0.01" placeholder={weightLog[weightDate] ? `Đã ghi: ${weightLog[weightDate]}kg` : "Số kg..."} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-bold text-[18px] text-ink placeholder:text-ink-faint text-center tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" autoFocus />
                                 </div>
                                 <button
                                     onClick={() => { saveWeight(); setWeightModal(null); }}
@@ -831,11 +831,11 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Bắt đầu (kg)</label>
-                                        <input type="number" value={goalDraft.start} step="0.1" onChange={e => setGoalDraft(d => ({ ...d, start: e.target.value }))} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-bold text-[16px] text-ink text-center tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" />
+                                        <input type="number" value={goalDraft.start} step="0.01" onChange={e => setGoalDraft(d => ({ ...d, start: e.target.value }))} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-bold text-[16px] text-ink text-center tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" />
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Mục tiêu (kg)</label>
-                                        <input type="number" value={goalDraft.target} step="0.1" onChange={e => setGoalDraft(d => ({ ...d, target: e.target.value }))} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-bold text-[16px] text-orange-deep text-center tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" />
+                                        <input type="number" value={goalDraft.target} step="0.01" onChange={e => setGoalDraft(d => ({ ...d, target: e.target.value }))} className="w-full bg-cream-soft p-3 rounded-2xl outline-none font-bold text-[16px] text-orange-deep text-center tabular-nums ring-1 focus:ring-2 focus:ring-orange/30 transition" />
                                     </div>
                                 </div>
                                 <p className="text-[11px] text-ink-muted italic px-1">
