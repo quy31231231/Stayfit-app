@@ -513,48 +513,52 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                     labels: labels, 
                     datasets: [
                         // Đặt stack riêng rẽ cho các đường line để chúng không bị cộng dồn
-                        { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#6B95AB', font: { weight: 'black', size: 9 }, formatter: (val) => val > 0 ? val : '' } },
-                        { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#B8AFA4', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
-                        
-                        // Gắn chung stack 'bars' cho 4 bữa ăn để chúng tự động xếp chồng lên nhau
-                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#C49A4A', datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#5F8266', datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#9B8AB8', datalabels: { display: false } },
-                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#D97757', datalabels: { display: false }, borderRadius: { topLeft: 4, topRight: 4 } }
+                        { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#2D2620', font: { weight: '600', size: 10 }, formatter: (val) => val > 0 ? val.toLocaleString('vi-VN') : '' } },
+                        { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#B8AFA4', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
+
+                        // Gắn chung stack 'bars' cho 4 bữa ăn — cùng style modern: rounded + white separator
+                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#C49A4A', borderColor: '#FFFFFF', borderWidth: 2, borderSkipped: false, borderRadius: 6, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#5F8266', borderColor: '#FFFFFF', borderWidth: 2, borderSkipped: false, borderRadius: 6, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#9B8AB8', borderColor: '#FFFFFF', borderWidth: 2, borderSkipped: false, borderRadius: 6, datalabels: { display: false } },
+                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#D97757', borderColor: '#FFFFFF', borderWidth: 2, borderSkipped: false, borderRadius: 6, datalabels: { display: false } }
                     ]
                 },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 } },
+                options: {
+                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 28 } },
                     onClick: handleChartClick, onHover: handleChartHover,
-                    plugins: { 
-                        legend: { display: false }, 
-                        // Bật tính năng Hiện thông tin khi Hover
-                        tooltip: { 
+                    categoryPercentage: 0.7,
+                    barPercentage: 0.9,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
                             enabled: true,
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            titleColor: '#2D2620',
-                            bodyColor: '#2D2620',
-                            borderColor: '#EBE3D2',
-                            borderWidth: 1,
-                            padding: 10,
+                            backgroundColor: 'rgba(45, 38, 32, 0.95)',
+                            titleColor: '#FFFFFF',
+                            bodyColor: '#F4EFE6',
+                            borderColor: 'transparent',
+                            borderWidth: 0,
+                            padding: 12,
+                            cornerRadius: 12,
                             boxPadding: 4,
                             usePointStyle: true,
                             boxWidth: 8,
                             boxHeight: 8,
+                            displayColors: true,
+                            titleFont: { weight: '600', size: 11 },
+                            bodyFont: { size: 12, weight: '500' },
                             callbacks: {
                                 label: function(context) {
-                                    // Không hiển thị popup cho đường Mục tiêu, Tổng và các bữa 0 Kcal
                                     if (context.dataset.label === 'Mục tiêu' || context.dataset.label === 'Tổng' || context.parsed.y === 0) return null;
-                                    return ` ${context.dataset.label}: ${context.parsed.y} kcal`;
+                                    return ` ${context.dataset.label}: ${context.parsed.y.toLocaleString('vi-VN')} kcal`;
                                 }
                             }
-                        } 
-                    }, 
-                    scales: { 
-                        x: { stacked: true, display: true, grid: { color: '#F4EFE6', drawBorder: false }, ticks: { font: { weight: 'bold', size: 9 } } },
-                        y: { stacked: true, display: true, beginAtZero: true, grid: { color: '#F4EFE6', drawBorder: false }, ticks: { display: false } } 
-                    } 
-                } 
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true, display: true, grid: { display: false, drawBorder: false }, ticks: { font: { weight: '500', size: 10 }, color: '#7A7066' } },
+                        y: { stacked: true, display: true, beginAtZero: true, grid: { color: 'rgba(45, 38, 32, 0.06)', drawBorder: false }, ticks: { display: false } }
+                    }
+                }
             });
         }
 
@@ -676,7 +680,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                 <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Theo bữa ăn mỗi ngày</p>
                             </div>
                         </div>
-                        <span className="text-[10px] text-ink-faint italic shrink-0">tap để xem</span>
+                        <span className="text-[10px] text-ink-faint italic shrink-0">nhấn để xem</span>
                     </header>
                     <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
                 </section>
@@ -691,7 +695,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                 <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Xu hướng macro</p>
                             </div>
                         </div>
-                        <span className="text-[10px] text-ink-faint italic shrink-0">tap để xem</span>
+                        <span className="text-[10px] text-ink-faint italic shrink-0">nhấn để xem</span>
                     </header>
                     <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
                 </section>
