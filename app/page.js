@@ -178,7 +178,6 @@ const COMMON_FOODS = [
     { name: "Chôm chôm", unit: "g", per: 100, kcal: 82, carb: 21, fat: 0, protein: 1 },
     { name: "Củ nghệ (gia vị)", unit: "g", per: 100, kcal: 354, carb: 65, fat: 10, protein: 8 },
     { name: "Củ dền", unit: "g", per: 100, kcal: 43, carb: 10, fat: 0, protein: 2 },
-    { name: "Cà rốt", unit: "g", per: 100, kcal: 41, carb: 10, fat: 0, protein: 1 },
     { name: "Củ từ", unit: "g", per: 100, kcal: 118, carb: 28, fat: 0, protein: 2 },
     { name: "Dọc mùng", unit: "g", per: 100, kcal: 14, carb: 3.8, fat: 0, protein: 0.25 },
     { name: "Dưa cải bệ", unit: "g", per: 100, kcal: 17, carb: 4.5, fat: 0, protein: 2 },
@@ -230,7 +229,6 @@ const COMMON_FOODS = [
     { name: "Khổ qua (quả)", unit: "g", per: 100, kcal: 17, carb: 4, fat: 0, protein: 1 },
     { name: "Khổ qua (lá)", unit: "g", per: 100, kcal: 30, carb: 3, fat: 1, protein: 5 },
     { name: "Kiwi", unit: "g", per: 100, kcal: 61, carb: 15, fat: 1, protein: 1 },
-    { name: "Khoai tây", unit: "g", per: 100, kcal: 77, carb: 18, fat: 0, protein: 2 },
     { name: "Khoai lang", unit: "g", per: 100, kcal: 86, carb: 20, fat: 0, protein: 2 },
     { name: "Lá diếp xoắn", unit: "g", per: 100, kcal: 23, carb: 5, fat: 0, protein: 2 },
     { name: "Lê", unit: "g", per: 100, kcal: 42, carb: 11, fat: 0, protein: 0 },
@@ -1382,6 +1380,17 @@ export default function App() {
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
         setSelectedFood(null); setSearchQuery(""); setQty(1);
+    };
+
+    const handleConfirmDelete = () => {
+        if (!confirmModal.foodToDelete) return;
+        const foodName = confirmModal.foodToDelete.name;
+        setCustomFoodList(prev => prev.filter(f => f.name !== foodName));
+        if (COMMON_FOODS.some(f => f.name === foodName) && !deletedCommonFoods.includes(foodName)) {
+            setDeletedCommonFoods(prev => [...prev, foodName]);
+        }
+        if (selectedFood && selectedFood.name === foodName) setSelectedFood(null);
+        setConfirmModal({ isOpen: false, foodToDelete: null, alertMessage: "" });
     };
 
     /* ───── AI VISION SCAN HANDLERS ───── */
