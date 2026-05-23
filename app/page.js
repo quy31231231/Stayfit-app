@@ -682,6 +682,77 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                     <div className="h-48 relative w-full"><canvas ref={weightChartRef}></canvas></div>
                 </section>
 
+                {/* CHỈ SỐ BMI */}
+                {(() => {
+                    const heightM = (profile?.height || 0) / 100;
+                    const weightKg = profile?.weight || 0;
+                    if (!heightM || !weightKg) return null;
+                    const bmi = weightKg / (heightM * heightM);
+
+                    let category, catColor, catBg;
+                    if (bmi < 18.5)      { category = "Thiếu cân";  catColor = "text-mist-deep";   catBg = "bg-mist-soft"; }
+                    else if (bmi < 25)   { category = "Khỏe mạnh";  catColor = "text-sage-deep";   catBg = "bg-sage-soft"; }
+                    else if (bmi < 30)   { category = "Thừa cân";   catColor = "text-orange-deep"; catBg = "bg-orange-soft"; }
+                    else                 { category = "Béo phì";    catColor = "text-rose-700";    catBg = "bg-rose-100"; }
+
+                    const MIN_BMI = 15, MAX_BMI = 40;
+                    const markerPct = Math.max(0, Math.min(100, ((bmi - MIN_BMI) / (MAX_BMI - MIN_BMI)) * 100));
+
+                    const segments = [
+                        { color: "bg-mist",     flex: 3.5, label: "Thiếu cân",  range: "<18.5",     dot: "bg-mist" },
+                        { color: "bg-sage",     flex: 6.5, label: "Khỏe mạnh",  range: "18.5–24.9", dot: "bg-sage" },
+                        { color: "bg-orange",   flex: 5,   label: "Thừa cân",   range: "25.0–29.9", dot: "bg-orange" },
+                        { color: "bg-rose-500", flex: 10,  label: "Béo phì",    range: ">30.0",     dot: "bg-rose-500" },
+                    ];
+
+                    return (
+                        <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 md:p-6">
+                            <header className="flex items-center gap-3 mb-4">
+                                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-mist-soft text-xl">⚖️</span>
+                                <div>
+                                    <h3 className="text-[15px] font-bold tracking-tight text-ink">Chỉ số BMI của bạn</h3>
+                                    <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Tính từ cân nặng và chiều cao hiện tại</p>
+                                </div>
+                            </header>
+
+                            <div className="flex items-baseline gap-2 mb-4 flex-wrap">
+                                <p className="text-4xl font-bold text-ink tabular-nums leading-none">{bmi.toFixed(1)}</p>
+                                <p className="text-[12px] text-ink-muted">Cân nặng của bạn</p>
+                                <span className={`ml-auto inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold ${catBg} ${catColor}`}>
+                                    {category}
+                                </span>
+                            </div>
+
+                            <div className="relative h-2.5 rounded-full overflow-visible flex mb-4">
+                                {segments.map((s, i) => (
+                                    <div
+                                        key={i}
+                                        className={`${s.color} ${i === 0 ? 'rounded-l-full' : ''} ${i === segments.length - 1 ? 'rounded-r-full' : ''}`}
+                                        style={{ flexGrow: s.flex }}
+                                    />
+                                ))}
+                                <div
+                                    className="absolute top-[-4px] bottom-[-4px] w-[3px] bg-ink rounded-full shadow-sm"
+                                    style={{ left: `${markerPct}%`, transform: 'translateX(-50%)' }}
+                                    aria-hidden="true"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-2">
+                                {segments.map(s => (
+                                    <div key={s.label} className="text-center">
+                                        <div className="flex items-center justify-center gap-1">
+                                            <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`}></span>
+                                            <p className="text-[10px] font-semibold text-ink leading-tight">{s.label}</p>
+                                        </div>
+                                        <p className="text-[10px] text-ink-muted tabular-nums mt-0.5">{s.range}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    );
+                })()}
+
                 {/* PAGINATION */}
                 <div className="flex justify-between items-center bg-white p-1.5 rounded-2xl shadow-soft ring-1 sticky top-[64px] z-10">
                     <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-cream-soft hover:bg-orange-soft hover:text-orange-deep text-ink-muted rounded-xl text-[11px] font-semibold transition">‹ 14 ngày trước</button>
