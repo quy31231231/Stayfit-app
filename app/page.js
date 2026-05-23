@@ -34,6 +34,11 @@ const GOALS = [
     { label: "Duy trì", value: 0 }, { label: "Tăng cân", value: 300 }
 ];
 const MEAL_TYPES = ["Bữa sáng", "Bữa trưa", "Bữa tối", "Ăn vặt"];
+const TEXT_SUGGESTIONS = [
+    "Bữa sáng tôi ăn 2 quả trứng luộc với 1 bát salad rau trộn",
+    "Bữa tối tôi ăn 150g bò bít tết nướng với rau củ hấp",
+    "Tôi ăn nhẹ với 200g sữa chua Hy Lạp không đường và các loại hạt",
+];
 const DIET_MODES = [
     {
         category: "1. Cân bằng & Lành mạnh",
@@ -815,6 +820,8 @@ export default function App() {
         error: null,
         items: null,
     });
+    const [scanMode, setScanMode] = useState('image'); // 'image' | 'text'
+    const [scanText, setScanText] = useState('');
     const [scanFeedbackCache, setScanFeedbackCache] = useState([]);
     const [dismissedSuggestions, setDismissedSuggestions] = useState([]);
     const [librarySuggestion, setLibrarySuggestion] = useState(null);
@@ -1142,6 +1149,8 @@ export default function App() {
         setScanModalOpen(false);
         setTimeout(() => {
             setScanState({ file: null, preview: null, loading: false, error: null, items: null });
+            setScanMode('image');
+            setScanText('');
             const suggestion = detectLibrarySuggestion();
             if (suggestion) setLibrarySuggestion(suggestion);
         }, 350);
@@ -1227,6 +1236,39 @@ export default function App() {
 
     const handleScanReset = () => {
         setScanState({ file: null, preview: null, loading: false, error: null, items: null });
+    };
+
+    const handleTextAnalyze = async () => {
+        if (!scanText.trim()) return;
+        setScanState(s => ({ ...s, loading: true, error: null }));
+        try {
+            const libraryPayload = allFoods.map(f => ({
+                name: f.name, unit: f.unit, per: f.per,
+                kcal: f.kcal, protein: f.protein, carb: f.carb, fat: f.fat,
+            }));
+            const res = await fetch("/api/text-analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userId, password,
+                    text: scanText.trim(),
+                    library: libraryPayload,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Phân tích thất bại");
+            const items = (data.items || []).map((it) => ({
+                ...it,
+                _checked: true,
+                _qty: it.grams,
+                _meal: MEAL_TYPES.includes(it.meal_suggestion) ? it.meal_suggestion : selectedMeal,
+                _editMode: false,
+                _origName: it.name,
+            }));
+            setScanState(s => ({ ...s, loading: false, items }));
+        } catch (err) {
+            setScanState(s => ({ ...s, loading: false, error: err.message }));
+        }
     };
 
     const updateScanItem = (idx, patch) => {
@@ -2013,33 +2055,85 @@ export default function App() {
                         <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
                             <div className="bg-white rounded-t-[2rem] sm:rounded-[2rem] p-6 max-w-md w-full max-h-[92vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200 relative">
                                 {/* Header */}
-                                <div className="flex justify-between items-center mb-5">
-                                    <h3 className="text-[16px] font-bold text-ink tracking-tight">Quét ảnh món ăn ✨</h3>
+                                <div className="flex justify-between items-center mb-3">
+                                    <h3 className="text-[16px] font-bold text-ink tracking-tight">Thêm món bằng AI ✨</h3>
                                     <button onClick={closeScanModal} className="grid h-9 w-9 place-items-center rounded-full bg-cream-soft text-ink-muted hover:bg-cream-deep transition" aria-label="Đóng">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                     </button>
                                 </div>
 
-                                {!scanState.preview ? (
-                                    /* STEP 1: Chưa chọn ảnh */
-                                    <div className="space-y-3">
-                                        <label className="block">
-                                            <input type="file" accept="image/*" capture="environment" onChange={handleScanPick} className="hidden" />
-                                            <span className="block w-full p-5 rounded-2xl bg-orange-soft text-orange-deep text-center font-semibold cursor-pointer hover:bg-orange-soft/80 transition flex items-center justify-center gap-2">
-                                                📷 Chụp ảnh món ăn
-                                            </span>
-                                        </label>
-                                        <label className="block">
-                                            <input type="file" accept="image/*" onChange={handleScanPick} className="hidden" />
-                                            <span className="block w-full p-5 rounded-2xl bg-cream-soft text-ink text-center font-semibold cursor-pointer hover:bg-cream-deep transition flex items-center justify-center gap-2">
-                                                🖼 Chọn từ thư viện
-                                            </span>
-                                        </label>
-                                        <p className="text-[12px] text-ink-faint text-center italic px-4 mt-4">
-                                            AI sẽ ước lượng tên món, khối lượng, kcal và macro dinh dưỡng trong ảnh.
-                                        </p>
-                                        {scanState.error && <p className="text-[12px] text-orange-deep text-center mt-2">{scanState.error}</p>}
+                                {/* Tab switcher — chỉ hiện khi chưa có preview & items */}
+                                {!scanState.preview && !scanState.items && (
+                                    <div className="flex gap-1 bg-cream-soft rounded-2xl p-1 mb-4">
+                                        <button
+                                            onClick={() => setScanMode('image')}
+                                            className={`flex-1 py-2 rounded-xl text-[12px] font-bold transition ${scanMode === 'image' ? 'bg-white shadow-soft text-ink' : 'text-ink-muted hover:text-ink'}`}
+                                        >📷 Quét ảnh</button>
+                                        <button
+                                            onClick={() => setScanMode('text')}
+                                            className={`flex-1 py-2 rounded-xl text-[12px] font-bold transition ${scanMode === 'text' ? 'bg-white shadow-soft text-ink' : 'text-ink-muted hover:text-ink'}`}
+                                        >✍️ Mô tả</button>
                                     </div>
+                                )}
+
+                                {!scanState.preview && !scanState.items ? (
+                                    scanMode === 'image' ? (
+                                        /* STEP 1a: Image mode — chưa chọn ảnh */
+                                        <div className="space-y-3">
+                                            <label className="block">
+                                                <input type="file" accept="image/*" capture="environment" onChange={handleScanPick} className="hidden" />
+                                                <span className="block w-full p-5 rounded-2xl bg-orange-soft text-orange-deep text-center font-semibold cursor-pointer hover:bg-orange-soft/80 transition flex items-center justify-center gap-2">
+                                                    📷 Chụp ảnh món ăn
+                                                </span>
+                                            </label>
+                                            <label className="block">
+                                                <input type="file" accept="image/*" onChange={handleScanPick} className="hidden" />
+                                                <span className="block w-full p-5 rounded-2xl bg-cream-soft text-ink text-center font-semibold cursor-pointer hover:bg-cream-deep transition flex items-center justify-center gap-2">
+                                                    🖼 Chọn từ thư viện
+                                                </span>
+                                            </label>
+                                            <p className="text-[12px] text-ink-faint text-center italic px-4 mt-4">
+                                                AI sẽ ước lượng tên món, khối lượng, kcal và macro dinh dưỡng trong ảnh.
+                                            </p>
+                                            {scanState.error && <p className="text-[12px] text-orange-deep text-center mt-2">{scanState.error}</p>}
+                                        </div>
+                                    ) : (
+                                        /* STEP 1b: Text mode — gõ mô tả */
+                                        <div className="space-y-3">
+                                            <div className="space-y-2">
+                                                {TEXT_SUGGESTIONS.map((s, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => setScanText(s)}
+                                                        className="w-full text-left bg-cream-soft rounded-2xl p-3.5 text-[12px] text-ink-muted hover:bg-cream-deep transition leading-relaxed"
+                                                    >
+                                                        {s}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <p className="text-[10px] text-ink-faint text-center italic">
+                                                Bấm 1 gợi ý để điền nhanh, hoặc gõ mô tả của bạn
+                                            </p>
+                                            <textarea
+                                                value={scanText}
+                                                onChange={e => setScanText(e.target.value)}
+                                                placeholder="Bạn đã ăn gì? VD: 150g cơm với 100g ức gà luộc..."
+                                                rows={3}
+                                                maxLength={1000}
+                                                className="w-full bg-cream-soft p-3.5 rounded-2xl text-[13px] outline-none resize-none focus:ring-2 focus:ring-orange/30"
+                                            />
+                                            <button
+                                                onClick={handleTextAnalyze}
+                                                disabled={!scanText.trim() || scanState.loading}
+                                                className="w-full h-12 bg-orange text-white rounded-xl font-bold disabled:opacity-50 transition hover:bg-orange-deep flex items-center justify-center gap-2"
+                                            >
+                                                {scanState.loading ? (
+                                                    <><span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/> Đang phân tích...</>
+                                                ) : "✨ Phân tích bằng AI"}
+                                            </button>
+                                            {scanState.error && <p className="text-[12px] text-orange-deep text-center">{scanState.error}</p>}
+                                        </div>
+                                    )
                                 ) : !scanState.items ? (
                                     /* STEP 2: Có ảnh, chưa analyze */
                                     <div className="space-y-3">

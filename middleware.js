@@ -15,16 +15,17 @@ export function middleware(req) {
           || req.headers.get('x-real-ip')
           || 'unknown';
 
-  const isVision = req.nextUrl.pathname.startsWith('/api/vision-analyze');
-  const limit = isVision ? LIMIT_VISION : LIMIT_DEFAULT;
-  const bucket = isVision ? buckets.vision : buckets.default;
+  const isAI = req.nextUrl.pathname.startsWith('/api/vision-analyze')
+            || req.nextUrl.pathname.startsWith('/api/text-analyze');
+  const limit = isAI ? LIMIT_VISION : LIMIT_DEFAULT;
+  const bucket = isAI ? buckets.vision : buckets.default;
 
   const now = Date.now();
   const timestamps = (bucket.get(ip) || []).filter(t => now - t < WINDOW_MS);
 
   if (timestamps.length >= limit) {
     return NextResponse.json(
-      { error: `Quá nhiều request${isVision ? ' tới AI vision' : ''}. Vui lòng đợi 1 phút.` },
+      { error: `Quá nhiều request${isAI ? ' tới AI' : ''}. Vui lòng đợi 1 phút.` },
       { status: 429, headers: { 'Retry-After': '60' } }
     );
   }
@@ -49,5 +50,6 @@ export const config = {
     '/api/sync/:path*',
     '/api/save-meal/:path*',
     '/api/vision-analyze/:path*',
+    '/api/text-analyze/:path*',
   ],
 };
