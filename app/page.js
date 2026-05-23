@@ -1547,20 +1547,20 @@ export default function App() {
                                                     </div>
                                                 </div>
                                                 <div className="flex justify-between gap-1.5">
-                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 ring-1">
+                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 px-2 ring-1">
                                                         <p className="text-[9px] font-semibold uppercase tracking-wider text-sage-deep">Protein</p>
                                                         <p className="text-[12px] font-bold text-ink tabular-nums mt-0.5">{totalPro}g</p>
-                                                        <p className="text-[9px] text-ink-muted tabular-nums">→ {projectedPro}g</p>
+                                                        <p className="text-[9px] text-ink-muted tabular-nums mt-1 pt-1 border-t border-cream-deep/40">{projectedPro}g</p>
                                                     </div>
-                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 ring-1">
+                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 px-2 ring-1">
                                                         <p className="text-[9px] font-semibold uppercase tracking-wider text-clay-deep">Carb</p>
                                                         <p className="text-[12px] font-bold text-ink tabular-nums mt-0.5">{totalCarb}g</p>
-                                                        <p className="text-[9px] text-ink-muted tabular-nums">→ {projectedCarb}g</p>
+                                                        <p className="text-[9px] text-ink-muted tabular-nums mt-1 pt-1 border-t border-cream-deep/40">{projectedCarb}g</p>
                                                     </div>
-                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 ring-1">
+                                                    <div className="flex-1 text-center bg-white rounded-xl py-2 px-2 ring-1">
                                                         <p className="text-[9px] font-semibold uppercase tracking-wider text-lilac-deep">Fat</p>
                                                         <p className="text-[12px] font-bold text-ink tabular-nums mt-0.5">{totalFat}g</p>
-                                                        <p className="text-[9px] text-ink-muted tabular-nums">→ {projectedFat}g</p>
+                                                        <p className="text-[9px] text-ink-muted tabular-nums mt-1 pt-1 border-t border-cream-deep/40">{projectedFat}g</p>
                                                     </div>
                                                 </div>
                                             </div>
