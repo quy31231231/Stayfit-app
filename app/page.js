@@ -1879,6 +1879,18 @@ export default function App() {
 
                                             {/* Card hiển thị / edit */}
                                             <div className="rounded-2xl bg-cream-soft ring-1 p-4 relative">
+                                                {/* Source badge - top left */}
+                                                {!scanEditMode && (
+                                                    r.source === "library" ? (
+                                                        <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sage-soft text-sage-deep ring-1 ring-sage/30">
+                                                            📚 Thư viện
+                                                        </span>
+                                                    ) : (
+                                                        <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-clay-soft text-clay-deep ring-1 ring-clay/30">
+                                                            ✨ AI ước tính
+                                                        </span>
+                                                    )
+                                                )}
                                                 {!scanEditMode && (
                                                     <button
                                                         onClick={() => setScanEditMode(true)}
@@ -1935,11 +1947,11 @@ export default function App() {
                                                 ) : (
                                                     /* DISPLAY MODE */
                                                     <>
-                                                        <div className="flex justify-between items-start mb-3 gap-3 pr-10">
+                                                        <div className="flex justify-between items-start mb-3 gap-3 pr-10 pt-7">
                                                             <div className="min-w-0 flex-1">
                                                                 <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{selectedFood.name}</h5>
                                                                 <p className="text-[11px] text-ink-muted tabular-nums mt-0.5">
-                                                                    Khẩu phần ~{selectedFood.per}g/ml
+                                                                    Khẩu phần ~{selectedFood.per}{(selectedFood.unit === "g" || selectedFood.unit === "ml") ? selectedFood.unit : ` ${selectedFood.unit}`}
                                                                 </p>
                                                             </div>
                                                             <div className="text-right shrink-0">
@@ -1982,7 +1994,7 @@ export default function App() {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng (g/ml)</label>
+                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng ({selectedFood.unit || "g/ml"})</label>
                                                     <input type="number" value={qty} step="any" min="1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-soft p-2.5 rounded-xl text-[14px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
                                                 </div>
                                             </div>
