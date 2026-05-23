@@ -243,7 +243,7 @@ export async function POST(req) {
             responseMimeType: "application/json",
             temperature: 0.2,
             topP: 0.8,
-            maxOutputTokens: 2048,
+            maxOutputTokens: 4096,
           },
         });
         result = await model.generateContent([
@@ -290,13 +290,33 @@ export async function POST(req) {
 
     console.log(`[vision-analyze] Đã dùng model: ${usedModel}`);
 
-    const text = result.response.text();
+    const rawText = result.response.text();
+    const finishReason = result.response?.candidates?.[0]?.finishReason;
+
+    // Strip markdown code fences (defensive — responseMimeType=application/json should prevent this, but vài model vẫn wrap).
+    let cleanText = rawText.trim();
+    if (cleanText.startsWith("```")) {
+      cleanText = cleanText.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/, "");
+    }
+    // Extract JSON object if có text thừa ngoài JSON.
+    const jsonStart = cleanText.indexOf("{");
+    const jsonEnd = cleanText.lastIndexOf("}");
+    if (jsonStart >= 0 && jsonEnd > jsonStart) {
+      cleanText = cleanText.slice(jsonStart, jsonEnd + 1);
+    }
+
     let parsed;
     try {
-      parsed = JSON.parse(text);
+      parsed = JSON.parse(cleanText);
     } catch (e) {
-      console.error("[vision-analyze] Parse error:", text.slice(0, 200));
-      return Response.json({ error: "AI trả về không đúng định dạng" }, { status: 502 });
+      console.error(
+        "[vision-analyze] Parse error. finishReason:", finishReason,
+        " | Raw text (500 chars):", rawText.slice(0, 500)
+      );
+      const hint = finishReason === "MAX_TOKENS"
+        ? "AI trả response quá dài, hệ thống không parse được. Thử chụp ít món hơn hoặc thử lại."
+        : "AI trả về không đúng định dạng. Vui lòng thử lại.";
+      return Response.json({ error: hint }, { status: 502 });
     }
 
     if (!parsed.found) {
