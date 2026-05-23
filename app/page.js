@@ -1239,6 +1239,7 @@ export default function App() {
 
     const handleScanReset = () => {
         setScanState({ file: null, preview: null, loading: false, error: null, items: null });
+        setScanText('');
     };
 
     const handleTextAnalyze = async () => {
@@ -2179,7 +2180,9 @@ export default function App() {
                                     const checkedCount = items.filter(it => it._checked).length;
                                     return (
                                         <div className="space-y-3">
-                                            <img src={scanState.preview} alt="Ảnh đã quét" className="w-full max-h-36 object-cover rounded-2xl ring-1" />
+                                            {scanState.preview && (
+                                                <img src={scanState.preview} alt="Ảnh đã quét" className="w-full max-h-36 object-cover rounded-2xl ring-1" />
+                                            )}
                                             <p className="text-[11px] text-ink-muted text-center">
                                                 Phát hiện <span className="font-semibold text-ink">{items.length}</span> món · bỏ chọn món không muốn ghi
                                             </p>
@@ -2337,7 +2340,7 @@ export default function App() {
                                                     onClick={handleScanReset}
                                                     className="px-4 h-12 text-ink bg-cream-soft rounded-xl font-semibold text-[13px] transition hover:bg-cream-deep"
                                                 >
-                                                    Chụp lại
+                                                    {scanMode === 'image' ? 'Chụp lại' : 'Nhập lại'}
                                                 </button>
                                                 <button
                                                     onClick={addAllScannedItems}
