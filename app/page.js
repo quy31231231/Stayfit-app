@@ -1089,11 +1089,16 @@ export default function App() {
     const lastPullAtRef = useRef(0);
     // Cờ chống chạy đồng thời nhiều syncFromCloud
     const pullingRef = useRef(false);
+    // Cờ báo có thay đổi local chưa push lên server (chống pull overwrite changes pending)
+    const pendingChangeRef = useRef(false);
 
     const syncToCloud = async () => {
         if (!userId || !password) return;
         // Tránh push echo: nếu vừa pull xong dưới 1.5s thì bỏ qua (state đổi do pull, không phải user)
-        if (Date.now() - lastPullAtRef.current < 1500) return;
+        if (Date.now() - lastPullAtRef.current < 1500) {
+            pendingChangeRef.current = false;
+            return;
+        }
         try {
             const profileToSave = { ...profile };
             if (!profileToSave.isManualTarget) profileToSave.manualTargetKcal = "";
@@ -1109,12 +1114,15 @@ export default function App() {
                     deletedCommonFoods: deletedCommonFoods,
                 }),
             });
+            pendingChangeRef.current = false;
         } catch (err) { console.error("Lỗi lưu ngầm:", err.message); }
     };
 
     const syncFromCloud = async () => {
         if (!userId || !password) return;
         if (pullingRef.current) return;
+        // Có thay đổi local chưa kịp push → bỏ qua pull để tránh overwrite mất dữ liệu user
+        if (pendingChangeRef.current) return;
         pullingRef.current = true;
         try {
             const res = await fetch(`/api/sync?userId=${userId}&password=${password}`);
@@ -1181,6 +1189,8 @@ export default function App() {
     useEffect(() => {
         if (!isClient) return;
         if (isFirstRender.current) { isFirstRender.current = false; return; }
+        // Đánh dấu có thay đổi local đang chờ push → chặn pull cho đến khi push xong
+        pendingChangeRef.current = true;
         const timeoutId = setTimeout(() => { syncToCloud(); }, 2500);
         return () => clearTimeout(timeoutId);
     }, [history, profile, customFoodList, deletedCommonFoods]);
