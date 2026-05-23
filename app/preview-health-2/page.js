@@ -10,7 +10,8 @@ const PALETTE = {
   bg:         "#FBF8F2",
   bgHeader:   "rgba(251, 248, 242, 0.85)",
   card:       "#FFFFFF",
-  hairline:   "rgba(45, 38, 32, 0.10)",
+  // Viền sage tone — fit với health green, opacity thấp cho cảm giác mềm mại
+  hairline:   "rgba(74, 139, 94, 0.18)",
   neutralSoft:"#F4EFE6",
 
   ink:        "#2D2620",
