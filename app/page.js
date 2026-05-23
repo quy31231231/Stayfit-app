@@ -1460,8 +1460,6 @@ export default function App() {
                             <EqCell label="Cần khoảng" value={Number(target).toLocaleString("vi-VN")} tone="neutral" />
                             <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">−</span>
                             <EqCell label="Đã nạp" value={Math.round(dailyKcal).toLocaleString("vi-VN")} tone="sage" />
-                            <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">+</span>
-                            <EqCell label="Vận động" value="0" tone="clay" />
                             <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">=</span>
                             <EqCell label="Còn dư" value={Math.max(0, Math.round(target - dailyKcal)).toLocaleString("vi-VN")} tone="orange" highlight />
                         </div>
