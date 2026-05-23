@@ -1861,21 +1861,20 @@ export default function App() {
                                         <div className="space-y-4">
                                             <img src={scanState.preview} alt={selectedFood.name} className="w-full max-h-36 object-cover rounded-2xl ring-1" />
 
-                                            {/* Confidence + Edit toggle */}
-                                            <div className="flex items-center gap-2 -mb-2">
-                                                <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-clay-soft text-clay-deep">
-                                                    🤖 AI ước lượng · {Math.round(r.confidence * 100)}%
-                                                </span>
+                                            {/* Card hiển thị / edit */}
+                                            <div className="rounded-2xl bg-cream-soft ring-1 p-4 relative">
                                                 <button
                                                     onClick={() => setScanEditMode(m => !m)}
-                                                    className="ml-auto text-[11px] font-semibold text-orange-deep hover:underline"
+                                                    className="absolute top-2.5 right-2.5 grid h-7 w-7 place-items-center rounded-full text-ink-muted hover:bg-white hover:text-orange-deep transition"
+                                                    aria-label={scanEditMode ? "Xong" : "Chỉnh sửa giá trị"}
+                                                    title={scanEditMode ? "Xong" : "Chỉnh sửa"}
                                                 >
-                                                    {scanEditMode ? "✓ Xong" : "✎ Sửa giá trị"}
+                                                    {scanEditMode ? (
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                                    ) : (
+                                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                                    )}
                                                 </button>
-                                            </div>
-
-                                            {/* Card hiển thị / edit */}
-                                            <div className="rounded-2xl bg-cream-soft ring-1 p-4">
                                                 {scanEditMode ? (
                                                     /* EDIT MODE — chỉnh sửa giá trị theo per-khẩu-phần */
                                                     <div className="space-y-2.5">
@@ -1885,11 +1884,11 @@ export default function App() {
                                                         </div>
                                                         <div className="grid grid-cols-2 gap-2">
                                                             <div>
-                                                                <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Per (g/ml)</label>
+                                                                <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Khẩu phần (g/ml)</label>
                                                                 <input type="number" value={selectedFood.per} step="any" min="1" onChange={e => updateField("per", parseFloat(e.target.value) || 1)} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
                                                             </div>
                                                             <div>
-                                                                <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Kcal / per</label>
+                                                                <label className="text-[9px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Kcal / khẩu phần</label>
                                                                 <input type="number" value={selectedFood.kcal} step="any" min="0" onChange={e => updateField("kcal", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2.5 rounded-xl text-[13px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-orange/30" />
                                                             </div>
                                                         </div>
@@ -1907,16 +1906,16 @@ export default function App() {
                                                                 <input type="number" value={selectedFood.fat} step="any" min="0" onChange={e => updateField("fat", parseFloat(e.target.value) || 0)} className="w-full bg-white p-2 rounded-xl text-[12px] font-bold text-center outline-none tabular-nums focus:ring-2 focus:ring-lilac/30" />
                                                             </div>
                                                         </div>
-                                                        <p className="text-[10px] text-ink-muted italic mt-1">Giá trị là cho mỗi {selectedFood.per}g/ml. Số lượng nạp được tính từ "Số lượng" bên dưới.</p>
+                                                        <p className="text-[10px] text-ink-muted italic mt-1">Giá trị là cho mỗi {selectedFood.per}g/ml. Số lượng nạp được tính từ ô Số lượng bên dưới.</p>
                                                     </div>
                                                 ) : (
                                                     /* DISPLAY MODE */
                                                     <>
                                                         <div className="flex justify-between items-start mb-3">
                                                             <div className="min-w-0 flex-1 pr-3">
-                                                                <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{selectedFood.name}</h5>
+                                                                <h5 className="text-[15px] font-bold tracking-tight text-ink truncate pr-8">{selectedFood.name}</h5>
                                                                 <p className="text-[11px] text-ink-muted tabular-nums mt-0.5">
-                                                                    AI ước lượng ~{selectedFood.per}g/ml
+                                                                    Khẩu phần ~{selectedFood.per}g/ml
                                                                 </p>
                                                             </div>
                                                             <div className="text-right shrink-0">
@@ -1940,8 +1939,8 @@ export default function App() {
                                                         </div>
                                                         {r.note && (
                                                             <div className="mt-3 pt-3 border-t border-cream-deep/50">
-                                                                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted mb-1">🧠 AI suy luận</p>
-                                                                <p className="text-[11px] text-ink leading-relaxed">{r.note}</p>
+                                                                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted mb-1">Bạn có biết?</p>
+                                                                <p className="text-[11px] text-ink leading-relaxed">{String(r.note).replace(/^["'“”‘’\s]+|["'“”‘’\s]+$/g, "")}</p>
                                                             </div>
                                                         )}
                                                     </>

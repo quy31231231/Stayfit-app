@@ -93,7 +93,7 @@ TRẢ VỀ CHỈ JSON (không markdown, không text thừa)
   "fat": 5.8,
   "confidence": 0.75,
   "meal_suggestion": "Ăn vặt",
-  "note": "Thấy 1 ly thủy tinh cao ~12cm chứa khoảng 250ml sữa yến mạch (đầy ~90%). Tính theo chuẩn 55 kcal/100ml. Nếu lượng thực khác ~250ml, hãy chỉnh 'Số lượng' bên dưới.",
+  "note": "Sữa yến mạch giàu beta-glucan giúp hạ cholesterol và no lâu — lựa chọn tuyệt vời cho bữa nhẹ buổi chiều của bạn!",
   "source": "estimate"
 }
 
@@ -104,7 +104,11 @@ QUY TẮC QUAN TRỌNG
 1. LUÔN ước lượng từ ảnh, KHÔNG đọc nhãn dinh dưỡng (bỏ qua nhãn).
 2. "grams" = TỔNG khẩu phần ước tính (gram cho rắn, ml cho lỏng).
 3. "kcal/protein/carb/fat" = TỔNG cho khẩu phần đó (đã nhân với grams/100).
-4. "note" PHẢI giải thích cách ước lượng (vật chứa nào, đầy bao nhiêu, theo chuẩn nào).
+4. "note" KHÔNG giải thích cách ước lượng. Thay vào đó, viết 1 câu (15-30 từ) ẤM ÁP về món:
+   - Lời khen tích cực ("Lựa chọn rất tốt cho...", "Món này giúp...") khi món lành mạnh, HOẶC
+   - Fact "Bạn có biết?" thú vị về dinh dưỡng/văn hóa/lịch sử món đó.
+   KHÔNG nhắc tới gram, kcal, vật chứa, hay "ước lượng". Văn phong thân thiện, tiếng Việt tự nhiên.
+   KHÔNG dùng dấu ngoặc kép ở đầu/cuối câu.
 5. "confidence":
    - 0.85-0.95: thấy rõ vật chứa + thức ăn + ước lượng chắc
    - 0.65-0.84: thấy được nhưng góc/ánh sáng không hoàn hảo
