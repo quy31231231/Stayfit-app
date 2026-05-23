@@ -213,6 +213,10 @@ export async function POST(req) {
           console.warn(`[text-analyze] Model ${modelName} không khả dụng, thử model kế...`);
           continue;
         }
+        if (msg.includes("429") || msg.includes("Too Many Requests") || msg.includes("quota")) {
+          console.warn(`[text-analyze] Model ${modelName} hết quota, thử model kế...`);
+          continue;
+        }
         throw err;
       }
     }
@@ -228,6 +232,9 @@ export async function POST(req) {
       } else if (errMsg.includes("API_KEY_INVALID") || errMsg.includes("403")) {
         userMessage = "API key không hợp lệ.";
         statusCode = 401;
+      } else if (errMsg.includes("429") || errMsg.includes("Too Many Requests") || errMsg.includes("quota")) {
+        userMessage = "Tất cả model Gemini đều đã hết quota hôm nay (free tier: 20 lượt/ngày/model). Hãy đợi đến mai hoặc tạo API key MỚI từ Google AI Studio: https://aistudio.google.com/apikey";
+        statusCode = 429;
       } else if (errMsg.includes("404") || errMsg.includes("not found")) {
         userMessage = "Không tìm thấy model AI khả dụng.";
       } else {

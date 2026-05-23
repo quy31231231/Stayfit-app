@@ -263,6 +263,10 @@ export async function POST(req) {
           console.warn(`[vision-analyze] Model ${modelName} không khả dụng, thử model kế...`);
           continue;
         }
+        if (msg.includes("429") || msg.includes("Too Many Requests") || msg.includes("quota")) {
+          console.warn(`[vision-analyze] Model ${modelName} hết quota, thử model kế...`);
+          continue;
+        }
         throw err;
       }
     }
@@ -278,6 +282,9 @@ export async function POST(req) {
       } else if (errMsg.includes("API_KEY_INVALID") || errMsg.includes("403")) {
         userMessage = "API key không hợp lệ. Kiểm tra lại GEMINI_API_KEY trên Vercel.";
         statusCode = 401;
+      } else if (errMsg.includes("429") || errMsg.includes("Too Many Requests") || errMsg.includes("quota")) {
+        userMessage = "Tất cả model Gemini đều đã hết quota hôm nay (free tier: 20 lượt/ngày/model). Hãy đợi đến mai hoặc tạo API key MỚI từ Google AI Studio (project mới có quota riêng): https://aistudio.google.com/apikey";
+        statusCode = 429;
       } else if (errMsg.includes("404") || errMsg.includes("not found")) {
         userMessage = "Không tìm thấy model AI khả dụng cho account của bạn. Tạo API key mới tại https://aistudio.google.com/apikey.";
       } else {

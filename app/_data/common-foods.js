@@ -507,5 +507,251 @@ export const COMMON_FOODS = [
     { name: "Lá lốt", unit: "g", per: 100, kcal: 30, carb: 5, fat: 1, protein: 3 },
     { name: "Lá chanh", unit: "g", per: 100, kcal: 28, carb: 5, fat: 1, protein: 2 },
     { name: "Lá dứa (Pandan)", unit: "g", per: 100, kcal: 50, carb: 8, fat: 1, protein: 2 },
-    { name: "Rong nho (Sea grapes)", unit: "g", per: 100, kcal: 60, carb: 12, fat: 0.4, protein: 5 }
+    { name: "Rong nho (Sea grapes)", unit: "g", per: 100, kcal: 60, carb: 12, fat: 0.4, protein: 5 },
+
+    /* ════════════════════════════════════════════════════════════════════
+       NHÓM A: MÓN VIỆT NAM CHẾ BIẾN PHỔ THÔNG (~120 món)
+       Source: Viện Dinh dưỡng VN + recipe-based estimate (per portion chuẩn)
+       ════════════════════════════════════════════════════════════════════ */
+
+    // ━━━ PHỞ VARIANTS ━━━ (per 1 tô đầy đủ)
+    { name: "Phở gà", unit: "tô", per: 1, kcal: 420, carb: 55, fat: 8, protein: 28 },
+    { name: "Phở bò tái", unit: "tô", per: 1, kcal: 480, carb: 55, fat: 12, protein: 30 },
+    { name: "Phở bò nạm", unit: "tô", per: 1, kcal: 520, carb: 55, fat: 18, protein: 28 },
+    { name: "Phở bò gân", unit: "tô", per: 1, kcal: 470, carb: 55, fat: 13, protein: 27 },
+    { name: "Phở sốt vang", unit: "tô", per: 1, kcal: 550, carb: 50, fat: 22, protein: 28 },
+    { name: "Phở chua Lạng Sơn", unit: "tô", per: 1, kcal: 430, carb: 65, fat: 8, protein: 18 },
+    { name: "Phở xào", unit: "đĩa", per: 1, kcal: 580, carb: 65, fat: 18, protein: 24 },
+    { name: "Phở cuốn (4 cuốn)", unit: "phần", per: 1, kcal: 380, carb: 45, fat: 12, protein: 22 },
+
+    // ━━━ BÚN VARIANTS ━━━ (per 1 tô / phần đầy đủ)
+    { name: "Bún riêu cua", unit: "tô", per: 1, kcal: 380, carb: 55, fat: 9, protein: 22 },
+    { name: "Bún ốc", unit: "tô", per: 1, kcal: 350, carb: 52, fat: 8, protein: 18 },
+    { name: "Bún măng vịt", unit: "tô", per: 1, kcal: 470, carb: 50, fat: 15, protein: 28 },
+    { name: "Bún mọc", unit: "tô", per: 1, kcal: 410, carb: 52, fat: 12, protein: 24 },
+    { name: "Bún chả cá", unit: "tô", per: 1, kcal: 430, carb: 55, fat: 13, protein: 25 },
+    { name: "Bún thịt nướng", unit: "tô", per: 1, kcal: 510, carb: 65, fat: 18, protein: 28 },
+    { name: "Bún đậu mắm tôm", unit: "phần", per: 1, kcal: 620, carb: 55, fat: 30, protein: 22 },
+    { name: "Bún mắm", unit: "tô", per: 1, kcal: 470, carb: 55, fat: 15, protein: 24 },
+    { name: "Bún nước lèo", unit: "tô", per: 1, kcal: 420, carb: 52, fat: 12, protein: 22 },
+    { name: "Bún cá", unit: "tô", per: 1, kcal: 380, carb: 50, fat: 10, protein: 24 },
+    { name: "Bún suông", unit: "tô", per: 1, kcal: 410, carb: 55, fat: 12, protein: 22 },
+    { name: "Bún sứa", unit: "tô", per: 1, kcal: 360, carb: 45, fat: 10, protein: 22 },
+    { name: "Bún bò Nam Bộ", unit: "tô", per: 1, kcal: 490, carb: 60, fat: 15, protein: 26 },
+    { name: "Bún chả giò", unit: "tô", per: 1, kcal: 540, carb: 60, fat: 22, protein: 22 },
+    { name: "Bún kèn", unit: "tô", per: 1, kcal: 450, carb: 55, fat: 14, protein: 23 },
+
+    // ━━━ MÌ & HỦ TIẾU ━━━
+    { name: "Mì Quảng", unit: "tô", per: 1, kcal: 470, carb: 55, fat: 15, protein: 26 },
+    { name: "Mì Hoành Thánh", unit: "tô", per: 1, kcal: 420, carb: 50, fat: 13, protein: 24 },
+    { name: "Mì Vịt Tiềm", unit: "tô", per: 1, kcal: 580, carb: 52, fat: 22, protein: 32 },
+    { name: "Mì xào giòn", unit: "đĩa", per: 1, kcal: 620, carb: 60, fat: 30, protein: 22 },
+    { name: "Mì xào mềm", unit: "đĩa", per: 1, kcal: 570, carb: 65, fat: 22, protein: 24 },
+    { name: "Hủ tiếu Nam Vang", unit: "tô", per: 1, kcal: 450, carb: 55, fat: 12, protein: 28 },
+    { name: "Hủ tiếu khô", unit: "tô", per: 1, kcal: 480, carb: 60, fat: 15, protein: 26 },
+    { name: "Hủ tiếu Mỹ Tho", unit: "tô", per: 1, kcal: 430, carb: 55, fat: 12, protein: 24 },
+    { name: "Mì gói (1 gói khô 75g)", unit: "gói", per: 1, kcal: 350, carb: 52, fat: 14, protein: 8 },
+    { name: "Mì trộn", unit: "tô", per: 1, kcal: 480, carb: 58, fat: 18, protein: 16 },
+    { name: "Bánh canh giò heo", unit: "tô", per: 1, kcal: 520, carb: 52, fat: 22, protein: 24 },
+    { name: "Bánh canh cua", unit: "tô", per: 1, kcal: 470, carb: 50, fat: 14, protein: 28 },
+
+    // ━━━ BÁNH CÁC LOẠI ━━━
+    { name: "Bánh xèo (1 chiếc lớn)", unit: "chiếc", per: 1, kcal: 480, carb: 50, fat: 24, protein: 18 },
+    { name: "Bánh cuốn (1 đĩa)", unit: "đĩa", per: 1, kcal: 320, carb: 48, fat: 8, protein: 14 },
+    { name: "Bánh khọt (10 chiếc)", unit: "phần", per: 1, kcal: 380, carb: 45, fat: 16, protein: 14 },
+    { name: "Bánh bột lọc (5 chiếc)", unit: "phần", per: 1, kcal: 220, carb: 35, fat: 4, protein: 12 },
+    { name: "Bánh ít (3 cái)", unit: "phần", per: 1, kcal: 290, carb: 52, fat: 6, protein: 8 },
+    { name: "Bánh tét", unit: "g", per: 100, kcal: 280, carb: 45, fat: 9, protein: 6 },
+    { name: "Bánh chưng", unit: "g", per: 100, kcal: 250, carb: 42, fat: 7, protein: 6 },
+    { name: "Bánh giò (1 cái)", unit: "cái", per: 1, kcal: 320, carb: 48, fat: 8, protein: 14 },
+    { name: "Bánh bao thịt (1 cái)", unit: "cái", per: 1, kcal: 280, carb: 40, fat: 8, protein: 12 },
+    { name: "Bánh ướt thịt nướng", unit: "đĩa", per: 1, kcal: 380, carb: 45, fat: 12, protein: 22 },
+    { name: "Bánh đa cua", unit: "tô", per: 1, kcal: 490, carb: 55, fat: 16, protein: 24 },
+    { name: "Bánh hỏi heo quay", unit: "đĩa", per: 1, kcal: 470, carb: 40, fat: 22, protein: 22 },
+    { name: "Bánh căn (10 chiếc)", unit: "phần", per: 1, kcal: 360, carb: 42, fat: 14, protein: 14 },
+    { name: "Bánh đập (1 cái)", unit: "cái", per: 1, kcal: 290, carb: 35, fat: 12, protein: 10 },
+    { name: "Bánh bèo Huế (5 chén)", unit: "phần", per: 1, kcal: 240, carb: 40, fat: 6, protein: 8 },
+    { name: "Bánh nậm (3 cái)", unit: "phần", per: 1, kcal: 210, carb: 35, fat: 4, protein: 8 },
+    { name: "Bánh ram ít (3 cái)", unit: "phần", per: 1, kcal: 320, carb: 45, fat: 12, protein: 8 },
+    { name: "Bánh tráng nướng (1 cái)", unit: "cái", per: 1, kcal: 230, carb: 30, fat: 10, protein: 8 },
+    { name: "Bánh tráng trộn (1 phần)", unit: "phần", per: 1, kcal: 280, carb: 40, fat: 10, protein: 8 },
+    { name: "Bánh tráng cuốn bơ", unit: "phần", per: 1, kcal: 220, carb: 30, fat: 10, protein: 6 },
+
+    // ━━━ CUỐN & NEM ━━━
+    { name: "Gỏi cuốn tôm thịt (1 cuốn)", unit: "cuốn", per: 1, kcal: 95, carb: 14, fat: 2, protein: 6 },
+    { name: "Chả giò chiên (1 cái)", unit: "cái", per: 1, kcal: 130, carb: 12, fat: 8, protein: 5 },
+    { name: "Nem nướng (1 que)", unit: "que", per: 1, kcal: 130, carb: 4, fat: 9, protein: 9 },
+    { name: "Nem rán Bắc (1 cái)", unit: "cái", per: 1, kcal: 120, carb: 10, fat: 7, protein: 6 },
+    { name: "Nem chua rán (5 viên)", unit: "phần", per: 1, kcal: 230, carb: 15, fat: 13, protein: 10 },
+    { name: "Nem cuốn Hà Nội (1 cuốn)", unit: "cuốn", per: 1, kcal: 110, carb: 14, fat: 4, protein: 6 },
+    { name: "Bò bía (1 cuốn)", unit: "cuốn", per: 1, kcal: 90, carb: 12, fat: 3, protein: 4 },
+    { name: "Bì cuốn (1 cuốn)", unit: "cuốn", per: 1, kcal: 130, carb: 16, fat: 5, protein: 6 },
+
+    // ━━━ CƠM ━━━ (per đĩa đầy đủ)
+    { name: "Cơm gà Hải Nam", unit: "đĩa", per: 1, kcal: 620, carb: 75, fat: 18, protein: 35 },
+    { name: "Cơm gà xối mỡ", unit: "đĩa", per: 1, kcal: 750, carb: 80, fat: 30, protein: 32 },
+    { name: "Cơm gà rang muối", unit: "đĩa", per: 1, kcal: 680, carb: 75, fat: 25, protein: 32 },
+    { name: "Cơm gà Tam Kỳ", unit: "đĩa", per: 1, kcal: 580, carb: 72, fat: 18, protein: 28 },
+    { name: "Cơm tấm sườn nướng", unit: "đĩa", per: 1, kcal: 620, carb: 75, fat: 22, protein: 30 },
+    { name: "Cơm hến", unit: "tô", per: 1, kcal: 380, carb: 55, fat: 10, protein: 15 },
+    { name: "Cơm cháy chà bông", unit: "phần", per: 1, kcal: 480, carb: 65, fat: 18, protein: 18 },
+    { name: "Cơm chiên Dương Châu", unit: "đĩa", per: 1, kcal: 520, carb: 65, fat: 18, protein: 22 },
+    { name: "Cơm chiên hải sản", unit: "đĩa", per: 1, kcal: 540, carb: 65, fat: 18, protein: 26 },
+    { name: "Cơm chiên cá mặn", unit: "đĩa", per: 1, kcal: 510, carb: 68, fat: 16, protein: 22 },
+    { name: "Cơm âm phủ", unit: "đĩa", per: 1, kcal: 580, carb: 70, fat: 18, protein: 26 },
+    { name: "Cơm gà nướng mật ong", unit: "đĩa", per: 1, kcal: 650, carb: 75, fat: 20, protein: 32 },
+    { name: "Cơm sườn ram", unit: "đĩa", per: 1, kcal: 680, carb: 72, fat: 26, protein: 30 },
+    { name: "Cơm bò xào hành tây", unit: "đĩa", per: 1, kcal: 620, carb: 70, fat: 22, protein: 30 },
+    { name: "Cơm trộn Hàn Quốc (Bibimbap)", unit: "đĩa", per: 1, kcal: 550, carb: 72, fat: 14, protein: 24 },
+
+    // ━━━ XÔI ━━━ (per đĩa ~150-200g)
+    { name: "Xôi gà", unit: "đĩa", per: 1, kcal: 460, carb: 65, fat: 12, protein: 22 },
+    { name: "Xôi xéo", unit: "đĩa", per: 1, kcal: 430, carb: 70, fat: 12, protein: 12 },
+    { name: "Xôi mặn", unit: "đĩa", per: 1, kcal: 480, carb: 65, fat: 16, protein: 18 },
+    { name: "Xôi đậu xanh", unit: "đĩa", per: 1, kcal: 340, carb: 65, fat: 4, protein: 10 },
+    { name: "Xôi lá cẩm", unit: "đĩa", per: 1, kcal: 320, carb: 65, fat: 3, protein: 8 },
+    { name: "Xôi gấc", unit: "đĩa", per: 1, kcal: 360, carb: 68, fat: 5, protein: 8 },
+    { name: "Xôi vò", unit: "đĩa", per: 1, kcal: 400, carb: 68, fat: 8, protein: 12 },
+    { name: "Xôi đậu phộng", unit: "đĩa", per: 1, kcal: 410, carb: 65, fat: 12, protein: 12 },
+
+    // ━━━ CHÁO ━━━ (per tô ~400g)
+    { name: "Cháo gà", unit: "tô", per: 1, kcal: 320, carb: 45, fat: 8, protein: 18 },
+    { name: "Cháo lòng", unit: "tô", per: 1, kcal: 380, carb: 45, fat: 15, protein: 18 },
+    { name: "Cháo trai", unit: "tô", per: 1, kcal: 270, carb: 42, fat: 5, protein: 13 },
+    { name: "Cháo vịt", unit: "tô", per: 1, kcal: 360, carb: 45, fat: 12, protein: 18 },
+    { name: "Cháo cá", unit: "tô", per: 1, kcal: 290, carb: 42, fat: 7, protein: 16 },
+    { name: "Cháo trắng", unit: "tô", per: 1, kcal: 180, carb: 38, fat: 1, protein: 4 },
+    { name: "Cháo sườn", unit: "tô", per: 1, kcal: 340, carb: 45, fat: 10, protein: 18 },
+    { name: "Cháo tôm", unit: "tô", per: 1, kcal: 310, carb: 45, fat: 6, protein: 18 },
+    { name: "Cháo bồ câu", unit: "tô", per: 1, kcal: 340, carb: 42, fat: 10, protein: 22 },
+    { name: "Cháo ếch", unit: "tô", per: 1, kcal: 320, carb: 42, fat: 9, protein: 18 },
+
+    // ━━━ LẨU ━━━ (per phần ~600g)
+    { name: "Lẩu Thái", unit: "phần", per: 1, kcal: 480, carb: 35, fat: 15, protein: 45 },
+    { name: "Lẩu mắm", unit: "phần", per: 1, kcal: 520, carb: 40, fat: 18, protein: 45 },
+    { name: "Lẩu nấm", unit: "phần", per: 1, kcal: 380, carb: 30, fat: 10, protein: 35 },
+    { name: "Lẩu cá kèo", unit: "phần", per: 1, kcal: 420, carb: 35, fat: 12, protein: 42 },
+    { name: "Lẩu gà lá é", unit: "phần", per: 1, kcal: 460, carb: 30, fat: 16, protein: 45 },
+    { name: "Lẩu bò", unit: "phần", per: 1, kcal: 530, carb: 30, fat: 22, protein: 52 },
+
+    // ━━━ CANH ━━━ (per tô nhỏ ~300g)
+    { name: "Canh chua cá", unit: "tô", per: 1, kcal: 220, carb: 15, fat: 8, protein: 22 },
+    { name: "Canh khổ qua nhồi thịt", unit: "tô", per: 1, kcal: 180, carb: 8, fat: 9, protein: 18 },
+    { name: "Canh rau ngót thịt bằm", unit: "tô", per: 1, kcal: 130, carb: 6, fat: 5, protein: 15 },
+    { name: "Canh cua đồng rau đay", unit: "tô", per: 1, kcal: 150, carb: 10, fat: 6, protein: 14 },
+    { name: "Canh bí đỏ", unit: "tô", per: 1, kcal: 110, carb: 14, fat: 3, protein: 6 },
+    { name: "Canh măng vịt", unit: "tô", per: 1, kcal: 180, carb: 8, fat: 9, protein: 16 },
+    { name: "Canh thịt bằm cải", unit: "tô", per: 1, kcal: 140, carb: 6, fat: 6, protein: 16 },
+    { name: "Canh nấm", unit: "tô", per: 1, kcal: 90, carb: 6, fat: 3, protein: 10 },
+
+    // ━━━ KHO, NƯỚNG, CHIÊN ━━━ (per phần ~150-200g)
+    { name: "Thịt kho tàu", unit: "phần", per: 1, kcal: 420, carb: 8, fat: 30, protein: 26 },
+    { name: "Cá kho tộ", unit: "phần", per: 1, kcal: 280, carb: 5, fat: 13, protein: 30 },
+    { name: "Kho quẹt", unit: "phần", per: 1, kcal: 130, carb: 10, fat: 8, protein: 5 },
+    { name: "Thịt kho trứng", unit: "phần", per: 1, kcal: 410, carb: 8, fat: 28, protein: 26 },
+    { name: "Cá kho riềng", unit: "phần", per: 1, kcal: 270, carb: 4, fat: 12, protein: 30 },
+    { name: "Sườn nướng BBQ", unit: "phần", per: 1, kcal: 410, carb: 8, fat: 26, protein: 30 },
+    { name: "Gà nướng mật ong", unit: "đùi", per: 1, kcal: 480, carb: 12, fat: 26, protein: 40 },
+    { name: "Cá nướng riềng mẻ", unit: "phần", per: 1, kcal: 350, carb: 5, fat: 16, protein: 40 },
+    { name: "Gà chiên giòn", unit: "đùi", per: 1, kcal: 380, carb: 10, fat: 24, protein: 32 },
+    { name: "Sườn rim mặn ngọt", unit: "phần", per: 1, kcal: 430, carb: 15, fat: 26, protein: 28 },
+
+    /* ════════════════════════════════════════════════════════════════════
+       NHÓM B: NGUYÊN LIỆU VIỆT NAM PHỔ BIẾN (~80 món)
+       Source: Viện Dinh dưỡng VN (per 100g raw/dry, trừ trứng quả)
+       ════════════════════════════════════════════════════════════════════ */
+
+    // ━━━ ĐỒ KHÔ (CÁ, MỰC, TÔM) ━━━
+    { name: "Cá cơm khô", unit: "g", per: 100, kcal: 350, carb: 4, fat: 10, protein: 55 },
+    { name: "Cá thu khô", unit: "g", per: 100, kcal: 320, carb: 5, fat: 15, protein: 45 },
+    { name: "Cá khô bổi", unit: "g", per: 100, kcal: 380, carb: 3, fat: 18, protein: 52 },
+    { name: "Mực khô", unit: "g", per: 100, kcal: 290, carb: 4, fat: 2, protein: 65 },
+    { name: "Tép khô", unit: "g", per: 100, kcal: 295, carb: 5, fat: 3, protein: 60 },
+    { name: "Khô bò (mặn ngọt)", unit: "g", per: 100, kcal: 350, carb: 15, fat: 12, protein: 45 },
+    { name: "Khô gà lá chanh", unit: "g", per: 100, kcal: 360, carb: 8, fat: 14, protein: 52 },
+    { name: "Khô heo (chà bông mặn ngọt)", unit: "g", per: 100, kcal: 380, carb: 12, fat: 14, protein: 55 },
+    { name: "Cá thiều khô", unit: "g", per: 100, kcal: 340, carb: 4, fat: 15, protein: 50 },
+    { name: "Cá đối khô", unit: "g", per: 100, kcal: 310, carb: 4, fat: 12, protein: 48 },
+    { name: "Khô cá tra phồng", unit: "g", per: 100, kcal: 420, carb: 5, fat: 22, protein: 52 },
+    { name: "Cá nục khô", unit: "g", per: 100, kcal: 320, carb: 3, fat: 12, protein: 50 },
+
+    // ━━━ MẮM ━━━
+    { name: "Mắm tôm", unit: "g", per: 100, kcal: 110, carb: 5, fat: 2, protein: 20 },
+    { name: "Mắm tép chua", unit: "g", per: 100, kcal: 80, carb: 8, fat: 2, protein: 12 },
+    { name: "Mắm ruốc", unit: "g", per: 100, kcal: 130, carb: 4, fat: 3, protein: 22 },
+    { name: "Mắm cá linh", unit: "g", per: 100, kcal: 150, carb: 3, fat: 8, protein: 16 },
+    { name: "Mắm cá sặc", unit: "g", per: 100, kcal: 140, carb: 3, fat: 7, protein: 15 },
+    { name: "Mắm nêm", unit: "g", per: 100, kcal: 95, carb: 6, fat: 2, protein: 14 },
+    { name: "Mắm thái Châu Đốc", unit: "g", per: 100, kcal: 220, carb: 12, fat: 12, protein: 15 },
+    { name: "Mắm bò hóc (prahok)", unit: "g", per: 100, kcal: 160, carb: 3, fat: 9, protein: 16 },
+
+    // ━━━ RAU GIA VỊ & LÁ VN ━━━
+    { name: "Rau mùi (ngò rí)", unit: "g", per: 100, kcal: 23, carb: 3.7, fat: 0.5, protein: 2.1 },
+    { name: "Ngò gai", unit: "g", per: 100, kcal: 25, carb: 4, fat: 0.5, protein: 2.2 },
+    { name: "Ngò om", unit: "g", per: 100, kcal: 28, carb: 4.5, fat: 0.7, protein: 2.2 },
+    { name: "Rau răm", unit: "g", per: 100, kcal: 30, carb: 5, fat: 0.8, protein: 2.5 },
+    { name: "Rau quế (Thai basil)", unit: "g", per: 100, kcal: 27, carb: 4, fat: 0.6, protein: 3.2 },
+    { name: "Lá mơ", unit: "g", per: 100, kcal: 35, carb: 6, fat: 1, protein: 3.5 },
+    { name: "Lá đinh lăng", unit: "g", per: 100, kcal: 50, carb: 8, fat: 2, protein: 4 },
+    { name: "Lá xương sông", unit: "g", per: 100, kcal: 32, carb: 5.5, fat: 0.8, protein: 2.5 },
+    { name: "Lá vông (Erythrina)", unit: "g", per: 100, kcal: 36, carb: 6, fat: 1, protein: 3 },
+    { name: "Hoa thiên lý", unit: "g", per: 100, kcal: 45, carb: 7, fat: 1.5, protein: 3.5 },
+    { name: "Hoa bí", unit: "g", per: 100, kcal: 18, carb: 3, fat: 0.4, protein: 1.5 },
+    { name: "Lá sương sâm", unit: "g", per: 100, kcal: 25, carb: 5, fat: 0.3, protein: 1.8 },
+
+    // ━━━ TRÁI CÂY LOCAL VN ━━━
+    { name: "Chuối sứ", unit: "g", per: 100, kcal: 110, carb: 26, fat: 0.5, protein: 1.5 },
+    { name: "Chuối Laba", unit: "g", per: 100, kcal: 93, carb: 24, fat: 0.3, protein: 1.2 },
+    { name: "Chuối tây", unit: "g", per: 100, kcal: 95, carb: 24, fat: 0.4, protein: 1.3 },
+    { name: "Chuối hột", unit: "g", per: 100, kcal: 85, carb: 22, fat: 0.4, protein: 1 },
+    { name: "Mãng cầu ta (sweetsop)", unit: "g", per: 100, kcal: 94, carb: 24, fat: 0.6, protein: 2.1 },
+    { name: "Na bở", unit: "g", per: 100, kcal: 95, carb: 24, fat: 0.7, protein: 1.8 },
+    { name: "Quả sấu", unit: "g", per: 100, kcal: 38, carb: 9, fat: 0.2, protein: 0.4 },
+    { name: "Quả vối khô", unit: "g", per: 100, kcal: 250, carb: 65, fat: 0.5, protein: 2 },
+    { name: "Quả nhót", unit: "g", per: 100, kcal: 42, carb: 10, fat: 0.3, protein: 0.8 },
+    { name: "Trái me (cơm chua)", unit: "g", per: 100, kcal: 239, carb: 63, fat: 0.6, protein: 2.8 },
+    { name: "Quả gấc", unit: "g", per: 100, kcal: 90, carb: 20, fat: 2.5, protein: 1.5 },
+    { name: "Quả dứa dại", unit: "g", per: 100, kcal: 50, carb: 12, fat: 0.3, protein: 0.5 },
+
+    // ━━━ ĐẬU PHỤ VARIANTS LOCAL ━━━
+    { name: "Đậu hũ chiên giòn", unit: "g", per: 100, kcal: 280, carb: 9, fat: 22, protein: 15 },
+    { name: "Tàu hủ ky tươi", unit: "g", per: 100, kcal: 200, carb: 13, fat: 13, protein: 16 },
+    { name: "Tàu hủ ky chiên", unit: "g", per: 100, kcal: 380, carb: 15, fat: 30, protein: 18 },
+    { name: "Đậu hũ non (silken)", unit: "g", per: 100, kcal: 55, carb: 2.5, fat: 3, protein: 4.5 },
+
+    // ━━━ BÚN KHÔ & BÁNH SỢI ━━━
+    { name: "Bún tàu (miến đậu xanh khô)", unit: "g", per: 100, kcal: 350, carb: 85, fat: 0.1, protein: 0.1 },
+    { name: "Sợi hủ tiếu khô", unit: "g", per: 100, kcal: 360, carb: 80, fat: 0.4, protein: 5 },
+    { name: "Bánh canh bột gạo (tươi)", unit: "g", per: 100, kcal: 110, carb: 24, fat: 0.2, protein: 2.2 },
+    { name: "Bánh canh bột lọc (tươi)", unit: "g", per: 100, kcal: 130, carb: 30, fat: 0.1, protein: 1.5 },
+    { name: "Mì trứng tươi", unit: "g", per: 100, kcal: 280, carb: 55, fat: 4, protein: 10 },
+    { name: "Mì căn (gluten)", unit: "g", per: 100, kcal: 370, carb: 14, fat: 2, protein: 75 },
+    { name: "Bánh tráng phơi sương", unit: "g", per: 100, kcal: 340, carb: 80, fat: 0.5, protein: 5 },
+    { name: "Bánh hỏi (sợi tươi)", unit: "g", per: 100, kcal: 105, carb: 23, fat: 0.3, protein: 2.2 },
+
+    // ━━━ GIA VỊ VN ĐẶC THÙ ━━━
+    { name: "Hành phi", unit: "g", per: 100, kcal: 530, carb: 50, fat: 35, protein: 8 },
+    { name: "Tỏi phi", unit: "g", per: 100, kcal: 540, carb: 45, fat: 36, protein: 8 },
+    { name: "Mỡ hành", unit: "g", per: 100, kcal: 720, carb: 2, fat: 78, protein: 2 },
+    { name: "Sa tế tôm", unit: "g", per: 100, kcal: 410, carb: 12, fat: 38, protein: 8 },
+    { name: "Dầu điều (annatto)", unit: "ml", per: 100, kcal: 870, carb: 0, fat: 97, protein: 0 },
+    { name: "Đường phèn", unit: "g", per: 100, kcal: 380, carb: 100, fat: 0, protein: 0 },
+    { name: "Đường thốt nốt", unit: "g", per: 100, kcal: 380, carb: 95, fat: 0.1, protein: 0.4 },
+    { name: "Bột canh", unit: "g", per: 100, kcal: 110, carb: 14, fat: 2, protein: 4 },
+    { name: "Bột tôm", unit: "g", per: 100, kcal: 290, carb: 15, fat: 4, protein: 52 },
+    { name: "Tinh bột nghệ", unit: "g", per: 100, kcal: 380, carb: 85, fat: 3, protein: 8 },
+    { name: "Bột riềng", unit: "g", per: 100, kcal: 230, carb: 70, fat: 2, protein: 4 },
+    { name: "Nước cốt me", unit: "g", per: 100, kcal: 240, carb: 63, fat: 0.5, protein: 2.8 },
+
+    // ━━━ KHÁC (MẦM, ĐỒ MUỐI, TRỨNG ĐẶC SẢN) ━━━
+    { name: "Mầm đậu nành tươi", unit: "g", per: 100, kcal: 122, carb: 9.6, fat: 6.7, protein: 13 },
+    { name: "Củ kiệu muối", unit: "g", per: 100, kcal: 35, carb: 8, fat: 0.2, protein: 1 },
+    { name: "Dưa cải chua củ", unit: "g", per: 100, kcal: 22, carb: 4, fat: 0.3, protein: 1.6 },
+    { name: "Dưa cà pháo muối", unit: "g", per: 100, kcal: 35, carb: 6, fat: 0.5, protein: 2 },
+    { name: "Trứng vịt muối (1 quả)", unit: "quả", per: 1, kcal: 130, carb: 2, fat: 10, protein: 8 },
+    { name: "Trứng cút lộn (1 quả)", unit: "quả", per: 1, kcal: 22, carb: 0.5, fat: 1.5, protein: 2.2 },
+    { name: "Hột vịt bắc thảo (1 quả)", unit: "quả", per: 1, kcal: 130, carb: 3, fat: 10, protein: 9 },
+    { name: "Trứng gà ác (1 quả)", unit: "quả", per: 1, kcal: 45, carb: 0.5, fat: 3, protein: 4.5 },
+    { name: "Chả mực Hạ Long", unit: "g", per: 100, kcal: 230, carb: 8, fat: 14, protein: 18 },
+    { name: "Bánh mì baguette VN (1 ổ ~80g)", unit: "ổ", per: 1, kcal: 220, carb: 45, fat: 3, protein: 8 }
 ];
