@@ -39,8 +39,8 @@ export async function POST(req) {
     try {
       const hashedPassword = hashPassword(password);
 
-      // 1. KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE (đọc đến cột L để lấy luôn customFoods/deletedCommon hiện tại)
-      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:L" });
+      // 1. KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE (đọc đến cột N để lấy luôn customFoods/deletedCommon/startWeight/targetWeight)
+      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:N" });
       const profileRows = profileRes.data.values || [];
       const profileIndex = profileRows.findIndex(row => row[0] === userId);
 
@@ -54,8 +54,12 @@ export async function POST(req) {
       // Nếu client không gửi customFoods/deletedCommonFoods, giữ nguyên giá trị cũ trong Sheets
       const existingCustomFoods = profileIndex !== -1 ? (profileRows[profileIndex][10] || "") : "";
       const existingDeletedCommon = profileIndex !== -1 ? (profileRows[profileIndex][11] || "") : "";
+      const existingStartWeight = profileIndex !== -1 ? (profileRows[profileIndex][12] || "") : "";
+      const existingTargetWeight = profileIndex !== -1 ? (profileRows[profileIndex][13] || "") : "";
       const customFoodsJson = Array.isArray(customFoods) ? JSON.stringify(customFoods) : existingCustomFoods;
       const deletedCommonJson = Array.isArray(deletedCommonFoods) ? JSON.stringify(deletedCommonFoods) : existingDeletedCommon;
+      const startWeightVal = (profile.startWeight ?? null) !== null ? profile.startWeight : existingStartWeight;
+      const targetWeightVal = (profile.targetWeight ?? null) !== null ? profile.targetWeight : existingTargetWeight;
 
       const newProfileRow = [
         userId, profile.gender || "", profile.age || "", profile.height || "", profile.weight || "",
@@ -63,17 +67,19 @@ export async function POST(req) {
         new Date().toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" }),
         hashedPassword,
         customFoodsJson,
-        deletedCommonJson
+        deletedCommonJson,
+        startWeightVal,
+        targetWeightVal
       ];
 
       if (profileIndex !== -1) {
         await sheets.spreadsheets.values.update({
-          spreadsheetId: SHEET_ID, range: `Profile!A${profileIndex + 1}:L${profileIndex + 1}`, valueInputOption: "USER_ENTERED",
+          spreadsheetId: SHEET_ID, range: `Profile!A${profileIndex + 1}:N${profileIndex + 1}`, valueInputOption: "USER_ENTERED",
           requestBody: { values: [newProfileRow] }
         });
       } else {
         await sheets.spreadsheets.values.append({
-          spreadsheetId: SHEET_ID, range: "Profile!A:L", valueInputOption: "USER_ENTERED",
+          spreadsheetId: SHEET_ID, range: "Profile!A:N", valueInputOption: "USER_ENTERED",
           requestBody: { values: [newProfileRow] }
         });
       }
@@ -215,8 +221,8 @@ export async function GET(req) {
     const sheets = await getSheets();
     const hashedPassword = hashPassword(password);
 
-    // 1. LẤY PROFILE (đọc đến cột L để lấy customFoods + deletedCommonFoods)
-    const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:L" });
+    // 1. LẤY PROFILE (đọc đến cột N để lấy customFoods + deletedCommonFoods + startWeight + targetWeight)
+    const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:N" });
     const profileRows = profileRes.data.values || [];
     const profileRow = profileRows.find(row => row[0] === userId);
 
@@ -238,6 +244,9 @@ export async function GET(req) {
       goal: parseInt(profileRow[6]) || 0,
       manualTargetKcal: profileRow[7] ? parseInt(profileRow[7]) : null,
     };
+    // Chỉ thêm startWeight/targetWeight nếu có giá trị (tránh overwrite local state với null)
+    if (profileRow[12]) profile.startWeight = parseFloat(profileRow[12]);
+    if (profileRow[13]) profile.targetWeight = parseFloat(profileRow[13]);
 
     let customFoods = null;
     let deletedCommonFoods = null;

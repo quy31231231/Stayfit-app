@@ -1130,7 +1130,7 @@ export default function App() {
                 data.profile.manualCarb = profile.manualCarb || 250;
                 data.profile.manualFat = profile.manualFat || 55;
                 data.profile.macroDietMode = profile.macroDietMode || "Tiêu chuẩn (Standard)";
-                setProfile(data.profile);
+                setProfile(prev => ({ ...prev, ...data.profile }));
             }
             if (data.history) setHistory(data.history);
             if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
