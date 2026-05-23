@@ -1861,12 +1861,11 @@ export default function App() {
                                         <div className="space-y-4">
                                             <img src={scanState.preview} alt={selectedFood.name} className="w-full max-h-36 object-cover rounded-2xl ring-1" />
 
-                                            {/* Source badge */}
+                                            {/* Confidence + Edit toggle */}
                                             <div className="flex items-center gap-2 -mb-2">
-                                                <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${r.source === "label" ? "bg-sage-soft text-sage-deep" : "bg-clay-soft text-clay-deep"}`}>
-                                                    {r.source === "label" ? "📋 Đọc từ nhãn" : "🤖 AI ước lượng"}
+                                                <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-clay-soft text-clay-deep">
+                                                    🤖 AI ước lượng · {Math.round(r.confidence * 100)}%
                                                 </span>
-                                                <span className="text-[10px] text-ink-muted tabular-nums">độ tin cậy {Math.round(r.confidence * 100)}%</span>
                                                 <button
                                                     onClick={() => setScanEditMode(m => !m)}
                                                     className="ml-auto text-[11px] font-semibold text-orange-deep hover:underline"
@@ -1917,11 +1916,8 @@ export default function App() {
                                                             <div className="min-w-0 flex-1 pr-3">
                                                                 <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{selectedFood.name}</h5>
                                                                 <p className="text-[11px] text-ink-muted tabular-nums mt-0.5">
-                                                                    Per {selectedFood.per}g/ml: {selectedFood.kcal} kcal · {selectedFood.protein}P / {selectedFood.carb}C / {selectedFood.fat}F
+                                                                    AI ước lượng ~{selectedFood.per}g/ml
                                                                 </p>
-                                                                {r.note && (
-                                                                    <p className="text-[11px] text-ink-muted italic mt-1">"{r.note}"</p>
-                                                                )}
                                                             </div>
                                                             <div className="text-right shrink-0">
                                                                 <p className="text-3xl font-bold text-orange-deep tabular-nums leading-none">{scaled.kcal}</p>
@@ -1942,6 +1938,12 @@ export default function App() {
                                                                 <p className="text-[13px] font-bold tabular-nums mt-0.5">{scaled.fat}g</p>
                                                             </div>
                                                         </div>
+                                                        {r.note && (
+                                                            <div className="mt-3 pt-3 border-t border-cream-deep/50">
+                                                                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted mb-1">🧠 AI suy luận</p>
+                                                                <p className="text-[11px] text-ink leading-relaxed">{r.note}</p>
+                                                            </div>
+                                                        )}
                                                     </>
                                                 )}
                                             </div>

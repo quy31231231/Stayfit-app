@@ -2,55 +2,116 @@ import { google } from "googleapis";
 import crypto from "crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const VISION_PROMPT = `Bạn là chuyên gia dinh dưỡng. Phân tích ảnh và trả về JSON nutrition.
+const VISION_PROMPT = `Bạn là chuyên gia dinh dưỡng có kiến thức sâu về món ăn Việt Nam và quốc tế.
 
-PHÂN LOẠI ẢNH trước:
+NHIỆM VỤ: Quan sát ảnh và **ước lượng tổng dinh dưỡng** (kcal, protein, carb, fat) cho TOÀN BỘ khẩu phần thức ăn/đồ uống thấy trong ảnh.
 
-A) **SẢN PHẨM ĐÓNG GÓI** (chai, hộp, túi có nhãn dinh dưỡng):
-   - TÌM "Bảng thành phần dinh dưỡng / Nutrition Facts" trên nhãn
-   - ĐỌC giá trị TRỰC TIẾP từ nhãn (KHÔNG ước lượng):
-     * Năng lượng / Energy / Calories → kcal
-     * Chất đạm / Protein → protein
-     * Chất bột đường / Carbohydrate / Carb → carb
-     * Chất béo / Fat → fat
-   - GHI NHẬN "serving size" trên nhãn:
-     * Nếu nhãn ghi "per 100ml" → grams = 100, đơn vị thực ra là ml (cứ ghi grams)
-     * Nếu nhãn ghi "per 100g" → grams = 100
-     * Nếu nhãn ghi "per 1 chai/hộp" → grams = volume tổng (vd: chai 1L = 1000)
-   - Confidence cao (0.85-0.95) khi đọc rõ nhãn
-   - Confidence thấp (0.4-0.6) khi nhãn mờ/không thấy rõ — ghi chú "Vui lòng kiểm tra lại nhãn"
+KHÔNG ĐỌC nhãn dinh dưỡng (kể cả khi thấy). LUÔN ước lượng dựa trên KÍCH THƯỚC THẤY được.
 
-B) **MÓN ĂN CHẾ BIẾN** (cơm, phở, salad, đồ ăn tự làm):
-   - Ước lượng theo kích thước khẩu phần thấy được
-   - Sử dụng dữ liệu dinh dưỡng tiêu chuẩn cho món Việt (USDA / TPHCM Nutrition DB)
-   - grams = khối lượng khẩu phần ước tính
-   - Confidence 0.5-0.85 tuỳ độ rõ ràng
+═══════════════════════════════════════════════════════════════
+QUY TRÌNH 4 BƯỚC — bắt buộc thực hiện trước khi trả JSON
+═══════════════════════════════════════════════════════════════
 
-C) **KHÔNG PHẢI ĐỒ ĂN** (phong cảnh, người, vật, etc.): trả về { "found": false }
+【BƯỚC 1】 NHẬN DIỆN MÓN ĂN
+- Xác định tên cụ thể (vd: phở bò tái, cơm tấm sườn nướng bì chả, sữa yến mạch trong ly thủy tinh)
+- Liệt kê các thành phần chính nếu là món hỗn hợp
 
-Trả về CHỈ JSON (không markdown):
+【BƯỚC 2】 ƯỚC LƯỢNG KÍCH THƯỚC KHẨU PHẦN (cực kỳ quan trọng)
+Dùng vật chứa làm thước đo, tham khảo bảng dưới:
+
+  VẬT CHỨA RẮN (thức ăn):
+  - Đĩa nhỏ Việt: đường kính ~18-20cm, chứa ~300-400g
+  - Đĩa lớn Việt: đường kính ~22-25cm, chứa ~400-600g
+  - Đĩa Western: đường kính ~28cm, chứa ~500-700g
+  - Tô phở (tô lớn): đường kính ~20cm, chứa 600-800ml/g
+  - Tô bún/canh (tô nhỏ): chứa ~400-500ml/g
+  - Bát cơm: chứa ~150-250g cơm
+  - Khay com tấm: chứa ~400-500g (cơm + thịt + đồ ăn kèm)
+
+  VẬT CHỨA LỎNG (đồ uống):
+  - Ly nước thủy tinh thường: 200-300ml
+  - Ly cà phê take-away: 350-500ml
+  - Cốc espresso: 30-50ml
+  - Cốc capuccino/latte: 200-300ml
+  - Chai nước 500ml, lon nước 330ml, lon bia 330-500ml
+  - Bình thủy: 1000-1500ml
+  - Hộp sữa nhỏ: 110-180ml; hộp lớn: 1000ml
+
+  VẬT THAM CHIẾU KHÁC:
+  - Muỗng canh: ~15ml; muỗng cà phê: ~5ml
+  - Đũa Việt: dài ~25cm
+  - Tay người trung bình: lòng bàn tay ~10-12cm
+  - Quả trứng gà: ~50-55g
+  - Lát bánh mì sandwich: ~25-30g
+
+Mô tả vật chứa thấy trong ảnh và mức độ đầy (đầy / 3/4 / nửa / ít).
+Cuối bước này: ước tính KHỐI LƯỢNG/THỂ TÍCH tổng = ? gram (hoặc ml cho lỏng, vẫn ghi vào "grams")
+
+【BƯỚC 3】 TRA DỮ LIỆU DINH DƯỠNG CHUẨN per 100g/ml
+Tham khảo (dùng kiến thức của bạn về món Việt + USDA + dữ liệu dinh dưỡng quốc tế):
+
+  CƠ BẢN VIỆT NAM (per 100g):
+  - Cơm trắng: 130 kcal, 2.7P, 28C, 0.3F
+  - Phở bò (cả nước): ~50 kcal, 3P, 6C, 1F
+  - Bún bò Huế: ~60 kcal, 3.5P, 7C, 1.5F
+  - Bánh mì thịt: ~250 kcal, 10P, 35C, 8F
+  - Ức gà luộc: 165 kcal, 31P, 0C, 3.6F
+  - Thịt heo nạc: 150 kcal, 22P, 0C, 6F
+  - Rau xào: 60 kcal, 2P, 6C, 3F
+
+  ĐỒ UỐNG (per 100ml):
+  - Sữa tươi nguyên kem: ~62 kcal, 3.3P, 4.9C, 3.4F
+  - Sữa tươi không đường: ~42 kcal, 3.4P, 5C, 1F
+  - Sữa yến mạch nguyên bản: ~50-65 kcal, 0.6-1P, 6.5-8C, 1.5-3F
+  - Sữa hạnh nhân không đường: ~17 kcal, 0.5P, 0.3C, 1.5F
+  - Cà phê đen: ~2 kcal/100ml; cà phê sữa: ~70 kcal/100ml
+  - Trà sữa trân châu: ~80-120 kcal/100ml tùy thành phần
+  - Nước cam vắt: 45 kcal, 1P, 10C, 0F
+
+(Dùng kiến thức của bạn nếu món không có trong danh sách trên — nhưng phải dựa trên dữ liệu thực tế, không bịa)
+
+【BƯỚC 4】 TÍNH TỔNG cho khẩu phần
+TỔNG = (giá trị per 100) × (grams ước tính / 100)
+
+VD: Thấy 1 ly thủy tinh chứa ~250ml sữa yến mạch nguyên bản
+→ kcal = 55 × 2.5 = 138
+→ protein = 0.8 × 2.5 = 2.0
+→ carb = 7.3 × 2.5 = 18.3
+→ fat = 2.3 × 2.5 = 5.8
+
+═══════════════════════════════════════════════════════════════
+TRẢ VỀ CHỈ JSON (không markdown, không text thừa)
+═══════════════════════════════════════════════════════════════
+
 {
   "found": true,
-  "name": "Tên cụ thể (vd: Sữa yến mạch OATSIDE Nguyên Bản — đọc tên brand từ nhãn nếu có)",
-  "grams": 100,
-  "kcal": 65,
-  "protein": 0.6,
-  "carb": 8.1,
-  "fat": 3.2,
-  "confidence": 0.9,
+  "name": "Sữa yến mạch trong ly thủy tinh",
+  "grams": 250,
+  "kcal": 138,
+  "protein": 2.0,
+  "carb": 18.3,
+  "fat": 5.8,
+  "confidence": 0.75,
   "meal_suggestion": "Ăn vặt",
-  "note": "Đọc từ nhãn per 100ml. Số liệu là cho 100ml/g, user cần điều chỉnh số lượng theo lượng thực dùng.",
-  "source": "label"
+  "note": "Thấy 1 ly thủy tinh cao ~12cm chứa khoảng 250ml sữa yến mạch (đầy ~90%). Tính theo chuẩn 55 kcal/100ml. Nếu lượng thực khác ~250ml, hãy chỉnh 'Số lượng' bên dưới.",
+  "source": "estimate"
 }
 
-Quy tắc QUAN TRỌNG:
-- "grams" + "kcal" + macros là CÙNG MỘT KHẨU PHẦN.
-- Nếu đọc từ nhãn "per 100ml" → grams=100, kcal=số trên nhãn, KHÔNG nhân/chia.
-- TUYỆT ĐỐI không hallucinate giá trị nếu không đọc được nhãn — đặt confidence thấp.
-- Đối với đồ uống (sữa, nước ép) khẩu phần mặc định là 100 (per 100ml).
-- "source": "label" nếu đọc từ nhãn, "estimate" nếu ước lượng món chế biến.
-- "meal_suggestion": "Bữa sáng" | "Bữa trưa" | "Bữa tối" | "Ăn vặt".
-- Số liệu khẩu phần trong note (giúp user verify): "Theo nhãn: per 100ml = 65 kcal, 0.6g đạm, 8.1g carb, 3.2g béo"`;
+═══════════════════════════════════════════════════════════════
+QUY TẮC QUAN TRỌNG
+═══════════════════════════════════════════════════════════════
+
+1. LUÔN ước lượng từ ảnh, KHÔNG đọc nhãn dinh dưỡng (bỏ qua nhãn).
+2. "grams" = TỔNG khẩu phần ước tính (gram cho rắn, ml cho lỏng).
+3. "kcal/protein/carb/fat" = TỔNG cho khẩu phần đó (đã nhân với grams/100).
+4. "note" PHẢI giải thích cách ước lượng (vật chứa nào, đầy bao nhiêu, theo chuẩn nào).
+5. "confidence":
+   - 0.85-0.95: thấy rõ vật chứa + thức ăn + ước lượng chắc
+   - 0.65-0.84: thấy được nhưng góc/ánh sáng không hoàn hảo
+   - 0.4-0.64: ảnh mờ, góc xấu, hoặc món không quen
+6. "meal_suggestion": "Bữa sáng" | "Bữa trưa" | "Bữa tối" | "Ăn vặt".
+7. Nếu KHÔNG có thức ăn/đồ uống trong ảnh → { "found": false }.
+8. "source" luôn là "estimate".`;
 
 function hashPassword(password) {
   if (!password) return "";
@@ -104,16 +165,17 @@ export async function POST(req) {
       return Response.json({ error: "Server chưa cấu hình GEMINI_API_KEY" }, { status: 500 });
     }
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Ưu tiên model nhẹ/rẻ trước (cheaper = free tier friendly hơn)
+    // Ưu tiên model vision tốt hơn cho portion estimation accuracy
+    // (Pro/2.5-flash có reasoning tốt hơn lite/8b cho task này)
     const MODELS_TO_TRY = process.env.GEMINI_MODEL
       ? [process.env.GEMINI_MODEL]
       : [
-          "gemini-2.5-flash-lite",   // Lite — free tier rộng nhất
-          "gemini-2.0-flash-lite",
-          "gemini-1.5-flash-8b",     // 8B small model
-          "gemini-2.5-flash",
+          "gemini-2.5-flash",          // Best balance accuracy/cost
           "gemini-2.0-flash",
+          "gemini-2.5-flash-lite",     // Fallback rẻ
+          "gemini-2.0-flash-lite",
           "gemini-1.5-flash-latest",
+          "gemini-1.5-flash-8b",
         ];
 
     let result, lastError, usedModel;
@@ -123,7 +185,9 @@ export async function POST(req) {
           model: modelName,
           generationConfig: {
             responseMimeType: "application/json",
-            temperature: 0.3,
+            temperature: 0.2,          // thấp hơn → ổn định hơn
+            topP: 0.8,
+            maxOutputTokens: 2048,     // đủ chỗ cho reasoning + JSON
           },
         });
         result = await model.generateContent([
