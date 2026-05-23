@@ -1862,7 +1862,17 @@ export default function App() {
                                             <img src={scanState.preview} alt={selectedFood.name} className="w-full max-h-36 object-cover rounded-2xl ring-1" />
 
                                             {/* Card hiển thị / edit */}
-                                            <div className="rounded-2xl bg-cream-soft ring-1 p-4">
+                                            <div className="rounded-2xl bg-cream-soft ring-1 p-4 relative">
+                                                {!scanEditMode && (
+                                                    <button
+                                                        onClick={() => setScanEditMode(true)}
+                                                        className="absolute top-3 right-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-white text-orange-deep ring-1 ring-orange/30 hover:bg-orange-soft hover:ring-orange/50 transition shadow-sm"
+                                                        aria-label="Chỉnh sửa giá trị"
+                                                        title="Chỉnh sửa"
+                                                    >
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                                    </button>
+                                                )}
                                                 {scanEditMode ? (
                                                     /* EDIT MODE — chỉnh sửa giá trị theo per-khẩu-phần */
                                                     <div className="space-y-2.5">
@@ -1909,24 +1919,14 @@ export default function App() {
                                                 ) : (
                                                     /* DISPLAY MODE */
                                                     <>
-                                                        <div className="flex justify-between items-start mb-3 gap-3">
+                                                        <div className="flex justify-between items-start mb-3 gap-3 pr-10">
                                                             <div className="min-w-0 flex-1">
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{selectedFood.name}</h5>
-                                                                    <button
-                                                                        onClick={() => setScanEditMode(true)}
-                                                                        className="shrink-0 grid h-6 w-6 place-items-center rounded-full text-ink-muted/70 hover:bg-white hover:text-orange-deep transition"
-                                                                        aria-label="Chỉnh sửa giá trị"
-                                                                        title="Chỉnh sửa"
-                                                                    >
-                                                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                                                                    </button>
-                                                                </div>
+                                                                <h5 className="text-[15px] font-bold tracking-tight text-ink truncate">{selectedFood.name}</h5>
                                                                 <p className="text-[11px] text-ink-muted tabular-nums mt-0.5">
                                                                     Khẩu phần ~{selectedFood.per}g/ml
                                                                 </p>
                                                             </div>
-                                                            <div className="text-right shrink-0">
+                                                            <div className="text-right shrink-0 mt-6">
                                                                 <p className="text-3xl font-bold text-orange-deep tabular-nums leading-none">{scaled.kcal}</p>
                                                                 <p className="text-[10px] text-ink-muted uppercase tracking-wider mt-1">kcal</p>
                                                             </div>
