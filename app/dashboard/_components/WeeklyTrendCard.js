@@ -16,7 +16,7 @@ export default function WeeklyTrendCard({ data = [], target = 2000 }) {
             TB <span className="font-semibold text-ink">{avg.toLocaleString("vi-VN")}</span> kcal / ngày
           </p>
         </div>
-        <span className="rounded-full bg-cream-soft px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-muted ring-1 ring-cream-deep/60 tabular-nums">
+        <span className="rounded-full bg-cream-soft px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-muted ring-1 tabular-nums">
           Mục tiêu {target.toLocaleString("vi-VN")}
         </span>
       </div>

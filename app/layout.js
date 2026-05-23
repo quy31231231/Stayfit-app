@@ -80,6 +80,9 @@ export default function RootLayout({ children }) {
                     fontFamily: {
                       sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                     },
+                    ringColor: {
+                      DEFAULT: 'rgba(60, 145, 100, 0.22)',
+                    },
                     boxShadow: {
                       soft: '0 1px 2px rgba(45, 38, 32, 0.04), 0 8px 24px -12px rgba(45, 38, 32, 0.08)',
                       lift: '0 4px 12px -4px rgba(45, 38, 32, 0.12), 0 16px 40px -16px rgba(45, 38, 32, 0.20)',

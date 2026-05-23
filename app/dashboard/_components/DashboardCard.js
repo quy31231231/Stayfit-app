@@ -8,14 +8,14 @@ export default function DashboardCard({
   as: Tag = "div",
 }) {
   const toneClass = {
-    white:  "bg-white ring-1 ring-cream-deep/60",
-    cream:  "bg-cream-soft ring-1 ring-cream-deep/40",
+    white:  "bg-white ring-1",
+    cream:  "bg-cream-soft ring-1",
     orange: "bg-orange-soft ring-1 ring-orange/15",
     clay:   "bg-clay-soft ring-1 ring-clay/20",
     sage:   "bg-sage-soft ring-1 ring-sage/15",
     lilac:  "bg-lilac-soft ring-1 ring-lilac/15",
     mist:   "bg-mist-soft ring-1 ring-mist/15",
-  }[tone] || "bg-white ring-1 ring-cream-deep/60";
+  }[tone] || "bg-white ring-1";
 
   const paddingClass = {
     none:    "p-0",

@@ -191,14 +191,14 @@ function WaterCard({ consumed = 0, target = 8 }) {
         {Array.from({ length: target }).map((_, i) => (
           <div
             key={i}
-            className={`h-9 rounded-lg transition ${i < consumed ? "bg-mist ring-1 ring-mist-deep/10" : "bg-cream-soft ring-1 ring-cream-deep/40"}`}
+            className={`h-9 rounded-lg transition ${i < consumed ? "bg-mist ring-1 ring-mist-deep/10" : "bg-cream-soft ring-1"}`}
           />
         ))}
       </div>
 
       <button
         type="button"
-        className="mt-4 w-full rounded-2xl bg-cream-soft py-2.5 text-[12px] font-semibold text-ink-muted ring-1 ring-cream-deep/40 transition hover:bg-mist hover:text-white hover:ring-mist-deep/20"
+        className="mt-4 w-full rounded-2xl bg-cream-soft py-2.5 text-[12px] font-semibold text-ink-muted ring-1 transition hover:bg-mist hover:text-white hover:ring-mist-deep/20"
       >
         Thêm một ly
       </button>
