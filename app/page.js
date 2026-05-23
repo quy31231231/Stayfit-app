@@ -516,11 +516,11 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                         { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#2D2620', font: { weight: '600', size: 10 }, formatter: (val) => val > 0 ? val.toLocaleString('vi-VN') : '' } },
                         { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#B8AFA4', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
 
-                        // 4 bữa ăn — pastel mềm, segments dính nhau, chỉ round outer corners
-                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#E5C685', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#A8C09A', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#C3B5DA', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
-                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#EFA686', borderWidth: 0, borderRadius: 4, datalabels: { display: false } }
+                        // 4 bữa ăn — pastel nhạt match meal accent của journal
+                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#ECD09C', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#BFD7B6', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#D5C8E5', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
+                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#F3BBA3', borderWidth: 0, borderRadius: 4, datalabels: { display: false } }
                     ]
                 },
                 options: {
@@ -570,19 +570,40 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
             const dataCarb = currentChartDates.map(d => Math.round(sumDayMacro(history[d], 'carb')));
             const dataFat = currentChartDates.map(d => Math.round(sumDayMacro(history[d], 'fat')));
 
-           macroChartInstance.current = new Chart(ctx, { 
-                type: 'line', 
+           macroChartInstance.current = new Chart(ctx, {
+                type: 'line',
                 data: { labels: labels, datasets: [
-                    { label: 'Protein', data: dataProtein, borderColor: '#D97757', backgroundColor: '#D97757', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } }, 
-                    { label: 'Carb', data: dataCarb, borderColor: '#6B95AB', backgroundColor: '#6B95AB', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } },
-                    { label: 'Fat', data: dataFat, borderColor: '#C49A4A', backgroundColor: '#C49A4A', borderWidth: 2, tension: 0.4, pointRadius: 3, datalabels: { display: false } }
+                    { label: 'Protein', data: dataProtein, borderColor: '#8FAD97', backgroundColor: '#8FAD97', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } },
+                    { label: 'Carb',    data: dataCarb,    borderColor: '#D8B26B', backgroundColor: '#D8B26B', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } },
+                    { label: 'Fat',     data: dataFat,     borderColor: '#B5A4D0', backgroundColor: '#B5A4D0', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } }
                 ]},
-                options: { 
+                options: {
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25, bottom: 15 } },
                     onClick: handleChartClick, onHover: handleChartHover,
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: {size: 10, weight: 'bold'} } }, tooltip: { enabled: false } }, 
-                    scales: { y: { display: true, beginAtZero: true, grid: { color: '#F4EFE6', drawBorder: false }, ticks: { display: false } }, x: { display: true, grid: { color: '#F4EFE6', drawBorder: false }, ticks: { font: { weight: 'bold', size: 9 } } } } 
-                } 
+                    plugins: {
+                        legend: { display: true, position: 'top', labels: { boxWidth: 8, boxHeight: 8, usePointStyle: true, pointStyle: 'circle', font: { size: 11, weight: '500' }, color: '#2D2620', padding: 12 } },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(45, 38, 32, 0.95)',
+                            titleColor: '#FFFFFF',
+                            bodyColor: '#F4EFE6',
+                            borderColor: 'transparent',
+                            padding: 12,
+                            cornerRadius: 12,
+                            displayColors: true,
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            titleFont: { weight: '600', size: 11 },
+                            bodyFont: { size: 12, weight: '500' },
+                            callbacks: { label: (c) => ` ${c.dataset.label}: ${c.parsed.y}g` }
+                        }
+                    },
+                    scales: {
+                        y: { display: true, beginAtZero: true, grid: { color: 'rgba(45, 38, 32, 0.06)', drawBorder: false }, ticks: { display: false } },
+                        x: { display: true, grid: { display: false, drawBorder: false }, ticks: { font: { weight: '500', size: 10 }, color: '#7A7066' } }
+                    }
+                }
             });
         }
         
