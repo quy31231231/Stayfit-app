@@ -81,8 +81,10 @@ export async function POST(req) {
       return Response.json({ error: "Server chưa cấu hình GEMINI_API_KEY" }, { status: 500 });
     }
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    // Gemini 2.0 Flash (GA stable). Fallback to 1.5-flash nếu key chưa có access 2.0.
+    const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-2.0-flash";
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: MODEL_NAME,
       generationConfig: {
         responseMimeType: "application/json",
         temperature: 0.3,
