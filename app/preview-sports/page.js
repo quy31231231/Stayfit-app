@@ -164,6 +164,53 @@ export default function SportsPreview() {
           </div>
         </section>
 
+        {/* THÊM MÓN — giống app chính */}
+        <section className="rounded-3xl bg-white p-5 md:p-6 shadow-soft ring-1 ring-cream-deep/60">
+          <header className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-orange-deep">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </span>
+              <h3 className="text-[15px] font-bold tracking-tight text-ink leading-none">Thêm món</h3>
+            </div>
+            <div className="relative">
+              <select className="appearance-none bg-cream-soft hover:bg-cream-deep text-[11px] font-semibold text-ink py-2 pl-3.5 pr-9 rounded-full outline-none cursor-pointer ring-1 ring-cream-deep/60 focus:ring-2 focus:ring-orange/30 transition" defaultValue="Bữa trưa">
+                <option>Bữa sáng</option><option>Bữa trưa</option><option>Bữa tối</option><option>Ăn vặt</option>
+              </select>
+              <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+          </header>
+
+          {/* Tabs */}
+          <div className="mt-5 flex gap-1 p-1 bg-cream-soft rounded-2xl">
+            <button className="flex-1 py-2.5 text-[12px] font-semibold rounded-xl bg-white text-orange-deep shadow-soft ring-1 ring-cream-deep/60">Chọn nhanh</button>
+            <button className="flex-1 py-2.5 text-[12px] font-semibold rounded-xl text-ink-muted">Nhập tay</button>
+          </div>
+
+          {/* Search */}
+          <div className="mt-4 relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input type="text" placeholder="Tìm món ăn..." className="w-full bg-cream-soft ring-1 ring-cream-deep/40 rounded-2xl py-3 pl-10 pr-4 text-[13px] font-medium outline-none focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition" />
+          </div>
+
+          {/* Food grid sample */}
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {[
+              { name: "Tỏi", kcal: 149 },
+              { name: "Hành tây", kcal: 40 },
+              { name: "Cà chua", kcal: 18 },
+              { name: "Khoai tây", kcal: 77 },
+            ].map((f, i) => (
+              <button key={i} className="p-3.5 rounded-2xl text-left bg-cream-soft ring-1 ring-transparent hover:ring-cream-deep transition">
+                <p className="truncate text-[11px] font-semibold tracking-tight text-ink mb-0.5">{f.name}</p>
+                <p className="text-[12px] font-bold text-ink tabular-nums">{f.kcal} <span className="text-[9px] font-medium text-ink-muted">kcal/100g</span></p>
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* NHẬT KÝ BỮA ĂN — giữ nguyên style cũ */}
         <section>
           <div className="flex items-baseline justify-between px-1 mb-3">
