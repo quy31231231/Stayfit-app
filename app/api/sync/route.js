@@ -238,8 +238,8 @@ export async function GET(req) {
     const profile = {
       gender: profileRow[1] || "male",
       age: parseInt(profileRow[2]) || 25,
-      height: parseInt(profileRow[3]) || 165,
-      weight: parseInt(profileRow[4]) || 60,
+      height: parseFloat(profileRow[3]) || 165,
+      weight: parseFloat(profileRow[4]) || 60,
       activity: parseFloat(profileRow[5]) || 1.375,
       goal: parseInt(profileRow[6]) || 0,
       manualTargetKcal: profileRow[7] ? parseInt(profileRow[7]) : null,
