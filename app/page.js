@@ -516,18 +516,18 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                         { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#2D2620', font: { weight: '600', size: 10 }, formatter: (val) => val > 0 ? val.toLocaleString('vi-VN') : '' } },
                         { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#B8AFA4', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
 
-                        // Gắn chung stack 'bars' cho 4 bữa ăn — cùng style modern: rounded + white separator
-                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#C49A4A', borderColor: '#FFFFFF', borderWidth: 2, borderSkipped: false, borderRadius: 6, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#5F8266', borderColor: '#FFFFFF', borderWidth: 2, borderSkipped: false, borderRadius: 6, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#9B8AB8', borderColor: '#FFFFFF', borderWidth: 2, borderSkipped: false, borderRadius: 6, datalabels: { display: false } },
-                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#D97757', borderColor: '#FFFFFF', borderWidth: 2, borderSkipped: false, borderRadius: 6, datalabels: { display: false } }
+                        // 4 bữa ăn — pastel mềm, segments dính nhau, chỉ round outer corners
+                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#E5C685', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#A8C09A', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#C3B5DA', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
+                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#EFA686', borderWidth: 0, borderRadius: 4, datalabels: { display: false } }
                     ]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 28 } },
                     onClick: handleChartClick, onHover: handleChartHover,
-                    categoryPercentage: 0.7,
-                    barPercentage: 0.9,
+                    categoryPercentage: 0.85,
+                    barPercentage: 0.75,
                     plugins: {
                         legend: { display: false },
                         tooltip: {
