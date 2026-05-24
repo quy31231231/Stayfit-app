@@ -2,6 +2,7 @@
 
 import FoodLogItem from "./FoodLogItem";
 import { useDroppable } from "@dnd-kit/core";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const MEAL_THEMES = {
   "Bữa sáng": { icon: "☀️",  tone: "bg-clay-soft text-clay-deep",   ring: "ring-clay" },
@@ -27,6 +28,7 @@ export default function FoodLogSection({
   const isEmpty = items.length === 0;
 
   const { setNodeRef, isOver } = useDroppable({ id: mealName });
+  const [itemsRef] = useAutoAnimate({ duration: 220, easing: "ease-out" });
 
   const allSelected = !isEmpty && items.every((it) => selectedItemIds?.has(it.id));
 
@@ -79,7 +81,7 @@ export default function FoodLogSection({
       </header>
 
       {!isEmpty && (
-        <div className="mt-4 space-y-1.5">
+        <div ref={itemsRef} className="mt-4 space-y-1.5">
           {items.map((item) => (
             <FoodLogItem
               key={item.id}
