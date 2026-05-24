@@ -753,5 +753,243 @@ export const COMMON_FOODS = [
     { name: "Hột vịt bắc thảo (1 quả)", unit: "quả", per: 1, kcal: 130, carb: 3, fat: 10, protein: 9 },
     { name: "Trứng gà ác (1 quả)", unit: "quả", per: 1, kcal: 45, carb: 0.5, fat: 3, protein: 4.5 },
     { name: "Chả mực Hạ Long", unit: "g", per: 100, kcal: 230, carb: 8, fat: 14, protein: 18 },
-    { name: "Bánh mì baguette VN (1 ổ ~80g)", unit: "ổ", per: 1, kcal: 220, carb: 45, fat: 3, protein: 8 }
+    { name: "Bánh mì baguette VN (1 ổ ~80g)", unit: "ổ", per: 1, kcal: 220, carb: 45, fat: 3, protein: 8 },
+
+    /* ════════════════════════════════════════════════════════════════════
+       NHÓM C: NGUYÊN LIỆU NẤU ĂN QUỐC TẾ & PHỔ BIẾN (~195 entries)
+       Source: USDA SR Legacy + Viện Dinh dưỡng VN + brand-neutral nutrition labels
+       ════════════════════════════════════════════════════════════════════ */
+
+    // ━━━ SỐT & NƯỚC CHẤM CHÂU Á ━━━
+    { name: "Xì dầu đậm (Dark soy sauce)", unit: "ml", per: 100, kcal: 73, carb: 12, fat: 0.1, protein: 3.2 },
+    { name: "Xì dầu Nhật không gluten (Tamari)", unit: "ml", per: 100, kcal: 60, carb: 5.6, fat: 0.1, protein: 10.5 },
+    { name: "Tương ớt Indonesia (Sambal oelek)", unit: "g", per: 100, kcal: 25, carb: 5, fat: 0.5, protein: 1 },
+    { name: "Tương ớt Hàn (Gochujang)", unit: "g", per: 100, kcal: 240, carb: 45, fat: 3, protein: 6 },
+    { name: "Ớt bột Hàn (Gochugaru)", unit: "g", per: 100, kcal: 314, carb: 56, fat: 13, protein: 13 },
+    { name: "Tương đậu Hàn (Doenjang)", unit: "g", per: 100, kcal: 198, carb: 22, fat: 8, protein: 13 },
+    { name: "Rượu nấu ngọt (Mirin)", unit: "ml", per: 100, kcal: 240, carb: 43, fat: 0, protein: 0.2 },
+    { name: "Rượu Sake nấu ăn (Sake)", unit: "ml", per: 100, kcal: 134, carb: 5, fat: 0, protein: 0.5 },
+    { name: "Rượu nấu Trung Quốc (Shaoxing)", unit: "ml", per: 100, kcal: 137, carb: 5.2, fat: 0, protein: 0.3 },
+    { name: "Sốt Teriyaki Nhật (Teriyaki sauce)", unit: "ml", per: 100, kcal: 89, carb: 15.5, fat: 0, protein: 5.9 },
+    { name: "Sốt chấm Ponzu Nhật (Ponzu sauce)", unit: "ml", per: 100, kcal: 35, carb: 5, fat: 0.1, protein: 4 },
+    { name: "Sốt ớt ngọt Thái (Sweet chili sauce)", unit: "ml", per: 100, kcal: 230, carb: 56, fat: 0.5, protein: 1.5 },
+    { name: "Vừng nghiền Trung Đông (Tahini)", unit: "g", per: 100, kcal: 595, carb: 21, fat: 54, protein: 17 },
+    { name: "Sốt XO Hong Kong (XO sauce)", unit: "g", per: 100, kcal: 280, carb: 12, fat: 22, protein: 15 },
+    { name: "Sốt mận Trung Quốc (Plum sauce)", unit: "g", per: 100, kcal: 184, carb: 41, fat: 0.5, protein: 0.8 },
+
+    // ━━━ GIA VỊ KHÔ (SPICES QUỐC TẾ) ━━━
+    { name: "Cardamom xanh", unit: "g", per: 100, kcal: 311, carb: 68, fat: 6.7, protein: 11 },
+    { name: "Cardamom đen", unit: "g", per: 100, kcal: 311, carb: 68, fat: 6.7, protein: 11 },
+    { name: "Cumin (thì là Ai Cập)", unit: "g", per: 100, kcal: 375, carb: 44, fat: 22, protein: 18 },
+    { name: "Hạt mùi (Coriander seed)", unit: "g", per: 100, kcal: 298, carb: 55, fat: 18, protein: 12 },
+    { name: "Hạt thì là (Fennel seed)", unit: "g", per: 100, kcal: 345, carb: 52, fat: 15, protein: 16 },
+    { name: "Hạt mù tạt vàng", unit: "g", per: 100, kcal: 508, carb: 28, fat: 36, protein: 26 },
+    { name: "Hạt mù tạt nâu", unit: "g", per: 100, kcal: 469, carb: 35, fat: 29, protein: 26 },
+    { name: "Fenugreek (hồ lô ba)", unit: "g", per: 100, kcal: 323, carb: 58, fat: 6, protein: 23 },
+    { name: "Đinh hương (Clove)", unit: "g", per: 100, kcal: 274, carb: 66, fat: 13, protein: 6 },
+    { name: "Nhục đậu khấu (Nutmeg)", unit: "g", per: 100, kcal: 525, carb: 49, fat: 36, protein: 6 },
+    { name: "Vỏ nhục đậu khấu (Mace)", unit: "g", per: 100, kcal: 475, carb: 50, fat: 33, protein: 7 },
+    { name: "Allspice (tiêu Jamaica)", unit: "g", per: 100, kcal: 263, carb: 72, fat: 9, protein: 6 },
+    { name: "Saffron (nhụy nghệ tây)", unit: "g", per: 100, kcal: 310, carb: 65, fat: 6, protein: 11 },
+    { name: "Sumac", unit: "g", per: 100, kcal: 305, carb: 65, fat: 8, protein: 3 },
+    { name: "Paprika hun khói", unit: "g", per: 100, kcal: 282, carb: 55, fat: 13, protein: 14 },
+    { name: "Thyme khô", unit: "g", per: 100, kcal: 276, carb: 64, fat: 7.4, protein: 9 },
+    { name: "Oregano khô", unit: "g", per: 100, kcal: 265, carb: 69, fat: 4.3, protein: 9 },
+    { name: "Rosemary khô", unit: "g", per: 100, kcal: 331, carb: 64, fat: 15, protein: 5 },
+    { name: "Lá nguyệt quế khô (Bay leaf)", unit: "g", per: 100, kcal: 313, carb: 75, fat: 8, protein: 7.6 },
+    { name: "Hạt thì là khô (Dill seed)", unit: "g", per: 100, kcal: 305, carb: 55, fat: 14.5, protein: 16 },
+    { name: "Juniper berry (quả bách xù)", unit: "g", per: 100, kcal: 282, carb: 57, fat: 9, protein: 2 },
+    { name: "Hạt caraway", unit: "g", per: 100, kcal: 333, carb: 50, fat: 15, protein: 20 },
+    { name: "Tiêu hồng", unit: "g", per: 100, kcal: 251, carb: 64, fat: 3.3, protein: 10 },
+    { name: "Tiêu xanh khô", unit: "g", per: 100, kcal: 251, carb: 65, fat: 3, protein: 10 },
+    { name: "Ớt cayenne", unit: "g", per: 100, kcal: 318, carb: 57, fat: 17, protein: 12 },
+
+    // ━━━ PHÔ MAI VARIANTS ━━━
+    { name: "Phô mai Brie", unit: "g", per: 100, kcal: 334, carb: 0.5, fat: 27.7, protein: 20.8 },
+    { name: "Phô mai Camembert", unit: "g", per: 100, kcal: 300, carb: 0.5, fat: 24, protein: 20 },
+    { name: "Phô mai Gouda", unit: "g", per: 100, kcal: 356, carb: 2.2, fat: 27, protein: 25 },
+    { name: "Phô mai Feta", unit: "g", per: 100, kcal: 264, carb: 4.1, fat: 21.3, protein: 14.2 },
+    { name: "Phô mai Ricotta nguyên kem", unit: "g", per: 100, kcal: 174, carb: 3, fat: 13, protein: 11 },
+    { name: "Cottage cheese", unit: "g", per: 100, kcal: 98, carb: 3.4, fat: 4.3, protein: 11.1 },
+    { name: "Phô mai Burrata", unit: "g", per: 100, kcal: 330, carb: 2, fat: 27, protein: 19 },
+    { name: "Mascarpone", unit: "g", per: 100, kcal: 460, carb: 4.8, fat: 47, protein: 4.5 },
+    { name: "Phô mai Halloumi", unit: "g", per: 100, kcal: 321, carb: 2.5, fat: 24.7, protein: 22 },
+    { name: "Phô mai Blue (Roquefort)", unit: "g", per: 100, kcal: 369, carb: 2.3, fat: 30.6, protein: 22 },
+    { name: "Phô mai dê (Chevre)", unit: "g", per: 100, kcal: 364, carb: 0, fat: 30, protein: 22 },
+    { name: "Phô mai Manchego", unit: "g", per: 100, kcal: 392, carb: 0.5, fat: 32.1, protein: 25 },
+    { name: "Bocconcini (mozzarella nhỏ)", unit: "g", per: 100, kcal: 286, carb: 3.1, fat: 22.4, protein: 18.7 },
+    { name: "Phô mai Pecorino (sữa cừu)", unit: "g", per: 100, kcal: 419, carb: 3.6, fat: 33, protein: 26 },
+
+    // ━━━ NGŨ CỐC BỔ SUNG ━━━
+    { name: "Couscous khô", unit: "g", per: 100, kcal: 376, carb: 77, fat: 0.6, protein: 13 },
+    { name: "Bulgur khô", unit: "g", per: 100, kcal: 342, carb: 76, fat: 1.3, protein: 12 },
+    { name: "Farro khô", unit: "g", per: 100, kcal: 340, carb: 71, fat: 2, protein: 13 },
+    { name: "Lúa mạch ngọc trai (Pearl barley)", unit: "g", per: 100, kcal: 352, carb: 77, fat: 1.2, protein: 9.9 },
+    { name: "Kê (Millet) hạt", unit: "g", per: 100, kcal: 378, carb: 73, fat: 4.2, protein: 11 },
+    { name: "Cao lương (Sorghum)", unit: "g", per: 100, kcal: 339, carb: 72, fat: 3.5, protein: 11 },
+    { name: "Amaranth hạt", unit: "g", per: 100, kcal: 371, carb: 65, fat: 7, protein: 14 },
+    { name: "Teff hạt", unit: "g", per: 100, kcal: 367, carb: 73, fat: 2.4, protein: 13.3 },
+    { name: "Polenta / cornmeal", unit: "g", per: 100, kcal: 370, carb: 79, fat: 3.6, protein: 9 },
+    { name: "Semolina (bột báng durum)", unit: "g", per: 100, kcal: 360, carb: 73, fat: 1.1, protein: 13 },
+    { name: "Bột yến mạch nguyên cám", unit: "g", per: 100, kcal: 379, carb: 65, fat: 8, protein: 13 },
+    { name: "Bột lúa mạch đen (Rye flour)", unit: "g", per: 100, kcal: 325, carb: 76, fat: 1.5, protein: 11 },
+    { name: "Bột spelt", unit: "g", per: 100, kcal: 338, carb: 70, fat: 2.4, protein: 15 },
+    { name: "Kiều mạch (Buckwheat)", unit: "g", per: 100, kcal: 343, carb: 72, fat: 3.4, protein: 13 },
+    { name: "Gạo dại (Wild rice)", unit: "g", per: 100, kcal: 357, carb: 75, fat: 1.1, protein: 14.7 },
+    { name: "Gạo sushi", unit: "g", per: 100, kcal: 354, carb: 78, fat: 0.5, protein: 6.5 },
+
+    // ━━━ PASTA VARIANTS ━━━
+    { name: "Penne khô", unit: "g", per: 100, kcal: 371, carb: 74, fat: 1.5, protein: 13 },
+    { name: "Fusilli khô", unit: "g", per: 100, kcal: 371, carb: 74, fat: 1.5, protein: 13 },
+    { name: "Farfalle khô", unit: "g", per: 100, kcal: 371, carb: 74, fat: 1.5, protein: 13 },
+    { name: "Rigatoni khô", unit: "g", per: 100, kcal: 371, carb: 74, fat: 1.5, protein: 13 },
+    { name: "Macaroni khô", unit: "g", per: 100, kcal: 371, carb: 74, fat: 1.5, protein: 13 },
+    { name: "Orzo khô", unit: "g", per: 100, kcal: 369, carb: 74, fat: 1.4, protein: 13 },
+    { name: "Lá lasagna khô", unit: "g", per: 100, kcal: 371, carb: 74, fat: 1.5, protein: 13 },
+    { name: "Ravioli tươi (nhân phô mai)", unit: "g", per: 100, kcal: 240, carb: 30, fat: 8, protein: 11 },
+    { name: "Gnocchi khoai tây", unit: "g", per: 100, kcal: 178, carb: 35, fat: 1.5, protein: 4.5 },
+    { name: "Linguine khô", unit: "g", per: 100, kcal: 371, carb: 74, fat: 1.5, protein: 13 },
+    { name: "Fettuccine khô", unit: "g", per: 100, kcal: 371, carb: 74, fat: 1.5, protein: 13 },
+    { name: "Capellini khô (mì sợi nhỏ)", unit: "g", per: 100, kcal: 371, carb: 74, fat: 1.5, protein: 13 },
+
+    // ━━━ BÁNH MÌ VARIANTS ━━━
+    { name: "Bánh mì sourdough", unit: "g", per: 100, kcal: 260, carb: 52, fat: 2, protein: 9 },
+    { name: "Bánh mì Ciabatta", unit: "g", per: 100, kcal: 271, carb: 53, fat: 2.5, protein: 9 },
+    { name: "Bánh mì Pita", unit: "g", per: 100, kcal: 275, carb: 56, fat: 1.2, protein: 9 },
+    { name: "Bánh mì Naan", unit: "g", per: 100, kcal: 310, carb: 45, fat: 9, protein: 9 },
+    { name: "Tortilla bột mì", unit: "g", per: 100, kcal: 333, carb: 53, fat: 8, protein: 10 },
+    { name: "Tortilla ngô", unit: "g", per: 100, kcal: 240, carb: 48, fat: 3, protein: 6 },
+    { name: "Bagel (1 cái ~95g)", unit: "cái", per: 1, kcal: 245, carb: 47, fat: 1.5, protein: 10 },
+    { name: "Croissant (1 cái ~65g)", unit: "cái", per: 1, kcal: 270, carb: 30, fat: 14, protein: 5 },
+
+    // ━━━ COCONUT PRODUCTS ━━━
+    { name: "Nước cốt dừa lon", unit: "ml", per: 100, kcal: 230, carb: 6, fat: 24, protein: 2.3 },
+    { name: "Kem dừa đặc (Coconut cream)", unit: "g", per: 100, kcal: 330, carb: 6, fat: 35, protein: 3.5 },
+    { name: "Dừa khô bào sợi không đường", unit: "g", per: 100, kcal: 660, carb: 24, fat: 65, protein: 7 },
+    { name: "Đường hoa dừa", unit: "g", per: 100, kcal: 380, carb: 93, fat: 0.5, protein: 0 },
+
+    // ━━━ PICKLED & FERMENTED QUỐC TẾ ━━━
+    { name: "Sauerkraut (dưa cải Đức)", unit: "g", per: 100, kcal: 19, carb: 4.3, fat: 0.1, protein: 0.9 },
+    { name: "Kimchi cải thảo", unit: "g", per: 100, kcal: 30, carb: 4.6, fat: 0.8, protein: 2.2 },
+    { name: "Gừng chua hồng (gari Nhật)", unit: "g", per: 100, kcal: 38, carb: 9, fat: 0.2, protein: 0.4 },
+    { name: "Olive xanh ngâm", unit: "g", per: 100, kcal: 145, carb: 3.8, fat: 15.3, protein: 1 },
+    { name: "Olive đen ngâm", unit: "g", per: 100, kcal: 115, carb: 6, fat: 10.7, protein: 0.8 },
+    { name: "Olive Kalamata", unit: "g", per: 100, kcal: 233, carb: 9, fat: 20, protein: 1.1 },
+    { name: "Nụ bạch hoa (Capers)", unit: "g", per: 100, kcal: 23, carb: 4.9, fat: 0.9, protein: 2.4 },
+    { name: "Cá cơm muối Ý (Anchovies in oil)", unit: "g", per: 100, kcal: 210, carb: 0, fat: 9.7, protein: 29 },
+    { name: "Dưa chuột muối kiểu Mỹ (Dill pickles)", unit: "g", per: 100, kcal: 12, carb: 2.4, fat: 0.2, protein: 0.3 },
+    { name: "Củ cải vàng muối Nhật (Takuan)", unit: "g", per: 100, kcal: 25, carb: 5.5, fat: 0.1, protein: 0.6 },
+    { name: "Mơ muối Nhật (Umeboshi)", unit: "g", per: 100, kcal: 33, carb: 8.6, fat: 0.2, protein: 0.7 },
+    { name: "Chanh ngâm muối Maroc", unit: "g", per: 100, kcal: 30, carb: 8, fat: 0.1, protein: 0.5 },
+
+    // ━━━ STOCK & BROTH ━━━
+    { name: "Nước dùng gà", unit: "ml", per: 100, kcal: 17, carb: 1.5, fat: 0.5, protein: 1.4 },
+    { name: "Nước dùng bò", unit: "ml", per: 100, kcal: 17, carb: 0.1, fat: 0.5, protein: 2.7 },
+    { name: "Nước dùng rau củ", unit: "ml", per: 100, kcal: 11, carb: 2, fat: 0.2, protein: 0.4 },
+    { name: "Bột dashi (Nhật)", unit: "g", per: 100, kcal: 240, carb: 30, fat: 1, protein: 40 },
+    { name: "Nước dùng cá", unit: "ml", per: 100, kcal: 12, carb: 0.1, fat: 0.3, protein: 2.3 },
+
+    // ━━━ RƯỢU NẤU & GIẤM ━━━
+    { name: "Vang trắng nấu ăn", unit: "ml", per: 100, kcal: 82, carb: 2.6, fat: 0, protein: 0.1 },
+    { name: "Vang đỏ nấu ăn", unit: "ml", per: 100, kcal: 85, carb: 2.6, fat: 0, protein: 0.1 },
+    { name: "Giấm táo (Apple cider)", unit: "ml", per: 100, kcal: 21, carb: 0.9, fat: 0, protein: 0 },
+    { name: "Giấm rượu trắng", unit: "ml", per: 100, kcal: 19, carb: 0.6, fat: 0, protein: 0 },
+    { name: "Giấm sherry", unit: "ml", per: 100, kcal: 38, carb: 9, fat: 0, protein: 0 },
+    { name: "Marsala wine", unit: "ml", per: 100, kcal: 130, carb: 20, fat: 0, protein: 0.1 },
+
+    // ━━━ DẦU PREMIUM & ESTERS ━━━
+    { name: "Ghee (bơ lọc Ấn)", unit: "g", per: 100, kcal: 900, carb: 0, fat: 100, protein: 0.3 },
+    { name: "Bơ trong (Clarified butter)", unit: "g", per: 100, kcal: 876, carb: 0, fat: 99.5, protein: 0.3 },
+    { name: "Dầu óc chó (Walnut oil)", unit: "ml", per: 100, kcal: 884, carb: 0, fat: 100, protein: 0 },
+    { name: "Dầu quả bơ (Avocado oil)", unit: "ml", per: 100, kcal: 884, carb: 0, fat: 100, protein: 0 },
+    { name: "Dầu mè rang (Toasted sesame)", unit: "ml", per: 100, kcal: 884, carb: 0, fat: 100, protein: 0 },
+    { name: "Dầu hạt bí (Pumpkin seed oil)", unit: "ml", per: 100, kcal: 884, carb: 0, fat: 100, protein: 0 },
+    { name: "Dầu hạnh nhân (Almond oil)", unit: "ml", per: 100, kcal: 884, carb: 0, fat: 100, protein: 0 },
+
+    // ━━━ HERBS TƯƠI QUỐC TẾ ━━━
+    { name: "Sage tươi (Xô thơm)", unit: "g", per: 100, kcal: 90, carb: 15, fat: 3, protein: 3.5 },
+    { name: "Marjoram tươi", unit: "g", per: 100, kcal: 75, carb: 14, fat: 2, protein: 4 },
+    { name: "Tarragon tươi", unit: "g", per: 100, kcal: 49, carb: 8.5, fat: 1.1, protein: 4 },
+    { name: "Sorrel tươi (rau chua)", unit: "g", per: 100, kcal: 22, carb: 4, fat: 0.7, protein: 2 },
+    { name: "Lemon balm tươi (Tía tô đất)", unit: "g", per: 100, kcal: 50, carb: 8, fat: 1, protein: 3 },
+    { name: "Bạc hà Anh tươi (Peppermint)", unit: "g", per: 100, kcal: 70, carb: 15, fat: 1, protein: 4 },
+    { name: "Chervil tươi", unit: "g", per: 100, kcal: 25, carb: 5, fat: 0.5, protein: 3 },
+    { name: "Hẹ Tây (Chives) tươi", unit: "g", per: 100, kcal: 30, carb: 4.4, fat: 0.7, protein: 3.3 },
+
+    // ━━━ ASIAN NOODLES BỔ SUNG ━━━
+    { name: "Udon tươi", unit: "g", per: 100, kcal: 271, carb: 52, fat: 1.4, protein: 8 },
+    { name: "Udon khô", unit: "g", per: 100, kcal: 369, carb: 76, fat: 1.1, protein: 11 },
+    { name: "Soba khô (kiều mạch Nhật)", unit: "g", per: 100, kcal: 343, carb: 72, fat: 0.8, protein: 14 },
+    { name: "Mì somen khô", unit: "g", per: 100, kcal: 363, carb: 77, fat: 0.6, protein: 12 },
+    { name: "Shirataki (konjac)", unit: "g", per: 100, kcal: 9, carb: 3, fat: 0, protein: 0.2 },
+    { name: "Mì ramen tươi", unit: "g", per: 100, kcal: 200, carb: 40, fat: 3, protein: 7 },
+    { name: "Mì gluten kéo tay Trung Quốc", unit: "g", per: 100, kcal: 220, carb: 45, fat: 1, protein: 7 },
+
+    // ━━━ INDIAN BASICS ━━━
+    { name: "Garam masala (gia vị Ấn)", unit: "g", per: 100, kcal: 380, carb: 55, fat: 15, protein: 13 },
+    { name: "Bột Tikka masala", unit: "g", per: 100, kcal: 350, carb: 50, fat: 16, protein: 12 },
+    { name: "Lá curry tươi (Curry leaf)", unit: "g", per: 100, kcal: 108, carb: 19, fat: 1, protein: 6 },
+    { name: "Paneer (phô mai Ấn)", unit: "g", per: 100, kcal: 296, carb: 3.4, fat: 22.8, protein: 19.1 },
+    { name: "Toor dal (đậu lăng vàng)", unit: "g", per: 100, kcal: 343, carb: 62, fat: 1.5, protein: 22 },
+    { name: "Gạo Basmati", unit: "g", per: 100, kcal: 351, carb: 78, fat: 0.8, protein: 8 },
+
+    // ━━━ MEXICAN BASICS ━━━
+    { name: "Masa harina (bột ngô nixtamalized)", unit: "g", per: 100, kcal: 360, carb: 76, fat: 3.5, protein: 9 },
+    { name: "Ớt chipotle khô (xông khói)", unit: "g", per: 100, kcal: 282, carb: 56, fat: 13, protein: 14 },
+    { name: "Chorizo Mexican (heo)", unit: "g", per: 100, kcal: 455, carb: 2, fat: 38, protein: 24 },
+    { name: "Đậu refried (đậu pinto nhuyễn)", unit: "g", per: 100, kcal: 124, carb: 16, fat: 4, protein: 7 },
+    { name: "Queso fresco", unit: "g", per: 100, kcal: 305, carb: 3.4, fat: 24, protein: 18 },
+    { name: "Salsa verde (sốt cà chua xanh)", unit: "g", per: 100, kcal: 36, carb: 8, fat: 0.5, protein: 1.4 },
+
+    // ━━━ SWEETENERS THAY THẾ ━━━
+    { name: "Đường Stevia bột", unit: "g", per: 100, kcal: 0, carb: 0, fat: 0, protein: 0 },
+    { name: "Đường Erythritol", unit: "g", per: 100, kcal: 0, carb: 0, fat: 0, protein: 0 },
+    { name: "Đường palm (palm sugar)", unit: "g", per: 100, kcal: 396, carb: 95, fat: 0.4, protein: 0.2 },
+    { name: "Syrup gạo lứt", unit: "g", per: 100, kcal: 316, carb: 77, fat: 0, protein: 4 },
+    { name: "Syrup agave", unit: "ml", per: 100, kcal: 310, carb: 76, fat: 0.5, protein: 0 },
+    { name: "Đường mía thô (Jaggery)", unit: "g", per: 100, kcal: 383, carb: 97, fat: 0.1, protein: 0.4 },
+    { name: "Đường Sucralose", unit: "g", per: 100, kcal: 0, carb: 0, fat: 0, protein: 0 },
+    { name: "Đường Monk fruit", unit: "g", per: 100, kcal: 0, carb: 0, fat: 0, protein: 0 },
+
+    // ━━━ DAIRY BỔ SUNG ━━━
+    { name: "Kefir (sữa lên men)", unit: "ml", per: 100, kcal: 41, carb: 4.5, fat: 1, protein: 3.4 },
+    { name: "Kem chua (Sour cream)", unit: "g", per: 100, kcal: 198, carb: 4.6, fat: 19.4, protein: 2.4 },
+    { name: "Sữa dê tươi", unit: "ml", per: 100, kcal: 69, carb: 4.5, fat: 4.1, protein: 3.6 },
+    { name: "Sữa cừu tươi", unit: "ml", per: 100, kcal: 108, carb: 5.4, fat: 7, protein: 6 },
+    { name: "Sữa chua chua không đường (Buttermilk)", unit: "ml", per: 100, kcal: 40, carb: 4.8, fat: 0.9, protein: 3.3 },
+    { name: "Bơ đậu phộng tự nhiên", unit: "g", per: 100, kcal: 588, carb: 20, fat: 50, protein: 25 },
+
+    // ━━━ RAU & CỦ ÍT PHỔ BIẾN ━━━
+    { name: "Củ năng (Water chestnut)", unit: "g", per: 100, kcal: 97, carb: 24, fat: 0.1, protein: 1.4 },
+    { name: "Củ ấu", unit: "g", per: 100, kcal: 100, carb: 24, fat: 0.3, protein: 3 },
+    { name: "Củ niễng (Manchurian wild rice stem)", unit: "g", per: 100, kcal: 24, carb: 5, fat: 0.3, protein: 1.5 },
+    { name: "Củ riềng tươi", unit: "g", per: 100, kcal: 71, carb: 16, fat: 0.7, protein: 1.6 },
+    { name: "Tỏi xanh (Green garlic)", unit: "g", per: 100, kcal: 41, carb: 9, fat: 0.2, protein: 1.8 },
+    { name: "Cải mầm (Microgreens)", unit: "g", per: 100, kcal: 38, carb: 2, fat: 0.4, protein: 2.5 },
+    { name: "Rau bồ công anh", unit: "g", per: 100, kcal: 45, carb: 9, fat: 0.7, protein: 2.7 },
+    { name: "Củ nghệ tươi", unit: "g", per: 100, kcal: 70, carb: 16, fat: 0.4, protein: 1.5 },
+    { name: "Hành tăm Hàn (Korean shallot)", unit: "g", per: 100, kcal: 65, carb: 15, fat: 0.1, protein: 1.7 },
+
+    // ━━━ TRÁI CÂY KHÔ BỔ SUNG ━━━
+    { name: "Cranberry khô", unit: "g", per: 100, kcal: 308, carb: 82, fat: 1.4, protein: 0.2 },
+    { name: "Cherry khô", unit: "g", per: 100, kcal: 333, carb: 74, fat: 1.5, protein: 2 },
+
+    // ━━━ BAKING & WESTERN BASICS ━━━
+    { name: "Chocolate đen 70%", unit: "g", per: 100, kcal: 539, carb: 45, fat: 40, protein: 8 },
+    { name: "Cocoa powder không đường", unit: "g", per: 100, kcal: 228, carb: 57, fat: 14, protein: 20 },
+    { name: "Vanilla extract (chiết xuất vani)", unit: "ml", per: 100, kcal: 288, carb: 13, fat: 0, protein: 0 },
+    { name: "Baking soda (bột nở NaHCO3)", unit: "g", per: 100, kcal: 0, carb: 0, fat: 0, protein: 0 },
+    { name: "Baking powder (bột nở kép)", unit: "g", per: 100, kcal: 53, carb: 28, fat: 0, protein: 0 },
+    { name: "Men nở khô (dry yeast)", unit: "g", per: 100, kcal: 295, carb: 41, fat: 4.6, protein: 40 },
+    { name: "Men dinh dưỡng (Nutritional yeast)", unit: "g", per: 100, kcal: 326, carb: 35, fat: 5, protein: 49 },
+    { name: "Vụn bánh mì (Breadcrumbs)", unit: "g", per: 100, kcal: 395, carb: 72, fat: 5, protein: 13 },
+    { name: "Panko crumbs Nhật", unit: "g", per: 100, kcal: 380, carb: 77, fat: 2.5, protein: 12 },
+    { name: "Cream of tartar", unit: "g", per: 100, kcal: 258, carb: 61, fat: 0, protein: 0 },
+    { name: "Marzipan (bột hạnh nhân ngọt)", unit: "g", per: 100, kcal: 458, carb: 49, fat: 27, protein: 8 },
+    { name: "Wasabi paste", unit: "g", per: 100, kcal: 109, carb: 24, fat: 0.6, protein: 4.8 },
+    { name: "Tempeh", unit: "g", per: 100, kcal: 192, carb: 9, fat: 11, protein: 19 },
+
+    // ━━━ PROTEIN ĐÓNG HỘP ━━━
+    { name: "Cá ngừ đóng hộp trong dầu", unit: "g", per: 100, kcal: 198, carb: 0, fat: 9, protein: 29.1 },
+    { name: "Cá ngừ đóng hộp trong nước", unit: "g", per: 100, kcal: 116, carb: 0, fat: 0.8, protein: 26 }
 ];

@@ -162,7 +162,7 @@ export async function POST(req) {
               Number.isFinite(Number(f.per)) &&
               Number(f.per) > 0
           )
-          .slice(0, 600)
+          .slice(0, 1000)
       : [];
 
     const libraryListStr = library
