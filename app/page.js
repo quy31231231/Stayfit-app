@@ -42,6 +42,13 @@ const getMealByHour = () => {
     if (h >= 17 && h < 21) return "Bữa tối";
     return "Ăn vặt";
 };
+// Check user has explicitly mention meal type in their description.
+// Strip diacritics for robust match.
+const mentionsMealInText = (text) => {
+    if (!text) return false;
+    const t = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    return /\b(bua\s*sang|bua\s*trua|bua\s*toi|an\s*vat|an\s*nhe|sang\s*nay|trua\s*nay|toi\s*nay|sang\s*som|toi\s*muon)\b/.test(t);
+};
 const TEXT_SUGGESTIONS = [
     "Bữa sáng tôi ăn 2 quả trứng luộc với 1 bát salad rau trộn",
     "Bữa tối tôi ăn 150g bò bít tết nướng với rau củ hấp",
@@ -1229,7 +1236,8 @@ export default function App() {
                 ...it,
                 _checked: true,
                 _qty: it.grams,
-                _meal: MEAL_TYPES.includes(it.meal_suggestion) ? it.meal_suggestion : getMealByHour(),
+                // Image mode: AI không có context về giờ, đoán meal type từ loại món không tin được → luôn dùng getMealByHour() theo giờ thực.
+                _meal: getMealByHour(),
                 _editMode: false,
                 _origName: it.name,
             }));
@@ -1263,11 +1271,16 @@ export default function App() {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Phân tích thất bại");
+            // Chỉ trust AI's meal_suggestion KHI user CHỦ ĐỘNG mention meal trong text.
+            // Còn lại → dùng giờ thực (AI hay đoán sai dựa vào loại món, vd bò bít tết → "Bữa tối").
+            const textMentionsMeal = mentionsMealInText(scanText);
             const items = (data.items || []).map((it) => ({
                 ...it,
                 _checked: true,
                 _qty: it.grams,
-                _meal: MEAL_TYPES.includes(it.meal_suggestion) ? it.meal_suggestion : getMealByHour(),
+                _meal: textMentionsMeal && MEAL_TYPES.includes(it.meal_suggestion)
+                    ? it.meal_suggestion
+                    : getMealByHour(),
                 _editMode: false,
                 _origName: it.name,
             }));
