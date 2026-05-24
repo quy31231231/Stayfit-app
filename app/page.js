@@ -112,6 +112,13 @@ const generateUniqueTimestamp = () => {
   return `${svSE}.${ms}-${rand}`;
 };
 const removeAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+const normalizeFoodLookup = (value) => removeAccents(String(value || "").toLowerCase()).replace(/\s+/g, " ").trim();
+const normalizeFoodGroupKey = (value) => normalizeFoodLookup(value)
+    .replace(/\bphan\s+nac\b/g, "nac")
+    .replace(/[()]/g, " ")
+    .replace(/[\/,;:.-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 // --- COMPONENTS ---
 function MacroProgressBar({ label, current, target, colorClass }) {
@@ -1144,15 +1151,43 @@ export default function App() {
         const common = COMMON_FOODS.filter(f => !deletedCommonFoods.includes(f.name));
         return [...customFoodList, ...common];
     }, [customFoodList, deletedCommonFoods]);
+
+    const foodPickerFoods = useMemo(() => {
+        const byName = new Map();
+        allFoods.forEach(food => {
+            const key = normalizeFoodLookup(food.name);
+            if (!byName.has(key)) byName.set(key, food);
+        });
+
+        const groups = new Map();
+        allFoods.forEach(food => {
+            const aliasTarget = food.aliasOf ? byName.get(normalizeFoodLookup(food.aliasOf)) : null;
+            const canonicalFood = aliasTarget || food;
+            const groupKey = normalizeFoodGroupKey(canonicalFood.name);
+            const searchableNames = [food.name, food.aliasOf, canonicalFood.name].filter(Boolean);
+
+            if (!groups.has(groupKey)) {
+                groups.set(groupKey, { food: canonicalFood, searchTextParts: [] });
+            }
+
+            const group = groups.get(groupKey);
+            group.searchTextParts.push(...searchableNames);
+        });
+
+        return Array.from(groups.values()).map(group => ({
+            ...group.food,
+            searchText: normalizeFoodLookup(group.searchTextParts.join(" ")),
+        }));
+    }, [allFoods]);
     
     const filteredFoods = useMemo(() => {
-        let results = allFoods;
+        let results = foodPickerFoods;
         if (searchQuery.trim()) {
-            const query = removeAccents(searchQuery.toLowerCase().trim());
-            results = allFoods.filter(f => removeAccents(f.name.toLowerCase()).includes(query));
+            const query = normalizeFoodLookup(searchQuery);
+            results = foodPickerFoods.filter(f => f.searchText.includes(query));
         }
         return results.slice(0, 50);
-    }, [searchQuery, allFoods]);
+    }, [searchQuery, foodPickerFoods]);
 
     const handleAddSelectedFood = () => {
         if (!selectedFood) return;
