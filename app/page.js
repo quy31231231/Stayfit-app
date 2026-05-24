@@ -829,11 +829,11 @@ export default function App() {
     const [selectedItemIds, setSelectedItemIds] = useState(new Set());
     const [selectionMode, setSelectionMode] = useState(false);
     const [activeDragId, setActiveDragId] = useState(null);
-    const [bulkMoveMenuOpen, setBulkMoveMenuOpen] = useState(false);
+    const [openMoveMenu, setOpenMoveMenu] = useState(null); // null | mealName
     useEffect(() => {
         setSelectedItemIds(new Set());
         setSelectionMode(false);
-        setBulkMoveMenuOpen(false);
+        setOpenMoveMenu(null);
     }, [currentDate]);
 
     const journalSensors = useSensors(
@@ -1595,6 +1595,7 @@ export default function App() {
     const clearSelection = () => {
         setSelectedItemIds(new Set());
         setSelectionMode(false);
+        setOpenMoveMenu(null);
     };
 
     const applyDietMode = (mode) => {
@@ -2157,54 +2158,16 @@ export default function App() {
                         </div>
 
                         {selectionMode && (
-                            <div className="relative flex items-center justify-between rounded-full bg-orange-soft px-4 py-2 ring-1 ring-orange-deep/30 animate-in slide-in-from-top-2 fade-in duration-200">
+                            <div className="flex items-center justify-between rounded-full bg-orange-soft px-4 py-2 ring-1 ring-orange-deep/30 animate-in slide-in-from-top-2 fade-in duration-200">
                                 <span className="text-[12px] font-bold text-orange-deep">
                                     Đã chọn {selectedItemIds.size} món
                                 </span>
-                                <div className="flex items-center gap-3">
-                                    {selectedItemIds.size > 0 && (
-                                        <div className="relative">
-                                            <button
-                                                onClick={() => setBulkMoveMenuOpen(v => !v)}
-                                                className="flex items-center gap-1 text-[11px] font-semibold text-orange-deep hover:underline"
-                                            >
-                                                Chuyển sang
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                    <polyline points="6 9 12 15 18 9" />
-                                                </svg>
-                                            </button>
-                                            {bulkMoveMenuOpen && (
-                                                <>
-                                                    <div
-                                                        className="fixed inset-0 z-30"
-                                                        onClick={() => setBulkMoveMenuOpen(false)}
-                                                    />
-                                                    <div className="absolute right-0 top-full mt-2 z-40 bg-white rounded-2xl shadow-lift ring-1 ring-cream-deep p-1.5 min-w-[150px] animate-in zoom-in-95 fade-in duration-150">
-                                                        {MEAL_TYPES.map(meal => (
-                                                            <button
-                                                                key={meal}
-                                                                onClick={() => {
-                                                                    bulkUpdateMeals(selectedItemIds, meal);
-                                                                    clearSelection();
-                                                                    setBulkMoveMenuOpen(false);
-                                                                }}
-                                                                className="w-full text-left px-3 py-2 rounded-xl text-[12px] font-semibold text-ink hover:bg-cream-soft transition"
-                                                            >
-                                                                {meal}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
-                                    )}
-                                    <button
-                                        onClick={clearSelection}
-                                        className="text-[11px] font-semibold text-orange-deep hover:underline"
-                                    >
-                                        Hủy
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={clearSelection}
+                                    className="text-[11px] font-semibold text-orange-deep hover:underline"
+                                >
+                                    Hủy
+                                </button>
                             </div>
                         )}
 
@@ -2242,6 +2205,14 @@ export default function App() {
                                         onLongPress={handleLongPress}
                                         onToggleSelect={toggleItemSelected}
                                         onToggleSelectAll={toggleSelectAllInMeal}
+                                        mealTypes={MEAL_TYPES}
+                                        moveMenuOpen={openMoveMenu === meal}
+                                        onToggleMoveMenu={() => setOpenMoveMenu(prev => prev === meal ? null : meal)}
+                                        onCloseMoveMenu={() => setOpenMoveMenu(null)}
+                                        onBulkMove={(targetMeal) => {
+                                            bulkUpdateMeals(selectedItemIds, targetMeal);
+                                            clearSelection();
+                                        }}
                                     />
                                 </div>
                             ))}

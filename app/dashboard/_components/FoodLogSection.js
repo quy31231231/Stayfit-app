@@ -22,6 +22,11 @@ export default function FoodLogSection({
   onLongPress,
   onToggleSelect,
   onToggleSelectAll,
+  mealTypes = [],
+  moveMenuOpen = false,
+  onToggleMoveMenu,
+  onCloseMoveMenu,
+  onBulkMove,
 }) {
   const theme = MEAL_THEMES[mealName] || MEAL_THEMES["Ăn vặt"];
   const totalKcal = items.reduce((sum, i) => sum + (i.kcal || 0), 0);
@@ -58,13 +63,46 @@ export default function FoodLogSection({
         </div>
 
         {selectionMode && !isEmpty ? (
-          <button
-            type="button"
-            onClick={() => onToggleSelectAll?.(mealName)}
-            className="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-orange-soft text-orange-deep ring-1 ring-orange-deep/30 hover:bg-orange/20 transition whitespace-nowrap"
-          >
-            {allSelected ? "Bỏ chọn cả bữa" : "Chọn cả bữa"}
-          </button>
+          <div className="flex items-center gap-1.5 relative">
+            <button
+              type="button"
+              onClick={() => onToggleSelectAll?.(mealName)}
+              className="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-orange-soft text-orange-deep ring-1 ring-orange-deep/30 hover:bg-orange/20 transition whitespace-nowrap"
+            >
+              {allSelected ? "Bỏ chọn cả bữa" : "Chọn cả bữa"}
+            </button>
+            {selectedItemIds && selectedItemIds.size > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={onToggleMoveMenu}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white text-orange-deep ring-1 ring-orange-deep/30 hover:bg-orange-soft transition whitespace-nowrap"
+                >
+                  Chuyển sang
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+                {moveMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={onCloseMoveMenu} />
+                    <div className="absolute right-0 top-full mt-2 z-40 bg-white rounded-2xl shadow-lift ring-1 ring-cream-deep p-1.5 min-w-[150px] animate-in zoom-in-95 fade-in duration-150">
+                      {mealTypes.map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => onBulkMove?.(m)}
+                          className="w-full text-left px-3 py-2 rounded-xl text-[12px] font-semibold text-ink hover:bg-cream-soft transition"
+                        >
+                          {m}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         ) : (
           <button
             type="button"
