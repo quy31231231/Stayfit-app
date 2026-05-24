@@ -1,6 +1,7 @@
 "use client";
 
 import FoodLogItem from "./FoodLogItem";
+import { useDroppable } from "@dnd-kit/core";
 
 const MEAL_THEMES = {
   "Bữa sáng": { icon: "☀️",  tone: "bg-clay-soft text-clay-deep",   ring: "ring-clay" },
@@ -9,13 +10,32 @@ const MEAL_THEMES = {
   "Ăn vặt":   { icon: "⭐",  tone: "bg-orange-soft text-orange-deep", ring: "ring-orange" },
 };
 
-export default function FoodLogSection({ mealName, items = [], targetKcal, onAdd, onRemove }) {
+export default function FoodLogSection({
+  mealName,
+  items = [],
+  targetKcal,
+  onAdd,
+  onRemove,
+  selectedItemIds,
+  selectionMode = false,
+  onLongPress,
+  onToggleSelect,
+}) {
   const theme = MEAL_THEMES[mealName] || MEAL_THEMES["Ăn vặt"];
   const totalKcal = items.reduce((sum, i) => sum + (i.kcal || 0), 0);
   const isEmpty = items.length === 0;
 
+  const { setNodeRef, isOver } = useDroppable({ id: mealName });
+
   return (
-    <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 transition-shadow hover:shadow-lift md:p-6">
+    <section
+      ref={setNodeRef}
+      className={`rounded-3xl bg-white p-5 shadow-soft ring-1 transition md:p-6 ${
+        isOver
+          ? "ring-2 ring-orange-deep shadow-lift scale-[1.01]"
+          : "hover:shadow-lift"
+      }`}
+    >
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className={`grid h-11 w-11 place-items-center rounded-2xl text-xl ${theme.tone}`}>
@@ -48,7 +68,15 @@ export default function FoodLogSection({ mealName, items = [], targetKcal, onAdd
       {!isEmpty && (
         <div className="mt-4 space-y-1.5">
           {items.map((item) => (
-            <FoodLogItem key={item.id} item={item} onRemove={onRemove} />
+            <FoodLogItem
+              key={item.id}
+              item={item}
+              onRemove={onRemove}
+              selected={selectedItemIds?.has(item.id) || false}
+              selectionMode={selectionMode}
+              onLongPress={onLongPress}
+              onToggleSelect={onToggleSelect}
+            />
           ))}
         </div>
       )}
@@ -57,9 +85,13 @@ export default function FoodLogSection({ mealName, items = [], targetKcal, onAdd
         <button
           type="button"
           onClick={() => onAdd?.(mealName)}
-          className="mt-4 w-full rounded-2xl border border-dashed border-cream-deep bg-cream-soft/30 py-4 text-[13px] font-medium text-ink-muted transition hover:border-orange/60 hover:bg-orange-soft/30 hover:text-orange-deep"
+          className={`mt-4 w-full rounded-2xl border border-dashed py-4 text-[13px] font-medium transition ${
+            isOver
+              ? "border-orange-deep bg-orange-soft/40 text-orange-deep"
+              : "border-cream-deep bg-cream-soft/30 text-ink-muted hover:border-orange/60 hover:bg-orange-soft/30 hover:text-orange-deep"
+          }`}
         >
-          Ghi món cho {mealName.toLowerCase()}
+          {isOver ? `Thả vào ${mealName.toLowerCase()}` : `Ghi món cho ${mealName.toLowerCase()}`}
         </button>
       )}
     </section>

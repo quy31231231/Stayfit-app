@@ -6,6 +6,16 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { COMMON_FOODS } from './_data/common-foods';
 
+import {
+    DndContext,
+    DragOverlay,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+    closestCenter,
+} from '@dnd-kit/core';
+
 import DashboardCard from './dashboard/_components/DashboardCard';
 import CalorieCircle from './dashboard/_components/CalorieCircle';
 import MacroDonut from './dashboard/_components/MacroDonut';
@@ -815,6 +825,20 @@ export default function App() {
     useEffect(() => { setUndoStack([]); }, [currentDate]); // Đổi ngày thì dọn sạch thùng rác
     // -------------------------------
 
+    // Drag-and-drop + multi-select state cho tab Nhật ký
+    const [selectedItemIds, setSelectedItemIds] = useState(new Set());
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [activeDragId, setActiveDragId] = useState(null);
+    useEffect(() => {
+        setSelectedItemIds(new Set());
+        setSelectionMode(false);
+    }, [currentDate]);
+
+    const journalSensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } })
+    );
+
     const [profile, setProfile] = useState({ 
         gender: "male", age: 25, height: 165, weight: 60, activity: 1.375, goal: 0, 
         isManualTarget: false, manualTargetKcal: 2000,
@@ -1487,21 +1511,75 @@ export default function App() {
 
     const handleUndo = () => {
         if (undoStack.length === 0) return;
-        
-        const lastDeleted = undoStack[undoStack.length - 1];
-        
-        // SỬA LỖI Ở ĐÂY: Trả lại nguyên vẹn món ăn gốc, KHÔNG tạo Timestamp mới nữa
-        const restoredItem = lastDeleted.item;
-        
+
+        const last = undoStack[undoStack.length - 1];
+
+        // Undo cho bulk move (đổi bữa qua kéo-thả)
+        if (last.type === 'move') {
+            setHistory(prev => {
+                const list = prev[last.date] || [];
+                const restored = list.map(item => {
+                    const moved = last.items.find(m => m.id === item.id);
+                    return moved ? { ...item, meal: moved.oldMeal } : item;
+                });
+                return { ...prev, [last.date]: restored };
+            });
+            setUndoStack(prev => prev.slice(0, -1));
+            return;
+        }
+
+        // Undo cho delete (giữ nguyên logic cũ)
+        const restoredItem = last.item;
         setHistory(prev => {
             const currentList = prev[currentDate] || [];
-            const newList = [...currentList]; 
-            // Chèn lại món ăn vào đúng vị trí cũ
-            newList.splice(lastDeleted.index, 0, restoredItem);
+            const newList = [...currentList];
+            newList.splice(last.index, 0, restoredItem);
             return { ...prev, [currentDate]: newList };
         });
-        
         setUndoStack(prev => prev.slice(0, -1));
+    };
+
+    // Bulk update meal — dùng cho kéo-thả nhiều món
+    const bulkUpdateMeals = (ids, newMeal) => {
+        const movedItems = [];
+        setHistory(prev => {
+            const list = prev[currentDate] || [];
+            const updated = list.map(item => {
+                if (ids.has(item.id) && item.meal !== newMeal) {
+                    movedItems.push({ id: item.id, oldMeal: item.meal });
+                    return { ...item, meal: newMeal };
+                }
+                return item;
+            });
+            return { ...prev, [currentDate]: updated };
+        });
+        if (movedItems.length > 0) {
+            setUndoStack(s => [...s, { type: 'move', items: movedItems, date: currentDate }]);
+        }
+    };
+
+    const handleLongPress = (id) => {
+        setSelectionMode(true);
+        setSelectedItemIds(prev => {
+            const next = new Set(prev);
+            next.add(id);
+            return next;
+        });
+    };
+
+    const toggleItemSelected = (id) => {
+        setSelectedItemIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            if (next.size === 0) setSelectionMode(false);
+            return next;
+        });
+    };
+
+    const clearSelection = () => {
+        setSelectedItemIds(new Set());
+        setSelectionMode(false);
     };
 
     const applyDietMode = (mode) => {
@@ -2052,7 +2130,7 @@ export default function App() {
                         )}
                     </section>
 
-                    {/* 4 MEAL SECTIONS — dùng FoodLogSection từ dashboard */}
+                    {/* 4 MEAL SECTIONS — dùng FoodLogSection từ dashboard, có DnD */}
                     <div className="space-y-3">
                         <div className="flex items-baseline justify-between px-1">
                             <h2 className="text-[15px] font-bold tracking-tight text-ink">Nhật ký bữa ăn</h2>
@@ -2062,21 +2140,79 @@ export default function App() {
                                 </button>
                             )}
                         </div>
-                        {MEAL_TYPES.map((meal, i) => (
-                            <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
-                                <FoodLogSection
-                                    mealName={meal}
-                                    items={dailyLog.filter(it => it.meal === meal)}
-                                    onAdd={(m) => {
-                                        setSelectedMeal(m);
-                                        if (typeof document !== "undefined") {
-                                            document.getElementById("add-food-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                                        }
-                                    }}
-                                    onRemove={removeFood}
-                                />
+
+                        {selectionMode && (
+                            <div className="flex items-center justify-between rounded-full bg-orange-soft px-4 py-2 ring-1 ring-orange-deep/30 animate-in slide-in-from-top-2 fade-in duration-200">
+                                <span className="text-[12px] font-bold text-orange-deep">
+                                    Đã chọn {selectedItemIds.size} món · Kéo sang bữa khác để di chuyển
+                                </span>
+                                <button
+                                    onClick={clearSelection}
+                                    className="text-[11px] font-semibold text-orange-deep hover:underline"
+                                >
+                                    Hủy
+                                </button>
                             </div>
-                        ))}
+                        )}
+
+                        <DndContext
+                            sensors={journalSensors}
+                            collisionDetection={closestCenter}
+                            onDragStart={(e) => setActiveDragId(e.active.id)}
+                            onDragEnd={(e) => {
+                                setActiveDragId(null);
+                                const { active, over } = e;
+                                if (!over) return;
+                                const targetMeal = over.id;
+                                const ids = selectedItemIds.has(active.id)
+                                    ? selectedItemIds
+                                    : new Set([active.id]);
+                                bulkUpdateMeals(ids, targetMeal);
+                                clearSelection();
+                            }}
+                            onDragCancel={() => setActiveDragId(null)}
+                        >
+                            {MEAL_TYPES.map((meal, i) => (
+                                <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
+                                    <FoodLogSection
+                                        mealName={meal}
+                                        items={dailyLog.filter(it => it.meal === meal)}
+                                        onAdd={(m) => {
+                                            setSelectedMeal(m);
+                                            if (typeof document !== "undefined") {
+                                                document.getElementById("add-food-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                            }
+                                        }}
+                                        onRemove={removeFood}
+                                        selectedItemIds={selectedItemIds}
+                                        selectionMode={selectionMode}
+                                        onLongPress={handleLongPress}
+                                        onToggleSelect={toggleItemSelected}
+                                    />
+                                </div>
+                            ))}
+
+                            <DragOverlay dropAnimation={null}>
+                                {activeDragId ? (() => {
+                                    const dragged = dailyLog.find(it => it.id === activeDragId);
+                                    if (!dragged) return null;
+                                    const count = selectedItemIds.has(activeDragId) ? selectedItemIds.size : 1;
+                                    return (
+                                        <div className="rounded-2xl bg-white px-4 py-3 shadow-lift ring-2 ring-orange-deep/40 cursor-grabbing">
+                                            <div className="flex items-center gap-2">
+                                                <span className="grid h-6 min-w-6 px-2 place-items-center rounded-full bg-orange-deep text-[11px] font-bold text-white tabular-nums">
+                                                    {count}
+                                                </span>
+                                                <span className="text-[13px] font-semibold text-ink truncate max-w-[200px]">
+                                                    {count > 1 ? `${dragged.name} +${count - 1}` : dragged.name}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })() : null}
+                            </DragOverlay>
+                        </DndContext>
+
                         {dailyLog.length === 0 && (
                             <p className="text-center text-ink-faint text-[11px] uppercase font-semibold italic py-6 border border-dashed border-cream-deep rounded-3xl tracking-wider">
                                 Khi nào sẵn sàng, ghi món vào nhé
