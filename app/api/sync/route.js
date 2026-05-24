@@ -234,7 +234,8 @@ export async function POST(req) {
         }
       }
 
-      // 3. SYNC CÂN NẶNG — UPSERT (UNFORMATTED_VALUE để decimal so sánh đúng)
+      // 3. SYNC CÂN NẶNG — DEDUPE + UPSERT
+      // Mỗi (userId, date) chỉ giữ 1 row. Nếu phát hiện duplicates → delete hết + append fresh.
       if (weightLog && typeof weightLog === 'object') {
         const weightRes = await sheets.spreadsheets.values.get({
           spreadsheetId: SHEET_ID,
@@ -243,27 +244,75 @@ export async function POST(req) {
           dateTimeRenderOption: "FORMATTED_STRING",
         });
         const weightRows = weightRes.data.values || [];
+        let weightSheetId = null;
+
+        const rowsToAppend = [];
+        const deleteRanges = [];
 
         for (const [date, weight] of Object.entries(weightLog)) {
-          const existingIdx = weightRows.findIndex(row => row[0] === userId && String(row[1]) === date);
-          if (existingIdx === -1) {
-            // Append entry mới
-            await sheets.spreadsheets.values.append({
-              spreadsheetId: SHEET_ID, range: "Weight!A:C", valueInputOption: "USER_ENTERED",
-              requestBody: { values: [[userId, date, weight]] }
-            });
-          } else {
-            // Update giá trị cũ nếu khác (tránh write thừa)
-            const existingWeight = safeFloat(weightRows[existingIdx][2]);
+          const existingIndices = [];
+          weightRows.forEach((row, idx) => {
+            if (idx === 0) return; // skip header (nếu có)
+            if (row[0] === userId && String(row[1]) === date) {
+              existingIndices.push(idx);
+            }
+          });
+
+          if (existingIndices.length === 0) {
+            // Chưa có → append mới
+            rowsToAppend.push([userId, date, weight]);
+          } else if (existingIndices.length === 1) {
+            // Đúng 1 row → update in-place nếu value khác
+            const idx = existingIndices[0];
+            const existingWeight = safeFloat(weightRows[idx][2]);
             if (existingWeight !== Number(weight)) {
               await sheets.spreadsheets.values.update({
                 spreadsheetId: SHEET_ID,
-                range: `Weight!A${existingIdx + 1}:C${existingIdx + 1}`,
+                range: `Weight!A${idx + 1}:C${idx + 1}`,
                 valueInputOption: "USER_ENTERED",
                 requestBody: { values: [[userId, date, weight]] }
               });
             }
+          } else {
+            // Có DUPLICATES — đánh dấu xóa hết + append 1 row mới
+            existingIndices.forEach(idx => {
+              deleteRanges.push({ startIndex: idx, endIndex: idx + 1 });
+            });
+            rowsToAppend.push([userId, date, weight]);
           }
+        }
+
+        // Execute deletes (descending order để giữ indices của các row chưa xóa)
+        if (deleteRanges.length > 0) {
+          weightSheetId = await getSheetIdByName(sheets, SHEET_ID, "Weight");
+          if (weightSheetId != null) {
+            const requests = deleteRanges
+              .sort((a, b) => b.startIndex - a.startIndex)
+              .map(r => ({
+                deleteDimension: {
+                  range: {
+                    sheetId: weightSheetId,
+                    dimension: "ROWS",
+                    startIndex: r.startIndex,
+                    endIndex: r.endIndex,
+                  }
+                }
+              }));
+            await sheets.spreadsheets.batchUpdate({
+              spreadsheetId: SHEET_ID,
+              requestBody: { requests }
+            });
+          }
+        }
+
+        // Batch append all new rows
+        if (rowsToAppend.length > 0) {
+          await sheets.spreadsheets.values.append({
+            spreadsheetId: SHEET_ID,
+            range: "Weight!A:C",
+            valueInputOption: "USER_ENTERED",
+            requestBody: { values: rowsToAppend }
+          });
         }
       }
 
