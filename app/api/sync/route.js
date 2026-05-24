@@ -1,6 +1,18 @@
 import { google } from "googleapis";
 import crypto from "crypto";
 
+// Parse decimal an toàn dù Sheets trả number (UNFORMATTED) hoặc string "81,4" (locale VN).
+const safeFloat = (v) => {
+  if (typeof v === 'number') return v;
+  if (v == null || v === '') return NaN;
+  return parseFloat(String(v).replace(',', '.'));
+};
+const safeInt = (v) => {
+  if (typeof v === 'number') return Math.trunc(v);
+  if (v == null || v === '') return NaN;
+  return parseInt(String(v).replace(',', '.'), 10);
+};
+
 // [SECURITY] Hash password bằng SHA-256
 function hashPassword(password) {
   if (!password) return "";
@@ -81,8 +93,12 @@ export async function POST(req) {
     try {
       const hashedPassword = hashPassword(password);
 
-      // 1. KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE (đọc đến cột N để lấy luôn customFoods/deletedCommon/startWeight/targetWeight)
-      const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:N" });
+      // 1. KIỂM TRA MẬT KHẨU & CẬP NHẬT PROFILE — UNFORMATTED_VALUE (đến cột N)
+      const profileRes = await sheets.spreadsheets.values.get({
+        spreadsheetId: SHEET_ID,
+        range: "Profile!A:N",
+        valueRenderOption: "UNFORMATTED_VALUE",
+      });
       const profileRows = profileRes.data.values || [];
       const profileIndex = profileRows.findIndex(row => row[0] === userId);
 
@@ -126,41 +142,40 @@ export async function POST(req) {
         });
       }
 
-      // 2. SYNC LỊCH SỬ THỰC ĐƠN
+      // 2. SYNC LỊCH SỬ THỰC ĐƠN — UNFORMATTED_VALUE
       if (history && typeof history === 'object') {
         const existingRes = await sheets.spreadsheets.values.get({
           spreadsheetId: SHEET_ID,
           range: `History!A:K`,
+          valueRenderOption: "UNFORMATTED_VALUE",
         });
         const existingRows = existingRes.data.values || [];
-        
-        // Dùng Map để nhớ chính xác vị trí (dòng) của từng món ăn trên Sheets
+
         const existingMap = new Map();
         existingRows.forEach((row, index) => {
-          if (row[0] === userId && row[10]) {
-            existingMap.set(`${row[0]}::${row[10]}`, { row, index });
+          if (row[0] === userId && row[10] != null && row[10] !== "") {
+            existingMap.set(`${row[0]}::${String(row[10])}`, { row, index });
           }
         });
 
-        const rowsToAppend = []; // TẠO MẢNG GOM DỮ LIỆU ĐỂ LƯU 1 LẦN DUY NHẤT
+        const rowsToAppend = [];
 
         for (const [date, meals] of Object.entries(history)) {
           if (Array.isArray(meals)) {
             for (const meal of meals) {
-              const key = `${userId}::${meal.timestamp}`;
-              
+              const key = `${userId}::${String(meal.timestamp)}`;
+
               if (existingMap.has(key)) {
-                // NẾU MÓN ĐÃ TỒN TẠI: Kiểm tra xem có bất kỳ thay đổi nào cần cập nhật không
                 const { row, index } = existingMap.get(key);
-                
+
                 const currentMeal = row[2];
                 const currentName = row[3];
-                const currentQty = parseFloat(row[4]);
+                const currentQty = safeFloat(row[4]);
                 const currentUnit = row[5];
-                const currentKcal = parseFloat(row[6]);
-                const currentPro = parseFloat(row[7]);
-                const currentCarb = parseFloat(row[8]);
-                const currentFat = parseFloat(row[9]);
+                const currentKcal = safeFloat(row[6]);
+                const currentPro = safeFloat(row[7]);
+                const currentCarb = safeFloat(row[8]);
+                const currentFat = safeFloat(row[9]);
 
                 const isChanged = 
                     currentMeal !== meal.meal ||
@@ -217,13 +232,17 @@ export async function POST(req) {
         }
       }
 
-      // 3. SYNC CÂN NẶNG — UPSERT: update nếu đã tồn tại (cùng userId + ngày), append nếu chưa
+      // 3. SYNC CÂN NẶNG — UPSERT (UNFORMATTED_VALUE để decimal so sánh đúng)
       if (weightLog && typeof weightLog === 'object') {
-        const weightRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Weight!A:C" });
+        const weightRes = await sheets.spreadsheets.values.get({
+          spreadsheetId: SHEET_ID,
+          range: "Weight!A:C",
+          valueRenderOption: "UNFORMATTED_VALUE",
+        });
         const weightRows = weightRes.data.values || [];
 
         for (const [date, weight] of Object.entries(weightLog)) {
-          const existingIdx = weightRows.findIndex(row => row[0] === userId && row[1] === date);
+          const existingIdx = weightRows.findIndex(row => row[0] === userId && String(row[1]) === date);
           if (existingIdx === -1) {
             // Append entry mới
             await sheets.spreadsheets.values.append({
@@ -232,7 +251,7 @@ export async function POST(req) {
             });
           } else {
             // Update giá trị cũ nếu khác (tránh write thừa)
-            const existingWeight = parseFloat(weightRows[existingIdx][2]);
+            const existingWeight = safeFloat(weightRows[existingIdx][2]);
             if (existingWeight !== Number(weight)) {
               await sheets.spreadsheets.values.update({
                 spreadsheetId: SHEET_ID,
@@ -272,8 +291,12 @@ export async function GET(req) {
     const sheets = await getSheets();
     const hashedPassword = hashPassword(password);
 
-    // 1. LẤY PROFILE (đọc đến cột N để lấy customFoods + deletedCommonFoods + startWeight + targetWeight)
-    const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:N" });
+    // 1. LẤY PROFILE — UNFORMATTED_VALUE để bypass locale formatting (vd VN trả "81,4" thay vì 81.4)
+    const profileRes = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "Profile!A:N",
+      valueRenderOption: "UNFORMATTED_VALUE",
+    });
     const profileRows = profileRes.data.values || [];
     const profileRow = profileRows.find(row => row[0] === userId);
 
@@ -288,82 +311,93 @@ export async function GET(req) {
 
     const profile = {
       gender: profileRow[1] || "male",
-      age: parseInt(profileRow[2]) || 25,
-      height: parseFloat(profileRow[3]) || 165,
-      weight: parseFloat(profileRow[4]) || 60,
-      activity: parseFloat(profileRow[5]) || 1.375,
-      goal: parseInt(profileRow[6]) || 0,
-      manualTargetKcal: profileRow[7] ? parseInt(profileRow[7]) : null,
+      age: safeInt(profileRow[2]) || 25,
+      height: safeFloat(profileRow[3]) || 165,
+      weight: safeFloat(profileRow[4]) || 60,
+      activity: safeFloat(profileRow[5]) || 1.375,
+      goal: safeInt(profileRow[6]) || 0,
+      manualTargetKcal: profileRow[7] != null && profileRow[7] !== "" ? safeInt(profileRow[7]) : null,
     };
     // Chỉ thêm startWeight/targetWeight nếu có giá trị (tránh overwrite local state với null)
-    if (profileRow[12]) profile.startWeight = parseFloat(profileRow[12]);
-    if (profileRow[13]) profile.targetWeight = parseFloat(profileRow[13]);
+    if (profileRow[12] != null && profileRow[12] !== "") profile.startWeight = safeFloat(profileRow[12]);
+    if (profileRow[13] != null && profileRow[13] !== "") profile.targetWeight = safeFloat(profileRow[13]);
 
     let customFoods = null;
     let deletedCommonFoods = null;
     try { if (profileRow[10]) customFoods = JSON.parse(profileRow[10]); } catch (e) {}
     try { if (profileRow[11]) deletedCommonFoods = JSON.parse(profileRow[11]); } catch (e) {}
 
-    // 2. LẤY LỊCH SỬ
-    const historyRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "History!A:K" });
+    // 2. LẤY LỊCH SỬ — UNFORMATTED_VALUE
+    const historyRes = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "History!A:K",
+      valueRenderOption: "UNFORMATTED_VALUE",
+    });
     const historyRows = historyRes.data.values || [];
     const history = {};
 
     historyRows.slice(1).forEach(row => {
-      // Skip only completely empty rows
-      if (!row || row.length === 0 || !row[0] || !row[1]) return;
-      
+      if (!row || row.length === 0 || !row[0] || row[1] == null) return;
+
       if (row[0] === userId) {
-        const date = row[1];
+        const date = String(row[1]);
+        const tsRaw = row[10];
+        const ts = tsRaw != null && tsRaw !== "" ? String(tsRaw) : `${date}-${Date.now()}`;
         const meal = {
           meal: row[2] || "",
           name: row[3] || "",
-          quantity: parseFloat(row[4]) || 0,
+          quantity: safeFloat(row[4]) || 0,
           unit: row[5] || "g",
-          kcal: parseFloat(row[6]) || 0,
-          protein: parseFloat(row[7]) || 0,
-          carb: parseFloat(row[8]) || 0,
-          fat: parseFloat(row[9]) || 0,
-          timestamp: row[10] || `${date}-${Date.now()}`, // Generate timestamp if missing
-          id: row[10] || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          kcal: safeFloat(row[6]) || 0,
+          protein: safeFloat(row[7]) || 0,
+          carb: safeFloat(row[8]) || 0,
+          fat: safeFloat(row[9]) || 0,
+          timestamp: ts,
+          id: ts,
         };
         if (!history[date]) history[date] = [];
         history[date].push(meal);
       }
     });
 
-    // 3. LẤY CÂN NẶNG
-    const weightRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Weight!A:C" });
+    // 3. LẤY CÂN NẶNG — UNFORMATTED_VALUE
+    const weightRes = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "Weight!A:C",
+      valueRenderOption: "UNFORMATTED_VALUE",
+    });
     const weightRows = weightRes.data.values || [];
     const weightLog = {};
 
     weightRows.slice(1).forEach(row => {
-      if (row[0] === userId) {
-        weightLog[row[1]] = parseFloat(row[2]);
+      if (row[0] === userId && row[1] != null) {
+        weightLog[String(row[1])] = safeFloat(row[2]);
       }
     });
 
-    // 4. LẤY SCAN FEEDBACK (cho client tính suggestion)
+    // 4. LẤY SCAN FEEDBACK — UNFORMATTED_VALUE
     let scanFeedback = [];
     try {
       const fbRes = await sheets.spreadsheets.values.get({
-        spreadsheetId: SHEET_ID, range: "ScanFeedback!A:K"
+        spreadsheetId: SHEET_ID,
+        range: "ScanFeedback!A:K",
+        valueRenderOption: "UNFORMATTED_VALUE",
       });
       const fbRows = fbRes.data.values || [];
       scanFeedback = fbRows.slice(1)
         .filter(row => row && row[0] === userId && row[2] && row[4])
         .slice(-200)
         .map(row => ({
-          timestamp: row[1] || "",
+          timestamp: row[1] != null ? String(row[1]) : "",
           aiPredictedName: row[2] || "",
           libraryMatchedName: row[3] || "",
           userCorrectedName: row[4] || "",
-          confidence: parseFloat(row[5]) || 0,
-          fuzzyMatched: row[6] === "1",
-          kcal: parseFloat(row[7]) || 0,
-          protein: parseFloat(row[8]) || 0,
-          carb: parseFloat(row[9]) || 0,
-          fat: parseFloat(row[10]) || 0,
+          confidence: safeFloat(row[5]) || 0,
+          fuzzyMatched: row[6] === "1" || row[6] === 1,
+          kcal: safeFloat(row[7]) || 0,
+          protein: safeFloat(row[8]) || 0,
+          carb: safeFloat(row[9]) || 0,
+          fat: safeFloat(row[10]) || 0,
         }));
     } catch (e) {
       console.warn("[sync GET] ScanFeedback fetch failed:", e.message);
@@ -391,8 +425,12 @@ export async function DELETE(req) {
     const sheets = await getSheets();
     const hashedPassword = hashPassword(password);
 
-    // Verify password
-    const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:L" });
+    // Verify password (UNFORMATTED_VALUE để password hash text giữ nguyên kiểu)
+    const profileRes = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "Profile!A:L",
+      valueRenderOption: "UNFORMATTED_VALUE",
+    });
     const profileRows = profileRes.data.values || [];
     const profileRow = profileRows.find(row => row[0] === userId);
 
@@ -400,10 +438,14 @@ export async function DELETE(req) {
       return Response.json({ error: "Authentication failed" }, { status: 401 });
     }
 
-    // Delete from History - find row index and delete it
-    const historyRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "History!A:K" });
+    // Delete from History - find row index and delete it (UNFORMATTED_VALUE để compare timestamp đúng kiểu)
+    const historyRes = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "History!A:K",
+      valueRenderOption: "UNFORMATTED_VALUE",
+    });
     const historyRows = historyRes.data.values || [];
-    const deleteRowIndex = historyRows.findIndex(row => row && row[0] === userId && row[10] === timestamp);
+    const deleteRowIndex = historyRows.findIndex(row => row && row[0] === userId && row[10] != null && String(row[10]) === String(timestamp));
 
     if (deleteRowIndex !== -1) {
       // Get the correct sheet ID for History sheet
