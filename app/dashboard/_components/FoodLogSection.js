@@ -20,12 +20,15 @@ export default function FoodLogSection({
   selectionMode = false,
   onLongPress,
   onToggleSelect,
+  onToggleSelectAll,
 }) {
   const theme = MEAL_THEMES[mealName] || MEAL_THEMES["Ăn vặt"];
   const totalKcal = items.reduce((sum, i) => sum + (i.kcal || 0), 0);
   const isEmpty = items.length === 0;
 
   const { setNodeRef, isOver } = useDroppable({ id: mealName });
+
+  const allSelected = !isEmpty && items.every((it) => selectedItemIds?.has(it.id));
 
   return (
     <section
@@ -52,17 +55,27 @@ export default function FoodLogSection({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => onAdd?.(mealName)}
-          className="grid h-10 w-10 place-items-center rounded-full bg-cream-soft text-ink ring-1 transition hover:bg-orange hover:text-white hover:ring-orange"
-          aria-label={`Thêm món vào ${mealName}`}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
+        {selectionMode && !isEmpty ? (
+          <button
+            type="button"
+            onClick={() => onToggleSelectAll?.(mealName)}
+            className="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-orange-soft text-orange-deep ring-1 ring-orange-deep/30 hover:bg-orange/20 transition whitespace-nowrap"
+          >
+            {allSelected ? "Bỏ chọn cả bữa" : "Chọn cả bữa"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onAdd?.(mealName)}
+            className="grid h-10 w-10 place-items-center rounded-full bg-cream-soft text-ink ring-1 transition hover:bg-orange hover:text-white hover:ring-orange"
+            aria-label={`Thêm món vào ${mealName}`}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        )}
       </header>
 
       {!isEmpty && (

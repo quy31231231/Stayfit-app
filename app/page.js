@@ -1541,21 +1541,18 @@ export default function App() {
 
     // Bulk update meal — dùng cho kéo-thả nhiều món
     const bulkUpdateMeals = (ids, newMeal) => {
+        const list = history[currentDate] || [];
         const movedItems = [];
-        setHistory(prev => {
-            const list = prev[currentDate] || [];
-            const updated = list.map(item => {
-                if (ids.has(item.id) && item.meal !== newMeal) {
-                    movedItems.push({ id: item.id, oldMeal: item.meal });
-                    return { ...item, meal: newMeal };
-                }
-                return item;
-            });
-            return { ...prev, [currentDate]: updated };
+        const updated = list.map(item => {
+            if (ids.has(item.id) && item.meal !== newMeal) {
+                movedItems.push({ id: item.id, oldMeal: item.meal });
+                return { ...item, meal: newMeal };
+            }
+            return item;
         });
-        if (movedItems.length > 0) {
-            setUndoStack(s => [...s, { type: 'move', items: movedItems, date: currentDate }]);
-        }
+        if (movedItems.length === 0) return;
+        setHistory(prev => ({ ...prev, [currentDate]: updated }));
+        setUndoStack(s => [...s, { type: 'move', items: movedItems, date: currentDate }]);
     };
 
     const handleLongPress = (id) => {
@@ -1572,6 +1569,22 @@ export default function App() {
             const next = new Set(prev);
             if (next.has(id)) next.delete(id);
             else next.add(id);
+            if (next.size === 0) setSelectionMode(false);
+            return next;
+        });
+    };
+
+    const toggleSelectAllInMeal = (mealName) => {
+        const itemsInMeal = (history[currentDate] || []).filter(it => it.meal === mealName);
+        if (itemsInMeal.length === 0) return;
+        const allSelected = itemsInMeal.every(it => selectedItemIds.has(it.id));
+        setSelectedItemIds(prev => {
+            const next = new Set(prev);
+            if (allSelected) {
+                itemsInMeal.forEach(it => next.delete(it.id));
+            } else {
+                itemsInMeal.forEach(it => next.add(it.id));
+            }
             if (next.size === 0) setSelectionMode(false);
             return next;
         });
@@ -2188,6 +2201,7 @@ export default function App() {
                                         selectionMode={selectionMode}
                                         onLongPress={handleLongPress}
                                         onToggleSelect={toggleItemSelected}
+                                        onToggleSelectAll={toggleSelectAllInMeal}
                                     />
                                 </div>
                             ))}
