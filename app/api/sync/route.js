@@ -98,6 +98,7 @@ export async function POST(req) {
         spreadsheetId: SHEET_ID,
         range: "Profile!A:N",
         valueRenderOption: "UNFORMATTED_VALUE",
+        dateTimeRenderOption: "FORMATTED_STRING",
       });
       const profileRows = profileRes.data.values || [];
       const profileIndex = profileRows.findIndex(row => row[0] === userId);
@@ -148,6 +149,7 @@ export async function POST(req) {
           spreadsheetId: SHEET_ID,
           range: `History!A:K`,
           valueRenderOption: "UNFORMATTED_VALUE",
+          dateTimeRenderOption: "FORMATTED_STRING",
         });
         const existingRows = existingRes.data.values || [];
 
@@ -238,6 +240,7 @@ export async function POST(req) {
           spreadsheetId: SHEET_ID,
           range: "Weight!A:C",
           valueRenderOption: "UNFORMATTED_VALUE",
+          dateTimeRenderOption: "FORMATTED_STRING",
         });
         const weightRows = weightRes.data.values || [];
 
@@ -296,6 +299,7 @@ export async function GET(req) {
       spreadsheetId: SHEET_ID,
       range: "Profile!A:N",
       valueRenderOption: "UNFORMATTED_VALUE",
+      dateTimeRenderOption: "FORMATTED_STRING",
     });
     const profileRows = profileRes.data.values || [];
     const profileRow = profileRows.find(row => row[0] === userId);
@@ -332,6 +336,7 @@ export async function GET(req) {
       spreadsheetId: SHEET_ID,
       range: "History!A:K",
       valueRenderOption: "UNFORMATTED_VALUE",
+      dateTimeRenderOption: "FORMATTED_STRING",
     });
     const historyRows = historyRes.data.values || [];
     const history = {};
@@ -365,6 +370,7 @@ export async function GET(req) {
       spreadsheetId: SHEET_ID,
       range: "Weight!A:C",
       valueRenderOption: "UNFORMATTED_VALUE",
+      dateTimeRenderOption: "FORMATTED_STRING",
     });
     const weightRows = weightRes.data.values || [];
     const weightLog = {};
@@ -382,6 +388,7 @@ export async function GET(req) {
         spreadsheetId: SHEET_ID,
         range: "ScanFeedback!A:K",
         valueRenderOption: "UNFORMATTED_VALUE",
+        dateTimeRenderOption: "FORMATTED_STRING",
       });
       const fbRows = fbRes.data.values || [];
       scanFeedback = fbRows.slice(1)
@@ -430,6 +437,7 @@ export async function DELETE(req) {
       spreadsheetId: SHEET_ID,
       range: "Profile!A:L",
       valueRenderOption: "UNFORMATTED_VALUE",
+      dateTimeRenderOption: "FORMATTED_STRING",
     });
     const profileRows = profileRes.data.values || [];
     const profileRow = profileRows.find(row => row[0] === userId);
@@ -443,6 +451,7 @@ export async function DELETE(req) {
       spreadsheetId: SHEET_ID,
       range: "History!A:K",
       valueRenderOption: "UNFORMATTED_VALUE",
+      dateTimeRenderOption: "FORMATTED_STRING",
     });
     const historyRows = historyRes.data.values || [];
     const deleteRowIndex = historyRows.findIndex(row => row && row[0] === userId && row[10] != null && String(row[10]) === String(timestamp));
