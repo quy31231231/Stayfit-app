@@ -165,7 +165,9 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     };
 
    const saveWeight = async () => {
-        const inputVal = parseFloat(weightInput);
+        // Hỗ trợ cả "79.5" và "79,5" (kiểu VN với dấu phẩy thập phân)
+        const normalizedInput = String(weightInput || "").replace(',', '.');
+        const inputVal = parseFloat(normalizedInput);
         if (!inputVal || inputVal <= 0) return alert("Vui lòng nhập số kg hợp lệ!");
         const newLog = { ...weightLog, [weightDate]: inputVal };
         setWeightLog(newLog);
@@ -1661,14 +1663,14 @@ export default function App() {
                             <div>
                                 <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Cân nặng</label>
                                 <div className="relative">
-                                    <input type="number" value={profile.weight} onChange={e=>setProfile({...profile, weight:+e.target.value})} className="w-full bg-cream-soft ring-1 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
+                                    <input type="number" step="0.01" value={profile.weight} onChange={e=>setProfile({...profile, weight: parseFloat(String(e.target.value).replace(',', '.')) || 0})} className="w-full bg-cream-soft ring-1 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
                                     <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">kg</span>
                                 </div>
                             </div>
                             <div>
                                 <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Chiều cao</label>
                                 <div className="relative">
-                                    <input type="number" value={profile.height} onChange={e=>setProfile({...profile, height:+e.target.value})} className="w-full bg-cream-soft ring-1 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
+                                    <input type="number" step="0.1" value={profile.height} onChange={e=>setProfile({...profile, height: parseFloat(String(e.target.value).replace(',', '.')) || 0})} className="w-full bg-cream-soft ring-1 p-3 pr-8 rounded-2xl outline-none font-bold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
                                     <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-ink-muted">cm</span>
                                 </div>
                             </div>
