@@ -1,0 +1,1880 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "stayfit-app",
+    "languages": [
+      "javascript",
+      "css",
+      "json",
+      "markdown"
+    ],
+    "frameworks": [
+      "Next.js",
+      "React",
+      "Tailwind CSS",
+      "Chart.js"
+    ],
+    "description": "Vietnamese calorie & fitness tracker. Next.js 15 App Router PWA using Google Sheets as database and Gemini AI for food recognition.",
+    "analyzedAt": "2026-05-29T09:14:46Z",
+    "gitCommitHash": "62194f81020816926851e1a1bb02dc99dc707420"
+  },
+  "nodes": [
+    {
+      "id": "file:app/dashboard/_components/CalorieCircle.js",
+      "type": "file",
+      "name": "CalorieCircle.js",
+      "filePath": "app/dashboard/_components/CalorieCircle.js",
+      "summary": "SVG-based circular progress component that visualises consumed versus target calories for the dashboard, rendering arc geometry and numeric summaries inline.",
+      "tags": [
+        "component",
+        "ui",
+        "calorie-tracking",
+        "svg"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/dashboard/_components/CalorieCircle.js:CalorieCircle",
+      "type": "function",
+      "name": "CalorieCircle",
+      "filePath": "app/dashboard/_components/CalorieCircle.js",
+      "lineRange": [
+        3,
+        58
+      ],
+      "summary": "Default-exported React component that renders an SVG calorie ring with consumed/remaining/target labels, clamping progress to [0,1].",
+      "tags": [
+        "component",
+        "svg",
+        "calorie-tracking"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/dashboard/_components/DashboardCard.js",
+      "type": "file",
+      "name": "DashboardCard.js",
+      "filePath": "app/dashboard/_components/DashboardCard.js",
+      "summary": "Generic card wrapper component providing a consistent rounded, shadowed container with an optional title used throughout the dashboard.",
+      "tags": [
+        "component",
+        "ui",
+        "layout",
+        "reusable"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/dashboard/_components/DashboardCard.js:DashboardCard",
+      "type": "function",
+      "name": "DashboardCard",
+      "filePath": "app/dashboard/_components/DashboardCard.js",
+      "lineRange": [
+        3,
+        32
+      ],
+      "summary": "Default-exported React component rendering a styled card container with an optional title slot and arbitrary children.",
+      "tags": [
+        "component",
+        "layout",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:app/dashboard/_components/MacroDonut.js",
+      "type": "file",
+      "name": "MacroDonut.js",
+      "filePath": "app/dashboard/_components/MacroDonut.js",
+      "summary": "SVG donut chart component that visualises the protein, carbohydrate, and fat macro breakdown for a given nutritional summary.",
+      "tags": [
+        "component",
+        "ui",
+        "macro-tracking",
+        "svg"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/dashboard/_components/MacroDonut.js:MacroDonut",
+      "type": "function",
+      "name": "MacroDonut",
+      "filePath": "app/dashboard/_components/MacroDonut.js",
+      "lineRange": [
+        9,
+        55
+      ],
+      "summary": "Default-exported React component that computes SVG arc segments from macro gram values and renders a labelled donut ring with a legend.",
+      "tags": [
+        "component",
+        "svg",
+        "macro-tracking"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/dashboard/_components/WeeklyTrendCard.js",
+      "type": "file",
+      "name": "WeeklyTrendCard.js",
+      "filePath": "app/dashboard/_components/WeeklyTrendCard.js",
+      "summary": "Dashboard card component that renders a 7-day calorie bar chart alongside a weekly average versus target comparison summary.",
+      "tags": [
+        "component",
+        "ui",
+        "weekly-trend",
+        "chart"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/dashboard/_components/WeeklyTrendCard.js:WeeklyTrendCard",
+      "type": "function",
+      "name": "WeeklyTrendCard",
+      "filePath": "app/dashboard/_components/WeeklyTrendCard.js",
+      "lineRange": [
+        5,
+        59
+      ],
+      "summary": "Default-exported React component that derives per-day bar heights and a rolling average, then renders them inside a DashboardCard shell.",
+      "tags": [
+        "component",
+        "chart",
+        "weekly-trend"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/dashboard/page.js",
+      "type": "file",
+      "name": "page.js",
+      "filePath": "app/dashboard/page.js",
+      "summary": "Main Next.js App Router dashboard page that orchestrates calorie/macro state, meal logging, water intake, and mindfulness UI, composing all dashboard sub-components.",
+      "tags": [
+        "entry-point",
+        "component",
+        "dashboard",
+        "api-handler"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/dashboard/page.js:DashboardPage",
+      "type": "function",
+      "name": "DashboardPage",
+      "filePath": "app/dashboard/page.js",
+      "lineRange": [
+        34,
+        154
+      ],
+      "summary": "Default-exported page component that manages food-log state, syncs with the backend, computes daily totals and meal groups, then lays out all dashboard cards.",
+      "tags": [
+        "component",
+        "entry-point",
+        "dashboard"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/dashboard/page.js:WaterCard",
+      "type": "function",
+      "name": "WaterCard",
+      "filePath": "app/dashboard/page.js",
+      "lineRange": [
+        176,
+        207
+      ],
+      "summary": "Local React component that renders a water-intake tracker with glass icons and a litre progress label.",
+      "tags": [
+        "component",
+        "water-tracking",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/dashboard/page.js:MindfulCard",
+      "type": "function",
+      "name": "MindfulCard",
+      "filePath": "app/dashboard/page.js",
+      "lineRange": [
+        209,
+        242
+      ],
+      "summary": "Local React component that toggles a BreathingTimer overlay and renders a mindfulness prompt card on the dashboard.",
+      "tags": [
+        "component",
+        "mindfulness",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/_data/common-foods.js",
+      "type": "file",
+      "name": "common-foods.js",
+      "filePath": "app/_data/common-foods.js",
+      "summary": "Static Vietnamese food database exporting a large COMMON_FOODS array with nutritional data (calories, protein, carbs, fat) for hundreds of common Vietnamese dishes and ingredients.",
+      "tags": [
+        "data-model",
+        "utility",
+        "database"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:app/dashboard/_components/BreathingTimer.js",
+      "type": "file",
+      "name": "BreathingTimer.js",
+      "filePath": "app/dashboard/_components/BreathingTimer.js",
+      "summary": "React component implementing a guided 4-7-8 breathing exercise timer with phase cycling, keyboard dismiss support, and auto-close after a configurable number of cycles.",
+      "tags": [
+        "component",
+        "utility",
+        "event-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/dashboard/_components/GreetingHeader.js",
+      "type": "file",
+      "name": "GreetingHeader.js",
+      "filePath": "app/dashboard/_components/GreetingHeader.js",
+      "summary": "React component that renders a time-aware greeting header with the user's name, current date, BMI, and calorie progress — adjusting greeting text and accent color based on the hour of day.",
+      "tags": [
+        "component",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/page.js",
+      "type": "file",
+      "name": "page.js",
+      "filePath": "app/page.js",
+      "summary": "Root Next.js page and primary application shell containing the main App component, StatsView analytics panel, BottomNav navigation bar, and all supporting helper utilities including food normalization, date formatting, and cloud sync logic.",
+      "tags": [
+        "entry-point",
+        "component",
+        "api-handler",
+        "utility"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Monolithic Next.js client component (2762 lines) acting as both the app shell and a feature module; contains inline sub-components such as StatsView, BottomNav, EqCell, and MindfulCard."
+    },
+    {
+      "id": "function:app/dashboard/_components/BreathingTimer.js:BreathingTimer",
+      "type": "function",
+      "name": "BreathingTimer",
+      "filePath": "app/dashboard/_components/BreathingTimer.js",
+      "lineRange": [
+        12,
+        88
+      ],
+      "summary": "Exported default React component that drives a multi-phase breathing exercise (inhale/hold/exhale) using timed state transitions and renders an animated overlay with phase indicator.",
+      "tags": [
+        "component",
+        "event-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/dashboard/_components/GreetingHeader.js:GreetingHeader",
+      "type": "function",
+      "name": "GreetingHeader",
+      "filePath": "app/dashboard/_components/GreetingHeader.js",
+      "lineRange": [
+        33,
+        70
+      ],
+      "summary": "Exported default React component rendering a personalized greeting with the current date, calorie ring summary, and BMI badge, adapting text and color to the time of day.",
+      "tags": [
+        "component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/page.js:StatsView",
+      "type": "function",
+      "name": "StatsView",
+      "filePath": "app/page.js",
+      "lineRange": [
+        139,
+        799
+      ],
+      "summary": "Large React component rendering the statistics screen with Chart.js-powered weight, calorie, and macro charts, weight logging/goal management modals, and a BMI gauge.",
+      "tags": [
+        "component",
+        "api-handler"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/page.js:App",
+      "type": "function",
+      "name": "App",
+      "filePath": "app/page.js",
+      "lineRange": [
+        818,
+        2722
+      ],
+      "summary": "Root exported React component orchestrating the entire application: manages authentication, cloud sync with Google Sheets API, food logging, calorie tracking state, and routes between dashboard, stats, and settings views.",
+      "tags": [
+        "component",
+        "entry-point",
+        "api-handler"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/page.js:normalizeFoodGroupKey",
+      "type": "function",
+      "name": "normalizeFoodGroupKey",
+      "filePath": "app/page.js",
+      "lineRange": [
+        116,
+        121
+      ],
+      "summary": "Normalizes a Vietnamese food name string for group-key matching by stripping diacritics, collapsing punctuation and whitespace, and remapping alternate nutrition prefixes.",
+      "tags": [
+        "utility",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/page.js:formatDate",
+      "type": "function",
+      "name": "formatDate",
+      "filePath": "app/page.js",
+      "lineRange": [
+        100,
+        104
+      ],
+      "summary": "Converts a Date object to a Vietnam-timezone YYYY-MM-DD string used as the key throughout the food log and weight log data structures.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/page.js:generateUniqueTimestamp",
+      "type": "function",
+      "name": "generateUniqueTimestamp",
+      "filePath": "app/page.js",
+      "lineRange": [
+        107,
+        113
+      ],
+      "summary": "Generates a unique timestamp string combining a Vietnam-locale datetime, milliseconds, and a random suffix to serve as collision-resistant food log entry IDs.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/page.js:MacroProgressBar",
+      "type": "function",
+      "name": "MacroProgressBar",
+      "filePath": "app/page.js",
+      "lineRange": [
+        124,
+        137
+      ],
+      "summary": "Small React component rendering a labeled macro-nutrient progress bar capped at 100% for display in the dashboard and stats panels.",
+      "tags": [
+        "component",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/page.js:BottomNav",
+      "type": "function",
+      "name": "BottomNav",
+      "filePath": "app/page.js",
+      "lineRange": [
+        801,
+        815
+      ],
+      "summary": "React component rendering the fixed bottom navigation bar with Home, Stats, and Settings tab buttons that update the active view state.",
+      "tags": [
+        "component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/page.js:EqCell",
+      "type": "function",
+      "name": "EqCell",
+      "filePath": "app/page.js",
+      "lineRange": [
+        2728,
+        2742
+      ],
+      "summary": "React component rendering an exercise equipment card cell used within the equipment catalog grid in the settings or workout section.",
+      "tags": [
+        "component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/page.js:MindfulCard",
+      "type": "function",
+      "name": "MindfulCard",
+      "filePath": "app/page.js",
+      "lineRange": [
+        2744,
+        2762
+      ],
+      "summary": "React component rendering a mindfulness tip card with a decorative icon and motivational text used in the wellness section of the dashboard.",
+      "tags": [
+        "component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.claude/settings.json",
+      "type": "config",
+      "name": "settings.json",
+      "filePath": ".claude/settings.json",
+      "summary": "Claude Code project-level settings enabling specific plugins for the StayFit project workspace.",
+      "tags": [
+        "configuration",
+        "claude-code",
+        "tooling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.claude/settings.local.json",
+      "type": "config",
+      "name": "settings.local.json",
+      "filePath": ".claude/settings.local.json",
+      "summary": "Claude Code local settings defining allowed tool permissions for bash and MCP operations in this project.",
+      "tags": [
+        "configuration",
+        "claude-code",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.understand-anything/.understandignore",
+      "type": "file",
+      "name": ".understandignore",
+      "filePath": ".understand-anything/.understandignore",
+      "summary": "Ignore rules for the understand-anything knowledge graph tool, listing paths and patterns to exclude from analysis.",
+      "tags": [
+        "configuration",
+        "tooling",
+        "ignore-rules"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:app/api/save-meal/route.js",
+      "type": "file",
+      "name": "route.js",
+      "filePath": "app/api/save-meal/route.js",
+      "summary": "Next.js API route that appends a single meal entry row to the Google Sheets database.",
+      "tags": [
+        "api-handler",
+        "google-sheets",
+        "data-persistence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/api/save-meal/route.js:POST",
+      "type": "function",
+      "name": "POST",
+      "filePath": "app/api/save-meal/route.js",
+      "lineRange": [
+        3,
+        35
+      ],
+      "summary": "Handles POST requests to save a meal entry, authenticating with the Google Sheets API and appending a timestamped row with nutrition data.",
+      "tags": [
+        "api-handler",
+        "google-sheets",
+        "data-persistence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:app/api/sync/route.js",
+      "type": "file",
+      "name": "route.js",
+      "filePath": "app/api/sync/route.js",
+      "summary": "Core data synchronization API handling user registration/login, profile updates, meal history sync, weight tracking, and food library management via Google Sheets.",
+      "tags": [
+        "api-handler",
+        "google-sheets",
+        "data-model",
+        "service"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Handles Vietnamese locale decimal comma notation via safeFloat(), which normalizes comma-separated decimals before parsing. Uses SHA-256 password hashing via Node crypto."
+    },
+    {
+      "id": "function:app/api/sync/route.js:safeFloat",
+      "type": "function",
+      "name": "safeFloat",
+      "filePath": "app/api/sync/route.js",
+      "lineRange": [
+        5,
+        9
+      ],
+      "summary": "Safely parses a float value from Google Sheets, normalizing Vietnamese locale decimal commas to dots before parsing.",
+      "tags": [
+        "utility",
+        "validation",
+        "serialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/api/sync/route.js:POST",
+      "type": "function",
+      "name": "POST",
+      "filePath": "app/api/sync/route.js",
+      "lineRange": [
+        40,
+        328
+      ],
+      "summary": "Handles all write operations: user registration, login, profile updates, meal history sync, weight tracking upserts, and food library management across multiple Sheets tabs.",
+      "tags": [
+        "api-handler",
+        "google-sheets",
+        "data-model"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/api/sync/route.js:GET",
+      "type": "function",
+      "name": "GET",
+      "filePath": "app/api/sync/route.js",
+      "lineRange": [
+        330,
+        468
+      ],
+      "summary": "Handles read operations: fetches user profile, meal history, weight history, and food library from Google Sheets, converting Vietnamese locale values and returning structured data.",
+      "tags": [
+        "api-handler",
+        "google-sheets",
+        "data-model"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/api/sync/route.js:DELETE",
+      "type": "function",
+      "name": "DELETE",
+      "filePath": "app/api/sync/route.js",
+      "lineRange": [
+        470,
+        540
+      ],
+      "summary": "Handles deletion of a specific meal history entry for an authenticated user, using batchUpdate to remove the row from Google Sheets.",
+      "tags": [
+        "api-handler",
+        "google-sheets",
+        "data-persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/api/text-analyze/route.js",
+      "type": "file",
+      "name": "route.js",
+      "filePath": "app/api/text-analyze/route.js",
+      "summary": "Next.js API route that uses Google Gemini to analyze food names entered as text, returning structured nutrition estimates matched against the user's food library via fuzzy matching.",
+      "tags": [
+        "api-handler",
+        "ai-integration",
+        "food-recognition"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Implements a custom token-Jaccard fuzzy matcher with Vietnamese diacritic normalization for matching AI-returned food names against the personal food library."
+    },
+    {
+      "id": "function:app/api/text-analyze/route.js:normalize",
+      "type": "function",
+      "name": "normalize",
+      "filePath": "app/api/text-analyze/route.js",
+      "lineRange": [
+        6,
+        14
+      ],
+      "summary": "Strips Vietnamese diacritics using Unicode NFD decomposition, replaces d-with-stroke, lowercases, and normalizes whitespace for fuzzy comparison.",
+      "tags": [
+        "utility",
+        "validation",
+        "serialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/api/text-analyze/route.js:fuzzyScore",
+      "type": "function",
+      "name": "fuzzyScore",
+      "filePath": "app/api/text-analyze/route.js",
+      "lineRange": [
+        16,
+        28
+      ],
+      "summary": "Computes a Jaccard similarity score between two normalized strings using token overlap, with a bonus for substring containment.",
+      "tags": [
+        "utility",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/api/text-analyze/route.js:fuzzyMatch",
+      "type": "function",
+      "name": "fuzzyMatch",
+      "filePath": "app/api/text-analyze/route.js",
+      "lineRange": [
+        30,
+        41
+      ],
+      "summary": "Finds the best matching food entry in the library by applying fuzzyScore and returning the top match above the 0.6 threshold.",
+      "tags": [
+        "utility",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/api/text-analyze/route.js:buildTextPrompt",
+      "type": "function",
+      "name": "buildTextPrompt",
+      "filePath": "app/api/text-analyze/route.js",
+      "lineRange": [
+        43,
+        110
+      ],
+      "summary": "Constructs the Gemini text prompt instructing the model to identify foods from a user query and return structured JSON nutrition data.",
+      "tags": [
+        "ai-integration",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/api/text-analyze/route.js:POST",
+      "type": "function",
+      "name": "POST",
+      "filePath": "app/api/text-analyze/route.js",
+      "lineRange": [
+        128,
+        376
+      ],
+      "summary": "Handles POST requests for text-based food recognition: authenticates the user, calls Gemini with a structured prompt, parses JSON response, applies fuzzy library matching, and returns enriched nutrition items.",
+      "tags": [
+        "api-handler",
+        "ai-integration",
+        "food-recognition"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:app/api/vision-analyze/route.js",
+      "type": "file",
+      "name": "route.js",
+      "filePath": "app/api/vision-analyze/route.js",
+      "summary": "Next.js API route that uses Google Gemini Vision to identify foods from uploaded images, returning structured nutrition estimates matched against the user's food library.",
+      "tags": [
+        "api-handler",
+        "ai-integration",
+        "food-recognition"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Mirrors text-analyze logic but accepts base64-encoded image payloads and uses a vision-specific prompt. Vietnamese diacritic normalization and fuzzy matching are duplicated here."
+    },
+    {
+      "id": "function:app/api/vision-analyze/route.js:normalize",
+      "type": "function",
+      "name": "normalize",
+      "filePath": "app/api/vision-analyze/route.js",
+      "lineRange": [
+        6,
+        14
+      ],
+      "summary": "Strips Vietnamese diacritics using Unicode NFD decomposition, replaces d-with-stroke, lowercases, and normalizes whitespace for fuzzy comparison.",
+      "tags": [
+        "utility",
+        "validation",
+        "serialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/api/vision-analyze/route.js:fuzzyScore",
+      "type": "function",
+      "name": "fuzzyScore",
+      "filePath": "app/api/vision-analyze/route.js",
+      "lineRange": [
+        17,
+        29
+      ],
+      "summary": "Computes a Jaccard similarity score between two normalized strings using token overlap, with a bonus for substring containment.",
+      "tags": [
+        "utility",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/api/vision-analyze/route.js:fuzzyMatch",
+      "type": "function",
+      "name": "fuzzyMatch",
+      "filePath": "app/api/vision-analyze/route.js",
+      "lineRange": [
+        31,
+        42
+      ],
+      "summary": "Finds the best matching food entry in the library by applying fuzzyScore and returning the top match above the 0.6 threshold.",
+      "tags": [
+        "utility",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/api/vision-analyze/route.js:buildPrompt",
+      "type": "function",
+      "name": "buildPrompt",
+      "filePath": "app/api/vision-analyze/route.js",
+      "lineRange": [
+        44,
+        151
+      ],
+      "summary": "Constructs the Gemini vision prompt instructing the model to identify foods visible in an image and return structured JSON nutrition data.",
+      "tags": [
+        "ai-integration",
+        "utility"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/api/vision-analyze/route.js:POST",
+      "type": "function",
+      "name": "POST",
+      "filePath": "app/api/vision-analyze/route.js",
+      "lineRange": [
+        169,
+        430
+      ],
+      "summary": "Handles POST requests for image-based food recognition: authenticates the user, sends image and prompt to Gemini Vision, parses JSON response, applies fuzzy library matching, and returns enriched nutrition items.",
+      "tags": [
+        "api-handler",
+        "ai-integration",
+        "food-recognition"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:app/apple-icon.js",
+      "type": "file",
+      "name": "apple-icon.js",
+      "filePath": "app/apple-icon.js",
+      "summary": "Next.js ImageResponse generator for the Apple touch icon, producing a 180x180 SVG-based PNG icon for iOS home screen.",
+      "tags": [
+        "entry-point",
+        "component",
+        "infrastructure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:app/dashboard/_components/FoodLogItem.js",
+      "type": "file",
+      "name": "FoodLogItem.js",
+      "filePath": "app/dashboard/_components/FoodLogItem.js",
+      "summary": "React component rendering a single food log entry with drag-and-drop support (dnd-kit), long-press selection, and nutrition macro display.",
+      "tags": [
+        "component",
+        "event-handler",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/dashboard/_components/FoodLogItem.js:FoodLogItem",
+      "type": "function",
+      "name": "FoodLogItem",
+      "filePath": "app/dashboard/_components/FoodLogItem.js",
+      "lineRange": [
+        6,
+        125
+      ],
+      "summary": "Renders a draggable food item card with calorie/macro values, long-press gesture for selection mode, and a delete button.",
+      "tags": [
+        "component",
+        "event-handler",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/dashboard/_components/FoodLogSection.js",
+      "type": "file",
+      "name": "FoodLogSection.js",
+      "filePath": "app/dashboard/_components/FoodLogSection.js",
+      "summary": "React component rendering a meal section (breakfast, lunch, etc.) with a droppable zone, bulk selection controls, meal-type move actions, and an animated list of FoodLogItem entries.",
+      "tags": [
+        "component",
+        "event-handler",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/dashboard/_components/FoodLogSection.js:FoodLogSection",
+      "type": "function",
+      "name": "FoodLogSection",
+      "filePath": "app/dashboard/_components/FoodLogSection.js",
+      "lineRange": [
+        14,
+        152
+      ],
+      "summary": "Renders a droppable meal section using dnd-kit and auto-animate, handling select-all toggling, bulk meal-type moves, and delegating each item to FoodLogItem.",
+      "tags": [
+        "component",
+        "event-handler",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/globals.css",
+      "type": "file",
+      "name": "globals.css",
+      "filePath": "app/globals.css",
+      "summary": "Global CSS file importing Tailwind base, components, and utilities, with a minimal custom safe-area padding utility for mobile notch/navigation bar offset.",
+      "tags": [
+        "configuration",
+        "utility",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:app/icon.js",
+      "type": "file",
+      "name": "icon.js",
+      "filePath": "app/icon.js",
+      "summary": "Next.js ImageResponse generator for the favicon, producing a 32x32 SVG-based PNG icon for browser tab display.",
+      "tags": [
+        "entry-point",
+        "component",
+        "infrastructure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:app/layout.js",
+      "type": "file",
+      "name": "layout.js",
+      "filePath": "app/layout.js",
+      "summary": "Root Next.js layout defining app-wide metadata, PWA viewport settings, Google Fonts (Inter), and the HTML shell that wraps all pages.",
+      "tags": [
+        "entry-point",
+        "component",
+        "configuration"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Exports metadata and viewport objects used by Next.js App Router for SEO and PWA configuration alongside the default RootLayout component."
+    },
+    {
+      "id": "function:app/layout.js:RootLayout",
+      "type": "function",
+      "name": "RootLayout",
+      "filePath": "app/layout.js",
+      "lineRange": [
+        59,
+        154
+      ],
+      "summary": "Root layout component that applies font classes to the HTML body and renders the page children within the app shell.",
+      "tags": [
+        "entry-point",
+        "component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:app/manifest.js",
+      "type": "file",
+      "name": "manifest.js",
+      "filePath": "app/manifest.js",
+      "summary": "Next.js PWA web manifest generator defining app name, icons, display mode, orientation, and theme colors for installable mobile experience.",
+      "tags": [
+        "configuration",
+        "infrastructure",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:app/opengraph-image.js",
+      "type": "file",
+      "name": "opengraph-image.js",
+      "filePath": "app/opengraph-image.js",
+      "summary": "Next.js ImageResponse generator producing the 1200x630 Open Graph social share card with the StayFit branding, tagline, and feature highlights.",
+      "tags": [
+        "component",
+        "infrastructure",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:CLAUDE.md",
+      "type": "document",
+      "name": "CLAUDE.md",
+      "filePath": "CLAUDE.md",
+      "summary": "Project instructions for Claude Code covering the StayFit architecture, environment variables, key gotchas (private key escaping, Vietnamese locale decimals, fuzzy matching), and behavioral coding guidelines.",
+      "tags": [
+        "documentation",
+        "entry-point",
+        "configuration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:middleware.js",
+      "type": "file",
+      "name": "middleware.js",
+      "filePath": "middleware.js",
+      "summary": "Next.js middleware implementing in-memory IP-based rate limiting for all API routes, with stricter limits for AI endpoints (10 req/min) and a general limit of 30 req/min.",
+      "tags": [
+        "middleware",
+        "security",
+        "api-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:middleware.js:middleware",
+      "type": "function",
+      "name": "middleware",
+      "filePath": "middleware.js",
+      "lineRange": [
+        13,
+        46
+      ],
+      "summary": "Applies sliding-window rate limiting per IP using a Map-based token bucket, returning 429 responses when the limit is exceeded and periodically pruning stale entries.",
+      "tags": [
+        "middleware",
+        "security"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:next.config.js",
+      "type": "file",
+      "name": "next.config.js",
+      "filePath": "next.config.js",
+      "summary": "Next.js configuration enabling image optimization for remote Google user content and Gemini API domains.",
+      "tags": [
+        "configuration",
+        "infrastructure",
+        "build-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "package.json",
+      "summary": "Node.js project manifest declaring dependencies (Next.js 15, React 19, Tailwind CSS, dnd-kit, Google APIs, Gemini SDK) and build/dev/lint scripts.",
+      "tags": [
+        "configuration",
+        "build-system",
+        "dependency-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:postcss.config.js",
+      "type": "file",
+      "name": "postcss.config.js",
+      "filePath": "postcss.config.js",
+      "summary": "PostCSS configuration enabling the Tailwind CSS plugin for CSS processing.",
+      "tags": [
+        "configuration",
+        "build-system",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tailwind.config.js",
+      "type": "file",
+      "name": "tailwind.config.js",
+      "filePath": "tailwind.config.js",
+      "summary": "Tailwind CSS configuration specifying content paths covering all app JavaScript/TypeScript files for purging unused styles.",
+      "tags": [
+        "configuration",
+        "build-system",
+        "ui"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:app/dashboard/_components/CalorieCircle.js",
+      "target": "function:app/dashboard/_components/CalorieCircle.js:CalorieCircle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/_components/CalorieCircle.js",
+      "target": "function:app/dashboard/_components/CalorieCircle.js:CalorieCircle",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/_components/DashboardCard.js",
+      "target": "function:app/dashboard/_components/DashboardCard.js:DashboardCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/_components/DashboardCard.js",
+      "target": "function:app/dashboard/_components/DashboardCard.js:DashboardCard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/_components/MacroDonut.js",
+      "target": "function:app/dashboard/_components/MacroDonut.js:MacroDonut",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/_components/MacroDonut.js",
+      "target": "function:app/dashboard/_components/MacroDonut.js:MacroDonut",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/_components/WeeklyTrendCard.js",
+      "target": "function:app/dashboard/_components/WeeklyTrendCard.js:WeeklyTrendCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/_components/WeeklyTrendCard.js",
+      "target": "function:app/dashboard/_components/WeeklyTrendCard.js:WeeklyTrendCard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/_components/WeeklyTrendCard.js",
+      "target": "file:app/dashboard/_components/DashboardCard.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:app/dashboard/_components/WeeklyTrendCard.js:WeeklyTrendCard",
+      "target": "function:app/dashboard/_components/DashboardCard.js:DashboardCard",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "function:app/dashboard/page.js:DashboardPage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "function:app/dashboard/page.js:DashboardPage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "function:app/dashboard/page.js:WaterCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "function:app/dashboard/page.js:MindfulCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "file:app/dashboard/_components/BreathingTimer.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "file:app/dashboard/_components/CalorieCircle.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "file:app/dashboard/_components/DashboardCard.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "file:app/dashboard/_components/FoodLogSection.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "file:app/dashboard/_components/GreetingHeader.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "file:app/dashboard/_components/MacroDonut.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/dashboard/page.js",
+      "target": "file:app/dashboard/_components/WeeklyTrendCard.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:app/dashboard/page.js:DashboardPage",
+      "target": "function:app/dashboard/_components/CalorieCircle.js:CalorieCircle",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:app/dashboard/page.js:DashboardPage",
+      "target": "function:app/dashboard/_components/MacroDonut.js:MacroDonut",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:app/dashboard/page.js:DashboardPage",
+      "target": "function:app/dashboard/_components/WeeklyTrendCard.js:WeeklyTrendCard",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:app/dashboard/page.js:MindfulCard",
+      "target": "file:app/dashboard/_components/BreathingTimer.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:app/_data/common-foods.js",
+      "target": "file:app/_data/common-foods.js",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/_components/BreathingTimer.js",
+      "target": "function:app/dashboard/_components/BreathingTimer.js:BreathingTimer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/_components/BreathingTimer.js",
+      "target": "function:app/dashboard/_components/BreathingTimer.js:BreathingTimer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/_components/GreetingHeader.js",
+      "target": "function:app/dashboard/_components/GreetingHeader.js:GreetingHeader",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/_components/GreetingHeader.js",
+      "target": "function:app/dashboard/_components/GreetingHeader.js:GreetingHeader",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:StatsView",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:App",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:App",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:normalizeFoodGroupKey",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:formatDate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:generateUniqueTimestamp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:MacroProgressBar",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:BottomNav",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:EqCell",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "function:app/page.js:MindfulCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "file:app/_data/common-foods.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "file:app/dashboard/_components/BreathingTimer.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "file:app/dashboard/_components/CalorieCircle.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "file:app/dashboard/_components/DashboardCard.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "file:app/dashboard/_components/FoodLogSection.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "file:app/dashboard/_components/GreetingHeader.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/page.js",
+      "target": "file:app/dashboard/_components/MacroDonut.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/api/save-meal/route.js",
+      "target": "function:app/api/save-meal/route.js:POST",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/save-meal/route.js",
+      "target": "function:app/api/save-meal/route.js:POST",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/api/sync/route.js",
+      "target": "function:app/api/sync/route.js:safeFloat",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/sync/route.js",
+      "target": "function:app/api/sync/route.js:POST",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/sync/route.js",
+      "target": "function:app/api/sync/route.js:POST",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/api/sync/route.js",
+      "target": "function:app/api/sync/route.js:GET",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/sync/route.js",
+      "target": "function:app/api/sync/route.js:GET",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/api/sync/route.js",
+      "target": "function:app/api/sync/route.js:DELETE",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/sync/route.js",
+      "target": "function:app/api/sync/route.js:DELETE",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/api/text-analyze/route.js",
+      "target": "function:app/api/text-analyze/route.js:normalize",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/text-analyze/route.js",
+      "target": "function:app/api/text-analyze/route.js:fuzzyScore",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/text-analyze/route.js",
+      "target": "function:app/api/text-analyze/route.js:fuzzyMatch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/text-analyze/route.js",
+      "target": "function:app/api/text-analyze/route.js:buildTextPrompt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/text-analyze/route.js",
+      "target": "function:app/api/text-analyze/route.js:POST",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/text-analyze/route.js",
+      "target": "function:app/api/text-analyze/route.js:POST",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/api/vision-analyze/route.js",
+      "target": "function:app/api/vision-analyze/route.js:normalize",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/vision-analyze/route.js",
+      "target": "function:app/api/vision-analyze/route.js:fuzzyScore",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/vision-analyze/route.js",
+      "target": "function:app/api/vision-analyze/route.js:fuzzyMatch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/vision-analyze/route.js",
+      "target": "function:app/api/vision-analyze/route.js:buildPrompt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/vision-analyze/route.js",
+      "target": "function:app/api/vision-analyze/route.js:POST",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/api/vision-analyze/route.js",
+      "target": "function:app/api/vision-analyze/route.js:POST",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/_components/FoodLogItem.js",
+      "target": "function:app/dashboard/_components/FoodLogItem.js:FoodLogItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/_components/FoodLogItem.js",
+      "target": "function:app/dashboard/_components/FoodLogItem.js:FoodLogItem",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/dashboard/_components/FoodLogSection.js",
+      "target": "file:app/dashboard/_components/FoodLogItem.js",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:app/dashboard/_components/FoodLogSection.js",
+      "target": "function:app/dashboard/_components/FoodLogSection.js:FoodLogSection",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/dashboard/_components/FoodLogSection.js",
+      "target": "function:app/dashboard/_components/FoodLogSection.js:FoodLogSection",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:app/layout.js",
+      "target": "function:app/layout.js:RootLayout",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:app/layout.js",
+      "target": "function:app/layout.js:RootLayout",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:middleware.js",
+      "target": "function:middleware.js:middleware",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:middleware.js",
+      "target": "function:middleware.js:middleware",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:middleware.js",
+      "target": "file:app/api/vision-analyze/route.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:middleware.js",
+      "target": "file:app/api/text-analyze/route.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:middleware.js",
+      "target": "file:app/api/save-meal/route.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:middleware.js",
+      "target": "file:app/api/sync/route.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:package.json",
+      "target": "file:app/layout.js",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:next.config.js",
+      "target": "file:app/layout.js",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:next.config.js",
+      "target": "file:middleware.js",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tailwind.config.js",
+      "target": "file:app/globals.css",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:postcss.config.js",
+      "target": "file:app/globals.css",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:CLAUDE.md",
+      "target": "file:app/api/sync/route.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:CLAUDE.md",
+      "target": "file:app/api/text-analyze/route.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:CLAUDE.md",
+      "target": "file:app/api/vision-analyze/route.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:CLAUDE.md",
+      "target": "file:middleware.js",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:app/dashboard/_components/FoodLogSection.js",
+      "target": "file:app/dashboard/page.js",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:api",
+      "name": "API Layer",
+      "description": "Next.js API route handlers that integrate with Google Sheets for data persistence and Google Gemini for AI-powered Vietnamese food recognition via text and vision inputs.",
+      "nodeIds": [
+        "file:app/api/save-meal/route.js",
+        "file:app/api/sync/route.js",
+        "file:app/api/text-analyze/route.js",
+        "file:app/api/vision-analyze/route.js"
+      ]
+    },
+    {
+      "id": "layer:ui-components",
+      "name": "UI Components",
+      "description": "Reusable React dashboard widgets — calorie ring, macro donut chart, weekly trend bars, food log list, breathing timer, greeting header, and generic card wrapper — shared across both page routes.",
+      "nodeIds": [
+        "file:app/dashboard/_components/BreathingTimer.js",
+        "file:app/dashboard/_components/CalorieCircle.js",
+        "file:app/dashboard/_components/DashboardCard.js",
+        "file:app/dashboard/_components/FoodLogItem.js",
+        "file:app/dashboard/_components/FoodLogSection.js",
+        "file:app/dashboard/_components/GreetingHeader.js",
+        "file:app/dashboard/_components/MacroDonut.js",
+        "file:app/dashboard/_components/WeeklyTrendCard.js"
+      ]
+    },
+    {
+      "id": "layer:pages",
+      "name": "Pages",
+      "description": "Next.js App Router page routes — the monolithic root page handling food tracking state and AI scan flow, and the dashboard page composing the calorie/macro/log widgets.",
+      "nodeIds": [
+        "file:app/page.js",
+        "file:app/dashboard/page.js"
+      ]
+    },
+    {
+      "id": "layer:data",
+      "name": "Data",
+      "description": "Static Vietnamese food database providing the 200+ entry lookup table used for fuzzy name matching in AI food recognition routes and the food picker UI.",
+      "nodeIds": [
+        "file:app/_data/common-foods.js"
+      ]
+    },
+    {
+      "id": "layer:app-shell",
+      "name": "App Shell & PWA",
+      "description": "Next.js root layout, global styles, PWA manifest, app icons, and OpenGraph image generator that define the application's visual shell, metadata, and installable PWA identity.",
+      "nodeIds": [
+        "file:app/layout.js",
+        "file:app/globals.css",
+        "file:app/manifest.js",
+        "file:app/apple-icon.js",
+        "file:app/icon.js",
+        "file:app/opengraph-image.js"
+      ]
+    },
+    {
+      "id": "layer:config",
+      "name": "Configuration & Tooling",
+      "description": "Framework configuration (Next.js, Tailwind, PostCSS), in-memory API rate-limiting middleware, NPM package manifest, Claude Code workspace settings, and analyzer ignore rules that govern how the project is built, secured, and developed.",
+      "nodeIds": [
+        "file:middleware.js",
+        "file:next.config.js",
+        "file:postcss.config.js",
+        "file:tailwind.config.js",
+        "config:package.json",
+        "config:.claude/settings.json",
+        "config:.claude/settings.local.json",
+        "document:CLAUDE.md",
+        "file:.understand-anything/.understandignore"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "Main App Shell",
+      "description": "The root page.js is the heart of StayFit — a monolithic 2762-line component that owns all application state: food logging, calorie/macro tracking, the AI scan modal, custom food entry, and the food library. Every user interaction flows through this file, which acts as the controller that wires together all UI widgets and API calls. Understanding this file gives you the complete picture of what the app does before zooming into individual pieces.",
+      "nodeIds": [
+        "file:app/page.js"
+      ],
+      "languageLesson": "Next.js App Router uses file-based routing — a file at app/page.js automatically becomes the '/' route. Naming a component file page.js makes it a route segment, while layout.js wraps all routes beneath it."
+    },
+    {
+      "order": 2,
+      "title": "Project Dependencies",
+      "description": "The package.json declares the full technology stack: Next.js 15 for the framework, React for UI, @google/generative-ai for Gemini AI integration, googleapis for Sheets access, chart.js and react-chartjs-2 for data visualization, and @dnd-kit for drag-and-drop food reordering. Reading the dependencies before diving into code reveals what problems each library solves and why those choices were made.",
+      "nodeIds": [
+        "config:package.json"
+      ],
+      "languageLesson": "NPM package.json separates dependencies (needed at runtime) from devDependencies (only needed during development). Next.js, React, and googleapis belong in dependencies; ESLint and type checkers belong in devDependencies."
+    },
+    {
+      "order": 3,
+      "title": "App Layout & PWA Shell",
+      "description": "The layout.js wraps every page in the app, setting up global metadata, font loading (via next/font), and Vercel Analytics. Alongside it, manifest.js defines the PWA web app manifest that makes StayFit installable on mobile home screens — specifying the app name, theme color, icons, and standalone display mode. These two files together create the 'app shell' that users perceive before any page-level code runs.",
+      "nodeIds": [
+        "file:app/layout.js",
+        "file:app/manifest.js"
+      ],
+      "languageLesson": "Next.js App Router special files: layout.js defines persistent UI wrapping all child routes; manifest.js exports a function returning a WebAppManifest object that Next.js serves as /manifest.webmanifest automatically."
+    },
+    {
+      "order": 4,
+      "title": "Global Styles & Tailwind",
+      "description": "The globals.css establishes the visual foundation using Tailwind CSS directives and CSS custom properties for the color palette, spacing, and typography. The tailwind.config.js extends the default Tailwind theme with the app's custom colors and font families, while postcss.config.js wires Tailwind into the PostCSS build pipeline. All component styling in the app builds on top of these definitions.",
+      "nodeIds": [
+        "file:app/globals.css",
+        "file:tailwind.config.js",
+        "file:postcss.config.js"
+      ],
+      "languageLesson": "Tailwind's @layer directive (base, components, utilities) controls CSS specificity and purge behavior. Custom properties (CSS variables) in :root allow runtime theming while still using Tailwind utility classes that reference those variables."
+    },
+    {
+      "order": 5,
+      "title": "Vietnamese Food Database",
+      "description": "The common-foods.js file is the offline data backbone of StayFit — a static array of 200+ Vietnamese dishes and ingredients, each with name, unit, serving size, calories, protein, carbs, and fat. The root page.js imports this directly, using it as the food picker library and as a reference corpus for fuzzy-matching AI-identified food names against known nutritional values. This file is what makes the app work offline without any API call.",
+      "nodeIds": [
+        "file:app/_data/common-foods.js"
+      ]
+    },
+    {
+      "order": 6,
+      "title": "Google Sheets Data Layer",
+      "description": "The sync route is the primary data persistence layer for the entire application. Its GET handler reads the user's profile, weight history, and food log from a Google Sheet; its POST handler writes updates back; and its DELETE handler removes log entries. Because Google Sheets is the sole database (no SQL, no ORM), every piece of user data flows through this single route. The app/page.js calls this route on load and after every user action.",
+      "nodeIds": [
+        "file:app/api/sync/route.js"
+      ],
+      "languageLesson": "Using Google Sheets as a database is a common 'spreadsheet as backend' pattern for personal tools. The googleapis Node.js client authenticates via a service account JSON key. safeFloat() in this file handles Vietnamese locale decimals written with commas (e.g. '81,4') — raw parseFloat would return NaN."
+    },
+    {
+      "order": 7,
+      "title": "Meal Persistence API",
+      "description": "The save-meal route handles the specific action of appending a new food log entry as a row in the Google Sheets spreadsheet. It is a focused POST-only handler, separate from the broader sync route, because meal logging is the most frequent write operation and benefits from being a lightweight, single-purpose endpoint. The root page.js calls this whenever the user confirms a food selection.",
+      "nodeIds": [
+        "file:app/api/save-meal/route.js"
+      ]
+    },
+    {
+      "order": 8,
+      "title": "AI Food Recognition",
+      "description": "StayFit offers two AI-powered food identification routes built on Google Gemini. The text-analyze route accepts a food name description and uses Gemini text generation to identify the food and look up its nutrition, while the vision-analyze route accepts a base64-encoded photo and uses Gemini's vision capabilities to identify what's in the image. Both routes apply fuzzy Vietnamese name matching — diacritic-stripping normalization plus token-Jaccard similarity scoring — to map Gemini's output back to entries in the local food database.",
+      "nodeIds": [
+        "file:app/api/text-analyze/route.js",
+        "file:app/api/vision-analyze/route.js"
+      ],
+      "languageLesson": "Fuzzy string matching for Vietnamese text requires diacritic normalization because 'pho' and 'phở' are the same dish but differ in Unicode codepoints. The Jaccard similarity on token sets (intersection/union) tolerates word reordering and partial matches better than Levenshtein distance for food names."
+    },
+    {
+      "order": 9,
+      "title": "API Rate Limiting",
+      "description": "The middleware.js runs before every API route request and enforces in-memory rate limits: 30 requests per minute for general routes and 10 per minute for AI endpoints (text-analyze and vision-analyze). This protects against runaway Gemini API costs and accidental abuse. Being in-memory means limits reset on server restart — by design for a personal app, but worth knowing if the app ever scales to multiple instances.",
+      "nodeIds": [
+        "file:middleware.js"
+      ],
+      "languageLesson": "Next.js middleware runs at the Edge before the route handler, making it ideal for cross-cutting concerns like auth and rate limiting. The middleware.js file at the project root is automatically applied to all matching routes via the exported config.matcher array."
+    },
+    {
+      "order": 10,
+      "title": "Security & Build Config",
+      "description": "The next.config.js adds security HTTP response headers across all routes: a Content Security Policy (CSP) restricts which external scripts can run, X-Frame-Options prevents clickjacking, HSTS enforces HTTPS, and Permissions-Policy blocks browser APIs the app does not use. These headers are applied via Next.js's headers() config function and require no runtime code. This file is worth reading to understand the security posture of the deployed app.",
+      "nodeIds": [
+        "file:next.config.js"
+      ]
+    },
+    {
+      "order": 11,
+      "title": "Dashboard Layout",
+      "description": "The dashboard/page.js is a secondary route that assembles a read-only analytics view of the user's fitness data. It imports and composes six widgets — CalorieCircle, MacroDonut, FoodLogSection, WeeklyTrendCard, GreetingHeader, and BreathingTimer — into a single dashboard layout. Unlike the root page.js, the dashboard page does not manage state itself; it receives data as props or via shared state and delegates all rendering to the individual components.",
+      "nodeIds": [
+        "file:app/dashboard/page.js"
+      ]
+    },
+    {
+      "order": 12,
+      "title": "Calorie & Macro Visualization",
+      "description": "CalorieCircle renders an SVG progress ring that fills as the user's logged calories approach their daily goal — the primary at-a-glance metric. MacroDonut renders a Chart.js doughnut chart showing the protein/carb/fat breakdown of the day's food log. These two components appear together at the top of both the root page and the dashboard, forming the key 'how am I doing today' visual summary that the whole app is built around.",
+      "nodeIds": [
+        "file:app/dashboard/_components/CalorieCircle.js",
+        "file:app/dashboard/_components/MacroDonut.js"
+      ],
+      "languageLesson": "SVG stroke-dasharray and stroke-dashoffset are the standard technique for animating circular progress rings: set dasharray to the circumference and animate dashoffset from full (empty) to zero (full). Chart.js is initialized in a useEffect with a cleanup to destroy the canvas instance and avoid memory leaks on re-renders."
+    },
+    {
+      "order": 13,
+      "title": "Food Log Components",
+      "description": "FoodLogSection groups the day's food entries by meal type (breakfast, lunch, dinner, snack) and renders a list of FoodLogItem components. Each FoodLogItem shows a single logged food entry with its nutritional values and provides edit and delete action buttons that call back up to the parent state in app/page.js. This two-level component hierarchy — section containing items — keeps the list manageable and makes it easy to add per-meal subtotals.",
+      "nodeIds": [
+        "file:app/dashboard/_components/FoodLogSection.js",
+        "file:app/dashboard/_components/FoodLogItem.js"
+      ]
+    },
+    {
+      "order": 14,
+      "title": "Weekly Trend & Shared Card",
+      "description": "WeeklyTrendCard displays a Chart.js bar chart of the past 7 days of calorie intake, letting users spot patterns in their eating habits over time. It wraps its content in DashboardCard, the generic card wrapper used by every dashboard widget to provide consistent padding, rounded corners, and shadow styling. DashboardCard's high fan-in (imported by three different consumers) shows it is the visual design primitive that unifies the whole dashboard.",
+      "nodeIds": [
+        "file:app/dashboard/_components/WeeklyTrendCard.js",
+        "file:app/dashboard/_components/DashboardCard.js"
+      ]
+    },
+    {
+      "order": 15,
+      "title": "Wellness Features & Greeting",
+      "description": "GreetingHeader renders a personalized time-based welcome message (good morning / good afternoon / good evening) using the user's name from their profile. BreathingTimer is an animated guided breathing exercise — cycling through inhale, hold, and exhale phases — adding a wellness dimension beyond pure calorie counting. Together these components reflect StayFit's philosophy that fitness tracking should feel personal and holistic, not just a number-crunching tool.",
+      "nodeIds": [
+        "file:app/dashboard/_components/GreetingHeader.js",
+        "file:app/dashboard/_components/BreathingTimer.js"
+      ]
+    }
+  ]
+}

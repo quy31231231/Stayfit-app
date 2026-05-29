@@ -1,0 +1,1106 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "62194f81020816926851e1a1bb02dc99dc707420",
+  "generatedAt": "2026-05-29T09:15:42.895Z",
+  "files": {
+    "app/_data/common-foods.js": {
+      "filePath": "app/_data/common-foods.js",
+      "contentHash": "8814ae2ba0ae21668b8f1579e32df8956a3817cf5e3418a6c8b44ce3d9fa3883",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "COMMON_FOODS"
+      ],
+      "totalLines": 923,
+      "hasStructuralAnalysis": true
+    },
+    "app/api/save-meal/route.js": {
+      "filePath": "app/api/save-meal/route.js",
+      "contentHash": "64885f917b33a36f8316406212aa4b6d953b24c7c1f033256207234ce42a91d4",
+      "functions": [
+        {
+          "name": "POST",
+          "params": [
+            "req"
+          ],
+          "exported": true,
+          "lineCount": 33
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "googleapis",
+          "specifiers": [
+            "google"
+          ]
+        }
+      ],
+      "exports": [
+        "POST"
+      ],
+      "totalLines": 36,
+      "hasStructuralAnalysis": true
+    },
+    "app/api/sync/route.js": {
+      "filePath": "app/api/sync/route.js",
+      "contentHash": "98c9e88c5f679cdde2e935e7682b863a938610a52ed418651abdba6465a10361",
+      "functions": [
+        {
+          "name": "safeFloat",
+          "params": [
+            "v"
+          ],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "safeInt",
+          "params": [
+            "v"
+          ],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "hashPassword",
+          "params": [
+            "password"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "getSheets",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "getSheetIdByName",
+          "params": [
+            "sheets",
+            "spreadsheetId",
+            "sheetName"
+          ],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "POST",
+          "params": [
+            "req"
+          ],
+          "exported": true,
+          "lineCount": 289
+        },
+        {
+          "name": "GET",
+          "params": [
+            "req"
+          ],
+          "exported": true,
+          "lineCount": 139
+        },
+        {
+          "name": "DELETE",
+          "params": [
+            "req"
+          ],
+          "exported": true,
+          "lineCount": 71
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "googleapis",
+          "specifiers": [
+            "google"
+          ]
+        },
+        {
+          "source": "crypto",
+          "specifiers": [
+            "crypto"
+          ]
+        }
+      ],
+      "exports": [
+        "POST",
+        "GET",
+        "DELETE"
+      ],
+      "totalLines": 540,
+      "hasStructuralAnalysis": true
+    },
+    "app/api/text-analyze/route.js": {
+      "filePath": "app/api/text-analyze/route.js",
+      "contentHash": "6ed55bd3602f123e0ed21518b32211ac1abbae60d34a21f5b58b36614cb393d6",
+      "functions": [
+        {
+          "name": "normalize",
+          "params": [
+            "str"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "fuzzyScore",
+          "params": [
+            "query",
+            "target"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "fuzzyMatch",
+          "params": [
+            "query",
+            "library"
+          ],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "buildTextPrompt",
+          "params": [
+            "libraryListStr",
+            "userText"
+          ],
+          "exported": false,
+          "lineCount": 68
+        },
+        {
+          "name": "hashPassword",
+          "params": [
+            "password"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "getSheets",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "POST",
+          "params": [
+            "req"
+          ],
+          "exported": true,
+          "lineCount": 249
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "googleapis",
+          "specifiers": [
+            "google"
+          ]
+        },
+        {
+          "source": "crypto",
+          "specifiers": [
+            "crypto"
+          ]
+        },
+        {
+          "source": "@google/generative-ai",
+          "specifiers": [
+            "GoogleGenerativeAI"
+          ]
+        }
+      ],
+      "exports": [
+        "POST"
+      ],
+      "totalLines": 377,
+      "hasStructuralAnalysis": true
+    },
+    "app/api/vision-analyze/route.js": {
+      "filePath": "app/api/vision-analyze/route.js",
+      "contentHash": "852a8185698ad747379fe0a506668263168ebf66bf4bf6593daef85484ead39d",
+      "functions": [
+        {
+          "name": "normalize",
+          "params": [
+            "str"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "fuzzyScore",
+          "params": [
+            "query",
+            "target"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "fuzzyMatch",
+          "params": [
+            "query",
+            "library"
+          ],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "buildPrompt",
+          "params": [
+            "libraryListStr"
+          ],
+          "exported": false,
+          "lineCount": 108
+        },
+        {
+          "name": "hashPassword",
+          "params": [
+            "password"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "getSheets",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "POST",
+          "params": [
+            "req"
+          ],
+          "exported": true,
+          "lineCount": 262
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "googleapis",
+          "specifiers": [
+            "google"
+          ]
+        },
+        {
+          "source": "crypto",
+          "specifiers": [
+            "crypto"
+          ]
+        },
+        {
+          "source": "@google/generative-ai",
+          "specifiers": [
+            "GoogleGenerativeAI"
+          ]
+        }
+      ],
+      "exports": [
+        "POST"
+      ],
+      "totalLines": 431,
+      "hasStructuralAnalysis": true
+    },
+    "app/apple-icon.js": {
+      "filePath": "app/apple-icon.js",
+      "contentHash": "3c5d972afca6371a31a56db7eeacf16a2b11ff248372e4988afdfd72d87dde38",
+      "functions": [
+        {
+          "name": "AppleIcon",
+          "params": [],
+          "exported": true,
+          "lineCount": 24
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next/og",
+          "specifiers": [
+            "ImageResponse"
+          ]
+        }
+      ],
+      "exports": [
+        "size",
+        "contentType",
+        "AppleIcon"
+      ],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    "app/dashboard/_components/BreathingTimer.js": {
+      "filePath": "app/dashboard/_components/BreathingTimer.js",
+      "contentHash": "fb02f646cd2911d17cb12d28c36a78388e15482bac553230e78996c017b96467",
+      "functions": [
+        {
+          "name": "BreathingTimer",
+          "params": [],
+          "exported": true,
+          "lineCount": 77
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState"
+          ]
+        }
+      ],
+      "exports": [
+        "BreathingTimer"
+      ],
+      "totalLines": 89,
+      "hasStructuralAnalysis": true
+    },
+    "app/dashboard/_components/CalorieCircle.js": {
+      "filePath": "app/dashboard/_components/CalorieCircle.js",
+      "contentHash": "0204989ddde8c0e2ac2d5c933e23f9380297506290237209d71a1fb6e62a1c81",
+      "functions": [
+        {
+          "name": "CalorieCircle",
+          "params": [],
+          "exported": true,
+          "lineCount": 56
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "CalorieCircle"
+      ],
+      "totalLines": 59,
+      "hasStructuralAnalysis": true
+    },
+    "app/dashboard/_components/DashboardCard.js": {
+      "filePath": "app/dashboard/_components/DashboardCard.js",
+      "contentHash": "ae1796c667a3421c3ed7497f41bb921a6e7fba3735a712b09747051d42da21fa",
+      "functions": [
+        {
+          "name": "DashboardCard",
+          "params": [],
+          "exported": true,
+          "lineCount": 30
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "DashboardCard"
+      ],
+      "totalLines": 33,
+      "hasStructuralAnalysis": true
+    },
+    "app/dashboard/_components/FoodLogItem.js": {
+      "filePath": "app/dashboard/_components/FoodLogItem.js",
+      "contentHash": "0aaec117f9bf473dd7b34879f7e2cf304f82a0ae18643f8d7a06e126e97246bb",
+      "functions": [
+        {
+          "name": "FoodLogItem",
+          "params": [],
+          "exported": true,
+          "lineCount": 120
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useRef"
+          ]
+        },
+        {
+          "source": "@dnd-kit/core",
+          "specifiers": [
+            "useDraggable"
+          ]
+        }
+      ],
+      "exports": [
+        "FoodLogItem"
+      ],
+      "totalLines": 126,
+      "hasStructuralAnalysis": true
+    },
+    "app/dashboard/_components/FoodLogSection.js": {
+      "filePath": "app/dashboard/_components/FoodLogSection.js",
+      "contentHash": "70fe627ca4631c4db3e93c6a213f12618437de7069dff97afc74302c12ddd463",
+      "functions": [
+        {
+          "name": "FoodLogSection",
+          "params": [],
+          "exported": true,
+          "lineCount": 139
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./FoodLogItem",
+          "specifiers": [
+            "FoodLogItem"
+          ]
+        },
+        {
+          "source": "@dnd-kit/core",
+          "specifiers": [
+            "useDroppable"
+          ]
+        },
+        {
+          "source": "@formkit/auto-animate/react",
+          "specifiers": [
+            "useAutoAnimate"
+          ]
+        }
+      ],
+      "exports": [
+        "FoodLogSection"
+      ],
+      "totalLines": 153,
+      "hasStructuralAnalysis": true
+    },
+    "app/dashboard/_components/GreetingHeader.js": {
+      "filePath": "app/dashboard/_components/GreetingHeader.js",
+      "contentHash": "5a3023c1829de7757c72d9da0d1fc89a4bae018c5de0ece7133fe38549cd23a2",
+      "functions": [
+        {
+          "name": "greetingFor",
+          "params": [
+            "hour"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "accentFor",
+          "params": [
+            "hour"
+          ],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "GreetingHeader",
+          "params": [],
+          "exported": true,
+          "lineCount": 38
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "GreetingHeader"
+      ],
+      "totalLines": 71,
+      "hasStructuralAnalysis": true
+    },
+    "app/dashboard/_components/MacroDonut.js": {
+      "filePath": "app/dashboard/_components/MacroDonut.js",
+      "contentHash": "ab6d9f7f79838772f401c85470ce76c167b7c8e4ccb4e821f8fef49c3b3d24ea",
+      "functions": [
+        {
+          "name": "MacroDonut",
+          "params": [],
+          "exported": true,
+          "lineCount": 47
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "MacroDonut"
+      ],
+      "totalLines": 56,
+      "hasStructuralAnalysis": true
+    },
+    "app/dashboard/_components/WeeklyTrendCard.js": {
+      "filePath": "app/dashboard/_components/WeeklyTrendCard.js",
+      "contentHash": "a0d8e08a616e76e05aeedff6ea23576ec910374a3328fdd38f410f3400c7f1a1",
+      "functions": [
+        {
+          "name": "WeeklyTrendCard",
+          "params": [],
+          "exported": true,
+          "lineCount": 55
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./DashboardCard",
+          "specifiers": [
+            "DashboardCard"
+          ]
+        }
+      ],
+      "exports": [
+        "WeeklyTrendCard"
+      ],
+      "totalLines": 60,
+      "hasStructuralAnalysis": true
+    },
+    "app/dashboard/page.js": {
+      "filePath": "app/dashboard/page.js",
+      "contentHash": "c2ff8993625d619e2a68d714954111682c93f6fa21d679d5a2e64dfa17c790cc",
+      "functions": [
+        {
+          "name": "DashboardPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 121
+        },
+        {
+          "name": "EqCell",
+          "params": [],
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "WaterCard",
+          "params": [],
+          "exported": false,
+          "lineCount": 32
+        },
+        {
+          "name": "MindfulCard",
+          "params": [],
+          "exported": false,
+          "lineCount": 34
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useMemo",
+            "useState"
+          ]
+        },
+        {
+          "source": "./_components/DashboardCard",
+          "specifiers": [
+            "DashboardCard"
+          ]
+        },
+        {
+          "source": "./_components/CalorieCircle",
+          "specifiers": [
+            "CalorieCircle"
+          ]
+        },
+        {
+          "source": "./_components/MacroDonut",
+          "specifiers": [
+            "MacroDonut"
+          ]
+        },
+        {
+          "source": "./_components/FoodLogSection",
+          "specifiers": [
+            "FoodLogSection"
+          ]
+        },
+        {
+          "source": "./_components/GreetingHeader",
+          "specifiers": [
+            "GreetingHeader"
+          ]
+        },
+        {
+          "source": "./_components/WeeklyTrendCard",
+          "specifiers": [
+            "WeeklyTrendCard"
+          ]
+        },
+        {
+          "source": "./_components/BreathingTimer",
+          "specifiers": [
+            "BreathingTimer"
+          ]
+        }
+      ],
+      "exports": [
+        "DashboardPage"
+      ],
+      "totalLines": 243,
+      "hasStructuralAnalysis": true
+    },
+    "app/globals.css": {
+      "filePath": "app/globals.css",
+      "contentHash": "3106ee67efa806daf4fb28c76ed0eef3091b0bbf55464d0647764a0370e7f472",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "app/icon.js": {
+      "filePath": "app/icon.js",
+      "contentHash": "e56b3b34903aedccebed79c301c4e60b9ee1065789a8af431d2caaf8d5af3b8e",
+      "functions": [
+        {
+          "name": "Icon",
+          "params": [],
+          "exported": true,
+          "lineCount": 24
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next/og",
+          "specifiers": [
+            "ImageResponse"
+          ]
+        }
+      ],
+      "exports": [
+        "size",
+        "contentType",
+        "Icon"
+      ],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    "app/layout.js": {
+      "filePath": "app/layout.js",
+      "contentHash": "8d05d75660534de79d0c79b6906ee41dbb085376b4c2d3417c07f474c5156325",
+      "functions": [
+        {
+          "name": "RootLayout",
+          "params": [],
+          "exported": true,
+          "lineCount": 96
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@vercel/analytics/next",
+          "specifiers": [
+            "Analytics"
+          ]
+        }
+      ],
+      "exports": [
+        "metadata",
+        "viewport",
+        "RootLayout"
+      ],
+      "totalLines": 155,
+      "hasStructuralAnalysis": true
+    },
+    "app/manifest.js": {
+      "filePath": "app/manifest.js",
+      "contentHash": "4ba89828fa988a6f1b2b562b3d55e4d25f4fff36c24fd1d9bb1bf783684b3ed5",
+      "functions": [
+        {
+          "name": "manifest",
+          "params": [],
+          "exported": true,
+          "lineCount": 52
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "manifest"
+      ],
+      "totalLines": 53,
+      "hasStructuralAnalysis": true
+    },
+    "app/opengraph-image.js": {
+      "filePath": "app/opengraph-image.js",
+      "contentHash": "339bab826dd736f878a87a63fc05b1e73fe176153e9b3cbe0c8d31a6d3b9ab60",
+      "functions": [
+        {
+          "name": "OpenGraphImage",
+          "params": [],
+          "exported": true,
+          "lineCount": 169
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next/og",
+          "specifiers": [
+            "ImageResponse"
+          ]
+        }
+      ],
+      "exports": [
+        "alt",
+        "size",
+        "contentType",
+        "OpenGraphImage"
+      ],
+      "totalLines": 176,
+      "hasStructuralAnalysis": true
+    },
+    "app/page.js": {
+      "filePath": "app/page.js",
+      "contentHash": "93a96960cbb16a3bb9346d692852053908fbe1f5d77c57383040fb4fa0bea4cd",
+      "functions": [
+        {
+          "name": "IconUser",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "IconJournal",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "IconTrash",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "IconPlus",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "IconSearch",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "IconStats",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "IconEdit",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "IconUndo",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "getMealByHour",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "mentionsMealInText",
+          "params": [
+            "text"
+          ],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "formatDate",
+          "params": [
+            "date"
+          ],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "calcMacro",
+          "params": [
+            "val",
+            "per",
+            "q"
+          ],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "generateUniqueTimestamp",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "removeAccents",
+          "params": [
+            "str"
+          ],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "normalizeFoodLookup",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "normalizeFoodGroupKey",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "MacroProgressBar",
+          "params": [],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "StatsView",
+          "params": [],
+          "exported": false,
+          "lineCount": 661
+        },
+        {
+          "name": "BottomNav",
+          "params": [],
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "App",
+          "params": [],
+          "exported": true,
+          "lineCount": 1905
+        },
+        {
+          "name": "EqCell",
+          "params": [],
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "MindfulCard",
+          "params": [],
+          "exported": false,
+          "lineCount": 19
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useState",
+            "useMemo",
+            "useEffect",
+            "useRef"
+          ]
+        },
+        {
+          "source": "chart.js/auto",
+          "specifiers": [
+            "Chart"
+          ]
+        },
+        {
+          "source": "chartjs-plugin-datalabels",
+          "specifiers": [
+            "ChartDataLabels"
+          ]
+        },
+        {
+          "source": "./_data/common-foods",
+          "specifiers": [
+            "COMMON_FOODS"
+          ]
+        },
+        {
+          "source": "@dnd-kit/core",
+          "specifiers": [
+            "DndContext",
+            "DragOverlay",
+            "PointerSensor",
+            "TouchSensor",
+            "useSensor",
+            "useSensors",
+            "closestCenter"
+          ]
+        },
+        {
+          "source": "./dashboard/_components/DashboardCard",
+          "specifiers": [
+            "DashboardCard"
+          ]
+        },
+        {
+          "source": "./dashboard/_components/CalorieCircle",
+          "specifiers": [
+            "CalorieCircle"
+          ]
+        },
+        {
+          "source": "./dashboard/_components/MacroDonut",
+          "specifiers": [
+            "MacroDonut"
+          ]
+        },
+        {
+          "source": "./dashboard/_components/FoodLogSection",
+          "specifiers": [
+            "FoodLogSection"
+          ]
+        },
+        {
+          "source": "./dashboard/_components/GreetingHeader",
+          "specifiers": [
+            "GreetingHeader"
+          ]
+        },
+        {
+          "source": "./dashboard/_components/BreathingTimer",
+          "specifiers": [
+            "BreathingTimer"
+          ]
+        }
+      ],
+      "exports": [
+        "App"
+      ],
+      "totalLines": 2763,
+      "hasStructuralAnalysis": true
+    },
+    "middleware.js": {
+      "filePath": "middleware.js",
+      "contentHash": "ca20bf21859c9dd03c7a38bd04039e4c67aa7821c1dceece9ef78cfe97b88718",
+      "functions": [
+        {
+          "name": "middleware",
+          "params": [
+            "req"
+          ],
+          "exported": true,
+          "lineCount": 34
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next/server",
+          "specifiers": [
+            "NextResponse"
+          ]
+        }
+      ],
+      "exports": [
+        "middleware",
+        "config"
+      ],
+      "totalLines": 56,
+      "hasStructuralAnalysis": true
+    },
+    "next.config.js": {
+      "filePath": "next.config.js",
+      "contentHash": "4d2ed59573107eaa261bb20335e1cd762a6821fdf39efd5753d29409bc8e1c9e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": true
+    },
+    "postcss.config.js": {
+      "filePath": "postcss.config.js",
+      "contentHash": "54a758307a2ce79551eac8e5a0646f6a291b4e5e81e498b07a5d89329c5dd068",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": true
+    },
+    "tailwind.config.js": {
+      "filePath": "tailwind.config.js",
+      "contentHash": "a891fda45615921dc979b519db06e00e74321067175fd16c41151351f825cc13",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "CLAUDE.md": {
+      "filePath": "CLAUDE.md",
+      "contentHash": "232fbd42c0aeaf6ab4fe8b5b319702906a9329426c29fbd1d981df1911bb1017",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 121,
+      "hasStructuralAnalysis": true
+    },
+    "package.json": {
+      "filePath": "package.json",
+      "contentHash": "b0ecd9a2e2cea56fffcc8f4f315cb31f024e745ec73d071fc2cc1374df922a34",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 32,
+      "hasStructuralAnalysis": true
+    },
+    ".claude/settings.json": {
+      "filePath": ".claude/settings.json",
+      "contentHash": "382a95dfbbb686365d1827145d48cd411475ce292a4cd3ad329f05c2c2779e8b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": true
+    },
+    ".claude/settings.local.json": {
+      "filePath": ".claude/settings.local.json",
+      "contentHash": "304f2594f7e80dbe33c01b7145431c3db5b42af3ec84b31e29345e7c11141b39",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": true
+    },
+    ".understand-anything/.understandignore": {
+      "filePath": ".understand-anything/.understandignore",
+      "contentHash": "dc7ae917f3c300a37756344842614cdfd85d305d3a00b3252064f0b84eca1e5b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    }
+  }
+}

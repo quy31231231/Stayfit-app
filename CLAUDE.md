@@ -1,5 +1,60 @@
 # CLAUDE.md
 
+## Project: StayFit
+
+Vietnamese calorie & fitness tracker. Next.js 15 (App Router) PWA. Uses Google
+Sheets as the database and Google Gemini for AI food recognition (vision + text).
+
+## Commands
+
+```bash
+npm run dev    # Start dev server (http://localhost:3000)
+npm run build  # Production build
+npm run start  # Run production build
+npm run lint   # ESLint via next lint
+```
+
+## Architecture
+
+```
+app/
+  api/
+    vision-analyze/  # Gemini vision → identify food from photo
+    text-analyze/    # Gemini text → identify food from name
+    save-meal/       # Append a meal row to Google Sheets
+    sync/            # Read/write user data from Google Sheets
+  dashboard/         # Main UI (calorie circle, food log, macros)
+  _data/             # Static data (common-foods.js — Vietnamese food DB)
+middleware.js        # In-memory rate limiting (30 req/min default, 10 for AI routes)
+```
+
+Google Sheets is the sole database. No SQL, no ORM.
+
+## Environment Variables
+
+| Variable | Purpose |
+|---|---|
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Service account for Sheets API |
+| `GOOGLE_PRIVATE_KEY` | Service account private key (see gotcha below) |
+| `GOOGLE_SHEET_ID` / `SPREADSHEET_ID` | Target spreadsheet ID |
+| `GEMINI_API_KEY` | Google Generative AI key |
+| `GEMINI_MODEL` | Gemini model name (e.g. `gemini-1.5-flash`) |
+
+## Gotchas
+
+- **Private key escaping**: `GOOGLE_PRIVATE_KEY` in `.env` stores literal `\n`.
+  The API routes call `.replace(/\\n/g, "\n")` before using it — don't remove that.
+- **Rate limiter is in-memory**: Resets on every server restart. Fine for a personal
+  app, not suitable for multi-instance deployments.
+- **Sheets locale**: Vietnamese locales write decimals with commas (`81,4`).
+  `safeFloat()` in sync/route.js handles this — don't use raw `parseFloat` on Sheets values.
+- **Fuzzy food matching**: Both AI routes use a custom diacritic-stripping `normalize()`
+  + token-Jaccard scorer to match Vietnamese food names. Threshold is 0.6.
+
+---
+
+## Behavioral Guidelines
+
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.

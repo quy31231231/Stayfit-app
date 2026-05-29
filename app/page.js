@@ -119,6 +119,7 @@ const normalizeFoodGroupKey = (value) => normalizeFoodLookup(value)
     .replace(/[\/,;:.-]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+const UNIT_GRAM_WEIGHTS = { 'tô': 400, 'bát': 200, 'ly': 250, 'quả': 100, 'cái': 100, 'chiếc': 100, 'chén': 70, 'đĩa': 350, 'cuốn': 80, 'ổ': 80, 'suất': 350, 'gói': 75, 'miếng': 80, 'phần': 300 };
 
 // --- COMPONENTS ---
 function MacroProgressBar({ label, current, target, colorClass }) {
@@ -1176,6 +1177,7 @@ export default function App() {
 
         return Array.from(groups.values()).map(group => ({
             ...group.food,
+            normalizedName: normalizeFoodLookup(group.food.name),
             searchText: normalizeFoodLookup(group.searchTextParts.join(" ")),
         }));
     }, [allFoods]);
@@ -1188,7 +1190,7 @@ export default function App() {
         for (const f of foodPickerFoods) {
             const text = f.searchText;
             if (!tokens.every(t => text.includes(t))) continue;
-            const name = normalizeFoodLookup(f.name);
+            const name = f.normalizedName;
             let score = 0;
             if (name === query) score = 100;
             else if (name.startsWith(query)) score = 80;
@@ -1197,7 +1199,7 @@ export default function App() {
             else score = 40;
             scored.push({ f, score });
         }
-        scored.sort((a, b) => b.score - a.score);
+        scored.sort((a, b) => b.score - a.score || a.f.name.length - b.f.name.length);
         return scored.map(s => s.f).slice(0, 50);
     }, [searchQuery, foodPickerFoods]);
 
@@ -1526,7 +1528,7 @@ export default function App() {
         let weightInGrams = q; let baseUnit = 'g';
         if (['kg'].includes(u)) { weightInGrams = q * 1000; } else if (['l', 'lít'].includes(u)) { weightInGrams = q * 1000; baseUnit = 'ml'; }
         else if (['ml'].includes(u)) { weightInGrams = q; baseUnit = 'ml'; } else if (['g', 'gram'].includes(u)) { weightInGrams = q; }
-        else { const mockWeights = { 'tô': 400, 'bát': 200, 'ly': 250, 'quả': 100, 'cái': 100, 'chiếc': 100, 'đĩa': 350, 'cuốn': 80, 'ổ': 80, 'suất': 350, 'gói': 75, 'miếng': 80, 'phần': 300 }; weightInGrams = q * (mockWeights[u] || 100); }
+        else { weightInGrams = q * (UNIT_GRAM_WEIGHTS[u] || 100); }
 
         const factor100g = weightInGrams > 0 ? (100 / weightInGrams) : 1;
         setCustomFoodList(prev => [{ 
@@ -2107,7 +2109,7 @@ export default function App() {
                                     let weightInGrams = qty; const u = selectedFood.unit.toLowerCase();
                                     if (['kg', 'l', 'lít'].includes(u)) { weightInGrams = qty * 1000; }
                                     else if (['ml', 'g', 'gram'].includes(u)) { weightInGrams = qty; }
-                                    else { const mockWeights = { 'tô': 400, 'bát': 200, 'ly': 250, 'quả': 100, 'cái': 100, 'chiếc': 100, 'đĩa': 350, 'cuốn': 80, 'ổ': 80, 'suất': 350, 'gói': 75, 'miếng': 80, 'phần': 300 }; weightInGrams = qty * (mockWeights[u] || 100); }
+                                    else { weightInGrams = qty * (UNIT_GRAM_WEIGHTS[u] || 100); }
 
                                     const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty);
                                     const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty);
