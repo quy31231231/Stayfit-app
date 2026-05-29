@@ -10,7 +10,6 @@ import {
     DndContext,
     DragOverlay,
     PointerSensor,
-    TouchSensor,
     useSensor,
     useSensors,
     closestCenter,
@@ -845,8 +844,7 @@ export default function App() {
     }, [currentDate]);
 
     const journalSensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } })
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
     );
 
     const [profile, setProfile] = useState({ 
@@ -931,6 +929,8 @@ export default function App() {
     const pullingRef = useRef(false);
     // Cờ báo có thay đổi local chưa push lên server (chống pull overwrite changes pending)
     const pendingChangeRef = useRef(false);
+    // Đếm số DELETE request đang chạy — syncFromCloud không được pull khi > 0
+    const pendingDeleteCountRef = useRef(0);
 
     const syncToCloud = async () => {
         if (!userId || !password) return;
@@ -963,6 +963,8 @@ export default function App() {
         if (pullingRef.current) return;
         // Có thay đổi local chưa kịp push → bỏ qua pull để tránh overwrite mất dữ liệu user
         if (pendingChangeRef.current) return;
+        // DELETE đang chạy trên Sheets → bỏ qua pull để tránh kéo lại item vừa xóa
+        if (pendingDeleteCountRef.current > 0) return;
         pullingRef.current = true;
         try {
             const res = await fetch(`/api/sync?userId=${userId}&password=${password}`);
@@ -1563,12 +1565,14 @@ export default function App() {
         setUndoStack(prev => [...prev, { item: itemToDelete, index: itemIndex }]);
 
         if (itemToDelete && itemToDelete.timestamp && userId && password) {
+            pendingDeleteCountRef.current++;
             try {
                 await fetch("/api/sync", {
                     method: "DELETE", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ userId, password, timestamp: itemToDelete.timestamp }),
                 });
             } catch (err) { console.error("Lỗi xóa:", err); }
+            finally { pendingDeleteCountRef.current--; }
         }
     };
 
@@ -1667,12 +1671,14 @@ export default function App() {
         clearSelection();
         for (const item of toDelete) {
             if (item.timestamp && userId && password) {
+                pendingDeleteCountRef.current++;
                 try {
                     await fetch("/api/sync", {
                         method: "DELETE", headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ userId, password, timestamp: item.timestamp }),
                     });
                 } catch (err) { console.error("Lỗi xóa:", err); }
+                finally { pendingDeleteCountRef.current--; }
             }
         }
     };
