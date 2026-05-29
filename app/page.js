@@ -1181,12 +1181,24 @@ export default function App() {
     }, [allFoods]);
     
     const filteredFoods = useMemo(() => {
-        let results = foodPickerFoods;
-        if (searchQuery.trim()) {
-            const query = normalizeFoodLookup(searchQuery);
-            results = foodPickerFoods.filter(f => f.searchText.includes(query));
+        if (!searchQuery.trim()) return foodPickerFoods.slice(0, 50);
+        const query = normalizeFoodLookup(searchQuery);
+        const tokens = query.split(' ').filter(Boolean);
+        const scored = [];
+        for (const f of foodPickerFoods) {
+            const text = f.searchText;
+            if (!tokens.every(t => text.includes(t))) continue;
+            const name = normalizeFoodLookup(f.name);
+            let score = 0;
+            if (name === query) score = 100;
+            else if (name.startsWith(query)) score = 80;
+            else if (text.startsWith(query)) score = 70;
+            else if (name.includes(query)) score = 60;
+            else score = 40;
+            scored.push({ f, score });
         }
-        return results.slice(0, 50);
+        scored.sort((a, b) => b.score - a.score);
+        return scored.map(s => s.f).slice(0, 50);
     }, [searchQuery, foodPickerFoods]);
 
     const handleAddSelectedFood = () => {
