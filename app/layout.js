@@ -78,7 +78,7 @@ export default function RootLayout({ children }) {
                       mist:   { DEFAULT: '#6B95AB', soft: '#DDE8EF', deep: '#3D5A6B' },
                     },
                     fontFamily: {
-                      sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                      sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                     },
                     ringColor: {
                       DEFAULT: 'rgba(60, 145, 100, 0.22)',
@@ -95,13 +95,13 @@ export default function RootLayout({ children }) {
           }}
         />
 
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
         <style>{`
           body {
-            font-family: 'Inter', sans-serif;
-            font-feature-settings: 'cv11', 'ss01', 'ss03';
-            letter-spacing: -0.011em;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-feature-settings: 'kern', 'liga';
+            letter-spacing: -0.012em;
             -webkit-tap-highlight-color: transparent;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
