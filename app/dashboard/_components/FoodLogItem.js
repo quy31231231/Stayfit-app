@@ -60,13 +60,13 @@ export default function FoodLogItem({
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    // Cancel long press on ANY movement > 3px — prevents selection mode firing during swipe
     if (swipeDecided.current === null && (absDx > 3 || absDy > 3)) {
       cancelLongPress();
     }
 
     if (swipeDecided.current === null && (absDx > 8 || absDy > 8)) {
-      if (absDx > absDy && dx > 0) {
+      // Swipe-to-delete only active in selection mode
+      if (selectionMode && absDx > absDy && dx > 0) {
         swipeDecided.current = 'swipe';
         try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
       } else {

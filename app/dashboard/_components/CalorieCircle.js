@@ -23,8 +23,8 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
             <stop offset="100%" stopColor="#D97757" />
           </linearGradient>
           <linearGradient id="overGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#E8B87B" />
-            <stop offset="100%" stopColor="#C49A4A" />
+            <stop offset="0%" stopColor="#E07070" />
+            <stop offset="100%" stopColor="#C94040" />
           </linearGradient>
         </defs>
 
@@ -48,11 +48,11 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center gap-0.5">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-muted">
+        <span className={`text-[10px] font-semibold uppercase tracking-[0.15em] ${isOver ? "text-red-400" : "text-ink-muted"}`}>
           {isOver ? "Vượt" : remaining === 0 ? "Hoàn thành" : "Còn lại"}
         </span>
         <span className={`text-5xl font-bold leading-none tracking-tight tabular-nums ${
-          isOver ? "text-clay-deep" : remaining === 0 ? "text-sage-deep" : "text-ink"
+          isOver ? "text-red-500" : remaining === 0 ? "text-sage-deep" : "text-ink"
         }`}>
           {isOver
             ? `+${over.toLocaleString("vi-VN")}`

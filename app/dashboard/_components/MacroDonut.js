@@ -18,8 +18,7 @@ export default function MacroDonut({ kind = "protein", value = 0, target = 0, si
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - ratio);
 
-  // Ring turns clay (amber) when over target
-  const ringStroke = isOver ? "#C49A4A" : tone.ring;
+  const ringStroke = isOver ? "#C94040" : tone.ring;
 
   return (
     <div className="flex flex-col items-center">
@@ -42,7 +41,7 @@ export default function MacroDonut({ kind = "protein", value = 0, target = 0, si
         </svg>
 
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={`text-base font-bold leading-none tabular-nums ${isOver ? "text-clay-deep" : "text-ink"}`}>
+          <span className={`text-base font-bold leading-none tabular-nums ${isOver ? "text-red-500" : "text-ink"}`}>
             {Math.round(value)}
           </span>
           <span className="mt-0.5 text-[10px] font-medium text-ink-muted tabular-nums">
@@ -55,7 +54,7 @@ export default function MacroDonut({ kind = "protein", value = 0, target = 0, si
         <p className="text-[11px] font-semibold uppercase tracking-wider text-ink">{tone.label}</p>
         <p className="mt-0.5 text-[10px] font-medium tabular-nums">
           {isOver
-            ? <span className="text-clay-deep font-semibold">vượt +{over}{tone.unit} ↑</span>
+            ? <span className="text-red-500 font-semibold">vượt +{over}{tone.unit} ↑</span>
             : remaining === 0
             ? <span className="text-sage-deep">đạt ✓</span>
             : <span className="text-ink-muted">còn {Math.round(remaining)}{tone.unit}</span>
