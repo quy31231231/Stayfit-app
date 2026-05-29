@@ -61,15 +61,12 @@ export default function FoodLogItem({
     const absDy = Math.abs(dy);
 
     if (swipeDecided.current === null) {
-      // In selection mode: cancel long press on any small movement (swipe detection)
-      // In normal mode: only cancel when user is clearly scrolling vertically (>15px)
       if (selectionMode ? (absDx > 3 || absDy > 3) : absDy > 15) {
         cancelLongPress();
       }
     }
 
     if (swipeDecided.current === null && (absDx > 8 || absDy > 8)) {
-      // Swipe-to-delete only active in selection mode
       if (selectionMode && absDx > absDy && dx > 0) {
         swipeDecided.current = 'swipe';
         try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
@@ -113,24 +110,21 @@ export default function FoodLogItem({
     swipeDecided.current = null;
   };
 
-  const dragStyle = transform
+  // Combine dnd-kit transform and swipe transform
+  const contentStyle = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
-    : undefined;
+    : swipeX > 0
+    ? { transform: `translateX(${swipeX}px)`, transition: 'none' }
+    : { transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' };
 
   const isActiveSwipe = swipeX > 8;
-  const swipeProgress = Math.min(swipeX / DELETE_THRESHOLD, 1);
 
   return (
-    <div
-      ref={setNodeRef}
-      style={dragStyle}
-      {...attributes}
-      className="relative overflow-hidden rounded-2xl"
-    >
+    <div className="relative overflow-hidden rounded-2xl">
       {/* Delete reveal background */}
       <div
         className="absolute inset-0 flex items-center gap-1.5 pl-5 rounded-2xl bg-red-50"
-        style={{ opacity: isActiveSwipe ? swipeProgress : 0 }}
+        style={{ opacity: isActiveSwipe ? Math.min(swipeX / DELETE_THRESHOLD, 1) : 0 }}
         aria-hidden="true"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
@@ -142,16 +136,15 @@ export default function FoodLogItem({
         <span className="text-[11px] font-semibold text-red-400">Xóa</span>
       </div>
 
-      {/* Item content — slides right on swipe */}
+      {/* Main draggable element — setNodeRef here so dnd-kit has correct element */}
       <div
+        ref={setNodeRef}
+        style={contentStyle}
+        {...attributes}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        style={{
-          transform: swipeX > 0 ? `translateX(${swipeX}px)` : undefined,
-          transition: swipeX === 0 ? 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
-        }}
         className={`group flex items-center justify-between rounded-2xl px-4 py-3 touch-none select-none cursor-grab active:cursor-grabbing ${
           isDragging
             ? 'opacity-30'
@@ -161,13 +154,9 @@ export default function FoodLogItem({
         }`}
       >
         {selectionMode && (
-          <div
-            className={`mr-3 grid h-5 w-5 flex-none place-items-center rounded-md ring-1 transition ${
-              selected
-                ? "bg-orange-deep ring-orange-deep text-white"
-                : "bg-white ring-cream-deep text-transparent"
-            }`}
-          >
+          <div className={`mr-3 grid h-5 w-5 flex-none place-items-center rounded-md ring-1 transition ${
+            selected ? "bg-orange-deep ring-orange-deep text-white" : "bg-white ring-cream-deep text-transparent"
+          }`}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
             </svg>
