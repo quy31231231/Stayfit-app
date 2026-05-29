@@ -123,7 +123,7 @@ export default function FoodLogItem({
     <div className="relative overflow-hidden rounded-2xl">
       {/* Delete reveal background */}
       <div
-        className="absolute inset-0 flex items-center gap-1.5 pl-5 rounded-2xl bg-red-50"
+        className="absolute inset-0 flex items-center gap-1.5 pl-5 rounded-2xl bg-red-50 pointer-events-none"
         style={{ opacity: isActiveSwipe ? Math.min(swipeX / DELETE_THRESHOLD, 1) : 0 }}
         aria-hidden="true"
       >
