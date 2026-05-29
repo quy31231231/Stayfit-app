@@ -836,6 +836,7 @@ export default function App() {
     const [selectedItemIds, setSelectedItemIds] = useState(new Set());
     const [selectionMode, setSelectionMode] = useState(false);
     const [activeDragId, setActiveDragId] = useState(null);
+    const [dragOverDelete, setDragOverDelete] = useState(false);
     const [openMoveMenu, setOpenMoveMenu] = useState(null); // null | mealName
     useEffect(() => {
         setSelectedItemIds(new Set());
@@ -2270,9 +2271,22 @@ export default function App() {
                             sensors={journalSensors}
                             collisionDetection={closestCenter}
                             onDragStart={(e) => setActiveDragId(e.active.id)}
-                            onDragEnd={(e) => {
+                            onDragMove={(e) => {
+                                const isOver = e.delta.x > 120;
+                                if (isOver !== dragOverDelete) setDragOverDelete(isOver);
+                            }}
+                            onDragEnd={async (e) => {
                                 setActiveDragId(null);
-                                const { active, over } = e;
+                                setDragOverDelete(false);
+                                const { active, over, delta } = e;
+                                if (!over && delta.x > 120) {
+                                    if (selectedItemIds.has(active.id) && selectedItemIds.size > 0) {
+                                        await bulkDeleteSelected();
+                                    } else {
+                                        removeFood(active.id);
+                                    }
+                                    return;
+                                }
                                 if (!over) return;
                                 const targetMeal = over.id;
                                 const ids = selectedItemIds.has(active.id)
@@ -2281,7 +2295,7 @@ export default function App() {
                                 bulkUpdateMeals(ids, targetMeal);
                                 clearSelection();
                             }}
-                            onDragCancel={() => setActiveDragId(null)}
+                            onDragCancel={() => { setActiveDragId(null); setDragOverDelete(false); }}
                         >
                             {MEAL_TYPES.map((meal, i) => (
                                 <div key={meal} className="animate-fade-rise" style={{ animationDelay: `${i * 70}ms` }}>
@@ -2317,7 +2331,13 @@ export default function App() {
                                     const dragged = dailyLog.find(it => it.id === activeDragId);
                                     if (!dragged) return null;
                                     const count = selectedItemIds.has(activeDragId) ? selectedItemIds.size : 1;
-                                    return (
+                                    return dragOverDelete ? (
+                                        <div className="rounded-2xl bg-red-50 px-4 py-3 shadow-lift ring-2 ring-red-300/60 cursor-grabbing">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[13px] font-semibold text-red-500">Thả để xóa</span>
+                                            </div>
+                                        </div>
+                                    ) : (
                                         <div className="rounded-2xl bg-white px-4 py-3 shadow-lift ring-2 ring-orange-deep/40 cursor-grabbing">
                                             <div className="flex items-center gap-2">
                                                 <span className="grid h-6 min-w-6 px-2 place-items-center rounded-full bg-orange-deep text-[11px] font-bold text-white tabular-nums">
