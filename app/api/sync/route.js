@@ -424,14 +424,24 @@ export async function GET(req) {
     });
     const historyRows = historyRes.data.values || [];
     const history = {};
+    // Backfill: dòng cũ có ô timestamp (cột K) trống → sinh ID ổn định + ghi ngược vào Sheets,
+    // để DELETE/sync sau này định danh được dòng (nếu không, món cũ không thể xóa vĩnh viễn).
+    const tsBackfills = [];
 
-    historyRows.slice(1).forEach(row => {
+    historyRows.slice(1).forEach((row, i) => {
       if (!row || row.length === 0 || !row[0] || row[1] == null) return;
 
       if (row[0] === userId) {
         const date = String(row[1]);
         const tsRaw = row[10];
-        const ts = tsRaw != null && tsRaw !== "" ? String(tsRaw) : `${date}-${Date.now()}`;
+        let ts;
+        if (tsRaw != null && tsRaw !== "") {
+          ts = String(tsRaw);
+        } else {
+          // Sinh ts ổn định, duy nhất; ghi vào đúng dòng (sheet row = i + 2 vì bỏ header)
+          ts = `${date}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+          tsBackfills.push({ range: `History!K${i + 2}`, values: [[ts]] });
+        }
         const meal = {
           meal: row[2] || "",
           name: row[3] || "",
@@ -448,6 +458,18 @@ export async function GET(req) {
         history[date].push(meal);
       }
     });
+
+    // Ghi các timestamp vừa sinh trở lại Sheets (một lần, non-fatal nếu lỗi)
+    if (tsBackfills.length > 0) {
+      try {
+        await sheets.spreadsheets.values.batchUpdate({
+          spreadsheetId: SHEET_ID,
+          requestBody: { valueInputOption: "USER_ENTERED", data: tsBackfills },
+        });
+      } catch (e) {
+        console.warn("[sync GET] timestamp backfill failed:", e.message);
+      }
+    }
 
     // 3. LẤY CÂN NẶNG — UNFORMATTED_VALUE
     const weightRes = await sheets.spreadsheets.values.get({
