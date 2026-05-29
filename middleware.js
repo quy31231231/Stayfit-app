@@ -51,5 +51,6 @@ export const config = {
     '/api/save-meal/:path*',
     '/api/vision-analyze/:path*',
     '/api/text-analyze/:path*',
+    '/api/barcode/:path*',
   ],
 };

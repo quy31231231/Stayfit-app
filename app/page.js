@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
@@ -21,6 +22,9 @@ import MacroDonut from './dashboard/_components/MacroDonut';
 import FoodLogSection from './dashboard/_components/FoodLogSection';
 import GreetingHeader from './dashboard/_components/GreetingHeader';
 import BreathingTimer from './dashboard/_components/BreathingTimer';
+
+// Lazy: thư viện quét mã (zxing) chỉ tải khi mở scanner, không phình bundle ban đầu.
+const BarcodeScanner = dynamic(() => import('./dashboard/_components/BarcodeScanner'), { ssr: false });
 
 // Khởi tạo Plugin DataLabels
 Chart.register(ChartDataLabels);
@@ -119,6 +123,13 @@ const normalizeFoodGroupKey = (value) => normalizeFoodLookup(value)
     .replace(/\s+/g, " ")
     .trim();
 const UNIT_GRAM_WEIGHTS = { 'tô': 400, 'bát': 200, 'ly': 250, 'quả': 100, 'cái': 100, 'chiếc': 100, 'chén': 70, 'đĩa': 350, 'cuốn': 80, 'ổ': 80, 'suất': 350, 'gói': 75, 'miếng': 80, 'phần': 300 };
+// Quy đổi số lượng + đơn vị sang gram (ml tính tương đương gram). Đơn vị đếm dùng bảng ước lượng.
+const unitToGrams = (qty, unit) => {
+    const u = (unit || "g").toLowerCase();
+    if (['kg', 'l', 'lít'].includes(u)) return qty * 1000;
+    if (['ml', 'g', 'gram'].includes(u)) return qty;
+    return qty * (UNIT_GRAM_WEIGHTS[u] || 100);
+};
 
 // --- COMPONENTS ---
 function MacroProgressBar({ label, current, target, colorClass }) {
@@ -861,6 +872,9 @@ export default function App() {
     const [selectedFood, setSelectedFood] = useState(null);
     const [qty, setQty] = useState(1);
 
+    // Barcode scan state
+    const [barcodeOpen, setBarcodeOpen] = useState(false);
+
     // AI Vision scan state
     const [scanModalOpen, setScanModalOpen] = useState(false);
     const [scanState, setScanState] = useState({
@@ -878,6 +892,7 @@ export default function App() {
     const [suggestionForm, setSuggestionForm] = useState({ name: "", per: 100, kcal: 0, protein: 0, carb: 0, fat: 0 });
     const [searchQuery, setSearchQuery] = useState("");
     const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
+    const [recipe, setRecipe] = useState({ name: "", ingredients: [], weightOverride: null });
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
     const [inputUser, setInputUser] = useState("");
     const [inputPass, setInputPass] = useState("");
@@ -1229,6 +1244,109 @@ export default function App() {
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
         setSelectedFood(null); setSearchQuery(""); setQty(1);
+    };
+
+    /* ───── GHÉP MÓN (tạo món từ nhiều nguyên liệu → quy về /100g) ───── */
+    const recipeTotals = useMemo(() => {
+        let kcal = 0, protein = 0, carb = 0, fat = 0, autoWeight = 0;
+        for (const ing of recipe.ingredients) {
+            kcal += calcMacro(ing.kcal, ing.per, ing.qty);
+            protein += calcMacro(ing.protein, ing.per, ing.qty);
+            carb += calcMacro(ing.carb, ing.per, ing.qty);
+            fat += calcMacro(ing.fat, ing.per, ing.qty);
+            autoWeight += unitToGrams(ing.qty, ing.unit);
+        }
+        return {
+            kcal: Math.round(kcal * 10) / 10,
+            protein: Math.round(protein * 10) / 10,
+            carb: Math.round(carb * 10) / 10,
+            fat: Math.round(fat * 10) / 10,
+            autoWeight: Math.round(autoWeight),
+        };
+    }, [recipe.ingredients]);
+
+    const recipeWeight = recipe.weightOverride != null ? recipe.weightOverride : recipeTotals.autoWeight;
+    const recipePer100 = recipeWeight > 0 ? 100 / recipeWeight : 0;
+    const recipePer100Macros = {
+        kcal: Math.round(recipeTotals.kcal * recipePer100),
+        protein: Math.round(recipeTotals.protein * recipePer100 * 10) / 10,
+        carb: Math.round(recipeTotals.carb * recipePer100 * 10) / 10,
+        fat: Math.round(recipeTotals.fat * recipePer100 * 10) / 10,
+    };
+
+    const addRecipeIngredient = (food) => {
+        setRecipe(prev => ({
+            ...prev,
+            ingredients: [...prev.ingredients, {
+                name: food.name, unit: food.unit, per: food.per,
+                kcal: food.kcal, protein: food.protein, carb: food.carb, fat: food.fat,
+                qty: food.per,
+            }],
+        }));
+    };
+
+    const updateRecipeIngredientQty = (idx, qty) => {
+        setRecipe(prev => ({
+            ...prev,
+            ingredients: prev.ingredients.map((ing, i) => i === idx ? { ...ing, qty } : ing),
+        }));
+    };
+
+    const removeRecipeIngredient = (idx) => {
+        setRecipe(prev => ({ ...prev, ingredients: prev.ingredients.filter((_, i) => i !== idx) }));
+    };
+
+    const saveRecipeToLibrary = () => {
+        const name = recipe.name.trim();
+        if (!name || recipe.ingredients.length === 0 || recipeWeight <= 0) return;
+        if (allFoods.some(f => f.name.toLowerCase().trim() === name.toLowerCase())) {
+            setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: "Món ăn này đã có sẵn!" });
+            return;
+        }
+        const newFood = { name, unit: "g", per: 100, ...recipePer100Macros };
+        setCustomFoodList(prev => [newFood, ...prev]);
+        setRecipe({ name: "", ingredients: [], weightOverride: null });
+        setSearchQuery("");
+        setTab("quick");
+    };
+
+    /* ───── QUÉT MÃ VẠCH (Open Food Facts → /100g) ───── */
+    const handleBarcodeDetected = async (code) => {
+        setBarcodeOpen(false);
+        const trimmed = (code || "").trim();
+        if (!/^\d{6,14}$/.test(trimmed)) {
+            setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: `Mã "${trimmed}" không phải mã vạch sản phẩm.` });
+            return;
+        }
+        try {
+            const res = await fetch(`/api/barcode?code=${trimmed}`);
+            const data = await res.json();
+            if (!res.ok || !data.found || !data.product) {
+                setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: `Không tìm thấy sản phẩm (mã ${trimmed}). Bạn có thể nhập tay ở tab "Nhập tay".` });
+                return;
+            }
+            const p = data.product;
+            const food = { name: p.name, unit: "g", per: 100, kcal: p.kcal, protein: p.protein, carb: p.carb, fat: p.fat };
+
+            // Thiếu dinh dưỡng → chuyển sang nhập tay, điền sẵn tên.
+            if (!food.kcal && !food.protein && !food.carb && !food.fat) {
+                setCustomFood({ name: food.name, quantity: 100, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
+                setTab("custom");
+                setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: `Tìm thấy "${food.name}" nhưng thiếu dữ liệu dinh dưỡng. Mời bạn nhập tay.` });
+                return;
+            }
+
+            // Lưu vào thư viện (nếu chưa có) + chọn sẵn để ghi nhật ký.
+            setCustomFoodList(prev =>
+                prev.some(f => f.name.toLowerCase().trim() === food.name.toLowerCase().trim()) ? prev : [food, ...prev]
+            );
+            setTab("quick");
+            setSearchQuery("");
+            setSelectedFood(food);
+            setQty(100);
+        } catch (e) {
+            setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: "Lỗi tra cứu sản phẩm. Thử lại." });
+        }
     };
 
     const handleConfirmDelete = () => {
@@ -2099,6 +2217,18 @@ export default function App() {
                                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                                     </svg>
                                 </button>
+                                {/* Quét mã vạch sản phẩm */}
+                                <button
+                                    type="button"
+                                    onClick={() => setBarcodeOpen(true)}
+                                    className="grid h-9 w-9 place-items-center rounded-full bg-ink text-cream transition hover:bg-ink/85 active:scale-95 shadow-soft"
+                                    aria-label="Quét mã vạch sản phẩm"
+                                    title="Quét mã vạch"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M3 5v14M7.5 5v14M12 5v14M16.5 5v14M21 5v14"/>
+                                    </svg>
+                                </button>
                                 <div className="relative">
                                     <select value={selectedMeal} onChange={e=>setSelectedMeal(e.target.value)} className="appearance-none bg-cream-soft hover:bg-cream-deep text-[11px] font-semibold text-ink py-2 pl-3.5 pr-9 rounded-full outline-none cursor-pointer ring-1 focus:ring-2 focus:ring-orange/30 transition">
                                         {MEAL_TYPES.map(m => ( <option key={m} value={m}>{m}</option> ))}
@@ -2112,6 +2242,7 @@ export default function App() {
                         <div className="mt-5 flex gap-1 p-1 bg-cream-soft rounded-2xl">
                             <button onClick={() => setTab("quick")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "quick" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Chọn nhanh</button>
                             <button onClick={() => setTab("custom")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "custom" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Nhập tay</button>
+                            <button onClick={() => setTab("recipe")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "recipe" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Ghép món</button>
                         </div>
 
                         {tab === "quick" ? (
@@ -2205,7 +2336,7 @@ export default function App() {
                                     );
                                 })()}
                             </div>
-                        ) : (
+                        ) : tab === "custom" ? (
                             <div className="mt-4 space-y-2.5">
                                 <input placeholder="Tên món ăn (vd: Gà rán...)" value={customFood.name} onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} className="w-full bg-cream-soft ring-1 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition" />
                                 <div className="grid grid-cols-2 gap-2.5">
@@ -2227,6 +2358,96 @@ export default function App() {
                                     <button onClick={addCustom} className="w-full bg-orange text-white p-3.5 rounded-2xl font-bold text-[13px] mt-3 active:scale-95 transition shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep animate-in slide-in-from-bottom-2 fade-in duration-300">
                                         Xác nhận thêm
                                     </button>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="mt-4 space-y-3">
+                                {/* Tên món ghép */}
+                                <input
+                                    placeholder="Tên món (vd: Bánh yến mạch...)"
+                                    value={recipe.name}
+                                    onChange={e => setRecipe(p => ({ ...p, name: e.target.value }))}
+                                    className="w-full bg-cream-soft ring-1 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition"
+                                />
+
+                                {/* Tìm + thêm nguyên liệu */}
+                                <div className="relative">
+                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none"><IconSearch /></span>
+                                    <input type="text" placeholder="Thêm nguyên liệu từ thư viện..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-cream-soft ring-1 rounded-2xl py-3 pl-10 pr-4 text-[13px] font-medium outline-none focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition" />
+                                </div>
+                                {searchQuery.trim() && (
+                                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto no-scrollbar">
+                                        {filteredFoods.map((f, idx) => (
+                                            <button key={f.name + idx} onClick={() => addRecipeIngredient(f)} className="p-3 rounded-2xl text-left transition ring-1 bg-cream-soft ring-transparent hover:ring-cream-deep active:scale-[0.98]">
+                                                <p className="truncate text-[11px] font-semibold tracking-tight text-ink mb-0.5">{f.name}</p>
+                                                <p className="text-[11px] font-bold text-ink tabular-nums">{f.kcal} <span className="text-[9px] font-medium text-ink-muted">kcal/{f.per}{f.unit}</span></p>
+                                            </button>
+                                        ))}
+                                        {filteredFoods.length === 0 && <p className="col-span-2 text-center py-4 text-ink-muted text-[12px] italic">Không tìm thấy món ăn</p>}
+                                    </div>
+                                )}
+
+                                {/* Danh sách nguyên liệu đã thêm */}
+                                {recipe.ingredients.length === 0 ? (
+                                    <p className="text-center py-6 text-ink-muted text-[12px] italic">Tìm và thêm nguyên liệu để ghép thành món mới</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {recipe.ingredients.map((ing, idx) => (
+                                            <div key={idx} className="flex items-center gap-2 bg-cream-soft ring-1 rounded-2xl p-2.5">
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="truncate text-[12px] font-semibold text-ink">{ing.name}</p>
+                                                    <p className="text-[10px] text-ink-muted tabular-nums">{calcMacro(ing.kcal, ing.per, ing.qty)} kcal</p>
+                                                </div>
+                                                <input type="number" value={ing.qty} step="any" min="0" onChange={e => updateRecipeIngredientQty(idx, parseFloat(e.target.value) || 0)} className="w-16 bg-white ring-1 p-2 rounded-xl text-[13px] outline-none font-bold text-center focus:ring-2 focus:ring-orange/30 tabular-nums" />
+                                                <span className="text-[10px] font-semibold text-ink-muted w-9 shrink-0">{ing.unit}</span>
+                                                <button onClick={() => removeRecipeIngredient(idx)} className="grid place-items-center h-8 w-8 text-ink-faint hover:text-orange-deep rounded-lg transition shrink-0" aria-label="Xóa nguyên liệu"><IconTrash /></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Tổng + quy về /100g */}
+                                {recipe.ingredients.length > 0 && (
+                                    <div className="rounded-2xl bg-cream-soft ring-1 p-4 space-y-3">
+                                        {/* Khối lượng món (sửa được) */}
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="text-[11px] font-semibold text-ink-muted">Khối lượng món (g)</span>
+                                            <div className="flex items-center gap-2">
+                                                <input type="number" value={Math.round(recipeWeight)} step="any" min="1" onChange={e => setRecipe(p => ({ ...p, weightOverride: parseFloat(e.target.value) || 0 }))} className="w-20 bg-white ring-1 p-2 rounded-xl text-[13px] outline-none font-bold text-center focus:ring-2 focus:ring-orange/30 tabular-nums" />
+                                                {recipe.weightOverride != null && (
+                                                    <button onClick={() => setRecipe(p => ({ ...p, weightOverride: null }))} className="text-[10px] font-semibold text-orange-deep hover:underline whitespace-nowrap">Auto ({recipeTotals.autoWeight}g)</button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Bảng Tổng + /100g */}
+                                        <div className="rounded-xl bg-white ring-1 overflow-hidden">
+                                            <div className="grid grid-cols-5 text-center text-[9px] font-semibold uppercase tracking-wider py-1.5 bg-cream-soft/60">
+                                                <span></span><span className="text-ink-muted">Kcal</span><span className="text-sage-deep">Pro</span><span className="text-clay-deep">Carb</span><span className="text-lilac-deep">Fat</span>
+                                            </div>
+                                            <div className="grid grid-cols-5 text-center items-center py-2">
+                                                <span className="text-[10px] font-semibold text-ink-muted">Tổng</span>
+                                                <span className="text-[13px] font-bold text-ink tabular-nums">{recipeTotals.kcal}</span>
+                                                <span className="text-[12px] font-semibold text-ink tabular-nums">{recipeTotals.protein}</span>
+                                                <span className="text-[12px] font-semibold text-ink tabular-nums">{recipeTotals.carb}</span>
+                                                <span className="text-[12px] font-semibold text-ink tabular-nums">{recipeTotals.fat}</span>
+                                            </div>
+                                            <div className="grid grid-cols-5 text-center items-center py-2 border-t border-cream-deep/40 bg-orange-soft/30">
+                                                <span className="text-[10px] font-semibold text-orange-deep">/100g</span>
+                                                <span className="text-[13px] font-bold text-orange-deep tabular-nums">{recipePer100Macros.kcal}</span>
+                                                <span className="text-[12px] font-semibold text-ink tabular-nums">{recipePer100Macros.protein}</span>
+                                                <span className="text-[12px] font-semibold text-ink tabular-nums">{recipePer100Macros.carb}</span>
+                                                <span className="text-[12px] font-semibold text-ink tabular-nums">{recipePer100Macros.fat}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Lưu */}
+                                        {recipe.name.trim() !== "" && (
+                                            <button onClick={saveRecipeToLibrary} className="w-full bg-orange text-white p-3.5 rounded-2xl font-bold text-[13px] active:scale-95 transition shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep">
+                                                Lưu vào thư viện
+                                            </button>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -2359,6 +2580,11 @@ export default function App() {
                             </p>
                         )}
                     </div>
+
+                    {/* --- SCANNER MÃ VẠCH --- */}
+                    {barcodeOpen && (
+                        <BarcodeScanner onDetect={handleBarcodeDetected} onClose={() => setBarcodeOpen(false)} />
+                    )}
 
                     {/* --- MODAL QUÉT ẢNH MÓN ĂN BẰNG AI --- */}
                     {scanModalOpen && (
