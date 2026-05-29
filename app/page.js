@@ -2279,7 +2279,7 @@ export default function App() {
                                 setActiveDragId(null);
                                 setDragOverDelete(false);
                                 const { active, over, delta } = e;
-                                if (!over && delta.x > 120) {
+                                if (delta.x > 120) {
                                     if (selectedItemIds.has(active.id) && selectedItemIds.size > 0) {
                                         await bulkDeleteSelected();
                                     } else {

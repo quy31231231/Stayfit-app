@@ -41,7 +41,7 @@ export default function FoodLogItem({
       longPressFiredRef.current = true;
       onLongPress?.(item.id);
     }, 300);
-    if (!selectionMode) listeners?.onPointerDown?.(e);
+    listeners?.onPointerDown?.(e);
   };
 
   const handlePointerMove = (e) => {
