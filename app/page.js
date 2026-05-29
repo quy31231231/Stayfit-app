@@ -538,7 +538,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                 </div>
                                 {!hasGoal && (
                                     <p className="text-[10px] text-ink-faint italic text-center mt-3">
-                                        Chưa đặt mục tiêu — bấm <span className="font-semibold">⋯</span> để bắt đầu
+                                        Chưa đặt mục tiêu, bấm <span className="font-semibold">⋯</span> để bắt đầu
                                     </p>
                                 )}
                             </div>
@@ -701,8 +701,8 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
 
                     const segments = [
                         { color: "bg-mist",     flex: 3.5, label: "Thiếu cân",  range: "<18.5",     dot: "bg-mist" },
-                        { color: "bg-sage",     flex: 6.5, label: "Khỏe mạnh",  range: "18.5–24.9", dot: "bg-sage" },
-                        { color: "bg-orange",   flex: 5,   label: "Thừa cân",   range: "25.0–29.9", dot: "bg-orange" },
+                        { color: "bg-sage",     flex: 6.5, label: "Khỏe mạnh",  range: "18.5-24.9", dot: "bg-sage" },
+                        { color: "bg-orange",   flex: 5,   label: "Thừa cân",   range: "25.0-29.9", dot: "bg-orange" },
                         { color: "bg-rose-500", flex: 10,  label: "Béo phì",    range: ">30.0",     dot: "bg-rose-500" },
                     ];
 
@@ -758,7 +758,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                 <div className="flex justify-between items-center bg-white p-1.5 rounded-2xl shadow-soft ring-1 sticky top-[64px] z-10">
                     <button onClick={() => setChartOffset(p => p + 1)} className="px-3 py-2 bg-cream-soft hover:bg-orange-soft hover:text-orange-deep text-ink-muted rounded-xl text-[11px] font-semibold transition">‹ 14 ngày trước</button>
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted text-center px-2 tabular-nums">
-                        {getWeekLabel(currentChartDates[0])} – {getWeekLabel(currentChartDates[currentChartDates.length-1])}
+                        {getWeekLabel(currentChartDates[0])} - {getWeekLabel(currentChartDates[currentChartDates.length-1])}
                     </span>
                     <button onClick={() => setChartOffset(p => Math.max(0, p - 1))} disabled={chartOffset === 0} className={`px-3 py-2 rounded-xl text-[11px] font-semibold transition ${chartOffset === 0 ? 'text-cream-deep cursor-not-allowed' : 'bg-cream-soft hover:bg-orange-soft hover:text-orange-deep text-ink-muted'}`}>Tiếp ›</button>
                 </div>

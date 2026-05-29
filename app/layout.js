@@ -4,7 +4,7 @@ export const metadata = {
   metadataBase: new URL('https://stayfit.id.vn'),
   applicationName: 'StayFit',
   title: {
-    default: 'StayFit — Nhật ký Calo & Sức khỏe',
+    default: 'StayFit · Nhật ký Calo & Sức khỏe',
     template: '%s · StayFit',
   },
   description: 'Theo dõi calo, dinh dưỡng và cân nặng mỗi ngày. Đồng bộ liền mạch giữa điện thoại và máy tính qua Google Sheets.',
@@ -24,13 +24,13 @@ export const metadata = {
     locale: 'vi_VN',
     url: 'https://stayfit.id.vn',
     siteName: 'StayFit',
-    title: 'StayFit — Nhật ký Calo & Sức khỏe',
+    title: 'StayFit · Nhật ký Calo & Sức khỏe',
     description: 'Theo dõi calo, dinh dưỡng và cân nặng mỗi ngày. Đồng bộ liền mạch giữa điện thoại và máy tính.',
   },
 
   twitter: {
     card: 'summary_large_image',
-    title: 'StayFit — Nhật ký Calo & Sức khỏe',
+    title: 'StayFit · Nhật ký Calo & Sức khỏe',
     description: 'Theo dõi calo, dinh dưỡng và cân nặng mỗi ngày.',
   },
 

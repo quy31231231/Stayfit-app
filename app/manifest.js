@@ -1,6 +1,6 @@
 export default function manifest() {
   return {
-    name: 'StayFit — Nhật ký Calo & Sức khỏe',
+    name: 'StayFit · Nhật ký Calo & Sức khỏe',
     short_name: 'StayFit',
     description: 'Theo dõi calo, dinh dưỡng và cân nặng mỗi ngày.',
     start_url: '/',
