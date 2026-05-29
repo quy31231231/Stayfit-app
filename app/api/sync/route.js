@@ -232,6 +232,41 @@ export async function POST(req) {
             requestBody: { values: rowsToAppend }
           });
         }
+
+        // RECONCILE: Xóa các row trong Sheets mà KHÔNG còn trong local history
+        // Chỉ xóa trên các ngày đã có trong local history (tránh xóa nhầm ngày chưa load)
+        const localDates = new Set(Object.keys(history));
+        const localTimestamps = new Set();
+        for (const meals of Object.values(history)) {
+          if (Array.isArray(meals)) {
+            for (const meal of meals) {
+              if (meal.timestamp) localTimestamps.add(String(meal.timestamp));
+            }
+          }
+        }
+        const staleIndices = [];
+        existingRows.forEach((row, index) => {
+          if (row[0] === userId && row[1] != null && row[10] != null && row[10] !== '') {
+            if (localDates.has(String(row[1])) && !localTimestamps.has(String(row[10]))) {
+              staleIndices.push(index);
+            }
+          }
+        });
+        if (staleIndices.length > 0) {
+          const histSheetId = await getSheetIdByName(sheets, SHEET_ID, "History");
+          if (histSheetId !== null) {
+            await sheets.spreadsheets.batchUpdate({
+              spreadsheetId: SHEET_ID,
+              requestBody: {
+                requests: staleIndices.sort((a, b) => b - a).map(idx => ({
+                  deleteDimension: {
+                    range: { sheetId: histSheetId, dimension: "ROWS", startIndex: idx, endIndex: idx + 1 }
+                  }
+                }))
+              }
+            });
+          }
+        }
       }
 
       // 3. SYNC CÂN NẶNG — DEDUPE + UPSERT

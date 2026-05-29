@@ -48,7 +48,7 @@ Row identity trong `History` dựa vào `timestamp` (cột K), không phải `id
 
 ## Sync Architecture
 
-- **`syncToCloud` (POST)**: UPSERT only — thêm/sửa rows, **không bao giờ xóa** rows khỏi Sheets
+- **`syncToCloud` (POST)**: UPSERT + RECONCILE — thêm/sửa rows, **và xóa** rows của ngày đã có trong local history nhưng timestamp không còn trong local state
 - **DELETE API** (`/api/sync DELETE`): xóa 1 row theo `timestamp` (column K của History tab)
 - **Race condition guards**: `pendingChangeRef` (có thay đổi chưa push), `pendingDeleteCountRef` (có DELETE đang chờ) — `syncFromCloud` bỏ qua nếu một trong hai đang active
 - **Debounce**: 2.5s sau mỗi thay đổi state mới push lên cloud
