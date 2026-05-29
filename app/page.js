@@ -989,7 +989,13 @@ export default function App() {
             }
             if (data.history) setHistory(data.history);
             if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
-            if (Array.isArray(data.customFoods)) setCustomFoodList(data.customFoods);
+            if (Array.isArray(data.customFoods)) {
+                setCustomFoodList(prev => {
+                    const cloudNames = new Set(data.customFoods.map(f => f.name));
+                    const localOnly = prev.filter(f => !cloudNames.has(f.name));
+                    return localOnly.length ? [...data.customFoods, ...localOnly] : data.customFoods;
+                });
+            }
             if (Array.isArray(data.deletedCommonFoods)) setDeletedCommonFoods(data.deletedCommonFoods);
             if (Array.isArray(data.scanFeedback)) {
                 setScanFeedbackCache(data.scanFeedback);
@@ -1023,7 +1029,13 @@ export default function App() {
             if (data.profile) setProfile({...profile, ...data.profile});
             if (data.history) setHistory(data.history);
             if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
-            if (Array.isArray(data.customFoods)) localStorage.setItem('stayfit_custom_foods', JSON.stringify(data.customFoods));
+            if (Array.isArray(data.customFoods)) {
+                const localFoods = JSON.parse(localStorage.getItem('stayfit_custom_foods') || '[]');
+                const cloudNames = new Set(data.customFoods.map(f => f.name));
+                const localOnly = localFoods.filter(f => !cloudNames.has(f.name));
+                const merged = localOnly.length ? [...data.customFoods, ...localOnly] : data.customFoods;
+                localStorage.setItem('stayfit_custom_foods', JSON.stringify(merged));
+            }
             if (Array.isArray(data.deletedCommonFoods)) localStorage.setItem('stayfit_deleted_common', JSON.stringify(data.deletedCommonFoods));
             window.location.reload();
         } catch (err) { alert("❌ Lỗi: " + err.message); } 
@@ -1647,6 +1659,24 @@ export default function App() {
         setOpenMoveMenu(null);
     };
 
+    const bulkDeleteSelected = async () => {
+        if (selectedItemIds.size === 0) return;
+        const currentList = history[currentDate] || [];
+        const toDelete = currentList.filter(i => selectedItemIds.has(i.id));
+        setHistory(prev => ({ ...prev, [currentDate]: (prev[currentDate] || []).filter(i => !selectedItemIds.has(i.id)) }));
+        clearSelection();
+        for (const item of toDelete) {
+            if (item.timestamp && userId && password) {
+                try {
+                    await fetch("/api/sync", {
+                        method: "DELETE", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId, password, timestamp: item.timestamp }),
+                    });
+                } catch (err) { console.error("Lỗi xóa:", err); }
+            }
+        }
+    };
+
     const applyDietMode = (mode) => {
         if (mode.id === 'custom') setProfile({...profile, macroDietMode: "Tự nhập tay (Custom)"});
         else setProfile({
@@ -2211,12 +2241,22 @@ export default function App() {
                                 <span className="text-[12px] font-bold text-orange-deep">
                                     Đã chọn {selectedItemIds.size} món
                                 </span>
-                                <button
-                                    onClick={clearSelection}
-                                    className="text-[11px] font-semibold text-orange-deep hover:underline"
-                                >
-                                    Hủy
-                                </button>
+                                <div className="flex items-center gap-3">
+                                    {selectedItemIds.size > 0 && (
+                                        <button
+                                            onClick={bulkDeleteSelected}
+                                            className="text-[11px] font-semibold text-red-500 hover:underline"
+                                        >
+                                            Xóa
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={clearSelection}
+                                        className="text-[11px] font-semibold text-orange-deep hover:underline"
+                                    >
+                                        Hủy
+                                    </button>
+                                </div>
                             </div>
                         )}
 
