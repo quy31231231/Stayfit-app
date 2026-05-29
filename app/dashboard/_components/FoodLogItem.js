@@ -60,11 +60,12 @@ export default function FoodLogItem({
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    // In selection mode: cancel long press early (3px) since we're already selected
-    // In normal mode: only cancel on larger movement (8px) so long-press can fire
-    const cancelThreshold = selectionMode ? 3 : 8;
-    if (swipeDecided.current === null && (absDx > cancelThreshold || absDy > cancelThreshold)) {
-      cancelLongPress();
+    if (swipeDecided.current === null) {
+      // In selection mode: cancel long press on any small movement (swipe detection)
+      // In normal mode: only cancel when user is clearly scrolling vertically (>15px)
+      if (selectionMode ? (absDx > 3 || absDy > 3) : absDy > 15) {
+        cancelLongPress();
+      }
     }
 
     if (swipeDecided.current === null && (absDx > 8 || absDy > 8)) {
