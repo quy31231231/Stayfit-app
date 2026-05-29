@@ -64,10 +64,14 @@ ${userText}
 
 ${libraryBlock}QUY TRÌNH:
 1. Đọc kỹ text, xác định TẤT CẢ món ăn/đồ uống user nhắc (tối đa 5 món).
-2. Ước lượng khẩu phần (grams) cho từng món:
-   - Nếu user nói rõ số liệu ("150g bò", "200ml sữa", "2 quả trứng") → dùng chính xác (2 quả trứng ~ 100g)
-   - Nếu user nói chung ("1 bát salad", "ít rau") → ước lượng grams hợp lý (1 bát salad ~ 150g, "ít" ~ 50g)
-   - Vật chứa tham khảo: bát cơm ~150-250g, tô phở ~600g, đĩa ~300-500g, ly nước ~200ml, hộp sữa ~180-1000ml
+2. Ước lượng khẩu phần:
+   - Với món KHỚP thư viện (matched:true): "qty" = SỐ ĐƠN VỊ theo per+unit của entry (không quy ra gram)
+     VD: entry "Chả giò chiên (1 cái)" per:1 cái → user ăn 2 cái → qty:2
+     VD: entry "Phở bò (1 tô lớn)" per:1 tô → user ăn 1 tô → qty:1
+     VD: entry "Cơm trắng (chín)" per:100 g → user ăn 150g → qty:150
+     "(5 chiếc/cái/viên)" trong tên = mô tả khẩu phần chuẩn, không phải số nhân thêm
+   - Với món KHÔNG khớp (matched:false): "qty" và "grams" = grams/ml ước lượng
+     Vật chứa: bát cơm ~150-250g, tô phở ~600g, đĩa ~300-500g, ly nước ~200ml, hộp sữa ~180-1000ml
 3. So tên với THƯ VIỆN (nếu có). Match exact nếu trùng/rất gần.
 4. LUÔN trả đầy đủ kcal/protein/carb/fat per khẩu phần PARSE ĐƯỢC (KHÔNG phải per 100g).
 5. Nếu user mention meal type ("bữa sáng tôi ăn..."), set meal_suggestion theo đó cho TẤT CẢ items.
@@ -81,7 +85,7 @@ TRẢ VỀ CHỈ JSON (không markdown):
     {
       "matched": true|false,
       "name": "<tên>",
-      "qty": <grams>,
+      "qty": <số đơn vị theo per+unit nếu matched, hoặc grams nếu không matched>,
       "grams": <grams>,
       "kcal": <số>,
       "protein": <số>,

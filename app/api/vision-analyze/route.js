@@ -135,7 +135,7 @@ QUY TẮC QUAN TRỌNG
 1. TỐI ĐA 5 món/ảnh. Nếu ảnh có nhiều hơn, chọn 5 món LỚN NHẤT.
 2. LUÔN trả đầy đủ kcal/protein/carb/fat cho TỪNG món (dù matched hay không).
 3. "matched": true CHỈ KHI tên trùng/rất gần entry thư viện. Tên matched=true PHẢI là 1 entry có trong thư viện.
-4. "qty" cho matched=true: số đơn vị thấy theo "per" + "unit" của entry (VD: entry "Tỏi" per 100g, thấy 50g → qty=50; entry "Phở bò (1 tô)" thấy 1 tô → qty=1).
+4. "qty" cho matched=true: số đơn vị thấy theo "per" + "unit" của entry (VD: entry "Tỏi" per 100g, thấy 50g → qty=50; entry "Phở bò (1 tô)" thấy 1 tô → qty=1). "(5 chiếc/cái/viên)" trong tên = mô tả khẩu phần chuẩn, qty vẫn tính theo per+unit.
 5. "grams" cho matched=false: gram ước tính.
 6. LUÔN ước lượng từ ảnh, KHÔNG đọc nhãn dinh dưỡng.
 7. "note" KHÔNG giải thích cách ước lượng. Viết 1 câu (15-30 từ) ẤM ÁP về món:

@@ -1514,7 +1514,7 @@ export default function App() {
         let weightInGrams = q; let baseUnit = 'g';
         if (['kg'].includes(u)) { weightInGrams = q * 1000; } else if (['l', 'lít'].includes(u)) { weightInGrams = q * 1000; baseUnit = 'ml'; }
         else if (['ml'].includes(u)) { weightInGrams = q; baseUnit = 'ml'; } else if (['g', 'gram'].includes(u)) { weightInGrams = q; }
-        else { const mockWeights = { 'tô': 400, 'bát': 400, 'ly': 250, 'quả': 100 }; weightInGrams = q * (mockWeights[u] || 100); }
+        else { const mockWeights = { 'tô': 400, 'bát': 200, 'ly': 250, 'quả': 100, 'cái': 100, 'chiếc': 100, 'đĩa': 350, 'cuốn': 80, 'ổ': 80, 'suất': 350, 'gói': 75, 'miếng': 80, 'phần': 300 }; weightInGrams = q * (mockWeights[u] || 100); }
 
         const factor100g = weightInGrams > 0 ? (100 / weightInGrams) : 1;
         setCustomFoodList(prev => [{ 
@@ -2095,7 +2095,7 @@ export default function App() {
                                     let weightInGrams = qty; const u = selectedFood.unit.toLowerCase();
                                     if (['kg', 'l', 'lít'].includes(u)) { weightInGrams = qty * 1000; }
                                     else if (['ml', 'g', 'gram'].includes(u)) { weightInGrams = qty; }
-                                    else { const mockWeights = { 'tô': 400, 'ly': 250, 'quả': 100 }; weightInGrams = qty * (mockWeights[u] || 100); }
+                                    else { const mockWeights = { 'tô': 400, 'bát': 200, 'ly': 250, 'quả': 100, 'cái': 100, 'chiếc': 100, 'đĩa': 350, 'cuốn': 80, 'ổ': 80, 'suất': 350, 'gói': 75, 'miếng': 80, 'phần': 300 }; weightInGrams = qty * (mockWeights[u] || 100); }
 
                                     const totalKcal = calcMacro(selectedFood.kcal, selectedFood.per, qty);
                                     const totalPro = calcMacro(selectedFood.protein, selectedFood.per, qty);
@@ -2161,7 +2161,7 @@ export default function App() {
                                     <input type="number" placeholder="Số lượng" value={customFood.quantity} onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} className="bg-cream-soft ring-1 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition tabular-nums" />
                                     <div className="relative">
                                         <select value={customFood.unit} onChange={e => setCustomFood(p=>({...p, unit:e.target.value}))} className="w-full bg-cream-soft ring-1 p-3.5 pr-9 rounded-2xl text-[13px] outline-none font-semibold cursor-pointer appearance-none focus:ring-2 focus:ring-orange/30 transition">
-                                            <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
+                                            <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="cái">cái</option><option value="chiếc">chiếc</option><option value="bát">bát</option><option value="tô">tô</option><option value="đĩa">đĩa</option><option value="cuốn">cuốn</option><option value="ổ">ổ</option><option value="suất">suất</option><option value="gói">gói</option><option value="miếng">miếng</option><option value="ly">ly</option><option value="quả">quả</option>
                                         </select>
                                         <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-ink-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
                                     </div>
@@ -2590,7 +2590,7 @@ export default function App() {
                                          <div>
                                             <label className="text-[10px] font-black text-ink-muted uppercase block mb-1">Đơn vị</label>
                                             <select value={libraryEditForm.unit} onChange={e => setLibraryEditForm({...libraryEditForm, unit: e.target.value})} className="w-full bg-cream-soft p-3 rounded-xl text-sm outline-none font-bold focus:ring-2 focus:ring-orange/20 appearance-none cursor-pointer">
-                                                <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="ly">ly</option><option value="tô">tô</option><option value="quả">quả</option>
+                                                <option value="g">g</option><option value="kg">kg</option><option value="ml">ml</option><option value="lít">lít</option><option value="phần">phần</option><option value="cái">cái</option><option value="chiếc">chiếc</option><option value="bát">bát</option><option value="tô">tô</option><option value="đĩa">đĩa</option><option value="cuốn">cuốn</option><option value="ổ">ổ</option><option value="suất">suất</option><option value="gói">gói</option><option value="miếng">miếng</option><option value="ly">ly</option><option value="quả">quả</option>
                                             </select>
                                          </div>
                                     </div>
