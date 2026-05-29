@@ -21,22 +21,57 @@ app/
   api/
     vision-analyze/  # Gemini vision → identify food from photo
     text-analyze/    # Gemini text → identify food from name
-    save-meal/       # Append a meal row to Google Sheets
-    sync/            # Read/write user data from Google Sheets
-  dashboard/         # Main UI (calorie circle, food log, macros)
+    save-meal/       # Legacy API — writes to old 'Giảm cân' tab, không dùng trong flow chính
+    sync/            # Read/write user data from Google Sheets (GET/POST/DELETE)
+  dashboard/
+    _components/     # CalorieCircle, MacroDonut, FoodLogItem, FoodLogSection, ...
+    page.js          # Dashboard UI
   _data/             # Static data (common-foods.js — Vietnamese food DB)
+  page.js            # Root — auth gate + toàn bộ app state (~2000 lines)
 middleware.js        # In-memory rate limiting (30 req/min default, 10 for AI routes)
 ```
 
 Google Sheets is the sole database. No SQL, no ORM.
 
+## Sheets Schema
+
+4 tabs cần tồn tại trong spreadsheet:
+
+| Tab | Columns | Notes |
+|-----|---------|-------|
+| `Profile` | A:N | userId, gender, age, height, weight, activity, goal, manualKcal, updatedAt, hashedPassword, customFoodsJSON, deletedCommonJSON, startWeight, targetWeight |
+| `History` | A:K | userId, date, meal, name, quantity, unit, kcal, protein, carb, fat, **timestamp** |
+| `Weight` | A:C | userId, date, weight |
+| `ScanFeedback` | A:K | Gemini AI correction logs |
+
+Row identity trong `History` dựa vào `timestamp` (cột K), không phải `id`. DELETE API tìm và xóa row theo timestamp.
+
+## Sync Architecture
+
+- **`syncToCloud` (POST)**: UPSERT only — thêm/sửa rows, **không bao giờ xóa** rows khỏi Sheets
+- **DELETE API** (`/api/sync DELETE`): xóa 1 row theo `timestamp` (column K của History tab)
+- **Race condition guards**: `pendingChangeRef` (có thay đổi chưa push), `pendingDeleteCountRef` (có DELETE đang chờ) — `syncFromCloud` bỏ qua nếu một trong hai đang active
+- **Debounce**: 2.5s sau mỗi thay đổi state mới push lên cloud
+
+## Local Dev (test an toàn)
+
+Tạo `.env.local` với Sheet test riêng — Next.js tự ưu tiên file này, không commit lên git:
+
+```
+SPREADSHEET_ID=<id_sheet_test>
+```
+
+Chạy `npm run dev` → data không ảnh hưởng Sheet production.
+
 ## Environment Variables
 
 | Variable | Purpose |
 |---|---|
-| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Service account for Sheets API |
+| `GOOGLE_CLIENT_EMAIL` | Service account email — dùng trong `sync/route.js` |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Legacy — chỉ dùng trong `save-meal/route.js` (API cũ) |
 | `GOOGLE_PRIVATE_KEY` | Service account private key (see gotcha below) |
-| `GOOGLE_SHEET_ID` / `SPREADSHEET_ID` | Target spreadsheet ID |
+| `SPREADSHEET_ID` | Target spreadsheet ID (chính) |
+| `GOOGLE_SHEET_ID` | Alias cho `SPREADSHEET_ID` — dùng trong `save-meal` legacy |
 | `GEMINI_API_KEY` | Google Generative AI key |
 | `GEMINI_MODEL` | Gemini model name (e.g. `gemini-1.5-flash`) |
 
