@@ -875,6 +875,8 @@ export default function App() {
     // Barcode scan state
     const [barcodeOpen, setBarcodeOpen] = useState(false);
     const [pendingBarcode, setPendingBarcode] = useState(null); // mã đang chờ nhập tay → nhớ khi lưu
+    const [barcodeEstimated, setBarcodeEstimated] = useState(false); // macro điền sẵn là ước lượng AI?
+    const [barcodeLoading, setBarcodeLoading] = useState(false); // đang tra cứu sau khi quét
 
     // AI Vision scan state
     const [scanModalOpen, setScanModalOpen] = useState(false);
@@ -1313,10 +1315,11 @@ export default function App() {
         setTab("quick");
     };
 
-    /* ───── QUÉT MÃ VẠCH (Open Food Facts → /100g) ───── */
+    /* ───── QUÉT MÃ VẠCH (Open Food Facts + Gemini → /100g) ───── */
     // Mở tab "Nhập tay" điền sẵn + nhớ barcode (để lần quét sau nhận ngay).
-    const openManualWithBarcode = (code, name = "", macros = null) => {
+    const openManualWithBarcode = (code, name = "", macros = null, estimated = false) => {
         setPendingBarcode(code);
+        setBarcodeEstimated(estimated);
         setCustomFood({
             name,
             quantity: 100,
@@ -1327,6 +1330,31 @@ export default function App() {
             fat: macros ? String(macros.fat) : "",
         });
         setTab("custom");
+    };
+
+    // Nhờ Gemini (route text-analyze) ước lượng macro /100g từ TÊN sản phẩm. Trả null nếu thất bại.
+    const estimateMacrosViaAI = async (name) => {
+        try {
+            const aiRes = await fetch("/api/text-analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, password, text: name, library: [] }),
+            });
+            const aiData = await aiRes.json();
+            const it = aiRes.ok && aiData.found && Array.isArray(aiData.items) ? aiData.items[0] : null;
+            if (!it) return null;
+            // source "estimate": macro tính theo `per` (= grams) → quy về /100g.
+            const basis = Number(it.per) || Number(it.grams) || 100;
+            const per100 = basis > 0 ? 100 / basis : 1;
+            return {
+                kcal: Math.round((Number(it.kcal) || 0) * per100),
+                protein: Math.round((Number(it.protein) || 0) * per100 * 10) / 10,
+                carb: Math.round((Number(it.carb) || 0) * per100 * 10) / 10,
+                fat: Math.round((Number(it.fat) || 0) * per100 * 10) / 10,
+            };
+        } catch (e) {
+            return null;
+        }
     };
 
     const handleBarcodeDetected = async (code) => {
@@ -1344,6 +1372,7 @@ export default function App() {
             return;
         }
 
+        setBarcodeLoading(true);
         try {
             const res = await fetch(`/api/barcode?code=${trimmed}`);
             const data = await res.json();
@@ -1356,8 +1385,8 @@ export default function App() {
 
             const p = data.product;
 
-            // 3a. Có dinh dưỡng thật (không ước lượng) → lưu thư viện + chọn để ghi nhật ký.
-            if (data.hasNutrition && !data.estimated) {
+            // 3a. OFF có dinh dưỡng nhãn thật → lưu thư viện + chọn để ghi nhật ký.
+            if (data.hasNutrition) {
                 const food = { name: p.name, unit: "g", per: 100, kcal: p.kcal, protein: p.protein, carb: p.carb, fat: p.fat, barcode: trimmed };
                 setCustomFoodList(prev =>
                     prev.some(f => f.name.toLowerCase().trim() === food.name.toLowerCase().trim()) ? prev : [food, ...prev]
@@ -1366,16 +1395,13 @@ export default function App() {
                 return;
             }
 
-            // 3b. Chỉ có ước lượng (OFF tra theo tên) → nhập tay điền sẵn để user kiểm tra rồi lưu.
-            if (data.hasNutrition && data.estimated) {
-                openManualWithBarcode(trimmed, p.name, { kcal: p.kcal, protein: p.protein, carb: p.carb, fat: p.fat });
-                return;
-            }
-
-            // 3c. Có tên nhưng không có dinh dưỡng → nhập tay điền sẵn tên.
-            openManualWithBarcode(trimmed, p.name);
+            // 3b. OFF có tên nhưng thiếu dinh dưỡng → nhờ Gemini ước lượng /100g, điền sẵn để user xác nhận.
+            const est = await estimateMacrosViaAI(p.name);
+            openManualWithBarcode(trimmed, p.name, est, !!est);
         } catch (e) {
             setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: "Lỗi tra cứu sản phẩm. Thử lại." });
+        } finally {
+            setBarcodeLoading(false);
         }
     };
 
@@ -1701,6 +1727,7 @@ export default function App() {
         }, ...prev]);
         setCustomFood({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
         setPendingBarcode(null);
+        setBarcodeEstimated(false);
         setTab("quick");
     };
 
@@ -2273,7 +2300,7 @@ export default function App() {
                         {/* Tabs */}
                         <div className="mt-5 flex gap-1 p-1 bg-cream-soft rounded-2xl">
                             <button onClick={() => setTab("quick")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "quick" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Chọn nhanh</button>
-                            <button onClick={() => { setPendingBarcode(null); setTab("custom"); }} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "custom" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Nhập tay</button>
+                            <button onClick={() => { setPendingBarcode(null); setBarcodeEstimated(false); setTab("custom"); }} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "custom" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Nhập tay</button>
                             <button onClick={() => setTab("recipe")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "recipe" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Ghép món</button>
                         </div>
 
@@ -2374,7 +2401,9 @@ export default function App() {
                                     <div className="flex items-start gap-2 rounded-2xl bg-mist-soft ring-1 ring-mist/30 p-3">
                                         <svg className="mt-0.5 shrink-0 text-mist-deep" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5v14M7.5 5v14M12 5v14M16.5 5v14M21 5v14"/></svg>
                                         <p className="text-[11px] font-medium text-mist-deep leading-relaxed">
-                                            Tự động điền từ mã vạch <span className="font-bold tabular-nums">{pendingBarcode}</span>. Kiểm tra &amp; bổ sung dinh dưỡng rồi lưu — lần quét sau sẽ tự nhận.
+                                            {barcodeEstimated
+                                                ? <>Dinh dưỡng <span className="font-bold">ước lượng bằng AI</span> cho mã <span className="font-bold tabular-nums">{pendingBarcode}</span>. Kiểm tra/sửa lại cho đúng rồi lưu — lần quét sau sẽ tự nhận.</>
+                                                : <>Tự động điền từ mã vạch <span className="font-bold tabular-nums">{pendingBarcode}</span>. Kiểm tra &amp; bổ sung dinh dưỡng rồi lưu — lần quét sau sẽ tự nhận.</>}
                                         </p>
                                     </div>
                                 )}
@@ -2632,6 +2661,19 @@ export default function App() {
                         <BarcodeScanner onDetect={handleBarcodeDetected} onClose={() => setBarcodeOpen(false)} />
                     )}
 
+                    {/* --- ĐANG TRA CỨU SAU KHI QUÉT --- */}
+                    {barcodeLoading && (
+                        <div className="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-sm flex items-center justify-center max-w-md mx-auto animate-in fade-in duration-150">
+                            <div className="flex flex-col items-center gap-3 rounded-3xl bg-white px-8 py-7 shadow-2xl ring-1">
+                                <svg className="animate-spin text-orange" width="30" height="30" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                                    <path className="opacity-90" d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                                </svg>
+                                <p className="text-[13px] font-bold text-ink">Đang nhận diện sản phẩm…</p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* --- MODAL QUÉT ẢNH MÓN ĂN BẰNG AI --- */}
                     {scanModalOpen && (
                         <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
@@ -2663,7 +2705,7 @@ export default function App() {
                                                 </span>
                                             </label>
                                             <p className="text-[12px] text-ink-faint text-center italic px-4 mt-4">
-                                                AI sẽ ước lượng tên món, khối lượng, kcal và macro dinh dưỡng trong ảnh.
+                                                AI ước lượng món ăn bày biện. Với sản phẩm đóng gói, chụp rõ <span className="font-semibold text-ink-muted">bảng thành phần dinh dưỡng</span> để lấy đúng số nhà sản xuất công bố.
                                             </p>
                                             {scanState.error && <p className="text-[12px] text-orange-deep text-center mt-2">{scanState.error}</p>}
                                         </div>
@@ -2770,6 +2812,10 @@ export default function App() {
                                                             item.source === "library" ? (
                                                                 <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sage-soft text-sage-deep ring-1 ring-sage/30">
                                                                     📚 Thư viện
+                                                                </span>
+                                                            ) : item.source === "label" ? (
+                                                                <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-mist-soft text-mist-deep ring-1 ring-mist/30">
+                                                                    🏷️ Từ nhãn SP
                                                                 </span>
                                                             ) : (
                                                                 <span className="absolute top-3 left-3 z-10 inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-clay-soft text-clay-deep ring-1 ring-clay/30">

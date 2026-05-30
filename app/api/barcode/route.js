@@ -1,5 +1,5 @@
 // Tra cứu sản phẩm theo mã vạch qua Open Food Facts (miễn phí, không cần API key).
-// Trả về dinh dưỡng /100g, khớp model thư viện món ăn (unit: 'g', per: 100).
+// Trả về dinh dưỡng /100g khi OFF có; nếu thiếu, client sẽ nhờ Gemini ước lượng từ tên.
 
 const round1 = (v) => (v == null || isNaN(v) ? 0 : Math.round(Number(v) * 10) / 10);
 
@@ -13,8 +13,7 @@ function extractKcal(n) {
   return kcal;
 }
 
-// Trích macro /100g. hasData=true khi OFF thực sự có ít nhất 1 trường dinh dưỡng
-// (kể cả giá trị 0 — vd nước ngọt light gần 0 kcal vẫn là dữ liệu hợp lệ).
+// hasData=true khi OFF thực sự có ít nhất 1 trường dinh dưỡng (kể cả giá trị 0 — vd nước light gần 0 kcal).
 function macrosFrom(n) {
   const kcal = extractKcal(n);
   return {
@@ -28,41 +27,6 @@ function macrosFrom(n) {
       n.carbohydrates_100g != null ||
       n.fat_100g != null,
   };
-}
-
-// OFF search theo tên: tìm 1 entry KHÁC có đủ dinh dưỡng (cho sản phẩm mà mã vạch gốc thiếu số liệu).
-// Chọn kết quả đầu tiên có dinh dưỡng VÀ tên chia sẻ ít nhất 1 token với truy vấn (tránh khớp lung tung).
-async function searchByName(name) {
-  if (!name) return null;
-  // Bỏ token kích cỡ/dung tích ("1,25L", "330ml", "500") — chúng làm hẹp kết quả về đúng entry thiếu data.
-  let q = name
-    .replace(/\b\d+([.,]\d+)?\s?(l|lít|lit|ml|cl|kg|g|gr|oz)\b/gi, " ")
-    .replace(/\b\d+([.,]\d+)?\b/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (!q) q = name;
-  const queryTokens = q.toLowerCase().split(/\s+/).filter((t) => t.length >= 3);
-  const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&json=1&action=process&page_size=10&fields=product_name,nutriments`;
-  // OFF search hay 503 chập chờn → thử lại 1 lần. Có JSON rồi thì không thử lại nữa.
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const res = await fetch(url, { headers: { "User-Agent": OFF_UA }, signal: AbortSignal.timeout(5000) });
-      if (!res.ok) continue;
-      const data = await res.json().catch(() => null);
-      if (!data) continue;
-      for (const prod of data.products || []) {
-        const m = macrosFrom(prod.nutriments || {});
-        if (!m.hasData) continue;
-        const candName = (prod.product_name || "").toLowerCase();
-        const relevant = queryTokens.length === 0 || queryTokens.some((t) => candName.includes(t));
-        if (relevant) return m;
-      }
-      return null;
-    } catch (e) {
-      /* timeout/mạng → thử lại */
-    }
-  }
-  return null;
 }
 
 export async function GET(request) {
@@ -90,22 +54,11 @@ export async function GET(request) {
     const includeBrand = brand && baseName && !baseName.toLowerCase().includes(brand.toLowerCase());
     const name = (includeBrand ? `${baseName} (${brand})` : baseName || `Sản phẩm ${code}`).slice(0, 80);
 
-    let macros = macrosFrom(p.nutriments || {});
-    let estimated = false;
-
-    // Có tên nhưng thiếu dinh dưỡng → thử tra theo tên để lấy số liệu ước lượng.
-    if (!macros.hasData && baseName) {
-      const fallback = await searchByName(baseName);
-      if (fallback) {
-        macros = fallback;
-        estimated = true;
-      }
-    }
+    const macros = macrosFrom(p.nutriments || {});
 
     return Response.json({
       found: true,
       hasNutrition: macros.hasData,
-      estimated,
       product: {
         name,
         unit: "g",

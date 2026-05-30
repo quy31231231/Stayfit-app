@@ -44,66 +44,53 @@ function fuzzyMatch(query, library, threshold = 0.7) {
 function buildPrompt(libraryListStr) {
   const libraryBlock = libraryListStr
     ? `═══════════════════════════════════════════════════════════════
-THƯ VIỆN MÓN CỦA USER (ưu tiên match nếu có)
+THƯ VIỆN MÓN CỦA USER (chỉ dùng match cho MÓN BÀY BIỆN — LOẠI B)
 ═══════════════════════════════════════════════════════════════
 
 ${libraryListStr}
 
-QUY TRÌNH MATCH (cho TỪNG món):
-- Sau khi nhận diện món + ước lượng khẩu phần, SO tên món với THƯ VIỆN trên.
-- Nếu món trong ảnh KHỚP với 1 entry → "matched": true, "name" = EXACT tên từ thư viện (copy-paste).
-- Nếu KHÔNG có entry nào khớp đủ tin cậy → "matched": false, "name" = tên tự đặt.
+QUY TRÌNH MATCH (chỉ cho LOẠI B):
+- Sau khi nhận diện món + ước lượng khẩu phần, SO tên với THƯ VIỆN trên.
+- Nếu KHỚP 1 entry → "matched": true, "name" = EXACT tên từ thư viện (copy-paste).
+- Nếu KHÔNG khớp đủ tin cậy → "matched": false, "name" = tên tự đặt.
 
 `
     : "";
 
-  return `Bạn là chuyên gia dinh dưỡng có kiến thức sâu về món ăn Việt Nam và quốc tế.
+  return `Bạn là chuyên gia dinh dưỡng, vừa GIỎI nhận diện món ăn bày biện, vừa ĐỌC NHÃN dinh dưỡng sản phẩm đóng gói TỐT.
 
-NHIỆM VỤ: Quan sát ảnh, nhận diện TẤT CẢ món ăn/đồ uống thấy được (tối đa 5 món), ước lượng khẩu phần và macro cho TỪNG món.
-
-KHÔNG ĐỌC nhãn dinh dưỡng (kể cả khi thấy). LUÔN ước lượng dựa trên KÍCH THƯỚC THẤY được.
+NHIỆM VỤ: Quan sát ảnh, nhận diện tối đa 5 vật phẩm ăn/uống. Với MỖI vật, phân loại LOẠI A hoặc LOẠI B rồi xử lý tương ứng.
 
 ═══════════════════════════════════════════════════════════════
-QUY TRÌNH BẮT BUỘC
+LOẠI A — SẢN PHẨM ĐÓNG GÓI CÓ NHÃN DINH DƯỠNG
 ═══════════════════════════════════════════════════════════════
+(hộp sữa, gói snack/bánh, chai/lon nước, thanh protein, hộp sữa chua... có bảng "Nutrition Facts" / "Giá trị dinh dưỡng" / "Thông tin dinh dưỡng")
 
-【BƯỚC 1】 NHẬN DIỆN TẤT CẢ MÓN TRONG ẢNH
-- Liệt kê tối đa 5 món (ưu tiên món lớn nhất/rõ nhất nếu nhiều hơn).
-- Mỗi món xác định tên cụ thể (vd: phở bò tái, cơm trắng, canh chua cá).
-- Nếu là tô/đĩa hỗn hợp KHÔNG tách (vd cơm tấm có cơm + sườn + bì + chả) → coi là 1 món "Cơm tấm sườn bì chả".
-
-【BƯỚC 2】 ƯỚC LƯỢNG KÍCH THƯỚC TỪNG MÓN
-Dùng vật chứa làm thước đo, tham khảo bảng dưới:
-
-  VẬT CHỨA RẮN (thức ăn):
-  - Đĩa nhỏ Việt: đường kính ~18-20cm, chứa ~300-400g
-  - Đĩa lớn Việt: đường kính ~22-25cm, chứa ~400-600g
-  - Đĩa Western: đường kính ~28cm, chứa ~500-700g
-  - Tô phở (tô lớn): đường kính ~20cm, chứa 600-800ml/g
-  - Tô bún/canh (tô nhỏ): chứa ~400-500ml/g
-  - Bát cơm: chứa ~150-250g cơm
-  - Khay cơm tấm: chứa ~400-500g (cơm + thịt + đồ ăn kèm)
-
-  VẬT CHỨA LỎNG (đồ uống):
-  - Ly nước thủy tinh thường: 200-300ml
-  - Ly cà phê take-away: 350-500ml
-  - Cốc espresso: 30-50ml
-  - Cốc capuccino/latte: 200-300ml
-  - Chai nước 500ml, lon nước 330ml, lon bia 330-500ml
-  - Bình thủy: 1000-1500ml
-  - Hộp sữa nhỏ: 110-180ml; hộp lớn: 1000ml
-
-  VẬT THAM CHIẾU KHÁC:
-  - Muỗng canh: ~15ml; muỗng cà phê: ~5ml
-  - Đũa Việt: dài ~25cm
-  - Quả trứng gà: ~50-55g
-  - Lát bánh mì sandwich: ~25-30g
-
-${libraryBlock}【BƯỚC 3】 TRA DỮ LIỆU DINH DƯỠNG (LUÔN trả macros cho mọi món)
-Dùng kiến thức của bạn về món Việt + USDA. LUÔN trả kcal/protein/carb/fat cho từng món, dù matched=true hay false.
-TỔNG = (giá trị per 100g/ml) × (grams ước tính / 100)
+→ ƯU TIÊN ĐỌC NHÃN, lấy ĐÚNG số nhà sản xuất công bố (KHÔNG tự ước lượng):
+1. "name" = tên sản phẩm kèm thương hiệu (vd: "Sữa tươi tiệt trùng có đường (Vinamilk)", "Snack khoai tây vị tảo biển (Lay's)").
+2. Đọc bảng dinh dưỡng → tính giá trị TRÊN 100g (đồ uống thì /100ml):
+   - Nhãn có sẵn cột /100g hoặc /100ml → dùng trực tiếp.
+   - Nhãn chỉ ghi /khẩu phần (per serving) → quy đổi: per100 = (giá trị mỗi serving) ÷ (số gram/ml mỗi serving) × 100.
+   - Năng lượng ghi kJ → kcal = kJ ÷ 4.184.
+3. "source": "label". kcal/protein/carb/fat = giá trị TRÊN 100g/100ml.
+4. "grams" = khối lượng 1 khẩu phần hoặc cả gói/chai (đọc/ước từ nhãn, vd 240ml, Net 65g); không rõ thì để 100.
+5. "confidence" 0.9+ nếu đọc rõ nhãn; 0.6-0.8 nếu nhãn hơi mờ.
+6. KHÔNG match thư viện cho LOẠI A — số trên nhãn là chuẩn nhất.
 
 ═══════════════════════════════════════════════════════════════
+LOẠI B — MÓN ĂN / ĐỒ UỐNG BÀY BIỆN (KHÔNG có nhãn)
+═══════════════════════════════════════════════════════════════
+(phở, cơm, đĩa thức ăn, trái cây, ly nước tự pha...)
+
+→ ƯỚC LƯỢNG theo KÍCH THƯỚC thấy được. Dùng vật chứa làm thước đo:
+  RẮN: đĩa nhỏ VN ~300-400g; đĩa lớn ~400-600g; tô phở ~600-800g; tô bún/canh ~400-500g; bát cơm ~150-250g; khay cơm tấm ~400-500g.
+  LỎNG: ly thủy tinh 200-300ml; ly take-away 350-500ml; lon 330ml; chai 500ml; hộp sữa nhỏ 110-180ml; bình 1000-1500ml.
+  THAM CHIẾU: trứng gà ~50g; lát sandwich ~25-30g; muỗng canh ~15ml.
+
+- "source": "food". kcal/protein/carb/fat = macro CHO CẢ KHẨU PHẦN thấy được (KHÔNG phải /100g). "grams" = gram ước tính.
+- Tô/đĩa hỗn hợp không tách được (cơm tấm sườn bì chả) → coi là 1 món.
+
+${libraryBlock}═══════════════════════════════════════════════════════════════
 TRẢ VỀ CHỈ JSON (không markdown, không text thừa)
 ═══════════════════════════════════════════════════════════════
 
@@ -111,8 +98,9 @@ TRẢ VỀ CHỈ JSON (không markdown, không text thừa)
   "found": true,
   "items": [
     {
-      "matched": true,
-      "name": "<tên EXACT từ thư viện hoặc tên tự đặt>",
+      "source": "label" | "food",
+      "matched": true | false,
+      "name": "<A: tên sản phẩm + brand | B: tên EXACT thư viện hoặc tự đặt>",
       "qty": 50,
       "grams": 50,
       "kcal": 89,
@@ -126,28 +114,20 @@ TRẢ VỀ CHỈ JSON (không markdown, không text thừa)
   ]
 }
 
-Nếu không có món nào trong ảnh: { "found": false, "items": [] }
+Nếu không có gì ăn/uống trong ảnh: { "found": false, "items": [] }
 
 ═══════════════════════════════════════════════════════════════
 QUY TẮC QUAN TRỌNG
 ═══════════════════════════════════════════════════════════════
-
-1. TỐI ĐA 5 món/ảnh. Nếu ảnh có nhiều hơn, chọn 5 món LỚN NHẤT.
-2. LUÔN trả đầy đủ kcal/protein/carb/fat cho TỪNG món (dù matched hay không).
-3. "matched": true CHỈ KHI tên trùng/rất gần entry thư viện. Tên matched=true PHẢI là 1 entry có trong thư viện.
-4. "qty" cho matched=true: số đơn vị thấy theo "per" + "unit" của entry (VD: entry "Tỏi" per 100g, thấy 50g → qty=50; entry "Phở bò (1 tô)" thấy 1 tô → qty=1). "(5 chiếc/cái/viên)" trong tên = mô tả khẩu phần chuẩn, qty vẫn tính theo per+unit.
-5. "grams" cho matched=false: gram ước tính.
-6. LUÔN ước lượng từ ảnh, KHÔNG đọc nhãn dinh dưỡng.
-7. "note" KHÔNG giải thích cách ước lượng. Viết 1 câu (15-30 từ) ẤM ÁP về món:
-   - Lời khen tích cực ("Lựa chọn rất tốt cho..."), HOẶC
-   - Fact "Bạn có biết?" thú vị về món.
-   KHÔNG nhắc gram, kcal, vật chứa, "ước lượng". Tiếng Việt tự nhiên. KHÔNG dùng dấu ngoặc kép.
-8. "confidence":
-   - 0.85-0.95: thấy rõ + match chắc
-   - 0.65-0.84: thấy được nhưng không hoàn hảo
-   - 0.4-0.64: ảnh mờ, góc xấu, hoặc món không quen → confidence thấp
-9. "meal_suggestion": "Bữa sáng" | "Bữa trưa" | "Bữa tối" | "Ăn vặt".
-10. Nếu KHÔNG có thức ăn/đồ uống nào trong ảnh → { "found": false, "items": [] }.`;
+1. TỐI ĐA 5 vật/ảnh. Nhiều hơn thì chọn 5 cái lớn/rõ nhất.
+2. LUÔN trả đầy đủ kcal/protein/carb/fat cho TỪNG vật.
+3. ⚠ source "label" → macro là TRÊN 100g/100ml. source "food" → macro là CHO CẢ KHẨU PHẦN. ĐỪNG nhầm 2 loại này.
+4. "matched": true CHỈ cho source "food", và CHỈ KHI tên trùng/rất gần 1 entry thư viện.
+5. "qty" (food matched=true): số đơn vị theo per+unit của entry (entry "Tỏi" per 100g, thấy 50g → qty=50; "Phở bò (1 tô)" thấy 1 tô → qty=1). "(5 chiếc/cái)" trong tên = mô tả khẩu phần chuẩn.
+6. "note" KHÔNG nhắc gram/kcal/cách ước lượng. 1 câu (15-30 từ) ấm áp: lời khen HOẶC fact "Bạn có biết?". Tiếng Việt tự nhiên, KHÔNG dùng dấu ngoặc kép.
+7. "confidence": 0.85-0.95 rõ+chắc; 0.65-0.84 thấy được; 0.4-0.64 mờ/khó.
+8. "meal_suggestion": "Bữa sáng" | "Bữa trưa" | "Bữa tối" | "Ăn vặt".
+9. Nếu KHÔNG có thức ăn/đồ uống nào trong ảnh → { "found": false, "items": [] }.`;
 }
 
 function hashPassword(password) {
@@ -349,6 +329,29 @@ export async function POST(req) {
       const confidence = Math.min(1, Math.max(0, safeNum(item.confidence, 0.5)));
       const mealSuggestion = MEAL_TYPES.includes(item.meal_suggestion) ? item.meal_suggestion : null;
       const note = item.note ? String(item.note).slice(0, 300) : null;
+
+      // LOẠI A — đọc nhãn sản phẩm đóng gói: macro là /100g/100ml (số nhà sản xuất công bố).
+      if (item.source === "label") {
+        const servingG = Math.max(1, safeNum(item.grams, 100));
+        return {
+          source: "label",
+          matched: false,
+          name: name || "Sản phẩm đóng gói",
+          aiPredictedName: name,
+          libraryName: null,
+          fuzzyMatched: false,
+          unit: "g",
+          per: 100,
+          grams: servingG,
+          kcal: safeNum(item.kcal),
+          protein: safeNum(item.protein),
+          carb: safeNum(item.carb),
+          fat: safeNum(item.fat),
+          confidence,
+          meal_suggestion: mealSuggestion,
+          note,
+        };
+      }
 
       let libEntry = null;
       let fuzzyUsed = false;
