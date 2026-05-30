@@ -22,6 +22,8 @@ import MacroDonut from './dashboard/_components/MacroDonut';
 import FoodLogSection from './dashboard/_components/FoodLogSection';
 import GreetingHeader from './dashboard/_components/GreetingHeader';
 import BreathingTimer from './dashboard/_components/BreathingTimer';
+import { getSupabaseBrowser, isSupabaseConfigured } from '../lib/supabase/client';
+import { loadUserData, saveSnapshot, upsertWeight as sbUpsertWeight, deleteWeight as sbDeleteWeight, addScanFeedback } from '../lib/supabase/data';
 
 // Lazy: thư viện quét mã (zxing) chỉ tải khi mở scanner, không phình bundle ban đầu.
 const BarcodeScanner = dynamic(() => import('./dashboard/_components/BarcodeScanner'), { ssr: false });
@@ -106,6 +108,13 @@ const formatDate = (date) => {
     return `${vietnamDate.getFullYear()}-${String(vietnamDate.getMonth() + 1).padStart(2, '0')}-${String(vietnamDate.getDate()).padStart(2, '0')}`;
 };
 const calcMacro = (val, per, q) => Math.round((val / per) * q * 10) / 10;
+
+// Chuẩn hóa số điện thoại → userId (chỉ chữ số, +84/84 → 0...).
+const normPhone = (p) => {
+    let d = (p || "").replace(/\D/g, "");
+    if (d.startsWith("84")) d = "0" + d.slice(2);
+    return d;
+};
 
 // Kiểm tra check digit GTIN (EAN-13/EAN-8/UPC-A/GTIN-14) — thuần tính, offline.
 const isValidGtin = (code) => {
@@ -237,40 +246,19 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
         // Set pendingChangeRef IMMEDIATELY để chặn bất kỳ pull nào đang chạy
         if (pendingChangeRef) pendingChangeRef.current = true;
 
-        // Tính profile mới và cập nhật state
-        const newProfile = { ...profile, weight: inputVal };
-        setProfile(newProfile);
+        // Cập nhật profile.weight (App sẽ tự persist profile qua saveSnapshot).
+        setProfile({ ...profile, weight: inputVal });
         setWeightInput("");
 
-        // Push trực tiếp lên server NGAY thay vì chờ debounce 2.5s
-        // — loại bỏ race window với pull
-        if (userId && password) {
-            try {
-                const profileToSave = { ...newProfile };
-                if (!profileToSave.isManualTarget) profileToSave.manualTargetKcal = "";
-                if (!profileToSave.isManualMacro) {
-                    profileToSave.manualProtein = ""; profileToSave.manualCarb = ""; profileToSave.manualFat = ""; profileToSave.macroDietMode = "";
-                }
-                await fetch("/api/sync", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        action: "upload",
-                        userId, password,
-                        profile: profileToSave,
-                        weightLog: newLog,
-                    }),
-                });
-                if (pendingChangeRef) pendingChangeRef.current = false;
-            } catch (err) {
-                console.error("Lỗi lưu cân nặng ngay:", err.message);
-            }
-        }
+        // Ghi cân nặng thẳng lên Supabase (hạt mịn).
+        try { await sbUpsertWeight(weightDate, inputVal); }
+        catch (err) { console.error("Lỗi lưu cân nặng:", err.message); }
     };
 
-    const deleteWeight = (date) => { 
-        const newLog = { ...weightLog }; delete newLog[date]; 
-        setWeightLog(newLog); localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog)); 
+    const deleteWeight = (date) => {
+        const newLog = { ...weightLog }; delete newLog[date];
+        setWeightLog(newLog); localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog));
+        sbDeleteWeight(date).catch(err => console.error("Lỗi xóa cân nặng:", err.message));
     };
 
     const handleChartClick = (e, activeElements) => {
@@ -645,32 +633,13 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                     "Bắt đầu" là cân nặng tại thời điểm đặt mục tiêu. "Mục tiêu" là số kg bạn muốn đạt.
                                 </p>
                                 <button
-                                    onClick={async () => {
+                                    onClick={() => {
                                         const start = parseFloat(goalDraft.start);
                                         const tgt = parseFloat(goalDraft.target);
                                         if (!start || !tgt || start <= 0 || tgt <= 0) { alert("Vui lòng nhập số kg hợp lệ!"); return; }
-                                        if (pendingChangeRef) pendingChangeRef.current = true;
-                                        const newProfile = { ...profile, startWeight: start, targetWeight: tgt };
-                                        setProfile(newProfile);
+                                        setProfile({ ...profile, startWeight: start, targetWeight: tgt });
                                         setWeightModal(null);
-                                        // Push goal NGAY để không bị pull overwrite
-                                        if (userId && password) {
-                                            try {
-                                                const profileToSave = { ...newProfile };
-                                                if (!profileToSave.isManualTarget) profileToSave.manualTargetKcal = "";
-                                                if (!profileToSave.isManualMacro) {
-                                                    profileToSave.manualProtein = ""; profileToSave.manualCarb = ""; profileToSave.manualFat = ""; profileToSave.macroDietMode = "";
-                                                }
-                                                await fetch("/api/sync", {
-                                                    method: "POST",
-                                                    headers: { "Content-Type": "application/json" },
-                                                    body: JSON.stringify({ action: "upload", userId, password, profile: profileToSave }),
-                                                });
-                                                if (pendingChangeRef) pendingChangeRef.current = false;
-                                            } catch (err) {
-                                                console.error("Lỗi lưu mục tiêu:", err.message);
-                                            }
-                                        }
+                                        // App tự persist profile (start_weight/target_weight) qua saveSnapshot.
                                     }}
                                     className="w-full h-12 bg-orange text-white rounded-2xl font-bold text-[14px] transition hover:bg-orange-deep shadow-soft mt-2"
                                 >
@@ -862,6 +831,7 @@ function BottomNav({view, setView}) {
 export default function App() {
     const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
+    const [displayName, setDisplayName] = useState(""); // tên hiển thị (email/SĐT) — userId giờ là uuid
     const [view, setView] = useState("profile");
     const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
@@ -930,16 +900,15 @@ export default function App() {
     const [customFood, setCustomFood] = useState({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
     const [recipe, setRecipe] = useState({ name: "", ingredients: [], weightOverride: null });
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
-    const [inputUser, setInputUser] = useState("");
-    const [inputPass, setInputPass] = useState("");
+    const [phoneInput, setPhoneInput] = useState("");
+    const [phonePass, setPhonePass] = useState("");
     const [loginLoading, setLoginLoading] = useState(false);
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
         setIsClient(true);
         if (typeof window !== "undefined") {
-            setUserId(localStorage.getItem('stayfit_userid') || "");
-            setPassword(localStorage.getItem('stayfit_password') || "");
+            // userId/password giờ lấy từ session Supabase (xem effect bên dưới), không đọc localStorage nữa.
             const p = localStorage.getItem('stayfit_profile'); if(p) setProfile({...profile, ...JSON.parse(p)});
             const tl = localStorage.getItem('stayfit_target_log'); if(tl) setTargetLog(JSON.parse(tl));
             const h = localStorage.getItem('stayfit_history'); if(h) setHistory(JSON.parse(h));
@@ -975,172 +944,107 @@ export default function App() {
         }
     }, [profile, history, customFoodList, deletedCommonFoods, dismissedSuggestions, view, userId, isClient]);
 
-    // Mốc thời gian pull gần nhất — dùng để skip push echo ngay sau khi pull
+    // Refs giữ lại để các tham chiếu khác (StatsView, removeFood...) không vỡ — native không cần chống echo Sheets nữa.
     const lastPullAtRef = useRef(0);
-    // Cờ chống chạy đồng thời nhiều syncFromCloud
     const pullingRef = useRef(false);
-    // Cờ báo có thay đổi local chưa push lên server (chống pull overwrite changes pending)
     const pendingChangeRef = useRef(false);
-    // Đếm số DELETE request đang chạy — syncFromCloud không được pull khi > 0
     const pendingDeleteCountRef = useRef(0);
+    // Chỉ cho phép lưu (persist) SAU khi đã load xong — chống ghi đè/xóa-trắng dữ liệu khi state còn rỗng.
+    const dataLoadedRef = useRef(false);
 
-    const syncToCloud = async () => {
-        if (!userId || !password) return;
-        // Tránh push echo: nếu vừa pull xong dưới 1.5s thì bỏ qua (state đổi do pull, không phải user)
-        if (Date.now() - lastPullAtRef.current < 1500) {
-            pendingChangeRef.current = false;
-            return;
-        }
+    // Lưu toàn bộ state lên Supabase (gọi debounced). RLS tự khóa theo user đăng nhập.
+    const persist = async () => {
+        if (!dataLoadedRef.current) return;
         try {
-            const profileToSave = { ...profile };
-            if (!profileToSave.isManualTarget) profileToSave.manualTargetKcal = "";
-            if (!profileToSave.isManualMacro) {
-                profileToSave.manualProtein = ""; profileToSave.manualCarb = ""; profileToSave.manualFat = ""; profileToSave.macroDietMode = "";
-            }
-            await fetch("/api/sync", {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    action: "upload", userId: userId, password: password, profile: profileToSave,
-                    history: history, weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
-                    customFoods: customFoodList,
-                    deletedCommonFoods: deletedCommonFoods,
-                }),
+            await saveSnapshot({
+                profile,
+                history,
+                weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
+                customFoods: customFoodList,
+                deletedCommonFoods,
             });
-            pendingChangeRef.current = false;
-        } catch (err) { console.error("Lỗi lưu ngầm:", err.message); }
+        } catch (err) { console.error("Lỗi lưu Supabase:", err.message); }
     };
 
-    const syncFromCloud = async () => {
-        if (!userId || !password) return;
-        if (pullingRef.current) return;
-        // Có thay đổi local chưa kịp push → bỏ qua pull để tránh overwrite mất dữ liệu user
-        if (pendingChangeRef.current) return;
-        // DELETE đang chạy trên Sheets → bỏ qua pull để tránh kéo lại item vừa xóa
-        if (pendingDeleteCountRef.current > 0) return;
-        pullingRef.current = true;
-        try {
-            const res = await fetch(`/api/sync?userId=${userId}&password=${password}`);
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-            if (Object.keys(data).length === 0 || (!data.profile && !data.history)) return;
-
-            // Re-check sau khi GET xong: nếu user đã save trong lúc fetch, bỏ qua merge để giữ data local
-            if (pendingChangeRef.current) return;
-
-            if (data.profile) {
-                data.profile.isManualTarget = typeof data.profile.manualTargetKcal === 'number' && !isNaN(data.profile.manualTargetKcal);
-                if (!data.profile.isManualTarget) data.profile.manualTargetKcal = 2000;
-                data.profile.isManualMacro = profile.isManualMacro || false;
-                data.profile.manualProtein = profile.manualProtein || 125;
-                data.profile.manualCarb = profile.manualCarb || 250;
-                data.profile.manualFat = profile.manualFat || 55;
-                data.profile.macroDietMode = profile.macroDietMode || "Tiêu chuẩn (Standard)";
-                setProfile(prev => {
-                    // Nếu có pending change vào phút chót thì giữ nguyên prev
-                    if (pendingChangeRef.current) return prev;
-                    return { ...prev, ...data.profile };
-                });
+    // Phiên đăng nhập Supabase: nạp dữ liệu 1 lần; userId=user.id, password=access_token (cho AI route).
+    useEffect(() => {
+        if (!isClient) return;
+        const supa = getSupabaseBrowser();
+        if (!supa) return;
+        let active = true;
+        const apply = async (session) => {
+            if (!active) return;
+            if (session?.user) {
+                setUserId(session.user.id);
+                setPassword(session.access_token || "");
+                if (!dataLoadedRef.current) {
+                    const d = await loadUserData();
+                    if (d && active) {
+                        setProfile(prev => ({ ...prev, ...d.profile }));
+                        setHistory(d.history);
+                        setCustomFoodList(d.customFoods);
+                        setDeletedCommonFoods(d.deletedCommonFoods);
+                        localStorage.setItem("stayfit_weight_log", JSON.stringify(d.weightLog));
+                        setDisplayName(d.email || d.phone || "");
+                        dataLoadedRef.current = true;
+                    }
+                }
+            } else {
+                setUserId(""); setPassword(""); dataLoadedRef.current = false;
             }
-            if (data.history) setHistory(data.history);
-            if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
-            if (Array.isArray(data.customFoods)) {
-                setCustomFoodList(prev => {
-                    const cloudNames = new Set(data.customFoods.map(f => f.name));
-                    const localOnly = prev.filter(f => !cloudNames.has(f.name));
-                    return localOnly.length ? [...data.customFoods, ...localOnly] : data.customFoods;
-                });
-            }
-            if (Array.isArray(data.deletedCommonFoods)) setDeletedCommonFoods(data.deletedCommonFoods);
-            if (Array.isArray(data.scanFeedback)) {
-                setScanFeedbackCache(data.scanFeedback);
-                localStorage.setItem('stayfit_scan_feedback', JSON.stringify({
-                    data: data.scanFeedback, ts: Date.now()
-                }));
-            }
+        };
+        supa.auth.getSession().then(({ data }) => apply(data.session));
+        const { data: sub } = supa.auth.onAuthStateChange((_e, session) => apply(session));
+        return () => { active = false; sub.subscription.unsubscribe(); };
+    }, [isClient]);
 
-            lastPullAtRef.current = Date.now();
-
-            // Chỉ reload đúng 1 lần khi đăng nhập lần đầu trong session (để re-init biểu đồ, v.v.)
-            if (!sessionStorage.getItem(`sync_done_${userId}`)) {
-                sessionStorage.setItem(`sync_done_${userId}`, 'true');
-                window.location.reload();
-            }
-        } catch (err) { console.error("Lỗi tải ngầm:", err.message); }
-        finally { pullingRef.current = false; }
-    };
-
-    const handleLogin = async () => {
-        const uid = inputUser.trim().toLowerCase(); const pwd = inputPass.trim();
-        if (!uid || !pwd) return alert("Vui lòng nhập cả ID và Mật khẩu!"); 
+    // SĐT làm username: dùng email tổng hợp <sđt>@phone.stayfit.app (không OTP). Thử login → chưa có thì đăng ký.
+    const handlePhoneAuth = async () => {
+        const phone = normPhone(phoneInput); const pwd = phonePass.trim();
+        if (!phone || phone.length < 8) return alert("Số điện thoại không hợp lệ!");
+        if (pwd.length < 6) return alert("Mật khẩu tối thiểu 6 ký tự!");
+        const supa = getSupabaseBrowser();
+        if (!supa) return alert("Chưa cấu hình Supabase.");
         setLoginLoading(true);
         try {
-            const res = await fetch(`/api/sync?userId=${uid}&password=${pwd}`);
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-
-            localStorage.setItem('stayfit_userid', uid); localStorage.setItem('stayfit_password', pwd);
-            setUserId(uid); setPassword(pwd);
-            if (data.profile) setProfile({...profile, ...data.profile});
-            if (data.history) setHistory(data.history);
-            if (data.weightLog) localStorage.setItem("stayfit_weight_log", JSON.stringify(data.weightLog));
-            if (Array.isArray(data.customFoods)) {
-                const localFoods = JSON.parse(localStorage.getItem('stayfit_custom_foods') || '[]');
-                const cloudNames = new Set(data.customFoods.map(f => f.name));
-                const localOnly = localFoods.filter(f => !cloudNames.has(f.name));
-                const merged = localOnly.length ? [...data.customFoods, ...localOnly] : data.customFoods;
-                localStorage.setItem('stayfit_custom_foods', JSON.stringify(merged));
+            const email = `${phone}@phone.stayfit.app`;
+            const { error } = await supa.auth.signInWithPassword({ email, password: pwd });
+            if (error) {
+                const up = await supa.auth.signUp({ email, password: pwd });
+                if (up.error) throw up.error;
+                if (!up.data.session) {
+                    alert("Đã tạo tài khoản. Nếu chưa vào được, kiểm tra Supabase đã TẮT 'Confirm email'.");
+                }
             }
-            if (Array.isArray(data.deletedCommonFoods)) localStorage.setItem('stayfit_deleted_common', JSON.stringify(data.deletedCommonFoods));
-            window.location.reload();
-        } catch (err) { alert("❌ Lỗi: " + err.message); } 
+            // Session effect tự nạp dữ liệu + vào app.
+        } catch (e) { alert("❌ " + (e.message || "Lỗi đăng nhập")); }
         finally { setLoginLoading(false); }
     };
 
-    useEffect(() => {
-        if (!userId || !password || !isClient) return;
-        if (!sessionStorage.getItem(`stayfit_initial_sync_${userId}`)) {
-            sessionStorage.setItem(`stayfit_initial_sync_${userId}`, 'true');
-            syncFromCloud();
-        }
-    }, [userId, password, isClient]);
+    const handleGoogleLogin = async () => {
+        const supa = getSupabaseBrowser();
+        if (!supa) return alert("Đăng nhập Google chưa được cấu hình (thiếu Supabase env).");
+        await supa.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin + '/auth/callback' },
+        });
+    };
 
+    const handleLogout = async () => {
+        const supa = getSupabaseBrowser();
+        if (supa) { try { await supa.auth.signOut(); } catch (e) { /* noop */ } }
+        setUserId(""); setPassword(""); dataLoadedRef.current = false;
+        window.location.reload();
+    };
+
+    // Debounced persist khi state đổi (chỉ sau khi đã load xong).
     const isFirstRender = useRef(true);
     useEffect(() => {
         if (!isClient) return;
         if (isFirstRender.current) { isFirstRender.current = false; return; }
-        // Đánh dấu có thay đổi local đang chờ push → chặn pull cho đến khi push xong
-        pendingChangeRef.current = true;
-        const timeoutId = setTimeout(() => { syncToCloud(); }, 2500);
+        const timeoutId = setTimeout(() => { persist(); }, 2000);
         return () => clearTimeout(timeoutId);
     }, [history, profile, customFoodList, deletedCommonFoods]);
-
-    // Auto-PULL: khi tab hiển thị trở lại, khi window focus, và polling 30s
-    useEffect(() => {
-        if (!isClient || !userId || !password) return;
-
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'hidden') {
-                syncToCloud();
-            } else if (document.visibilityState === 'visible') {
-                syncFromCloud();
-            }
-        };
-        const handleFocus = () => { syncFromCloud(); };
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('focus', handleFocus);
-
-        // Polling mỗi 30s khi tab đang hiển thị
-        const pollId = setInterval(() => {
-            if (document.visibilityState === 'visible') syncFromCloud();
-        }, 30000);
-
-        return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('focus', handleFocus);
-            clearInterval(pollId);
-        };
-    }, [isClient, userId, password]);
     
     const calculatedTarget = useMemo(() => {
         let bmr = profile.gender === "male" 
@@ -1276,7 +1180,7 @@ export default function App() {
             name: selectedFood.name, quantity: quantity, unit: selectedFood.unit,
             kcal: calcMacro(selectedFood.kcal, selectedFood.per, quantity), protein: calcMacro(selectedFood.protein, selectedFood.per, quantity),
             carb: calcMacro(selectedFood.carb, selectedFood.per, quantity), fat: calcMacro(selectedFood.fat, selectedFood.per, quantity),
-            meal: selectedMeal, id: Date.now(), timestamp: generateUniqueTimestamp()
+            meal: selectedMeal, id: crypto.randomUUID(), timestamp: generateUniqueTimestamp()
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
         setSelectedFood(null); setSearchQuery(""); setQty(1);
@@ -1569,12 +1473,8 @@ export default function App() {
                 } catch (e) {}
                 return next;
             });
-            // Fire-and-forget POST sang Sheets
-            fetch("/api/sync", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: "scan_feedback", userId, password, ...feedbackEntry }),
-            }).catch(err => console.warn("Feedback log failed:", err));
+            // Fire-and-forget → Supabase
+            addScanFeedback(feedbackEntry).catch(err => console.warn("Feedback log failed:", err));
         }
     };
 
@@ -1593,7 +1493,7 @@ export default function App() {
                 carb: calcMacro(item.carb, item.per, quantity),
                 fat: calcMacro(item.fat, item.per, quantity),
                 meal: item._meal,
-                id: baseTs + i,
+                id: crypto.randomUUID(),
                 timestamp: `${baseTs + i}-${Math.random().toString(36).slice(2, 7)}`,
             };
         });
@@ -1690,7 +1590,7 @@ export default function App() {
         const newItem = {
             name: foodName, quantity: q, unit: u, kcal: Math.round(k * 10) / 10,
             protein: Math.round(p * 10) / 10, carb: Math.round(c * 10) / 10, fat: Math.round(f * 10) / 10,
-            meal: selectedMeal, id: Date.now(), timestamp: generateUniqueTimestamp()
+            meal: selectedMeal, id: crypto.randomUUID(), timestamp: generateUniqueTimestamp()
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
 
@@ -1718,17 +1618,7 @@ export default function App() {
         // --- VẤN ĐỀ 1 & 2: HOÀN TÁC NHIỀU LẦN VÀ KHÔNG TỰ ẨN ---
         // Nhồi món vừa xóa vào mảng (Stack)
         setUndoStack(prev => [...prev, { item: itemToDelete, index: itemIndex }]);
-
-        if (itemToDelete && itemToDelete.timestamp && userId && password) {
-            pendingDeleteCountRef.current++;
-            try {
-                await fetch("/api/sync", {
-                    method: "DELETE", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ userId, password, timestamp: itemToDelete.timestamp }),
-                });
-            } catch (err) { console.error("Lỗi xóa:", err); }
-            finally { pendingDeleteCountRef.current--; }
-        }
+        // persist (saveSnapshot reconcile) sẽ tự xóa trên Supabase.
     };
 
     const handleUndo = () => {
@@ -1820,22 +1710,9 @@ export default function App() {
 
     const bulkDeleteSelected = async () => {
         if (selectedItemIds.size === 0) return;
-        const currentList = history[currentDate] || [];
-        const toDelete = currentList.filter(i => selectedItemIds.has(i.id));
+        // Xóa khỏi state; persist (saveSnapshot reconcile) sẽ tự xóa trên Supabase.
         setHistory(prev => ({ ...prev, [currentDate]: (prev[currentDate] || []).filter(i => !selectedItemIds.has(i.id)) }));
         clearSelection();
-        for (const item of toDelete) {
-            if (item.timestamp && userId && password) {
-                pendingDeleteCountRef.current++;
-                try {
-                    await fetch("/api/sync", {
-                        method: "DELETE", headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ userId, password, timestamp: item.timestamp }),
-                    });
-                } catch (err) { console.error("Lỗi xóa:", err); }
-                finally { pendingDeleteCountRef.current--; }
-            }
-        }
     };
 
     const applyDietMode = (mode) => {
@@ -1919,13 +1796,29 @@ export default function App() {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-orange rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-deep rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/3"></div>
                 <div className="bg-white/10 p-8 rounded-[2.5rem] w-full backdrop-blur-xl border border-white/20 text-center shadow-2xl relative z-10">
-                    <h1 className="text-4xl font-black tracking-tighter italic mb-8">STAYFIT</h1>
-                    <div className="space-y-3 mb-6">
-                        <input type="text" value={inputUser} onChange={e=>setInputUser(e.target.value)} placeholder="Tên ID (vd: quy2026)" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" />
-                        <input type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="Mật khẩu" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }} />
+                    <h1 className="text-4xl font-black tracking-tighter italic mb-2">STAYFIT</h1>
+                    <p className="text-[11px] text-white/70 font-semibold mb-7">Đăng nhập để đồng bộ dữ liệu của bạn</p>
+
+                    {/* Google */}
+                    {isSupabaseConfigured && (
+                        <>
+                            <button onClick={handleGoogleLogin} disabled={loginLoading} className="w-full py-3.5 bg-white text-ink rounded-2xl font-bold flex items-center justify-center gap-2.5 hover:scale-[0.98] transition-all shadow-xl disabled:opacity-50">
+                                <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5 43.5 34.8 43.5 24c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 16.3 4.5 9.7 8.9 6.3 14.7z"/><path fill="#4CAF50" d="M24 43.5c5.4 0 10.3-2 14-5.3l-6.5-5.5c-2 1.5-4.6 2.3-7.5 2.3-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.6 39 16.2 43.5 24 43.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.5l6.5 5.5c-.5.4 7-5 7-15 0-1.2-.1-2.4-.4-3.5z"/></svg>
+                                Tiếp tục với Google
+                            </button>
+                            <div className="flex items-center gap-3 my-5">
+                                <div className="flex-1 h-px bg-white/20" /><span className="text-[10px] text-white/50 font-bold uppercase">hoặc</span><div className="flex-1 h-px bg-white/20" />
+                            </div>
+                        </>
+                    )}
+
+                    {/* Số điện thoại */}
+                    <div className="space-y-3">
+                        <input type="tel" inputMode="numeric" value={phoneInput} onChange={e=>setPhoneInput(e.target.value)} placeholder="Số điện thoại" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" />
+                        <input type="password" value={phonePass} onChange={e=>setPhonePass(e.target.value)} placeholder="Mật khẩu" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" onKeyDown={e => { if (e.key === 'Enter') handlePhoneAuth(); }} />
                     </div>
-                    <button onClick={handleLogin} disabled={loginLoading} className="w-full py-4 bg-white text-orange rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng Nhập"}</button>
-                    <p className="text-[9px] text-white/50 font-bold mt-4 px-4 leading-relaxed">Nếu chưa có tài khoản, hãy nhập ID & Mật khẩu mới để tự động đăng ký.</p>
+                    <button onClick={handlePhoneAuth} disabled={loginLoading} className="w-full mt-3 py-4 bg-white text-orange rounded-2xl font-black uppercase tracking-widest hover:scale-95 transition-all shadow-xl disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng ký / Đăng nhập"}</button>
+                    <p className="text-[9px] text-white/50 font-bold mt-3 px-4 leading-relaxed">Chưa có tài khoản? Nhập SĐT + mật khẩu mới để tự động đăng ký.</p>
                 </div>
             </div>
         );
@@ -1936,7 +1829,7 @@ export default function App() {
     }
     
     if (view === "profile") {
-        const userInitial = (userId || "?").trim().charAt(0).toUpperCase();
+        const userInitial = (displayName || "?").trim().charAt(0).toUpperCase();
         return (
             <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-500 relative font-sans text-ink">
                 {/* Slim sticky header */}
@@ -1956,7 +1849,7 @@ export default function App() {
                             </span>
                             <div className="min-w-0 flex-1">
                                 <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-orange-deep">Thành viên</span>
-                                <h2 className="mt-0.5 text-[16px] font-bold tracking-tight text-ink truncate">{userId || "Khách"}</h2>
+                                <h2 className="mt-0.5 text-[16px] font-bold tracking-tight text-ink truncate">{displayName || "Khách"}</h2>
                                 <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Lắng nghe cơ thể, nuôi dưỡng nhẹ nhàng</p>
                             </div>
                         </div>
@@ -2130,7 +2023,7 @@ export default function App() {
                         <button onClick={() => setView("journal")} className="w-full py-4 bg-orange text-white rounded-2xl font-bold text-[14px] shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep active:scale-95 transition">
                             Quay lại nhật ký
                         </button>
-                        <button onClick={() => { setUserId(""); setPassword(""); localStorage.removeItem('stayfit_userid'); localStorage.removeItem('stayfit_password'); }} className="w-full py-3 bg-cream-soft text-ink-muted rounded-2xl font-semibold text-[12px] ring-1 hover:bg-cream-deep hover:text-ink active:scale-95 transition">
+                        <button onClick={handleLogout} className="w-full py-3 bg-cream-soft text-ink-muted rounded-2xl font-semibold text-[12px] ring-1 hover:bg-cream-deep hover:text-ink active:scale-95 transition">
                             Đăng xuất
                         </button>
                     </div>
@@ -2195,7 +2088,7 @@ export default function App() {
 
                 <main className="p-4 space-y-5">
                     {/* GREETING */}
-                    <GreetingHeader userName={userId || "bạn"} />
+                    <GreetingHeader userName={displayName || "bạn"} />
 
                     {/* CALORIE HERO — vòng tròn + 3 macro donuts + Eq row */}
                     <DashboardCard tone="white" padding="lg" className="overflow-hidden">

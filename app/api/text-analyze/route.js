@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import crypto from "crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { verifySupabaseToken } from "../../../lib/supabase/verify";
 
 // Diacritic-strip + lowercase + collapse whitespace, for fuzzy comparison.
 function normalize(str) {
@@ -127,25 +128,12 @@ async function getSheets() {
 
 export async function POST(req) {
   try {
-    const { userId, password, text, library: rawLibrary = [] } = await req.json();
+    const { password, text, library: rawLibrary = [] } = await req.json();
 
-    // 1. Auth
-    if (!userId || !password) {
-      return Response.json({ error: "Thiếu thông tin xác thực" }, { status: 401 });
-    }
-    const SHEET_ID = process.env.SPREADSHEET_ID || process.env.GOOGLE_SHEET_ID;
-    if (!SHEET_ID) {
-      return Response.json({ error: "Server chưa cấu hình SPREADSHEET_ID" }, { status: 500 });
-    }
-    const sheets = await getSheets();
-    const profileRes = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: "Profile!A:J" });
-    const profileRows = profileRes.data.values || [];
-    const profileRow = profileRows.find((r) => r[0] === userId);
-    if (!profileRow) {
-      return Response.json({ error: "User không tồn tại" }, { status: 404 });
-    }
-    if (profileRow[9] && profileRow[9] !== hashPassword(password)) {
-      return Response.json({ error: "Sai mật khẩu" }, { status: 401 });
+    // 1. Auth — xác thực Supabase access token (client gửi qua `password`)
+    const authUser = await verifySupabaseToken(password);
+    if (!authUser) {
+      return Response.json({ error: "Phiên đăng nhập không hợp lệ" }, { status: 401 });
     }
 
     // 2. Validate text
