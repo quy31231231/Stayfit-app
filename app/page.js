@@ -874,6 +874,7 @@ export default function App() {
 
     // Barcode scan state
     const [barcodeOpen, setBarcodeOpen] = useState(false);
+    const [pendingBarcode, setPendingBarcode] = useState(null); // mã đang chờ nhập tay → nhớ khi lưu
 
     // AI Vision scan state
     const [scanModalOpen, setScanModalOpen] = useState(false);
@@ -1273,6 +1274,8 @@ export default function App() {
         carb: Math.round(recipeTotals.carb * recipePer100 * 10) / 10,
         fat: Math.round(recipeTotals.fat * recipePer100 * 10) / 10,
     };
+    // Báo trùng tên ngay khi gõ (không đợi tới lúc bấm Lưu).
+    const recipeNameTaken = recipe.name.trim() !== "" && allFoods.some(f => f.name.toLowerCase().trim() === recipe.name.trim().toLowerCase());
 
     const addRecipeIngredient = (food) => {
         setRecipe(prev => ({
@@ -1311,6 +1314,21 @@ export default function App() {
     };
 
     /* ───── QUÉT MÃ VẠCH (Open Food Facts → /100g) ───── */
+    // Mở tab "Nhập tay" điền sẵn + nhớ barcode (để lần quét sau nhận ngay).
+    const openManualWithBarcode = (code, name = "", macros = null) => {
+        setPendingBarcode(code);
+        setCustomFood({
+            name,
+            quantity: 100,
+            unit: "g",
+            kcal: macros ? String(macros.kcal) : "",
+            protein: macros ? String(macros.protein) : "",
+            carb: macros ? String(macros.carb) : "",
+            fat: macros ? String(macros.fat) : "",
+        });
+        setTab("custom");
+    };
+
     const handleBarcodeDetected = async (code) => {
         setBarcodeOpen(false);
         const trimmed = (code || "").trim();
@@ -1318,32 +1336,44 @@ export default function App() {
             setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: `Mã "${trimmed}" không phải mã vạch sản phẩm.` });
             return;
         }
+
+        // 1. Ưu tiên thư viện cá nhân theo barcode (tức thời, chạy cả offline & cho hàng VN đã thêm).
+        const known = customFoodList.find(f => f.barcode === trimmed);
+        if (known) {
+            setTab("quick"); setSearchQuery(""); setSelectedFood(known); setQty(100);
+            return;
+        }
+
         try {
             const res = await fetch(`/api/barcode?code=${trimmed}`);
             const data = await res.json();
+
+            // 2. Không tìm thấy gì → nhập tay, chỉ nhớ barcode.
             if (!res.ok || !data.found || !data.product) {
-                setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: `Không tìm thấy sản phẩm (mã ${trimmed}). Bạn có thể nhập tay ở tab "Nhập tay".` });
+                openManualWithBarcode(trimmed);
                 return;
             }
+
             const p = data.product;
-            const food = { name: p.name, unit: "g", per: 100, kcal: p.kcal, protein: p.protein, carb: p.carb, fat: p.fat };
 
-            // Thiếu dinh dưỡng → chuyển sang nhập tay, điền sẵn tên.
-            if (!food.kcal && !food.protein && !food.carb && !food.fat) {
-                setCustomFood({ name: food.name, quantity: 100, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
-                setTab("custom");
-                setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: `Tìm thấy "${food.name}" nhưng thiếu dữ liệu dinh dưỡng. Mời bạn nhập tay.` });
+            // 3a. Có dinh dưỡng thật (không ước lượng) → lưu thư viện + chọn để ghi nhật ký.
+            if (data.hasNutrition && !data.estimated) {
+                const food = { name: p.name, unit: "g", per: 100, kcal: p.kcal, protein: p.protein, carb: p.carb, fat: p.fat, barcode: trimmed };
+                setCustomFoodList(prev =>
+                    prev.some(f => f.name.toLowerCase().trim() === food.name.toLowerCase().trim()) ? prev : [food, ...prev]
+                );
+                setTab("quick"); setSearchQuery(""); setSelectedFood(food); setQty(100);
                 return;
             }
 
-            // Lưu vào thư viện (nếu chưa có) + chọn sẵn để ghi nhật ký.
-            setCustomFoodList(prev =>
-                prev.some(f => f.name.toLowerCase().trim() === food.name.toLowerCase().trim()) ? prev : [food, ...prev]
-            );
-            setTab("quick");
-            setSearchQuery("");
-            setSelectedFood(food);
-            setQty(100);
+            // 3b. Chỉ có ước lượng (OFF tra theo tên) → nhập tay điền sẵn để user kiểm tra rồi lưu.
+            if (data.hasNutrition && data.estimated) {
+                openManualWithBarcode(trimmed, p.name, { kcal: p.kcal, protein: p.protein, carb: p.carb, fat: p.fat });
+                return;
+            }
+
+            // 3c. Có tên nhưng không có dinh dưỡng → nhập tay điền sẵn tên.
+            openManualWithBarcode(trimmed, p.name);
         } catch (e) {
             setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: "Lỗi tra cứu sản phẩm. Thử lại." });
         }
@@ -1664,11 +1694,13 @@ export default function App() {
         else { weightInGrams = q * (UNIT_GRAM_WEIGHTS[u] || 100); }
 
         const factor100g = weightInGrams > 0 ? (100 / weightInGrams) : 1;
-        setCustomFoodList(prev => [{ 
-            name: foodName, unit: baseUnit, per: 100, kcal: Math.round(k * factor100g), 
-            protein: Math.round((p * factor100g) * 10) / 10, carb: Math.round((c * factor100g) * 10) / 10, fat: Math.round((f * factor100g) * 10) / 10 
+        setCustomFoodList(prev => [{
+            name: foodName, unit: baseUnit, per: 100, kcal: Math.round(k * factor100g),
+            protein: Math.round((p * factor100g) * 10) / 10, carb: Math.round((c * factor100g) * 10) / 10, fat: Math.round((f * factor100g) * 10) / 10,
+            ...(pendingBarcode ? { barcode: pendingBarcode } : {}),
         }, ...prev]);
         setCustomFood({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
+        setPendingBarcode(null);
         setTab("quick");
     };
 
@@ -2241,7 +2273,7 @@ export default function App() {
                         {/* Tabs */}
                         <div className="mt-5 flex gap-1 p-1 bg-cream-soft rounded-2xl">
                             <button onClick={() => setTab("quick")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "quick" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Chọn nhanh</button>
-                            <button onClick={() => setTab("custom")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "custom" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Nhập tay</button>
+                            <button onClick={() => { setPendingBarcode(null); setTab("custom"); }} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "custom" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Nhập tay</button>
                             <button onClick={() => setTab("recipe")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "recipe" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Ghép món</button>
                         </div>
 
@@ -2338,6 +2370,14 @@ export default function App() {
                             </div>
                         ) : tab === "custom" ? (
                             <div className="mt-4 space-y-2.5">
+                                {pendingBarcode && (
+                                    <div className="flex items-start gap-2 rounded-2xl bg-mist-soft ring-1 ring-mist/30 p-3">
+                                        <svg className="mt-0.5 shrink-0 text-mist-deep" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5v14M7.5 5v14M12 5v14M16.5 5v14M21 5v14"/></svg>
+                                        <p className="text-[11px] font-medium text-mist-deep leading-relaxed">
+                                            Tự động điền từ mã vạch <span className="font-bold tabular-nums">{pendingBarcode}</span>. Kiểm tra &amp; bổ sung dinh dưỡng rồi lưu — lần quét sau sẽ tự nhận.
+                                        </p>
+                                    </div>
+                                )}
                                 <input placeholder="Tên món ăn (vd: Gà rán...)" value={customFood.name} onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} className="w-full bg-cream-soft ring-1 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition" />
                                 <div className="grid grid-cols-2 gap-2.5">
                                     <input type="number" placeholder="Số lượng" value={customFood.quantity} onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} className="bg-cream-soft ring-1 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition tabular-nums" />
@@ -2367,8 +2407,14 @@ export default function App() {
                                     placeholder="Tên món (vd: Bánh yến mạch...)"
                                     value={recipe.name}
                                     onChange={e => setRecipe(p => ({ ...p, name: e.target.value }))}
-                                    className="w-full bg-cream-soft ring-1 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition"
+                                    className={`w-full bg-cream-soft p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 placeholder:text-ink-faint transition ring-1 ${recipeNameTaken ? "ring-red-300 focus:ring-red-300/60" : "focus:ring-orange/30"}`}
                                 />
+                                {recipeNameTaken && (
+                                    <p className="flex items-center gap-1.5 text-[11px] font-semibold text-red-500 -mt-1 ml-1">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                        Đã có món tên này trong thư viện
+                                    </p>
+                                )}
 
                                 {/* Tìm + thêm nguyên liệu */}
                                 <div className="relative">
@@ -2443,8 +2489,8 @@ export default function App() {
 
                                         {/* Lưu */}
                                         {recipe.name.trim() !== "" && (
-                                            <button onClick={saveRecipeToLibrary} className="w-full bg-orange text-white p-3.5 rounded-2xl font-bold text-[13px] active:scale-95 transition shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep">
-                                                Lưu vào thư viện
+                                            <button onClick={saveRecipeToLibrary} disabled={recipeNameTaken} className={`w-full p-3.5 rounded-2xl font-bold text-[13px] transition shadow-soft ring-1 ${recipeNameTaken ? "bg-cream-deep text-ink-faint ring-cream-deep cursor-not-allowed" : "bg-orange text-white ring-orange-deep/20 hover:bg-orange-deep active:scale-95"}`}>
+                                                {recipeNameTaken ? "Đổi tên khác để lưu" : "Lưu vào thư viện"}
                                             </button>
                                         )}
                                     </div>
