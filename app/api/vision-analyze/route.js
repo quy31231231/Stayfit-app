@@ -41,7 +41,7 @@ function fuzzyMatch(query, library, threshold = 0.7) {
   return best ? { entry: best, score: bestScore } : null;
 }
 
-function buildPrompt(libraryListStr) {
+function buildPrompt(libraryListStr, description) {
   const libraryBlock = libraryListStr
     ? `═══════════════════════════════════════════════════════════════
 THƯ VIỆN MÓN CỦA USER (chỉ dùng match cho MÓN BÀY BIỆN — LOẠI B)
@@ -57,9 +57,23 @@ QUY TRÌNH MATCH (chỉ cho LOẠI B):
 `
     : "";
 
+  const descBlock = description
+    ? `═══════════════════════════════════════════════════════════════
+NGƯỜI DÙNG MÔ TẢ MÓN (ƯU TIÊN để nhận diện đúng)
+═══════════════════════════════════════════════════════════════
+"${description}"
+
+- Người dùng biết rõ món của họ → ƯU TIÊN dùng mô tả này để NHẬN DIỆN & ĐẶT TÊN món.
+- Nếu mô tả nêu rõ tên/thành phần → bám theo, đừng đoán món khác.
+- Chỉ bỏ qua mô tả nếu nó RÕ RÀNG không khớp thứ thấy trong ảnh.
+- Vẫn ƯỚC LƯỢNG khẩu phần/khối lượng từ ẢNH (mô tả chỉ giúp định danh).
+
+`
+    : "";
+
   return `Bạn là chuyên gia dinh dưỡng, vừa GIỎI nhận diện món ăn bày biện, vừa ĐỌC NHÃN dinh dưỡng sản phẩm đóng gói TỐT.
 
-NHIỆM VỤ: Quan sát ảnh, nhận diện tối đa 5 vật phẩm ăn/uống. Với MỖI vật, phân loại LOẠI A hoặc LOẠI B rồi xử lý tương ứng.
+${descBlock}NHIỆM VỤ: Quan sát ảnh, nhận diện tối đa 5 vật phẩm ăn/uống. Với MỖI vật, phân loại LOẠI A hoặc LOẠI B rồi xử lý tương ứng.
 
 ═══════════════════════════════════════════════════════════════
 LOẠI A — SẢN PHẨM ĐÓNG GÓI CÓ NHÃN DINH DƯỠNG
@@ -73,6 +87,7 @@ LOẠI A — SẢN PHẨM ĐÓNG GÓI CÓ NHÃN DINH DƯỠNG
    - Nhãn chỉ ghi /khẩu phần (per serving) → quy đổi: per100 = (giá trị mỗi serving) ÷ (số gram/ml mỗi serving) × 100.
    - Năng lượng ghi kJ → kcal = kJ ÷ 4.184.
 3. "source": "label". kcal/protein/carb/fat = giá trị TRÊN 100g/100ml.
+   "liquid": true nếu là ĐỒ UỐNG (sữa, nước, nước ngọt... → đơn vị ml); false nếu sản phẩm RẮN (snack, bánh... → g).
 4. "grams" = khối lượng 1 khẩu phần hoặc cả gói/chai (đọc/ước từ nhãn, vd 240ml, Net 65g); không rõ thì để 100.
 5. "confidence" 0.9+ nếu đọc rõ nhãn; 0.6-0.8 nếu nhãn hơi mờ.
 6. KHÔNG match thư viện cho LOẠI A — số trên nhãn là chuẩn nhất.
@@ -99,6 +114,7 @@ TRẢ VỀ CHỈ JSON (không markdown, không text thừa)
   "items": [
     {
       "source": "label" | "food",
+      "liquid": true | false,
       "matched": true | false,
       "name": "<A: tên sản phẩm + brand | B: tên EXACT thư viện hoặc tự đặt>",
       "qty": 50,
@@ -148,7 +164,7 @@ async function getSheets() {
 
 export async function POST(req) {
   try {
-    const { userId, password, imageBase64, mimeType, library: rawLibrary = [] } = await req.json();
+    const { userId, password, imageBase64, mimeType, library: rawLibrary = [], description: rawDesc = "" } = await req.json();
 
     // 1. Auth
     if (!userId || !password) {
@@ -196,7 +212,8 @@ export async function POST(req) {
       .map((f) => `- "${f.name}" (per: ${f.per} ${f.unit})`)
       .join("\n");
 
-    const prompt = buildPrompt(libraryListStr);
+    const description = typeof rawDesc === "string" ? rawDesc.trim().slice(0, 300) : "";
+    const prompt = buildPrompt(libraryListStr, description);
 
     // 4. Call Gemini
     if (!process.env.GEMINI_API_KEY) {
@@ -340,7 +357,7 @@ export async function POST(req) {
           aiPredictedName: name,
           libraryName: null,
           fuzzyMatched: false,
-          unit: "g",
+          unit: item.liquid === true ? "ml" : "g",
           per: 100,
           grams: servingG,
           kcal: safeNum(item.kcal),

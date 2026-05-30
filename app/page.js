@@ -107,6 +107,39 @@ const formatDate = (date) => {
 };
 const calcMacro = (val, per, q) => Math.round((val / per) * q * 10) / 10;
 
+// Kiểm tra check digit GTIN (EAN-13/EAN-8/UPC-A/GTIN-14) — thuần tính, offline.
+const isValidGtin = (code) => {
+    const s = String(code || "").trim();
+    if (!/^\d{8}$|^\d{12,14}$/.test(s)) return false;
+    const digits = s.split("").map(Number);
+    const check = digits.pop();
+    let sum = 0;
+    // Trọng số 3/1 xen kẽ, tính từ phải qua trái (ngay trước check digit).
+    for (let i = digits.length - 1, w = 3; i >= 0; i--, w = w === 3 ? 1 : 3) sum += digits[i] * w;
+    return (10 - (sum % 10)) % 10 === check;
+};
+
+// Bảng prefix GS1 (3 số đầu EAN-13) → quốc gia đăng ký mã. Tập phổ biến + VN.
+const GS1_PREFIXES = [
+    [[0, 19], "Mỹ / Canada"], [[30, 39], "Mỹ"], [[60, 139], "Mỹ / Canada"],
+    [[300, 379], "Pháp"], [[380, 380], "Bulgaria"], [[400, 440], "Đức"],
+    [[450, 459], "Nhật Bản"], [[460, 469], "Nga"], [[471, 471], "Đài Loan"],
+    [[480, 480], "Philippines"], [[489, 489], "Hong Kong"], [[490, 499], "Nhật Bản"],
+    [[500, 509], "Anh"], [[690, 699], "Trung Quốc"], [[729, 729], "Israel"],
+    [[760, 769], "Thụy Sĩ"], [[800, 839], "Ý"], [[840, 849], "Tây Ban Nha"],
+    [[871, 871], "Hà Lan"], [[880, 880], "Hàn Quốc"], [[885, 885], "Thái Lan"],
+    [[888, 888], "Singapore"], [[890, 890], "Ấn Độ"], [[893, 893], "Việt Nam"],
+    [[899, 899], "Indonesia"], [[930, 939], "Úc"], [[955, 955], "Malaysia"],
+];
+const gs1Country = (code) => {
+    const s = String(code || "").trim();
+    if (!/^\d{12,14}$/.test(s)) return null; // chỉ EAN-13/UPC mới có prefix vùng
+    const ean13 = s.length === 12 ? "0" + s : s.slice(-13); // UPC-A → thêm 0 đầu
+    const p = parseInt(ean13.slice(0, 3), 10);
+    for (const [[lo, hi], name] of GS1_PREFIXES) if (p >= lo && p <= hi) return name;
+    return "Không rõ";
+};
+
 const generateUniqueTimestamp = () => {
   const now = new Date();
   const svSE = now.toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
@@ -872,11 +905,10 @@ export default function App() {
     const [selectedFood, setSelectedFood] = useState(null);
     const [qty, setQty] = useState(1);
 
-    // Barcode scan state
+    // Barcode scan state (tính năng "Kiểm tra sản phẩm")
     const [barcodeOpen, setBarcodeOpen] = useState(false);
-    const [pendingBarcode, setPendingBarcode] = useState(null); // mã đang chờ nhập tay → nhớ khi lưu
-    const [barcodeEstimated, setBarcodeEstimated] = useState(false); // macro điền sẵn là ước lượng AI?
     const [barcodeLoading, setBarcodeLoading] = useState(false); // đang tra cứu sau khi quét
+    const [barcodeResult, setBarcodeResult] = useState(null); // kết quả kiểm tra: {type, ...}
 
     // AI Vision scan state
     const [scanModalOpen, setScanModalOpen] = useState(false);
@@ -889,6 +921,7 @@ export default function App() {
     });
     const [scanMode, setScanMode] = useState('image'); // 'image' | 'text'
     const [scanText, setScanText] = useState('');
+    const [scanDesc, setScanDesc] = useState(''); // mô tả tùy chọn cho quét ảnh (giúp AI nhận diện đúng)
     const [scanFeedbackCache, setScanFeedbackCache] = useState([]);
     const [dismissedSuggestions, setDismissedSuggestions] = useState([]);
     const [librarySuggestion, setLibrarySuggestion] = useState(null);
@@ -1315,94 +1348,38 @@ export default function App() {
         setTab("quick");
     };
 
-    /* ───── QUÉT MÃ VẠCH (Open Food Facts + Gemini → /100g) ───── */
-    // Mở tab "Nhập tay" điền sẵn + nhớ barcode (để lần quét sau nhận ngay).
-    const openManualWithBarcode = (code, name = "", macros = null, estimated = false) => {
-        setPendingBarcode(code);
-        setBarcodeEstimated(estimated);
-        setCustomFood({
-            name,
-            quantity: 100,
-            unit: "g",
-            kcal: macros ? String(macros.kcal) : "",
-            protein: macros ? String(macros.protein) : "",
-            carb: macros ? String(macros.carb) : "",
-            fat: macros ? String(macros.fat) : "",
-        });
-        setTab("custom");
-    };
-
-    // Nhờ Gemini (route text-analyze) ước lượng macro /100g từ TÊN sản phẩm. Trả null nếu thất bại.
-    const estimateMacrosViaAI = async (name) => {
-        try {
-            const aiRes = await fetch("/api/text-analyze", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, password, text: name, library: [] }),
-            });
-            const aiData = await aiRes.json();
-            const it = aiRes.ok && aiData.found && Array.isArray(aiData.items) ? aiData.items[0] : null;
-            if (!it) return null;
-            // source "estimate": macro tính theo `per` (= grams) → quy về /100g.
-            const basis = Number(it.per) || Number(it.grams) || 100;
-            const per100 = basis > 0 ? 100 / basis : 1;
-            return {
-                kcal: Math.round((Number(it.kcal) || 0) * per100),
-                protein: Math.round((Number(it.protein) || 0) * per100 * 10) / 10,
-                carb: Math.round((Number(it.carb) || 0) * per100 * 10) / 10,
-                fat: Math.round((Number(it.fat) || 0) * per100 * 10) / 10,
-            };
-        } catch (e) {
-            return null;
-        }
-    };
-
+    /* ───── KIỂM TRA SẢN PHẨM (quét mã → tra dấu hiệu, KHÔNG khẳng định thật/giả) ───── */
     const handleBarcodeDetected = async (code) => {
         setBarcodeOpen(false);
-        const trimmed = (code || "").trim();
-        if (!/^\d{6,14}$/.test(trimmed)) {
-            setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: `Mã "${trimmed}" không phải mã vạch sản phẩm.` });
+        const raw = (code || "").trim();
+
+        // B — QR chứa link (tem chống giả của hãng) → cho user mở trang xác thực.
+        if (/^https?:\/\//i.test(raw)) {
+            setBarcodeResult({ type: "qr", url: raw });
             return;
         }
 
-        // 1. Ưu tiên thư viện cá nhân theo barcode (tức thời, chạy cả offline & cho hàng VN đã thêm).
-        const known = customFoodList.find(f => f.barcode === trimmed);
-        if (known) {
-            setTab("quick"); setSearchQuery(""); setSelectedFood(known); setQty(100);
+        // Không phải mã vạch sản phẩm hợp lệ.
+        if (!/^\d{6,14}$/.test(raw)) {
+            setBarcodeResult({ type: "invalid", code: raw });
             return;
         }
 
+        // A — mã vạch EAN/UPC: dấu hiệu + tra nhận dạng.
+        const valid = isValidGtin(raw);
+        const country = gs1Country(raw);
         setBarcodeLoading(true);
+        let product = null;
         try {
-            const res = await fetch(`/api/barcode?code=${trimmed}`);
+            const res = await fetch(`/api/barcode?code=${raw}`);
             const data = await res.json();
-
-            // 2. Không tìm thấy gì → nhập tay, chỉ nhớ barcode.
-            if (!res.ok || !data.found || !data.product) {
-                openManualWithBarcode(trimmed);
-                return;
-            }
-
-            const p = data.product;
-
-            // 3a. OFF có dinh dưỡng nhãn thật → lưu thư viện + chọn để ghi nhật ký.
-            if (data.hasNutrition) {
-                const food = { name: p.name, unit: "g", per: 100, kcal: p.kcal, protein: p.protein, carb: p.carb, fat: p.fat, barcode: trimmed };
-                setCustomFoodList(prev =>
-                    prev.some(f => f.name.toLowerCase().trim() === food.name.toLowerCase().trim()) ? prev : [food, ...prev]
-                );
-                setTab("quick"); setSearchQuery(""); setSelectedFood(food); setQty(100);
-                return;
-            }
-
-            // 3b. OFF có tên nhưng thiếu dinh dưỡng → nhờ Gemini ước lượng /100g, điền sẵn để user xác nhận.
-            const est = await estimateMacrosViaAI(p.name);
-            openManualWithBarcode(trimmed, p.name, est, !!est);
+            if (res.ok && data.found && data.product) product = data.product;
         } catch (e) {
-            setConfirmModal({ isOpen: true, foodToDelete: null, alertMessage: "Lỗi tra cứu sản phẩm. Thử lại." });
+            /* mạng lỗi → vẫn hiện dấu hiệu offline (check digit + nước) */
         } finally {
             setBarcodeLoading(false);
         }
+        setBarcodeResult({ type: "barcode", code: raw, valid, country, product });
     };
 
     const handleConfirmDelete = () => {
@@ -1429,6 +1406,7 @@ export default function App() {
             setScanState({ file: null, preview: null, loading: false, error: null, items: null });
             setScanMode('image');
             setScanText('');
+            setScanDesc('');
             const suggestion = detectLibrarySuggestion();
             if (suggestion) setLibrarySuggestion(suggestion);
         }, 350);
@@ -1493,6 +1471,7 @@ export default function App() {
                     imageBase64: base64,
                     mimeType: scanState.file.type,
                     library: libraryPayload,
+                    description: scanDesc.trim(),
                 }),
             });
             const data = await res.json();
@@ -1516,6 +1495,7 @@ export default function App() {
     const handleScanReset = () => {
         setScanState({ file: null, preview: null, loading: false, error: null, items: null });
         setScanText('');
+        setScanDesc('');
     };
 
     const handleTextAnalyze = async () => {
@@ -1723,11 +1703,8 @@ export default function App() {
         setCustomFoodList(prev => [{
             name: foodName, unit: baseUnit, per: 100, kcal: Math.round(k * factor100g),
             protein: Math.round((p * factor100g) * 10) / 10, carb: Math.round((c * factor100g) * 10) / 10, fat: Math.round((f * factor100g) * 10) / 10,
-            ...(pendingBarcode ? { barcode: pendingBarcode } : {}),
         }, ...prev]);
         setCustomFood({ name: "", quantity: 1, unit: "g", kcal: "", protein: "", carb: "", fat: "" });
-        setPendingBarcode(null);
-        setBarcodeEstimated(false);
         setTab("quick");
     };
 
@@ -2276,13 +2253,13 @@ export default function App() {
                                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                                     </svg>
                                 </button>
-                                {/* Quét mã vạch sản phẩm */}
+                                {/* Kiểm tra sản phẩm (quét mã → tra dấu hiệu thật/giả) */}
                                 <button
                                     type="button"
                                     onClick={() => setBarcodeOpen(true)}
                                     className="grid h-9 w-9 place-items-center rounded-full bg-ink text-cream transition hover:bg-ink/85 active:scale-95 shadow-soft"
-                                    aria-label="Quét mã vạch sản phẩm"
-                                    title="Quét mã vạch"
+                                    aria-label="Kiểm tra sản phẩm bằng mã vạch"
+                                    title="Kiểm tra sản phẩm"
                                 >
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M3 5v14M7.5 5v14M12 5v14M16.5 5v14M21 5v14"/>
@@ -2300,7 +2277,7 @@ export default function App() {
                         {/* Tabs */}
                         <div className="mt-5 flex gap-1 p-1 bg-cream-soft rounded-2xl">
                             <button onClick={() => setTab("quick")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "quick" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Chọn nhanh</button>
-                            <button onClick={() => { setPendingBarcode(null); setBarcodeEstimated(false); setTab("custom"); }} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "custom" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Nhập tay</button>
+                            <button onClick={() => setTab("custom")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "custom" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Nhập tay</button>
                             <button onClick={() => setTab("recipe")} className={`flex-1 py-2.5 text-[12px] font-semibold rounded-xl transition ${tab === "recipe" ? "bg-white text-orange-deep shadow-soft ring-1" : "text-ink-muted hover:text-ink"}`}>Ghép món</button>
                         </div>
 
@@ -2379,9 +2356,24 @@ export default function App() {
                                                 </div>
                                             </div>
 
+                                            {/* Chip chọn nhanh khối lượng — bấm để đổi, macro tự nhân theo */}
+                                            {(() => {
+                                                const u = (selectedFood.unit || "g").toLowerCase();
+                                                const isMass = u === "g" || u === "ml";
+                                                const presets = isMass ? [50, 100, 150, 200, 250] : [1, 2, 3];
+                                                return (
+                                                    <div className="flex flex-wrap gap-1.5 mb-2">
+                                                        {presets.map(v => (
+                                                            <button key={v} onClick={() => setQty(v)} className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ring-1 transition active:scale-95 ${qty === v ? "bg-orange text-white ring-orange-deep/20" : "bg-cream-soft text-ink-muted ring-cream-deep hover:text-ink"}`}>
+                                                                {v}{isMass ? selectedFood.unit : ""}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                );
+                                            })()}
                                             <div className="flex items-end gap-2">
-                                                <div className="w-20">
-                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng</label>
+                                                <div className="w-24">
+                                                    <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1">Số lượng ({selectedFood.unit})</label>
                                                     <input type="number" value={qty} step="any" min="0.1" onChange={e => setQty(parseFloat(e.target.value) || 0)} className="w-full bg-cream-soft ring-1 text-ink p-2.5 rounded-xl text-[14px] outline-none font-bold text-center focus:ring-2 focus:ring-orange/30 transition tabular-nums" />
                                                 </div>
                                                 <button onClick={() => handleAddSelectedFood()} className="flex-1 h-11 bg-orange text-white rounded-xl text-[12px] font-bold flex items-center justify-center gap-1.5 active:scale-95 transition hover:bg-orange-deep shadow-soft ring-1 ring-orange-deep/20">
@@ -2397,16 +2389,6 @@ export default function App() {
                             </div>
                         ) : tab === "custom" ? (
                             <div className="mt-4 space-y-2.5">
-                                {pendingBarcode && (
-                                    <div className="flex items-start gap-2 rounded-2xl bg-mist-soft ring-1 ring-mist/30 p-3">
-                                        <svg className="mt-0.5 shrink-0 text-mist-deep" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 5v14M7.5 5v14M12 5v14M16.5 5v14M21 5v14"/></svg>
-                                        <p className="text-[11px] font-medium text-mist-deep leading-relaxed">
-                                            {barcodeEstimated
-                                                ? <>Dinh dưỡng <span className="font-bold">ước lượng bằng AI</span> cho mã <span className="font-bold tabular-nums">{pendingBarcode}</span>. Kiểm tra/sửa lại cho đúng rồi lưu — lần quét sau sẽ tự nhận.</>
-                                                : <>Tự động điền từ mã vạch <span className="font-bold tabular-nums">{pendingBarcode}</span>. Kiểm tra &amp; bổ sung dinh dưỡng rồi lưu — lần quét sau sẽ tự nhận.</>}
-                                        </p>
-                                    </div>
-                                )}
                                 <input placeholder="Tên món ăn (vd: Gà rán...)" value={customFood.name} onChange={e => setCustomFood(p=>({...p, name:e.target.value}))} className="w-full bg-cream-soft ring-1 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition" />
                                 <div className="grid grid-cols-2 gap-2.5">
                                     <input type="number" placeholder="Số lượng" value={customFood.quantity} onChange={e => setCustomFood(p=>({...p, quantity:e.target.value}))} className="bg-cream-soft ring-1 p-3.5 rounded-2xl text-[13px] outline-none font-semibold focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition tabular-nums" />
@@ -2669,7 +2651,92 @@ export default function App() {
                                     <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                                     <path className="opacity-90" d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                                 </svg>
-                                <p className="text-[13px] font-bold text-ink">Đang nhận diện sản phẩm…</p>
+                                <p className="text-[13px] font-bold text-ink">Đang kiểm tra sản phẩm…</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- KẾT QUẢ KIỂM TRA SẢN PHẨM --- */}
+                    {barcodeResult && (
+                        <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200" onClick={() => setBarcodeResult(null)}>
+                            <div className="bg-white rounded-t-[2rem] sm:rounded-[2rem] p-6 max-w-md w-full max-h-[92vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-[15px] font-bold tracking-tight text-ink">Kiểm tra sản phẩm</h3>
+                                    <button onClick={() => setBarcodeResult(null)} className="grid h-8 w-8 place-items-center rounded-full bg-cream-soft ring-1 text-ink-muted hover:text-ink transition" aria-label="Đóng">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </div>
+
+                                {barcodeResult.type === "qr" ? (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 rounded-2xl bg-sage-soft ring-1 ring-sage/30 p-4">
+                                            <span className="text-xl">🔗</span>
+                                            <p className="text-[12px] font-semibold text-sage-deep leading-relaxed">Đây là mã QR / tem chống giả. Mở liên kết để xác thực trên trang của nhà sản xuất.</p>
+                                        </div>
+                                        <p className="text-[11px] text-ink-muted break-all bg-cream-soft rounded-xl p-3 ring-1">{barcodeResult.url}</p>
+                                        <a href={barcodeResult.url} target="_blank" rel="noopener noreferrer" className="block w-full text-center bg-orange text-white p-3.5 rounded-2xl font-bold text-[13px] active:scale-95 transition hover:bg-orange-deep shadow-soft">
+                                            Mở trang xác thực
+                                        </a>
+                                        <p className="text-[10px] text-ink-faint text-center italic px-2">Chỉ mở nếu bạn tin tưởng nguồn. Trang xác thực phải là tên miền chính thức của hãng.</p>
+                                    </div>
+                                ) : barcodeResult.type === "invalid" ? (
+                                    <div className="rounded-2xl bg-orange-soft ring-1 ring-orange/30 p-4">
+                                        <p className="text-[13px] font-bold text-orange-deep mb-1">Không nhận dạng được mã</p>
+                                        <p className="text-[12px] text-ink-muted leading-relaxed break-all">Nội dung quét: {barcodeResult.code || "(trống)"} — không phải mã vạch sản phẩm hay liên kết xác thực.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {/* Dấu hiệu mã */}
+                                        <div className="rounded-2xl bg-cream-soft ring-1 p-4 space-y-2.5">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">Mã vạch</span>
+                                                <span className="text-[13px] font-bold text-ink tabular-nums">{barcodeResult.code}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">Hợp lệ (check digit)</span>
+                                                <span className={`text-[12px] font-bold ${barcodeResult.valid ? "text-sage-deep" : "text-orange-deep"}`}>
+                                                    {barcodeResult.valid ? "✓ Hợp lệ" : "✗ Không hợp lệ"}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">Nước đăng ký mã</span>
+                                                <span className="text-[12px] font-bold text-ink">{barcodeResult.country || "—"}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Sản phẩm đăng ký trong CSDL */}
+                                        <div className="rounded-2xl bg-white ring-1 p-4">
+                                            <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-muted mb-2">Sản phẩm đăng ký (cơ sở dữ liệu mở)</p>
+                                            {barcodeResult.product ? (
+                                                <div className="flex items-center gap-3">
+                                                    {barcodeResult.product.image && (
+                                                        <img src={barcodeResult.product.image} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 shrink-0" />
+                                                    )}
+                                                    <div className="min-w-0">
+                                                        <p className="text-[13px] font-bold text-ink truncate">{barcodeResult.product.name}</p>
+                                                        {barcodeResult.product.brand && <p className="text-[11px] text-ink-muted truncate">{barcodeResult.product.brand}</p>}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <p className="text-[12px] text-ink-muted italic">Không có trong cơ sở dữ liệu — chưa thể đối chiếu tên/thương hiệu.</p>
+                                            )}
+                                            <p className="text-[10px] text-ink-faint mt-2 leading-relaxed">So tên/thương hiệu trên với sản phẩm bạn đang cầm. Nếu lệch → dấu hiệu đáng ngờ.</p>
+                                        </div>
+
+                                        {/* Cảnh báo bắt buộc */}
+                                        <div className="rounded-2xl bg-orange-soft ring-1 ring-orange/30 p-4">
+                                            <p className="text-[11px] font-semibold text-orange-deep leading-relaxed">
+                                                ⚠ Đây chỉ là <span className="font-bold">thông tin mã vạch</span>, KHÔNG khẳng định hàng thật/giả — hàng giả có thể in y mã. Để chắc chắn: kiểm tra <span className="font-bold">tem chống giả của hãng</span>, bao bì, hóa đơn và nơi mua.
+                                            </p>
+                                        </div>
+
+                                        {/* Tra sâu hơn */}
+                                        <div className="flex gap-2">
+                                            <a href={`https://www.gs1.org/services/verified-by-gs1`} target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-cream-soft ring-1 text-ink p-2.5 rounded-xl font-semibold text-[11px] hover:bg-cream-deep transition">Verified by GS1</a>
+                                            <a href={`https://icheck.com.vn`} target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-cream-soft ring-1 text-ink p-2.5 rounded-xl font-semibold text-[11px] hover:bg-cream-deep transition">iCheck</a>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -2750,6 +2817,16 @@ export default function App() {
                                     /* STEP 2: Có ảnh, chưa analyze */
                                     <div className="space-y-3">
                                         <img src={scanState.preview} alt="Món vừa chọn" className="w-full max-h-72 object-cover rounded-2xl ring-1" />
+                                        <div>
+                                            <textarea
+                                                value={scanDesc}
+                                                onChange={e => setScanDesc(e.target.value)}
+                                                placeholder="Mô tả món (không bắt buộc) — giúp AI nhận diện chính xác hơn. VD: phở bò tái, bánh mì thịt nướng..."
+                                                rows={2}
+                                                maxLength={300}
+                                                className="w-full bg-cream-soft ring-1 p-3 rounded-2xl text-[12px] outline-none resize-none focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition"
+                                            />
+                                        </div>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={handleScanAnalyze}
@@ -2945,6 +3022,29 @@ export default function App() {
                                                     </div>
                                                 );
                                             })}
+
+                                            {scanMode === 'image' && (
+                                                <div className="rounded-2xl bg-cream-soft ring-1 p-3.5 space-y-2.5">
+                                                    <p className="text-[11px] font-semibold text-ink-muted">Chưa đúng món? Mô tả lại để nhận diện chính xác hơn:</p>
+                                                    <textarea
+                                                        value={scanDesc}
+                                                        onChange={e => setScanDesc(e.target.value)}
+                                                        placeholder="VD: đây là bún chả Hà Nội, có chả viên và nước chấm..."
+                                                        rows={2}
+                                                        maxLength={300}
+                                                        className="w-full bg-white ring-1 p-3 rounded-xl text-[12px] outline-none resize-none focus:ring-2 focus:ring-orange/30 placeholder:text-ink-faint transition"
+                                                    />
+                                                    <button
+                                                        onClick={handleScanAnalyze}
+                                                        disabled={scanState.loading || !scanDesc.trim()}
+                                                        className="w-full h-10 bg-ink text-cream rounded-xl font-bold text-[12px] transition hover:bg-ink/85 disabled:opacity-50 flex items-center justify-center gap-2"
+                                                    >
+                                                        {scanState.loading ? (
+                                                            <><span className="inline-block w-3.5 h-3.5 border-2 border-cream border-t-transparent rounded-full animate-spin"/> Đang phân tích lại...</>
+                                                        ) : "↻ Phân tích lại với mô tả"}
+                                                    </button>
+                                                </div>
+                                            )}
 
                                             <div className="flex gap-2 pt-1">
                                                 <button

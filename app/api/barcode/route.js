@@ -1,33 +1,8 @@
-// Tra cứu sản phẩm theo mã vạch qua Open Food Facts (miễn phí, không cần API key).
-// Trả về dinh dưỡng /100g khi OFF có; nếu thiếu, client sẽ nhờ Gemini ước lượng từ tên.
-
-const round1 = (v) => (v == null || isNaN(v) ? 0 : Math.round(Number(v) * 10) / 10);
+// Tra cứu NHẬN DẠNG sản phẩm theo mã vạch qua Open Food Facts (miễn phí, không cần API key).
+// Dùng cho tính năng "Kiểm tra sản phẩm" — trả tên/thương hiệu/ảnh đã đăng ký để user đối chiếu.
+// LƯU Ý: KHÔNG khẳng định thật/giả — chỉ là thông tin tham khảo.
 
 const OFF_UA = "StayFit/1.0 (stayfit.id.vn)";
-
-// kcal/100g từ object nutriments (ưu tiên kcal, fallback kJ → kcal).
-function extractKcal(n) {
-  let kcal = n["energy-kcal_100g"];
-  if (kcal == null) kcal = n["energy-kcal_value"];
-  if (kcal == null && n["energy_100g"] != null) kcal = n["energy_100g"] / 4.184;
-  return kcal;
-}
-
-// hasData=true khi OFF thực sự có ít nhất 1 trường dinh dưỡng (kể cả giá trị 0 — vd nước light gần 0 kcal).
-function macrosFrom(n) {
-  const kcal = extractKcal(n);
-  return {
-    kcal: kcal != null ? Math.round(kcal) : 0,
-    protein: round1(n.proteins_100g),
-    carb: round1(n.carbohydrates_100g),
-    fat: round1(n.fat_100g),
-    hasData:
-      kcal != null ||
-      n.proteins_100g != null ||
-      n.carbohydrates_100g != null ||
-      n.fat_100g != null,
-  };
-}
 
 export async function GET(request) {
   const code = new URL(request.url).searchParams.get("code");
@@ -36,7 +11,7 @@ export async function GET(request) {
   }
 
   try {
-    const fields = "product_name,product_name_vi,brands,nutriments,image_front_small_url";
+    const fields = "product_name,product_name_vi,brands,image_front_small_url";
     const res = await fetch(
       `https://world.openfoodfacts.org/api/v2/product/${code}?fields=${fields}`,
       { headers: { "User-Agent": OFF_UA }, signal: AbortSignal.timeout(8000) }
@@ -48,27 +23,15 @@ export async function GET(request) {
       return Response.json({ found: false });
     }
 
-    const baseName = (p.product_name_vi || p.product_name || "").trim();
+    const name = (p.product_name_vi || p.product_name || "").trim();
     const brand = p.brands ? p.brands.split(",")[0].trim() : "";
-    // Chỉ ghép brand khi tên chưa chứa brand (tránh "Nutella (Nutella)").
-    const includeBrand = brand && baseName && !baseName.toLowerCase().includes(brand.toLowerCase());
-    const name = (includeBrand ? `${baseName} (${brand})` : baseName || `Sản phẩm ${code}`).slice(0, 80);
-
-    const macros = macrosFrom(p.nutriments || {});
 
     return Response.json({
       found: true,
-      hasNutrition: macros.hasData,
       product: {
-        name,
-        unit: "g",
-        per: 100,
-        kcal: macros.kcal,
-        protein: macros.protein,
-        carb: macros.carb,
-        fat: macros.fat,
+        name: name || `Sản phẩm ${code}`,
+        brand,
         image: p.image_front_small_url || null,
-        barcode: code,
       },
     });
   } catch (e) {
