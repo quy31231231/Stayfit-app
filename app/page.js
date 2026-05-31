@@ -28,6 +28,7 @@ import { uploadImage, signGets } from '../lib/r2/upload';
 
 // Lazy: thư viện quét mã (zxing) chỉ tải khi mở scanner, không phình bundle ban đầu.
 const BarcodeScanner = dynamic(() => import('./dashboard/_components/BarcodeScanner'), { ssr: false });
+const AvatarCropper = dynamic(() => import('./_components/AvatarCropper'), { ssr: false });
 const OnboardingWizard = dynamic(() => import('./_components/OnboardingWizard'), { ssr: false });
 
 // Khởi tạo Plugin DataLabels
@@ -869,6 +870,8 @@ export default function App() {
     const [imgUrls, setImgUrls] = useState({});         // R2 presigned GET: imageKey/avatarKey → url tạm
     const [lightboxUrl, setLightboxUrl] = useState(null); // xem ảnh món phóng to
     const avatarInputRef = useRef(null);
+    const [avatarCropSrc, setAvatarCropSrc] = useState(null); // ảnh đang chờ crop (dataURL)
+    const [avatarBusy, setAvatarBusy] = useState(false);
     const [tab, setTab] = useState("quick");
     const [selectedMeal, setSelectedMeal] = useState("Bữa sáng");
     const [selectedFood, setSelectedFood] = useState(null);
@@ -1554,11 +1557,22 @@ export default function App() {
     };
 
     // Avatar: chọn ảnh → nén nhỏ → upload R2 → lưu avatarKey (persist tự lo).
-    const handleAvatarPick = async (e) => {
+    // Chọn/chụp ảnh → mở cropper (chưa upload).
+    const handleAvatarPick = (e) => {
         const file = e.target.files?.[0];
         if (e.target) e.target.value = "";
-        if (!file || !password) return;
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => setAvatarCropSrc(reader.result);
+        reader.readAsDataURL(file);
+    };
+
+    // Sau khi crop xong → nén → upload R2 → lưu avatarKey.
+    const finishAvatarCrop = async (blob) => {
+        if (!blob || !password) { setAvatarCropSrc(null); return; }
+        setAvatarBusy(true);
         try {
+            const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
             const { file: compressed } = await compressImage(file, 256, 0.85);
             const key = await uploadImage(password, 'avatar', compressed);
             setProfile(prev => ({ ...prev, avatarKey: key }));
@@ -1566,6 +1580,9 @@ export default function App() {
             setImgUrls(prev => ({ ...prev, ...urls }));
         } catch (err) {
             console.warn('Upload avatar thất bại:', err.message);
+        } finally {
+            setAvatarBusy(false);
+            setAvatarCropSrc(null);
         }
     };
 
@@ -1905,6 +1922,14 @@ export default function App() {
         const avatarUrl = profile.avatarKey ? imgUrls[profile.avatarKey] : null;
         return (
             <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-500 relative font-sans text-ink">
+                {avatarCropSrc && (
+                    <AvatarCropper
+                        src={avatarCropSrc}
+                        busy={avatarBusy}
+                        onCancel={() => { if (!avatarBusy) setAvatarCropSrc(null); }}
+                        onComplete={finishAvatarCrop}
+                    />
+                )}
                 {/* Slim sticky header */}
                 <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex items-center justify-center">
                     <div className="text-center">
