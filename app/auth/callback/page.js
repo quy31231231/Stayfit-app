@@ -3,23 +3,27 @@
 import { useEffect } from 'react';
 import { getSupabaseBrowser } from '../../../lib/supabase/client';
 
-// Trang nhận redirect từ Google (qua Supabase). Đổi authorization code → session (lưu localStorage),
-// rồi quay về trang chủ. Client-side PKCE: code_verifier nằm trong localStorage của chính trình duyệt này.
+// Sau redirect từ Google: client tự đổi ?code= → session (detectSessionInUrl=true).
+// Trang này chỉ chờ có session rồi về '/'. Có timeout chống treo.
 export default function AuthCallback() {
   useEffect(() => {
-    const go = () => window.location.replace('/');
     const sb = getSupabaseBrowser();
+    const go = () => window.location.replace('/');
     if (!sb) return go();
 
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const errDesc = params.get('error_description');
-    if (errDesc) { console.error('[auth/callback]', errDesc); return go(); }
-    if (!code) return go();
+    let done = false;
+    const finish = () => { if (!done) { done = true; go(); } };
 
-    sb.auth.exchangeCodeForSession(code)
-      .then(({ error }) => { if (error) console.error('[auth/callback] exchange:', error.message); })
-      .finally(go);
+    // Khi session sẵn sàng → về trang chủ.
+    const { data: sub } = sb.auth.onAuthStateChange((_e, session) => {
+      if (session) finish();
+    });
+    // Trường hợp session đã có sẵn ngay.
+    sb.auth.getSession().then(({ data }) => { if (data.session) finish(); });
+    // Fallback: dù sao cũng về trang chủ sau 4s (gate ở '/' sẽ xử lý tiếp).
+    const t = setTimeout(finish, 4000);
+
+    return () => { clearTimeout(t); sub.subscription.unsubscribe(); };
   }, []);
 
   return (

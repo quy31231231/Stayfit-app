@@ -251,14 +251,14 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
         setWeightInput("");
 
         // Ghi cân nặng thẳng lên Supabase (hạt mịn).
-        try { await sbUpsertWeight(weightDate, inputVal); }
+        try { await sbUpsertWeight(userId, weightDate, inputVal); }
         catch (err) { console.error("Lỗi lưu cân nặng:", err.message); }
     };
 
     const deleteWeight = (date) => {
         const newLog = { ...weightLog }; delete newLog[date];
         setWeightLog(newLog); localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog));
-        sbDeleteWeight(date).catch(err => console.error("Lỗi xóa cân nặng:", err.message));
+        sbDeleteWeight(userId, date).catch(err => console.error("Lỗi xóa cân nặng:", err.message));
     };
 
     const handleChartClick = (e, activeElements) => {
@@ -954,9 +954,9 @@ export default function App() {
 
     // Lưu toàn bộ state lên Supabase (gọi debounced). RLS tự khóa theo user đăng nhập.
     const persist = async () => {
-        if (!dataLoadedRef.current) return;
+        if (!dataLoadedRef.current || !userId) return;
         try {
-            await saveSnapshot({
+            await saveSnapshot(userId, {
                 profile,
                 history,
                 weightLog: JSON.parse(localStorage.getItem("stayfit_weight_log") || "{}"),
@@ -966,29 +966,37 @@ export default function App() {
         } catch (err) { console.error("Lỗi lưu Supabase:", err.message); }
     };
 
-    // Phiên đăng nhập Supabase: nạp dữ liệu 1 lần; userId=user.id, password=access_token (cho AI route).
+    // Nạp dữ liệu của user (gọi NGOÀI callback onAuthStateChange để tránh deadlock auth lock).
+    const loadForUser = async (uid, email) => {
+        if (dataLoadedRef.current) return;
+        try {
+            const d = await loadUserData(uid);
+            if (!d) return;
+            setProfile(prev => ({ ...prev, ...d.profile }));
+            setHistory(d.history);
+            setCustomFoodList(d.customFoods);
+            setDeletedCommonFoods(d.deletedCommonFoods);
+            localStorage.setItem("stayfit_weight_log", JSON.stringify(d.weightLog));
+            setDisplayName(email || "");
+            dataLoadedRef.current = true;
+        } catch (err) { console.error("Lỗi nạp dữ liệu:", err.message); }
+    };
+
+    // Phiên đăng nhập Supabase: userId=user.id, password=access_token (cho AI route).
+    // QUAN TRỌNG: trong onAuthStateChange KHÔNG await hàm supabase khác (deadlock) → defer bằng setTimeout(0).
     useEffect(() => {
         if (!isClient) return;
         const supa = getSupabaseBrowser();
         if (!supa) return;
         let active = true;
-        const apply = async (session) => {
+        const apply = (session) => {
             if (!active) return;
             if (session?.user) {
-                setUserId(session.user.id);
+                const uid = session.user.id;
+                const email = session.user.email || session.user.phone || "";
+                setUserId(uid);
                 setPassword(session.access_token || "");
-                if (!dataLoadedRef.current) {
-                    const d = await loadUserData();
-                    if (d && active) {
-                        setProfile(prev => ({ ...prev, ...d.profile }));
-                        setHistory(d.history);
-                        setCustomFoodList(d.customFoods);
-                        setDeletedCommonFoods(d.deletedCommonFoods);
-                        localStorage.setItem("stayfit_weight_log", JSON.stringify(d.weightLog));
-                        setDisplayName(d.email || d.phone || "");
-                        dataLoadedRef.current = true;
-                    }
-                }
+                setTimeout(() => { if (active) loadForUser(uid, email); }, 0);
             } else {
                 setUserId(""); setPassword(""); dataLoadedRef.current = false;
             }
@@ -1474,7 +1482,7 @@ export default function App() {
                 return next;
             });
             // Fire-and-forget → Supabase
-            addScanFeedback(feedbackEntry).catch(err => console.warn("Feedback log failed:", err));
+            addScanFeedback(userId, feedbackEntry).catch(err => console.warn("Feedback log failed:", err));
         }
     };
 
