@@ -29,11 +29,10 @@ HTTP=$(curl -sf -o /dev/null -w "%{http_code}" "$BASE/")
 # 2. HTML contains app identifiers
 HTML=$(curl -sf "$BASE/")
 echo "$HTML" | grep -q "StayFit" && echo "PASS title 'StayFit' in HTML" || { echo "FAIL title not found"; exit 1; }
-echo "$HTML" | grep -q "tailwindcss" && echo "PASS Tailwind CDN loaded" || { echo "FAIL Tailwind not found"; exit 1; }
 
-# 3. API: sync GET without credentials returns expected error
-SYNC=$(curl -sf "http://localhost:$PORT/api/sync?userId=_smoke&password=_smoke")
-echo "$SYNC" | grep -q '"error"' && echo "PASS sync API returns error for missing creds" || { echo "FAIL sync API unexpected: $SYNC"; exit 1; }
+# 3. API: barcode lookup (public, no auth) returns JSON
+BC=$(curl -sf "http://localhost:$PORT/api/barcode?code=3017620422003")
+echo "$BC" | grep -q '"found"' && echo "PASS barcode API returns JSON" || { echo "FAIL barcode API unexpected: $BC"; exit 1; }
 
 # 4. API: vision-analyze rejects missing body (method check)
 VA=$(curl -sf -X POST -H "Content-Type: application/json" -d '{}' "http://localhost:$PORT/api/vision-analyze" 2>&1 || true)

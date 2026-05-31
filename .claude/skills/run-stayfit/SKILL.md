@@ -28,12 +28,12 @@ bash .claude/skills/run-stayfit/smoke.sh [port]
 The script:
 1. Starts `npm run dev -- --port <port>` in background
 2. Waits up to 20s for the server to respond
-3. Runs 5 checks (all verified working):
+3. Runs checks (all verified working):
    - `GET /` → HTTP 200
-   - HTML contains `"StayFit"` and Tailwind CDN tag
-   - `GET /api/sync?userId=_smoke&password=_smoke` → `{"error":"Missing SPREADSHEET_ID"}` (400)
-   - `POST /api/vision-analyze {}` → error JSON (no GEMINI_API_KEY)
-   - `POST /api/text-analyze {}` → error JSON (no GEMINI_API_KEY)
+   - HTML contains `"StayFit"`
+   - `GET /api/barcode?code=3017620422003` → JSON `{"found":...}` (public, no auth)
+   - `POST /api/vision-analyze {}` → error JSON (no GEMINI_API_KEY / no auth token)
+   - `POST /api/text-analyze {}` → error JSON (no GEMINI_API_KEY / no auth token)
 4. Waits (Ctrl-C to stop)
 
 **For a quick one-off check against an already-running server:**
@@ -43,8 +43,8 @@ The script:
 npm run dev -- --port 3099
 
 # Smoke-test in another:
-curl -s http://localhost:3099/                          # → 200 HTML
-curl -s "http://localhost:3099/api/sync?userId=x&password=x"  # → {"error":"Missing SPREADSHEET_ID"}
+curl -s http://localhost:3099/                                # → 200 HTML
+curl -s "http://localhost:3099/api/barcode?code=3017620422003"  # → {"found":...}
 ```
 
 ## Run (human path)
@@ -56,9 +56,9 @@ npm run build && npm run start  # production build
 
 ## Gotchas
 
-- **`tailwind.config` inline script**: Tailwind is loaded via CDN (`cdn.tailwindcss.com`), not PostCSS. There is no `tailwind.config.js` file. All custom colors (`cream`, `ink`, `orange`, `clay`, `sage`, `lilac`) are defined inline in `app/layout.js`.
-- **Google Sheets env vars**: Without `SPREADSHEET_ID` / `GOOGLE_CLIENT_EMAIL` / `GOOGLE_PRIVATE_KEY`, all `/api/sync` calls return 400 `{"error":"Missing SPREADSHEET_ID"}`. This is expected in local dev without credentials.
-- **GEMINI_API_KEY missing**: `/api/vision-analyze` and `/api/text-analyze` fail with an error JSON. No crash, no stack trace — clean 4xx/5xx.
+- **Tailwind build**: Tailwind is built via PostCSS (`tailwind.config.js` + `app/globals.css`), not CDN. Custom colors (`cream`, `ink`, `orange`, `clay`, `sage`, `lilac`, `mist`) live in `tailwind.config.js`.
+- **Supabase env vars**: `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` required for login/data. Without them the app still renders but auth is disabled (Google button hidden).
+- **GEMINI_API_KEY missing / no auth token**: `/api/vision-analyze` and `/api/text-analyze` fail with an error JSON (401 without a valid Supabase token, or Gemini error). No crash.
 - **Rate limiter is in-memory**: Resets on every restart. 30 req/min default, 10/min for AI routes.
 - **`npm run dev` first compile is slow** (~3–5s to compile 600 modules). The smoke script waits up to 20s.
 - **Port 3000 may be in use**: Pass an alternate port to the smoke script: `bash .../smoke.sh 3099`.
