@@ -2,8 +2,12 @@
 
 ## Project: StayFit
 
-Vietnamese calorie & fitness tracker. Next.js 15 (App Router) PWA. Uses Google
-Sheets as the database and Google Gemini for AI food recognition (vision + text).
+Vietnamese calorie & fitness tracker. Next.js 15 (App Router) PWA. Uses **Supabase**
+(Postgres + Auth, RLS) as the database and Google Gemini for AI food recognition (vision + text).
+
+> Lịch sử: app từng dùng Google Sheets làm DB. Đã **di trú sang Supabase native** (xem
+> `supabase/schema.sql` + `scripts/migrate-to-supabase.mjs`). Sheets không còn dùng trong runtime;
+> `googleapis` chỉ còn ở devDependencies cho script di trú một lần.
 
 ## Commands
 
@@ -19,72 +23,81 @@ npm run lint   # ESLint via next lint
 ```
 app/
   api/
-    vision-analyze/  # Gemini vision → identify food from photo
-    text-analyze/    # Gemini text → identify food from name
-    save-meal/       # Legacy API — writes to old 'Giảm cân' tab, không dùng trong flow chính
-    sync/            # Read/write user data from Google Sheets (GET/POST/DELETE)
+    vision-analyze/  # Gemini vision → identify food from photo (auth: Supabase JWT)
+    text-analyze/    # Gemini text → identify food from name (auth: Supabase JWT)
+    barcode/         # Tra mã vạch qua Open Food Facts (public, no auth) — "Kiểm tra sản phẩm"
+  auth/
+    callback/page.js # Client OAuth callback — đổi ?code= → session (detectSessionInUrl)
   dashboard/
-    _components/     # CalorieCircle, MacroDonut, FoodLogItem, FoodLogSection, ...
+    _components/     # CalorieCircle, MacroDonut, FoodLogItem, FoodLogSection, BarcodeScanner, ...
     page.js          # Dashboard UI
   _data/             # Static data (common-foods.js — Vietnamese food DB)
-  page.js            # Root — auth gate + toàn bộ app state (~2000 lines)
+  page.js            # Root — auth gate + toàn bộ app state (~3300 lines)
+lib/supabase/
+  client.js          # Browser client (supabase-js, localStorage session, PKCE)
+  data.js            # Data-access: loadUserData(uid) / saveSnapshot(uid,..) + weight/feedback
+  verify.js          # Server: verifySupabaseToken(jwt) cho AI routes
 middleware.js        # In-memory rate limiting (30 req/min default, 10 for AI routes)
+supabase/schema.sql  # Bảng + RLS + trigger auto-profile (chạy 1 lần trong Supabase SQL Editor)
+scripts/migrate-to-supabase.mjs  # Di trú Sheets → Supabase (1 lần, dùng service role key)
 ```
 
-Google Sheets is the sole database. No SQL, no ORM.
+Supabase Postgres là DB duy nhất. RLS khóa mọi bảng theo `auth.uid()`.
 
-## Sheets Schema
+## Supabase Schema (xem `supabase/schema.sql`)
 
-4 tabs cần tồn tại trong spreadsheet:
+| Table | Khóa | Cột chính |
+|-------|------|-----------|
+| `profiles` | `id` = auth.users.id | gender, age, height, weight, activity, goal, manual_target_kcal, start_weight, target_weight, deleted_common_foods text[] |
+| `food_logs` | `user_id` | date, meal, name, quantity, unit, kcal, protein, carb, fat (id = uuid) |
+| `weight_logs` | `user_id`, unique(user_id,date) | date, weight |
+| `custom_foods` | `user_id`, unique(user_id,name) | name, unit, per, kcal, protein, carb, fat, barcode |
+| `scan_feedback` | `user_id` | ai_predicted_name, library_matched_name, user_corrected_name, confidence, ... |
 
-| Tab | Columns | Notes |
-|-----|---------|-------|
-| `Profile` | A:N | userId, gender, age, height, weight, activity, goal, manualKcal, updatedAt, hashedPassword, customFoodsJSON, deletedCommonJSON, startWeight, targetWeight |
-| `History` | A:K | userId, date, meal, name, quantity, unit, kcal, protein, carb, fat, **timestamp** |
-| `Weight` | A:C | userId, date, weight |
-| `ScanFeedback` | A:K | Gemini AI correction logs |
+Trigger `on_auth_user_created` tự tạo dòng `profiles` khi có user mới.
 
-Row identity trong `History` dựa vào `timestamp` (cột K), không phải `id`. DELETE API tìm và xóa row theo timestamp.
+## Auth & Data flow
 
-## Sync Architecture
-
-- **`syncToCloud` (POST)**: UPSERT + RECONCILE — thêm/sửa rows, **và xóa** rows của ngày đã có trong local history nhưng timestamp không còn trong local state
-- **DELETE API** (`/api/sync DELETE`): xóa 1 row theo `timestamp` (column K của History tab)
-- **Race condition guards**: `pendingChangeRef` (có thay đổi chưa push), `pendingDeleteCountRef` (có DELETE đang chờ) — `syncFromCloud` bỏ qua nếu một trong hai đang active
-- **Debounce**: 2.5s sau mỗi thay đổi state mới push lên cloud
-
-## Local Dev (test an toàn)
-
-Tạo `.env.local` với Sheet test riêng — Next.js tự ưu tiên file này, không commit lên git:
-
-```
-SPREADSHEET_ID=<id_sheet_test>
-```
-
-Chạy `npm run dev` → data không ảnh hưởng Sheet production.
+- **Đăng nhập**: Google OAuth + SĐT (email tổng hợp `<sđt>@phone.stayfit.app`, không OTP). Session lưu
+  **localStorage** (SPA, không cookie). Gate ở `page.js`: `onAuthStateChange` → `userId = user.id`,
+  `password = access_token` (token này gửi cho AI routes).
+- **⚠ KHÔNG gọi `supabase.auth.getUser()/getSession()` bên trong `onAuthStateChange`** → deadlock auth-lock
+  (Promise pending mãi). `loadUserData(uid)` nhận `uid` từ session; việc nạp được **defer** bằng `setTimeout(0)`.
+- **Load**: `loadUserData(uid)` select song song 5 bảng → dựng lại shape state.
+- **Save**: `saveSnapshot(uid, {...})` — UPSERT + RECONCILE (xóa row không còn trong state). Debounce 2.5s.
+  Cân nặng ghi hạt mịn qua `upsertWeight`/`deleteWeight`.
+- **AI routes**: client gửi access token qua field `password`; route gọi `verifySupabaseToken(token)`
+  (`lib/supabase/verify.js`) → 401 nếu sai.
 
 ## Environment Variables
 
 | Variable | Purpose |
 |---|---|
-| `GOOGLE_CLIENT_EMAIL` | Service account email — dùng trong `sync/route.js` |
-| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Legacy — chỉ dùng trong `save-meal/route.js` (API cũ) |
-| `GOOGLE_PRIVATE_KEY` | Service account private key (see gotcha below) |
-| `SPREADSHEET_ID` | Target spreadsheet ID (chính) |
-| `GOOGLE_SHEET_ID` | Alias cho `SPREADSHEET_ID` — dùng trong `save-meal` legacy |
-| `GEMINI_API_KEY` | Google Generative AI key |
-| `GEMINI_MODEL` | Gemini model name (e.g. `gemini-1.5-flash`) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL `https://<ref>.supabase.co` (public) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/publishable key (public) |
+| `GEMINI_API_KEY` | Google Generative AI key (cho vision/text routes) |
+| `GEMINI_MODEL` | Gemini model name (optional; mặc định auto-xoay nhiều model) |
+| `SUPABASE_SERVICE_ROLE_KEY` | **BÍ MẬT** — chỉ cho `scripts/migrate-to-supabase.mjs`, KHÔNG để client/commit |
+| `GOOGLE_CLIENT_EMAIL` / `GOOGLE_PRIVATE_KEY` / `SPREADSHEET_ID` | Chỉ cho script di trú (đọc Sheets cũ). Không cần cho app runtime. |
+
+## Supabase setup (dashboard — không làm bằng code được)
+
+- **Authentication → Providers → Google**: bật + dán Client ID/Secret (tạo ở Google Cloud Console).
+  Authorized redirect URI bên Google = `https://<ref>.supabase.co/auth/v1/callback`.
+- **Authentication → Providers → Email**: TẮT "Confirm email" (để đăng ký SĐT-qua-email-tổng-hợp không cần verify).
+- **Authentication → URL Configuration**: Site URL = `https://stayfit.id.vn`; Redirect URLs gồm
+  `https://stayfit.id.vn/auth/callback` + `http://localhost:3000/auth/callback`.
 
 ## Gotchas
 
-- **Private key escaping**: `GOOGLE_PRIVATE_KEY` in `.env` stores literal `\n`.
-  The API routes call `.replace(/\\n/g, "\n")` before using it — don't remove that.
-- **Rate limiter is in-memory**: Resets on every server restart. Fine for a personal
-  app, not suitable for multi-instance deployments.
-- **Sheets locale**: Vietnamese locales write decimals with commas (`81,4`).
-  `safeFloat()` in sync/route.js handles this — don't use raw `parseFloat` on Sheets values.
+- **auth-lock deadlock**: không await hàm `supabase.auth.*` khác trong callback `onAuthStateChange` (xem trên).
+- **OAuth callback**: là **client page** (`app/auth/callback/page.js`), KHÔNG phải route handler — App Router
+  + PKCE localStorage cần đổi mã ở client (`detectSessionInUrl: true`). Đừng đổi lại thành route.js.
+- **Rate limiter is in-memory**: Resets on every restart. 30 req/min default, 10/min for AI routes.
 - **Fuzzy food matching**: Both AI routes use a custom diacritic-stripping `normalize()`
-  + token-Jaccard scorer to match Vietnamese food names. Threshold is 0.6.
+  + token-Jaccard scorer to match Vietnamese food names.
+- **Barcode ≠ thật/giả**: `/api/barcode` chỉ tra thông tin Open Food Facts để đối chiếu; UI luôn cảnh báo
+  KHÔNG khẳng định hàng thật/giả (mã vạch có thể bị copy).
 
 ---
 
