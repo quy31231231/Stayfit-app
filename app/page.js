@@ -481,7 +481,6 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                     <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">⚖️</span>
                                     <div>
                                         <h3 className="text-[15px] font-bold tracking-tight text-ink">Tiến trình cân nặng</h3>
-                                        <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Theo dõi hành trình của bạn</p>
                                     </div>
                                 </div>
                                 <div className="relative">
@@ -686,7 +685,6 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                         <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sage-soft text-xl">📈</span>
                         <div>
                             <h3 className="text-[15px] font-bold tracking-tight text-ink">Biểu đồ cân nặng</h3>
-                            <p className="mt-0.5 text-[11px] font-medium text-ink-muted">14 ngày gần nhất</p>
                         </div>
                     </header>
                     {sortedDates.length === 0 && (
@@ -726,7 +724,6 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                 <span className="grid h-11 w-11 place-items-center rounded-2xl bg-mist-soft text-xl">⚖️</span>
                                 <div>
                                     <h3 className="text-[15px] font-bold tracking-tight text-ink">Chỉ số BMI của bạn</h3>
-                                    <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Tính từ cân nặng và chiều cao hiện tại</p>
                                 </div>
                             </header>
 
@@ -784,10 +781,8 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-clay-soft text-xl">🔥</span>
                             <div>
                                 <h3 className="text-[15px] font-bold tracking-tight text-ink">Năng lượng đã nạp</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Theo bữa ăn mỗi ngày</p>
                             </div>
                         </div>
-                        <span className="text-[10px] text-ink-faint italic shrink-0">nhấn để xem</span>
                     </header>
                     <div className="h-48 relative w-full"><canvas ref={kcalChartRef}></canvas></div>
                 </section>
@@ -799,10 +794,8 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lilac-soft text-xl">🥗</span>
                             <div>
                                 <h3 className="text-[15px] font-bold tracking-tight text-ink">Protein · Carb · Fat</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Xu hướng macro</p>
                             </div>
                         </div>
-                        <span className="text-[10px] text-ink-faint italic shrink-0">nhấn để xem</span>
                     </header>
                     <div className="h-48 relative w-full"><canvas ref={macroChartRef}></canvas></div>
                 </section>
@@ -1881,6 +1874,10 @@ export default function App() {
                                 <h2 className="mt-0.5 text-[16px] font-bold tracking-tight text-ink truncate">{heroName || "Chưa đặt biệt danh"}</h2>
                                 {displayName && <p className="mt-0.5 text-[11px] font-medium text-ink-muted truncate">{displayName}</p>}
                             </div>
+                            <button onClick={handleLogout} className="shrink-0 self-start inline-flex items-center gap-1.5 rounded-full bg-cream-soft px-3 py-1.5 text-[11px] font-semibold text-ink-muted ring-1 hover:bg-cream-deep hover:text-ink active:scale-95 transition" aria-label="Đăng xuất">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                Đăng xuất
+                            </button>
                         </div>
                         {/* Ô biệt danh — đổi tên hiển thị ở lời chào */}
                         <div className="mt-4">
@@ -1900,7 +1897,6 @@ export default function App() {
                             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-lilac-soft text-xl">👤</span>
                             <div>
                                 <h3 className="text-[15px] font-bold tracking-tight text-ink">Giới tính</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Để tính BMR chính xác</p>
                             </div>
                         </header>
                         <div className="flex gap-1.5 p-1 bg-cream-soft rounded-2xl ring-1">
@@ -1915,7 +1911,6 @@ export default function App() {
                             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-sage-soft text-xl">📏</span>
                             <div>
                                 <h3 className="text-[15px] font-bold tracking-tight text-ink">Chỉ số cơ thể</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Tuổi · Cân nặng · Chiều cao</p>
                             </div>
                         </header>
                         <div className="grid grid-cols-3 gap-2.5">
@@ -1949,7 +1944,6 @@ export default function App() {
                             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-clay-soft text-xl">🎯</span>
                             <div>
                                 <h3 className="text-[15px] font-bold tracking-tight text-ink">Lối sống</h3>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Mức vận động & hướng đi</p>
                             </div>
                         </header>
                         <div className="space-y-3">
@@ -2001,7 +1995,6 @@ export default function App() {
                                 <span className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-soft text-xl">🥑</span>
                                 <div>
                                     <h3 className="text-[15px] font-bold tracking-tight text-ink">Tùy chỉnh Macro</h3>
-                                    <p className="mt-0.5 text-[11px] font-medium text-ink-muted">{profile.isManualMacro ? "Đang tùy chỉnh tay" : "Theo tỉ lệ mặc định"}</p>
                                 </div>
                             </div>
                             <button onClick={() => { const nextState = !profile.isManualMacro; setProfile({...profile, isManualMacro: nextState}); if (nextState) setIsDietModalOpen(true); }} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ring-1 ${profile.isManualMacro ? 'bg-orange ring-orange-deep/20' : 'bg-cream-deep ring-cream-deep'}`} aria-label="Toggle macro tùy chỉnh">
@@ -2057,15 +2050,6 @@ export default function App() {
                         )}
                     </section>
 
-                    {/* ACTION BUTTONS */}
-                    <div className="space-y-2.5">
-                        <button onClick={() => setView("journal")} className="w-full py-4 bg-orange text-white rounded-2xl font-bold text-[14px] shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep active:scale-95 transition">
-                            Quay lại nhật ký
-                        </button>
-                        <button onClick={handleLogout} className="w-full py-3 bg-cream-soft text-ink-muted rounded-2xl font-semibold text-[12px] ring-1 hover:bg-cream-deep hover:text-ink active:scale-95 transition">
-                            Đăng xuất
-                        </button>
-                    </div>
                 </main>
 
                 <BottomNav view={view} setView={setView} />
