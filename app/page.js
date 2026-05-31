@@ -27,6 +27,7 @@ import { loadUserData, saveSnapshot, upsertWeight as sbUpsertWeight, deleteWeigh
 
 // Lazy: thư viện quét mã (zxing) chỉ tải khi mở scanner, không phình bundle ban đầu.
 const BarcodeScanner = dynamic(() => import('./dashboard/_components/BarcodeScanner'), { ssr: false });
+const OnboardingWizard = dynamic(() => import('./_components/OnboardingWizard'), { ssr: false });
 
 // Khởi tạo Plugin DataLabels
 Chart.register(ChartDataLabels);
@@ -832,6 +833,7 @@ export default function App() {
     const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
     const [displayName, setDisplayName] = useState(""); // tên hiển thị (email/SĐT) — userId giờ là uuid
+    const [showOnboarding, setShowOnboarding] = useState(false); // wizard lần đầu đăng nhập
     const [view, setView] = useState("profile");
     const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
@@ -979,7 +981,19 @@ export default function App() {
             localStorage.setItem("stayfit_weight_log", JSON.stringify(d.weightLog));
             setDisplayName(email || "");
             dataLoadedRef.current = true;
+            // Lần đầu (chưa có biệt danh & chưa hoàn tất setup) → mở onboarding wizard.
+            if (!d.profile.nickname && !localStorage.getItem('stayfit_setup')) {
+                setShowOnboarding(true);
+            }
         } catch (err) { console.error("Lỗi nạp dữ liệu:", err.message); }
+    };
+
+    // Hoàn tất onboarding: merge profile + đánh dấu đã setup + vào Nhật ký.
+    const finishOnboarding = (partial) => {
+        setProfile(prev => ({ ...prev, ...partial }));
+        try { localStorage.setItem('stayfit_setup', 'done'); } catch (e) {}
+        setShowOnboarding(false);
+        setView('journal');
     };
 
     // Phiên đăng nhập Supabase: userId=user.id, password=access_token (cho AI route).
@@ -1832,12 +1846,19 @@ export default function App() {
         );
     }
 
+    // Lần đầu đăng nhập → onboarding wizard (đè lên mọi view).
+    if (showOnboarding) {
+        const suggestedNick = (displayName || "").split("@")[0] || "";
+        return <OnboardingWizard initial={profile} suggestedNick={suggestedNick} onComplete={finishOnboarding} />;
+    }
+
     if (view === "stats") {
         return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} targetLog={targetLog} setView={setView} view={view} setCurrentDate={setCurrentDate} userId={userId} password={password} pendingChangeRef={pendingChangeRef} />;
     }
     
     if (view === "profile") {
-        const userInitial = (displayName || "?").trim().charAt(0).toUpperCase();
+        const heroName = (profile.nickname || "").trim();
+        const userInitial = (heroName || displayName || "?").trim().charAt(0).toUpperCase();
         return (
             <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-500 relative font-sans text-ink">
                 {/* Slim sticky header */}
@@ -1849,7 +1870,7 @@ export default function App() {
                 </header>
 
                 <main className="p-4 space-y-5">
-                    {/* PROFILE HERO — avatar + ID */}
+                    {/* PROFILE HERO — avatar + biệt danh + email */}
                     <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 md:p-6">
                         <div className="flex items-center gap-4">
                             <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange to-orange-deep text-2xl font-bold text-white shadow-soft">
@@ -1857,9 +1878,19 @@ export default function App() {
                             </span>
                             <div className="min-w-0 flex-1">
                                 <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-orange-deep">Thành viên</span>
-                                <h2 className="mt-0.5 text-[16px] font-bold tracking-tight text-ink truncate">{displayName || "Khách"}</h2>
-                                <p className="mt-0.5 text-[11px] font-medium text-ink-muted">Lắng nghe cơ thể, nuôi dưỡng nhẹ nhàng</p>
+                                <h2 className="mt-0.5 text-[16px] font-bold tracking-tight text-ink truncate">{heroName || "Chưa đặt biệt danh"}</h2>
+                                {displayName && <p className="mt-0.5 text-[11px] font-medium text-ink-muted truncate">{displayName}</p>}
                             </div>
+                        </div>
+                        {/* Ô biệt danh — đổi tên hiển thị ở lời chào */}
+                        <div className="mt-4">
+                            <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Biệt danh</label>
+                            <input
+                                type="text" value={profile.nickname || ''} maxLength={40}
+                                onChange={e => setProfile({ ...profile, nickname: e.target.value })}
+                                placeholder="Tên hiển thị (vd: Quý)"
+                                className="w-full bg-cream-soft ring-1 p-3 rounded-2xl outline-none font-semibold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition placeholder:text-ink-faint"
+                            />
                         </div>
                     </section>
 
@@ -2096,7 +2127,7 @@ export default function App() {
 
                 <main className="p-4 space-y-5">
                     {/* GREETING */}
-                    <GreetingHeader userName={displayName || "bạn"} />
+                    <GreetingHeader userName={profile.nickname?.trim() || "bạn"} />
 
                     {/* CALORIE HERO — vòng tròn + 3 macro donuts + Eq row */}
                     <DashboardCard tone="white" padding="lg" className="overflow-hidden">

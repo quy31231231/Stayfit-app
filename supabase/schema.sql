@@ -7,6 +7,7 @@
 -- ---------- profiles (1 dòng / 1 tài khoản auth) ----------
 create table if not exists public.profiles (
   id                  uuid primary key references auth.users (id) on delete cascade,
+  nickname            text,
   gender              text,
   age                 int,
   height              numeric,
@@ -19,6 +20,8 @@ create table if not exists public.profiles (
   deleted_common_foods text[] not null default '{}',
   updated_at          timestamptz not null default now()
 );
+-- Migration cho DB đã tạo trước (thêm cột nếu chưa có):
+alter table public.profiles add column if not exists nickname text;
 
 -- ---------- custom_foods (thư viện món tự thêm) ----------
 create table if not exists public.custom_foods (
