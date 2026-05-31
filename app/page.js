@@ -1921,7 +1921,7 @@ export default function App() {
                             <button
                                 type="button"
                                 onClick={() => avatarInputRef.current?.click()}
-                                className="group relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-orange to-orange-deep text-2xl font-bold text-white shadow-soft active:scale-95 transition"
+                                className="group relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-orange to-orange-deep text-2xl font-bold text-white shadow-soft active:scale-95 transition focus:outline-none focus-visible:outline-none"
                                 aria-label="Đổi ảnh đại diện"
                             >
                                 {avatarUrl
