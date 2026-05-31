@@ -30,7 +30,7 @@ function accentFor(hour) {
   return { chip: "bg-lilac-soft/70 text-lilac-deep ring-lilac/15" };
 }
 
-export default function GreetingHeader({ userName = "bạn", now = new Date() }) {
+export default function GreetingHeader({ userName = "bạn", avatarUrl = null, now = new Date() }) {
   const hour = now.getHours();
   const greet = greetingFor(hour);
   const accent = accentFor(hour);
@@ -56,8 +56,10 @@ export default function GreetingHeader({ userName = "bạn", now = new Date() })
         className="flex items-center gap-3 self-start rounded-2xl bg-white p-2 pr-4 shadow-soft ring-1 transition hover:shadow-lift sm:self-auto"
         aria-label="Hồ sơ"
       >
-        <span className="grid h-10 w-10 place-items-center rounded-xl bg-orange text-base font-bold text-white">
-          {initial}
+        <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-orange text-base font-bold text-white">
+          {avatarUrl
+            ? (/* eslint-disable-next-line @next/next/no-img-element */ <img src={avatarUrl} alt="" className="h-full w-full object-cover" />)
+            : initial}
         </span>
         <span className="hidden text-left sm:block">
           <span className="block text-[13px] font-semibold text-ink">{userName}</span>

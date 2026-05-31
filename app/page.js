@@ -2173,7 +2173,7 @@ export default function App() {
 
                 <main className="p-4 space-y-5">
                     {/* GREETING */}
-                    <GreetingHeader userName={profile.nickname?.trim() || "bạn"} />
+                    <GreetingHeader userName={profile.nickname?.trim() || "bạn"} avatarUrl={profile.avatarKey ? imgUrls[profile.avatarKey] : null} />
 
                     {/* CALORIE HERO — vòng tròn + 3 macro donuts + Eq row */}
                     <DashboardCard tone="white" padding="lg" className="overflow-hidden">
