@@ -3,7 +3,11 @@
 ## Project: StayFit
 
 Vietnamese calorie & fitness tracker. Next.js 15 (App Router) PWA. Uses **Supabase**
-(Postgres + Auth, RLS) as the database and Google Gemini for AI food recognition (vision + text).
+(Postgres + Auth, RLS) as the database, **Cloudflare R2** (S3-compatible, private bucket) for image
+storage (ảnh món + avatar), and Google Gemini for AI food recognition (vision + text).
+
+> Tách lớp dữ liệu: **DB = Supabase** (metadata + khóa ảnh), **Storage = R2** (file ảnh). Postgres chỉ giữ
+> `image_key`/`avatar_key` trỏ tới object trên R2; upload/đọc qua presigned URL.
 
 > Lịch sử: app từng dùng Google Sheets làm DB. Đã **di trú sang Supabase native** (xem
 > `supabase/schema.sql` + `scripts/migrate-to-supabase.mjs`). Sheets không còn dùng trong runtime;
@@ -26,6 +30,7 @@ app/
     vision-analyze/  # Gemini vision → identify food from photo (auth: Supabase JWT)
     text-analyze/    # Gemini text → identify food from name (auth: Supabase JWT)
     barcode/         # Tra mã vạch qua Open Food Facts (public, no auth) — "Kiểm tra sản phẩm"
+    r2/sign/         # Ký presigned URL R2 (auth: Supabase JWT). op:put → upload, op:get → đọc
   auth/
     callback/page.js # Client OAuth callback — đổi ?code= → session (detectSessionInUrl)
   dashboard/
@@ -36,8 +41,11 @@ app/
 lib/supabase/
   client.js          # Browser client (supabase-js, localStorage session, PKCE)
   data.js            # Data-access: loadUserData(uid) / saveSnapshot(uid,..) + weight/feedback
-  verify.js          # Server: verifySupabaseToken(jwt) cho AI routes
-middleware.js        # In-memory rate limiting (30 req/min default, 10 for AI routes)
+  verify.js          # Server: verifySupabaseToken(jwt) cho AI + R2 routes
+lib/r2/
+  server.js          # Server-only: S3 client R2 + presignPut/presignGet (KHÔNG import vào client)
+  upload.js          # Client: uploadImage(token,kind,file) + signGets(token,keys)
+middleware.js        # In-memory rate limiting (30 req/min default, 10 for AI routes; /api/r2 = default)
 supabase/schema.sql  # Bảng + RLS + trigger auto-profile (chạy 1 lần trong Supabase SQL Editor)
 scripts/migrate-to-supabase.mjs  # Di trú Sheets → Supabase (1 lần, dùng service role key)
 ```
@@ -48,8 +56,8 @@ Supabase Postgres là DB duy nhất. RLS khóa mọi bảng theo `auth.uid()`.
 
 | Table | Khóa | Cột chính |
 |-------|------|-----------|
-| `profiles` | `id` = auth.users.id | gender, age, height, weight, activity, goal, manual_target_kcal, start_weight, target_weight, deleted_common_foods text[] |
-| `food_logs` | `user_id` | date, meal, name, quantity, unit, kcal, protein, carb, fat (id = uuid) |
+| `profiles` | `id` = auth.users.id | nickname, gender, age, height, weight, activity, goal, manual_target_kcal, start_weight, target_weight, deleted_common_foods text[], **avatar_key** (→ R2) |
+| `food_logs` | `user_id` | date, meal, name, quantity, unit, kcal, protein, carb, fat, **image_key** (→ R2) (id = uuid) |
 | `weight_logs` | `user_id`, unique(user_id,date) | date, weight |
 | `custom_foods` | `user_id`, unique(user_id,name) | name, unit, per, kcal, protein, carb, fat, barcode |
 | `scan_feedback` | `user_id` | ai_predicted_name, library_matched_name, user_corrected_name, confidence, ... |
@@ -68,6 +76,11 @@ Trigger `on_auth_user_created` tự tạo dòng `profiles` khi có user mới.
   Cân nặng ghi hạt mịn qua `upsertWeight`/`deleteWeight`.
 - **AI routes**: client gửi access token qua field `password`; route gọi `verifySupabaseToken(token)`
   (`lib/supabase/verify.js`) → 401 nếu sai.
+- **Ảnh (R2)**: client `uploadImage(token,kind,file)` → POST `/api/r2/sign` (op:put) lấy presigned PUT →
+  upload thẳng lên R2 (không qua hàm Vercel). Key do **server** đặt theo uid: `meals/<uid>/<uuid>.jpg`,
+  `avatars/<uid>.jpg` → lưu vào `image_key`/`avatar_key`. Hiển thị: `signGets(token,keys)` (op:get) ký
+  GET tạm (~1h), chỉ ký key của chính uid. Ảnh món upload **1 lần/ảnh** sau khi thêm món; chỉ ký GET
+  cho ngày đang xem + avatar (không ký cả lịch sử). R2 chưa cấu hình → app vẫn chạy, chỉ không lưu ảnh.
 
 ## Environment Variables
 
@@ -78,6 +91,7 @@ Trigger `on_auth_user_created` tự tạo dòng `profiles` khi có user mới.
 | `GEMINI_API_KEY` | Google Generative AI key (cho vision/text routes) |
 | `GEMINI_MODEL` | Gemini model name (optional; mặc định auto-xoay nhiều model) |
 | `SUPABASE_SERVICE_ROLE_KEY` | **BÍ MẬT** — chỉ cho `scripts/migrate-to-supabase.mjs`, KHÔNG để client/commit |
+| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | **BÍ MẬT** — Cloudflare R2 (server-only, KHÔNG `NEXT_PUBLIC_`). Cần cả ở Vercel để storage chạy trên prod |
 | `GOOGLE_CLIENT_EMAIL` / `GOOGLE_PRIVATE_KEY` / `SPREADSHEET_ID` | Chỉ cho script di trú (đọc Sheets cũ). Không cần cho app runtime. |
 
 ## Supabase setup (dashboard — không làm bằng code được)
@@ -87,6 +101,15 @@ Trigger `on_auth_user_created` tự tạo dòng `profiles` khi có user mới.
 - **Authentication → Providers → Email**: TẮT "Confirm email" (để đăng ký SĐT-qua-email-tổng-hợp không cần verify).
 - **Authentication → URL Configuration**: Site URL = `https://stayfit.id.vn`; Redirect URLs gồm
   `https://stayfit.id.vn/auth/callback` + `http://localhost:3000/auth/callback`.
+
+## R2 setup (Cloudflare dashboard — không làm bằng code được)
+
+- Tạo bucket **private** (vd `stayfit`). Tạo **R2 API Token** (Object Read & Write) → lấy 4 biến `R2_*`.
+- **CORS Policy** cho bucket (BẮT BUỘC, nếu thiếu trình duyệt chặn PUT): `AllowedOrigins`
+  `["http://localhost:3000","https://stayfit.id.vn"]`, `AllowedMethods` `["PUT","GET"]`, `AllowedHeaders` `["*"]`.
+- Cột DB cần thêm 1 lần (SQL Editor, **Role = postgres** không phải `authenticated`):
+  `alter table public.profiles add column if not exists avatar_key text;`
+  `alter table public.food_logs add column if not exists image_key text;`
 
 ## Gotchas
 
@@ -98,6 +121,14 @@ Trigger `on_auth_user_created` tự tạo dòng `profiles` khi có user mới.
   + token-Jaccard scorer to match Vietnamese food names.
 - **Barcode ≠ thật/giả**: `/api/barcode` chỉ tra thông tin Open Food Facts để đối chiếu; UI luôn cảnh báo
   KHÔNG khẳng định hàng thật/giả (mã vạch có thể bị copy).
+- **R2 CORS**: upload PUT từ trình duyệt cần CORS policy trên bucket (xem trên). Thiếu → lỗi "blocked by
+  CORS" ở Console, bucket trống. Hiển thị qua `<img src=presignedGET>` thì KHÔNG cần CORS.
+- **R2 env phải restart dev**: thêm/sửa `.env.local` xong phải **restart `npm run dev`** (Next chỉ đọc env
+  lúc khởi động); nếu không `/api/r2/sign` trả 500 "chưa cấu hình R2" và upload âm thầm hỏng.
+- **R2 key scoping = bảo mật**: route chỉ ký GET cho key bắt đầu `meals/<uid>/` hoặc `avatars/<uid>`;
+  key luôn do server sinh → không cần RLS riêng cho storage. Presigned GET hết hạn ~1h.
+- **SQL Editor Role**: chạy DDL (create/alter table) phải để **Role = postgres**; để `authenticated`
+  sẽ `permission denied for schema public`.
 
 ---
 
