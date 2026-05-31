@@ -15,6 +15,8 @@ export default function FoodLogSection({
   mealName,
   items = [],
   targetKcal,
+  thumbUrls = {},
+  onViewImage,
   onAdd,
   onRemove,
   selectedItemIds,
@@ -124,6 +126,8 @@ export default function FoodLogSection({
             <FoodLogItem
               key={item.id}
               item={item}
+              thumbUrl={item.imageKey ? thumbUrls[item.imageKey] : null}
+              onViewImage={onViewImage}
               onRemove={onRemove}
               selected={selectedItemIds?.has(item.id) || false}
               selectionMode={selectionMode}

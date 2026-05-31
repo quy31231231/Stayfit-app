@@ -5,6 +5,8 @@ import { useDraggable } from "@dnd-kit/core";
 
 export default function FoodLogItem({
   item,
+  thumbUrl = null,
+  onViewImage,
   onRemove,
   selected = false,
   selectionMode = false,
@@ -90,6 +92,19 @@ export default function FoodLogItem({
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
+      )}
+
+      {thumbUrl && !selectionMode && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onViewImage?.(thumbUrl); }}
+          onPointerDown={(e) => { e.stopPropagation(); cancelLongPress(); }}
+          className="mr-3 h-10 w-10 flex-none overflow-hidden rounded-xl bg-cream-soft ring-1 ring-cream-deep"
+          aria-label="Xem ảnh món"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={thumbUrl} alt="" className="h-full w-full object-cover" />
+        </button>
       )}
 
       <div className="min-w-0 flex-1">

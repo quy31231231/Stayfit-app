@@ -49,5 +49,6 @@ export const config = {
     '/api/vision-analyze/:path*',
     '/api/text-analyze/:path*',
     '/api/barcode/:path*',
+    '/api/r2/:path*',
   ],
 };

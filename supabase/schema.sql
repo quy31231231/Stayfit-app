@@ -18,10 +18,12 @@ create table if not exists public.profiles (
   start_weight        numeric,
   target_weight       numeric,
   deleted_common_foods text[] not null default '{}',
+  avatar_key          text,
   updated_at          timestamptz not null default now()
 );
 -- Migration cho DB đã tạo trước (thêm cột nếu chưa có):
 alter table public.profiles add column if not exists nickname text;
+alter table public.profiles add column if not exists avatar_key text;
 
 -- ---------- custom_foods (thư viện món tự thêm) ----------
 create table if not exists public.custom_foods (
@@ -53,9 +55,12 @@ create table if not exists public.food_logs (
   protein    numeric,
   carb       numeric,
   fat        numeric,
+  image_key  text,
   created_at timestamptz not null default now()
 );
 create index if not exists food_logs_user_date_idx on public.food_logs (user_id, date);
+-- Migration cho DB đã tạo trước (thêm cột nếu chưa có):
+alter table public.food_logs add column if not exists image_key text;
 
 -- ---------- weight_logs ----------
 create table if not exists public.weight_logs (

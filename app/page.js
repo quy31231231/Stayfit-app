@@ -24,6 +24,7 @@ import GreetingHeader from './dashboard/_components/GreetingHeader';
 import BreathingTimer from './dashboard/_components/BreathingTimer';
 import { getSupabaseBrowser, isSupabaseConfigured } from '../lib/supabase/client';
 import { loadUserData, saveSnapshot, upsertWeight as sbUpsertWeight, deleteWeight as sbDeleteWeight, addScanFeedback } from '../lib/supabase/data';
+import { uploadImage, signGets } from '../lib/r2/upload';
 
 // Lazy: thư viện quét mã (zxing) chỉ tải khi mở scanner, không phình bundle ban đầu.
 const BarcodeScanner = dynamic(() => import('./dashboard/_components/BarcodeScanner'), { ssr: false });
@@ -865,6 +866,9 @@ export default function App() {
     const [history, setHistory] = useState({});
     const [customFoodList, setCustomFoodList] = useState([]);
     const [deletedCommonFoods, setDeletedCommonFoods] = useState([]);
+    const [imgUrls, setImgUrls] = useState({});         // R2 presigned GET: imageKey/avatarKey → url tạm
+    const [lightboxUrl, setLightboxUrl] = useState(null); // xem ảnh món phóng to
+    const avatarInputRef = useRef(null);
     const [tab, setTab] = useState("quick");
     const [selectedMeal, setSelectedMeal] = useState("Bữa sáng");
     const [selectedFood, setSelectedFood] = useState(null);
@@ -1111,6 +1115,22 @@ export default function App() {
         });
     }, [dailyLogRaw]);
     
+    // R2: ký URL hiển thị tạm cho ảnh món (ngày đang xem) + avatar. Chỉ ký key chưa có.
+    useEffect(() => {
+        if (!password) return;
+        const dayItems = history[currentDate] || [];
+        const needed = new Set();
+        for (const it of dayItems) if (it.imageKey && !imgUrls[it.imageKey]) needed.add(it.imageKey);
+        if (profile.avatarKey && !imgUrls[profile.avatarKey]) needed.add(profile.avatarKey);
+        if (needed.size === 0) return;
+        let cancelled = false;
+        signGets(password, [...needed])
+            .then(urls => { if (!cancelled) setImgUrls(prev => ({ ...prev, ...urls })); })
+            .catch(() => {});
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [password, currentDate, history, profile.avatarKey]);
+
     const dailyKcal = Math.round(dailyLog.reduce((s, i) => s + (i.kcal || 0), 0) * 10) / 10;
     const dailyProtein = Math.round(dailyLog.reduce((s, i) => s + (i.protein || 0), 0) * 10) / 10;
     const dailyCarb = Math.round(dailyLog.reduce((s, i) => s + (i.carb || 0), 0) * 10) / 10;
@@ -1516,7 +1536,37 @@ export default function App() {
             ...prev,
             [currentDate]: [...(prev[currentDate] || []), ...newEntries],
         }));
+
+        // Ảnh món: chỉ khi quét bằng ảnh. Upload 1 lần lên R2, gắn imageKey vào các món vừa thêm.
+        const photo = scanMode === 'image' ? scanState.file : null;
+        if (photo && password) {
+            const ids = newEntries.map(e => e.id);
+            const day = currentDate;
+            uploadImage(password, 'meal', photo)
+                .then(key => setHistory(prev => ({
+                    ...prev,
+                    [day]: (prev[day] || []).map(it => ids.includes(it.id) ? { ...it, imageKey: key } : it),
+                })))
+                .catch(err => console.warn('Upload ảnh món thất bại:', err.message));
+        }
+
         closeScanModal();
+    };
+
+    // Avatar: chọn ảnh → nén nhỏ → upload R2 → lưu avatarKey (persist tự lo).
+    const handleAvatarPick = async (e) => {
+        const file = e.target.files?.[0];
+        if (e.target) e.target.value = "";
+        if (!file || !password) return;
+        try {
+            const { file: compressed } = await compressImage(file, 256, 0.85);
+            const key = await uploadImage(password, 'avatar', compressed);
+            setProfile(prev => ({ ...prev, avatarKey: key }));
+            const urls = await signGets(password, [key]);
+            setImgUrls(prev => ({ ...prev, ...urls }));
+        } catch (err) {
+            console.warn('Upload avatar thất bại:', err.message);
+        }
     };
 
     /* ───── LIBRARY SUGGESTION (auto-grow library từ feedback) ───── */
@@ -1852,6 +1902,7 @@ export default function App() {
     if (view === "profile") {
         const heroName = (profile.nickname || "").trim();
         const userInitial = (heroName || displayName || "?").trim().charAt(0).toUpperCase();
+        const avatarUrl = profile.avatarKey ? imgUrls[profile.avatarKey] : null;
         return (
             <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-500 relative font-sans text-ink">
                 {/* Slim sticky header */}
@@ -1866,9 +1917,20 @@ export default function App() {
                     {/* PROFILE HERO — avatar + biệt danh + email */}
                     <section className="rounded-3xl bg-white p-5 shadow-soft ring-1 md:p-6">
                         <div className="flex items-center gap-4">
-                            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange to-orange-deep text-2xl font-bold text-white shadow-soft">
-                                {userInitial}
-                            </span>
+                            <input ref={avatarInputRef} type="file" accept="image/*" onChange={handleAvatarPick} className="hidden" />
+                            <button
+                                type="button"
+                                onClick={() => avatarInputRef.current?.click()}
+                                className="group relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-orange to-orange-deep text-2xl font-bold text-white shadow-soft active:scale-95 transition"
+                                aria-label="Đổi ảnh đại diện"
+                            >
+                                {avatarUrl
+                                    ? (/* eslint-disable-next-line @next/next/no-img-element */ <img src={avatarUrl} alt="" className="h-full w-full object-cover" />)
+                                    : userInitial}
+                                <span className="absolute inset-x-0 bottom-0 grid place-items-center bg-ink/45 py-0.5 opacity-0 transition group-hover:opacity-100">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                </span>
+                            </button>
                             <div className="min-w-0 flex-1">
                                 <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-orange-deep">Thành viên</span>
                                 <h2 className="mt-0.5 text-[16px] font-bold tracking-tight text-ink truncate">{heroName || "Chưa đặt biệt danh"}</h2>
@@ -2496,6 +2558,8 @@ export default function App() {
                                     <FoodLogSection
                                         mealName={meal}
                                         items={dailyLog.filter(it => it.meal === meal)}
+                                        thumbUrls={imgUrls}
+                                        onViewImage={setLightboxUrl}
                                         onAdd={(m) => {
                                             setSelectedMeal(m);
                                             if (typeof document !== "undefined") {
@@ -2654,6 +2718,24 @@ export default function App() {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    )}
+
+                    {/* LIGHTBOX — xem ảnh món phóng to */}
+                    {lightboxUrl && (
+                        <div
+                            className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+                            onClick={() => setLightboxUrl(null)}
+                        >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={lightboxUrl} alt="Ảnh món" className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl" />
+                            <button
+                                onClick={() => setLightboxUrl(null)}
+                                className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-ink shadow-lift active:scale-95"
+                                aria-label="Đóng"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
                         </div>
                     )}
 
