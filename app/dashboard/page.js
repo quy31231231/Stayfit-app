@@ -141,7 +141,7 @@ export default function DashboardPage() {
       <button
         type="button"
         onClick={() => handleAdd("Ăn vặt")}
-        className="fixed bottom-6 right-6 grid h-14 w-14 place-items-center rounded-full bg-orange text-white shadow-lift ring-1 ring-orange-deep/20 transition hover:bg-orange-deep md:hidden"
+        className="fixed bottom-6 right-6 grid h-14 w-14 place-items-center rounded-full bg-orange text-white shadow-lift ring-1 ring-orange-deep/20 transition hover:bg-orange-deep active:scale-95 md:hidden"
         aria-label="Thêm món nhanh"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -198,7 +198,7 @@ function WaterCard({ consumed = 0, target = 8 }) {
 
       <button
         type="button"
-        className="mt-4 w-full rounded-2xl bg-cream-soft py-2.5 text-[12px] font-semibold text-ink-muted ring-1 transition hover:bg-mist hover:text-white hover:ring-mist-deep/20"
+        className="mt-4 w-full rounded-2xl bg-cream-soft py-2.5 text-[12px] font-semibold text-ink-muted ring-1 transition hover:bg-mist hover:text-white hover:ring-mist-deep/20 active:scale-95"
       >
         Thêm một ly
       </button>
@@ -228,7 +228,7 @@ function MindfulCard() {
             <button
               type="button"
               onClick={() => setBreathing(true)}
-              className="mt-3 rounded-full bg-white px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white"
+              className="mt-3 rounded-full bg-white px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white active:scale-95"
             >
               Bắt đầu thở
             </button>
