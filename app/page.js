@@ -472,7 +472,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
 
     return (
-        <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-300 relative text-ink">
+        <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 relative text-ink">
             {/* Slim sticky header */}
             <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex items-center justify-center">
                 <div className="text-center">
@@ -1949,7 +1949,7 @@ export default function App() {
         const userInitial = (heroName || displayName || "?").trim().charAt(0).toUpperCase();
         const avatarUrl = profile.avatarKey ? imgUrls[profile.avatarKey] : null;
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-500 relative font-sans text-ink">
+            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 relative font-sans text-ink">
                 {avatarCropSrc && (
                     <AvatarCropper
                         src={avatarCropSrc}
@@ -2207,7 +2207,7 @@ export default function App() {
 
     if (view === "journal") {
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 animate-in fade-in duration-300 relative font-sans text-ink">
+            <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 relative font-sans text-ink">
                 {/* DATE NAV — slim sticky bar */}
                 <header className="sticky top-0 z-20 bg-cream/95 backdrop-blur-sm border-b border-cream-deep px-4 py-3 flex justify-between items-center">
                     <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate()-1); setCurrentDate(formatDate(d)); }} className="grid h-9 w-9 place-items-center rounded-full text-ink-muted hover:bg-orange-soft hover:text-orange-deep transition" aria-label="Ngày trước">
