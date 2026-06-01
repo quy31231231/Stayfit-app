@@ -167,6 +167,34 @@ const normalizeFoodGroupKey = (value) => normalizeFoodLookup(value)
     .replace(/[\/,;:.-]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+// Gợi ý định lượng từ lịch sử: trả về quantity hay dùng nhất cho món `foodName` (cùng `unit`).
+// Hòa số lần → lấy lần ghi gần đây nhất. Không có dữ liệu → null.
+const suggestQty = (history, foodName, unit) => {
+    const targetName = normalizeFoodLookup(foodName);
+    const targetUnit = (unit || "g").toLowerCase();
+    if (!targetName) return null;
+    const stats = new Map(); // quantity -> { count, recency }
+    let order = 0;
+    for (const date of Object.keys(history || {}).sort()) {
+        for (const item of history[date] || []) {
+            if (normalizeFoodLookup(item.name) !== targetName) continue;
+            if ((item.unit || "g").toLowerCase() !== targetUnit) continue;
+            const q = Number(item.quantity);
+            if (!(q > 0)) continue;
+            const prev = stats.get(q);
+            if (prev) { prev.count++; prev.recency = order; }
+            else stats.set(q, { count: 1, recency: order });
+            order++;
+        }
+    }
+    let best = null, bestStat = null;
+    for (const [q, s] of stats) {
+        if (!bestStat || s.count > bestStat.count || (s.count === bestStat.count && s.recency > bestStat.recency)) {
+            best = q; bestStat = s;
+        }
+    }
+    return best;
+};
 const UNIT_GRAM_WEIGHTS = { 'tô': 400, 'bát': 200, 'ly': 250, 'quả': 100, 'cái': 100, 'chiếc': 100, 'chén': 70, 'đĩa': 350, 'cuốn': 80, 'ổ': 80, 'suất': 350, 'gói': 75, 'miếng': 80, 'phần': 300 };
 // Quy đổi số lượng + đơn vị sang gram (ml tính tương đương gram). Đơn vị đếm dùng bảng ước lượng.
 const unitToGrams = (qty, unit) => {
@@ -2296,7 +2324,7 @@ export default function App() {
                                 <div className="mt-3 grid grid-cols-2 gap-2 max-h-64 overflow-y-auto no-scrollbar pb-1">
                                     {filteredFoods.map((f, idx) => (
                                         <div key={f.name + idx} className="relative group">
-                                            <button onClick={() => { setSelectedFood(f); setQty(f.per); }} className={`w-full p-3.5 pr-11 rounded-2xl text-left transition ring-1 ${selectedFood?.name === f.name ? "bg-orange-soft ring-orange/30" : "bg-cream-soft ring-transparent hover:ring-cream-deep"} active:scale-[0.98]`}>
+                                            <button onClick={() => { setSelectedFood(f); setQty(suggestQty(history, f.name, f.unit) ?? f.per); }} className={`w-full p-3.5 pr-11 rounded-2xl text-left transition ring-1 ${selectedFood?.name === f.name ? "bg-orange-soft ring-orange/30" : "bg-cream-soft ring-transparent hover:ring-cream-deep"} active:scale-[0.98]`}>
                                                 <p className="truncate text-[11px] font-semibold tracking-tight text-ink mb-0.5">{f.name}</p>
                                                 <p className="text-[12px] font-bold text-ink tabular-nums">{f.kcal} <span className="text-[9px] font-medium text-ink-muted">kcal/{f.per}{f.unit}</span></p>
                                             </button>
@@ -2364,8 +2392,15 @@ export default function App() {
                                                 const u = (selectedFood.unit || "g").toLowerCase();
                                                 const isMass = u === "g" || u === "ml";
                                                 const presets = isMass ? [50, 100, 150, 200, 250] : [1, 2, 3];
+                                                const suggested = suggestQty(history, selectedFood.name, selectedFood.unit);
+                                                const showSuggestChip = suggested != null && !presets.includes(suggested);
                                                 return (
                                                     <div className="flex flex-wrap gap-1.5 mb-2">
+                                                        {showSuggestChip && (
+                                                            <button key="suggested" onClick={() => setQty(suggested)} className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ring-1 transition active:scale-95 ${qty === suggested ? "bg-orange text-white ring-orange-deep/20" : "bg-cream-soft text-ink-muted ring-cream-deep hover:text-ink"}`}>
+                                                                ★ {suggested}{isMass ? selectedFood.unit : ""}
+                                                            </button>
+                                                        )}
                                                         {presets.map(v => (
                                                             <button key={v} onClick={() => setQty(v)} className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ring-1 transition active:scale-95 ${qty === v ? "bg-orange text-white ring-orange-deep/20" : "bg-cream-soft text-ink-muted ring-cream-deep hover:text-ink"}`}>
                                                                 {v}{isMass ? selectedFood.unit : ""}
