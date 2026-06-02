@@ -61,12 +61,20 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  colorScheme: 'light',
+  colorScheme: 'light dark',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="vi" className={jakarta.variable}>
+      <head>
+        {/* Chống FOUC: set class `dark` trước khi paint nếu user đã chọn tối */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('stayfit_theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body className="bg-cream text-ink">
         {children}
         <Analytics />

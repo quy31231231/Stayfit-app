@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* LIGHT = nhận diện StayFit ấm (giữ nguyên) */
+:root {
+  --cream: 251 248 242; --cream-soft: 244 239 230; --cream-deep: 235 227 210;
+  --ink: 45 38 32; --ink-muted: 122 112 102; --ink-faint: 184 175 164;
+  --orange: 217 119 87; --orange-soft: 247 232 220; --orange-deep: 122 51 24;
+  --clay: 196 154 74; --clay-soft: 240 229 204; --clay-deep: 92 64 21;
+  --sage: 95 130 102; --sage-soft: 221 231 220; --sage-deep: 45 70 50;
+  --lilac: 155 138 184; --lilac-soft: 229 221 237; --lilac-deep: 63 47 92;
+  --mist: 107 149 171; --mist-soft: 221 232 239; --mist-deep: 61 90 107;
+  --surface: 255 255 255; --surface-soft: 244 239 230; --on-accent: 255 255 255;
+  --ring: rgba(60, 145, 100, 0.22); --shadow: 45 38 32; --focus: 217 119 87;
+}
+
+/* DARK = Nike monochrome trung tính + accent VOLT */
+html.dark {
+  --cream: 17 17 17; --cream-soft: 31 31 31; --cream-deep: 51 51 51;        /* #111 nền / #1F1F1F input / #333 viền-hover */
+  --ink: 245 245 245; --ink-muted: 158 158 158; --ink-faint: 94 94 94;      /* text trung tính (Nike) */
+  --orange: 198 242 78; --orange-soft: 32 38 18; --orange-deep: 214 255 102; /* VOLT: fill / tint nền / text-border sáng */
+  --clay: 224 178 86; --clay-soft: 46 38 18; --clay-deep: 240 205 130;       /* carb vàng */
+  --sage: 70 196 178; --sage-soft: 14 40 38; --sage-deep: 122 224 208;       /* protein TEAL (lệch khỏi volt) */
+  --lilac: 178 158 224; --lilac-soft: 36 30 52; --lilac-deep: 200 184 240;   /* fat tím */
+  --mist: 110 178 214; --mist-soft: 16 34 44; --mist-deep: 150 206 236;      /* nước cyan */
+  --surface: 26 26 26; --surface-soft: 38 38 38; --on-accent: 17 17 17;      /* card #1A1A1A / chữ trên volt = Nike ink #111 */
+  --ring: rgba(255, 255, 255, 0.12); --shadow: 0 0 0; --focus: 198 242 78;
+}
+
 body {
   font-family: var(--font-jakarta), 'ui-sans-serif', system-ui, sans-serif;
   font-feature-settings: 'kern', 'liga';
@@ -9,8 +35,8 @@ body {
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #FBF8F2;
-  color: #2D2620;
+  background-color: rgb(var(--cream));
+  color: rgb(var(--ink));
   overscroll-behavior-y: contain;
 }
 
@@ -35,7 +61,7 @@ input[type=number]::-webkit-outer-spin-button {
 .animate-fade-rise { animation: fade-rise 0.5s ease-out backwards; }
 
 *:focus-visible {
-  outline: 2px solid #D97757;
+  outline: 2px solid rgb(var(--focus));
   outline-offset: 2px;
   border-radius: 4px;
 }

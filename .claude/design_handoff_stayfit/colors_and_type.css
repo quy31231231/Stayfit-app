@@ -1,0 +1,186 @@
+/* ============================================================================
+   StayFit — Colors & Type foundations
+   ----------------------------------------------------------------------------
+   StayFit ships TWO themes from one token set:
+     • LIGHT  — the warm "wellness" identity (cream + terracotta orange). KEEP.
+     • DARK   — the new "Nike athletic" identity (near-black + Nike green).
+   Tokens are theme-agnostic names. The app flips themes with `.dark` on <html>.
+   In the real Next.js app these are consumed as rgb(var(--token) / <alpha>);
+   here we expose ready-to-use hex/rgba so the design system previews are
+   self-contained.
+   Font: Plus Jakarta Sans (Google Fonts — exact match to production).
+   ========================================================================== */
+
+/* Font stack — "Apple Health / Fitness" look (SF Pro Rounded).
+   1. ui-rounded → SF Pro Rounded on macOS / iOS / iPadOS (real Apple Health font)
+   2. -apple-system / SF Pro Rounded literal → backup
+   3. Nunito (Google Fonts) → closest open-source twin for non-Apple platforms
+   4. system-ui / sans-serif → safe fallback
+   Note: SF Pro Rounded is Apple-proprietary. ui-rounded is a CSS keyword
+   Apple supports natively. Nunito ≈ SF Pro Rounded visually. */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
+
+/* ------------------------------------------------------------------ *
+ * LIGHT — default. Warm cream wellness palette.                       *
+ * ------------------------------------------------------------------ */
+:root {
+  /* — Surfaces / neutrals — */
+  --cream:        #FBF8F2;   /* app background          */
+  --cream-soft:   #F4EFE6;   /* inset / input / track   */
+  --cream-deep:   #EBE3D2;   /* hairline borders        */
+  --surface:      #FFFFFF;   /* cards                   */
+
+  /* — Ink (text) — */
+  --ink:          #2D2620;   /* primary text            */
+  --ink-muted:    #7A7066;   /* secondary text          */
+  --ink-faint:    #B8AFA4;   /* tertiary / placeholder  */
+
+  /* — Accent (primary brand) — */
+  --orange:       #D97757;   /* primary fill: buttons, FAB, badges  */
+  --orange-soft:  #F7E8DC;   /* tinted tile / chip background       */
+  --orange-deep:  #7A3318;   /* accent text / pressed / hover-dark  */
+  --on-accent:    #FFFFFF;   /* text/icons on top of --orange       */
+
+  /* — Macro + secondary tones (P / C / F / water + time-of-day) — */
+  --protein:      #7E9A84;   /* sage  — protein (muted) */
+  --protein-soft: #DDE7DC;
+  --protein-deep: #2D4632;
+  --carb:         #C9AC74;   /* clay  — carb (muted)    */
+  --carb-soft:    #F0E5CC;
+  --carb-deep:    #5C4015;
+  --fat:          #A99CC2;   /* lilac — fat (muted)     */
+  --fat-soft:     #E5DDED;
+  --fat-deep:     #3F2F5C;
+  --water:        #8CA9BA;   /* mist  — water (muted)   */
+  --water-soft:   #DDE8EF;
+  --water-deep:   #3D5A6B;
+
+  /* — Calorie ring gradient — */
+  --ring-cal-from: #E89B7B;
+  --ring-cal-to:   #D97757;
+  --ring-track:    #F4EFE6;
+  --ring-over-from:#E07070;
+  --ring-over-to:  #C94040;
+
+  /* — Lines & focus — */
+  --hairline:     rgba(45, 38, 32, 0.06);
+  --focus:        #D97757;
+
+  /* — Elevation — */
+  --shadow-soft: 0 1px 2px rgba(45,38,32,0.04), 0 8px 24px -12px rgba(45,38,32,0.08);
+  --shadow-lift: 0 4px 12px -4px rgba(45,38,32,0.12), 0 16px 40px -16px rgba(45,38,32,0.20);
+  --shadow-ring: inset 0 0 0 1px rgba(45,38,32,0.06);
+}
+
+/* ------------------------------------------------------------------ *
+ * DARK — "Nike athletic". Near-black + Nike green. Light identity is  *
+ * NOT touched; only the dark layer is redefined per the StayFit brief.*
+ * Contrast note: #1eaa52 on white ≈ 2.8:1 (weak) → fills use #007d48  *
+ * + white (≈5.8:1). #1eaa52 is reserved for text / ring / highlight   *
+ * on near-black, where it reads cleanly.                              *
+ * ------------------------------------------------------------------ */
+.dark {
+  --cream:        #0E0E0E;   /* app background (near-black) */
+  /* Subtle radial atmosphere — lime glow falls from the top, sinks to pure black */
+  --bg-atmosphere: radial-gradient(ellipse 90% 60% at 50% 0%, rgba(137,243,54,0.10), transparent 70%),
+                   radial-gradient(ellipse 80% 100% at 50% 100%, #050505, transparent 60%);
+  --cream-soft:   #1F1F1F;   /* inset / input / track       */
+  --cream-deep:   #2A2A2A;   /* hairline borders            */
+  --surface:      #1A1A1A;   /* cards                       */
+
+  --ink:          #F5F5F5;
+  --ink-muted:    #9E9E9E;
+  --ink-faint:    #6B6B6B;
+
+  --orange:       #22C55E;   /* primary fill button bg (punchy emerald) */
+  --orange-soft:  #0E2A1A;   /* dark green tile / chip bg               */
+  --orange-deep:  #89F336;   /* lime accent for text / borders / numbers */
+  --on-accent:    #0A0A0A;   /* deep near-black on emerald (~7:1)       */
+
+  /* Macro tones — same muted pastel family as light mode, on near-black */
+  --protein:      #7E9A84;   /* sage   */
+  --protein-soft: #182320;
+  --protein-deep: #7E9A84;
+  --carb:         #C9AC74;   /* clay   */
+  --carb-soft:    #26200F;
+  --carb-deep:    #C9AC74;
+  --fat:          #A99CC2;   /* lilac  */
+  --fat-soft:     #1F1B2A;
+  --fat-deep:     #A99CC2;
+  --water:        #8CA9BA;   /* mist   */
+  --water-soft:   #15202A;
+  --water-deep:   #8CA9BA;
+
+  /* Calorie ring → Lime green gradient; track sinks into the black */
+  --ring-cal-from: #89F336;
+  --ring-cal-to:   #5BB820;
+  --ring-track:    #1F1F1F;
+  --ring-over-from:#E07070;
+  --ring-over-to:  #C94040;
+
+  --hairline:     rgba(255,255,255,0.12);
+  --focus:        #89F336;
+
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.40), 0 8px 24px -12px rgba(0,0,0,0.70);
+  --shadow-lift: 0 4px 12px -4px rgba(0,0,0,0.55), 0 16px 40px -16px rgba(0,0,0,0.80);
+  --shadow-ring: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+/* ============================================================================
+   TYPE SCALE
+   Plus Jakarta Sans throughout. Tight tracking, heavy weights for numbers and
+   headings (athletic), generous line-height for Vietnamese diacritics.
+   ========================================================================== */
+:root {
+  --font-sans: ui-rounded, -apple-system, BlinkMacSystemFont,
+               "SF Pro Rounded", "SF Pro Display",
+               "Nunito", system-ui, sans-serif;
+
+  /* letter-spacing tokens */
+  --tracking-tight:  -0.012em;  /* body default (matches production) */
+  --tracking-tighter:-0.03em;   /* big numbers / display             */
+  --tracking-wide:    0.14em;    /* eyebrow / uppercase labels        */
+  --tracking-widest:  0.16em;
+}
+
+body { font-family: var(--font-sans); letter-spacing: var(--tracking-tight); }
+
+/* Semantic text roles — class hooks for previews & kits */
+.t-display {                      /* hero numerals (calorie count)        */
+  font-weight: 800;
+  font-size: clamp(40px, 8vw, 56px);
+  line-height: 0.95;
+  letter-spacing: var(--tracking-tighter);
+  font-variant-numeric: tabular-nums;
+}
+.t-wordmark {                     /* "STAYFIT" lockup — italic athletic   */
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+.t-h1 { font-weight: 700; font-size: 26px; line-height: 1.15; letter-spacing: var(--tracking-tight); }
+.t-h2 { font-weight: 700; font-size: 18px; line-height: 1.2;  letter-spacing: var(--tracking-tight); }
+.t-h3 { font-weight: 700; font-size: 15px; line-height: 1.25; letter-spacing: var(--tracking-tight); }
+.t-body  { font-weight: 500; font-size: 13px; line-height: 1.5; }
+.t-small { font-weight: 500; font-size: 11px; line-height: 1.4; }
+.t-eyebrow {                      /* uppercase section labels             */
+  font-weight: 600; font-size: 10px; line-height: 1;
+  text-transform: uppercase; letter-spacing: var(--tracking-wide);
+}
+.t-num { font-variant-numeric: tabular-nums; }
+
+/* ============================================================================
+   SHAPE / RADIUS / SPACING tokens
+   ========================================================================== */
+:root {
+  --r-sm:   12px;   /* chips, small controls                 */
+  --r-md:   16px;   /* inputs, list rows (rounded-2xl)       */
+  --r-lg:   24px;   /* cards (rounded-3xl)                   */
+  --r-xl:   40px;   /* sheets / bottom-nav top corners       */
+  --r-pill: 999px;  /* badges, FAB, avatars                  */
+
+  /* 4px base spacing scale */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px;
+}

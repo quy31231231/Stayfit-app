@@ -141,7 +141,7 @@ export default function DashboardPage() {
       <button
         type="button"
         onClick={() => handleAdd("Ăn vặt")}
-        className="fixed bottom-6 right-6 grid h-14 w-14 place-items-center rounded-full bg-orange text-white shadow-lift ring-1 ring-orange-deep/20 transition hover:bg-orange-deep active:scale-95 md:hidden"
+        className="fixed bottom-6 right-6 grid h-14 w-14 place-items-center rounded-full bg-orange text-onaccent shadow-lift ring-1 ring-orange-deep/20 transition hover:bg-orange-deep active:scale-95 md:hidden"
         aria-label="Thêm món nhanh"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -162,13 +162,13 @@ function EqCell({ label, value, tone = "neutral", highlight = false }) {
     neutral: "bg-cream-soft text-ink",
     sage:    "bg-sage-soft text-sage-deep",
     clay:    "bg-clay-soft text-clay-deep",
-    orange:  "bg-orange text-white shadow-soft ring-1 ring-orange-deep/20",
+    orange:  "bg-orange text-onaccent shadow-soft ring-1 ring-orange-deep/20",
   }[tone];
 
   return (
     <div className={`rounded-2xl py-2.5 ${toneClass}`}>
       <p className={`text-lg font-bold leading-none tracking-tight tabular-nums ${highlight ? "" : ""}`}>{value}</p>
-      <p className={`mt-1 text-[10px] font-medium uppercase tracking-wider ${highlight ? "text-white/80" : "opacity-70"}`}>{label}</p>
+      <p className={`mt-1 text-[10px] font-medium uppercase tracking-wider ${highlight ? "text-onaccent/80" : "opacity-70"}`}>{label}</p>
     </div>
   );
 }
@@ -198,7 +198,7 @@ function WaterCard({ consumed = 0, target = 8 }) {
 
       <button
         type="button"
-        className="mt-4 w-full rounded-2xl bg-cream-soft py-2.5 text-[12px] font-semibold text-ink-muted ring-1 transition hover:bg-mist hover:text-white hover:ring-mist-deep/20 active:scale-95"
+        className="mt-4 w-full rounded-2xl bg-cream-soft py-2.5 text-[12px] font-semibold text-ink-muted ring-1 transition hover:bg-mist hover:text-onaccent hover:ring-mist-deep/20 active:scale-95"
       >
         Thêm một ly
       </button>
@@ -214,7 +214,7 @@ function MindfulCard() {
       <DashboardCard tone="sage" padding="lg">
         <div className="flex items-start gap-3">
           <span
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-xl shadow-soft animate-gentle-pulse"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-surface text-xl shadow-soft animate-gentle-pulse"
             style={{ animationDuration: "6s" }}
           >
             🧘
@@ -228,7 +228,7 @@ function MindfulCard() {
             <button
               type="button"
               onClick={() => setBreathing(true)}
-              className="mt-3 rounded-full bg-white px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white active:scale-95"
+              className="mt-3 rounded-full bg-surface px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-onaccent active:scale-95"
             >
               Bắt đầu thở
             </button>

@@ -66,7 +66,7 @@ export default function OnboardingWizard({ initial = {}, suggestedNick = '', onC
               onChange={(e) => setNickname(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') next(); }}
               placeholder={suggestedNick || 'Biệt danh của bạn'}
-              className="w-full bg-white ring-1 p-4 rounded-2xl text-[15px] font-semibold outline-none focus:ring-2 focus:ring-orange/30 transition"
+              className="w-full bg-surface ring-1 p-4 rounded-2xl text-[15px] font-semibold outline-none focus:ring-2 focus:ring-orange/30 transition"
             />
             {suggestedNick && !nickname && (
               <button onClick={() => setNickname(suggestedNick)} className="mt-3 text-[12px] font-semibold text-orange-deep hover:underline">
@@ -81,7 +81,7 @@ export default function OnboardingWizard({ initial = {}, suggestedNick = '', onC
           <Section icon="👤" title="Giới tính của bạn?" desc="Giúp tính nhu cầu năng lượng (BMR) chính xác hơn.">
             <div className="flex gap-2 p-1 bg-cream-soft rounded-2xl ring-1">
               {[['male', 'Nam'], ['female', 'Nữ']].map(([v, l]) => (
-                <button key={v} onClick={() => setGender(v)} className={`flex-1 py-3.5 rounded-xl text-[14px] font-semibold transition ${gender === v ? 'bg-white text-orange-deep shadow-soft ring-1' : 'text-ink-muted hover:text-ink'}`}>{l}</button>
+                <button key={v} onClick={() => setGender(v)} className={`flex-1 py-3.5 rounded-xl text-[14px] font-semibold transition ${gender === v ? 'bg-surface text-orange-deep shadow-soft ring-1' : 'text-ink-muted hover:text-ink'}`}>{l}</button>
               ))}
             </div>
           </Section>
@@ -124,7 +124,7 @@ export default function OnboardingWizard({ initial = {}, suggestedNick = '', onC
         {step > 0 && (
           <button onClick={back} className="px-5 h-13 py-3.5 text-ink bg-cream-soft ring-1 rounded-2xl font-semibold text-[13px] hover:bg-cream-deep transition">Quay lại</button>
         )}
-        <button onClick={next} disabled={!canNext} className="flex-1 py-3.5 bg-orange text-white rounded-2xl font-bold text-[14px] shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed">
+        <button onClick={next} disabled={!canNext} className="flex-1 py-3.5 bg-orange text-onaccent rounded-2xl font-bold text-[14px] shadow-soft ring-1 ring-orange-deep/20 hover:bg-orange-deep active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed">
           {step === TOTAL - 1 ? 'Bắt đầu' : 'Tiếp tục'}
         </button>
       </div>
@@ -156,7 +156,7 @@ function Field({ label, unit, value, onChange, decimal }) {
             const raw = String(e.target.value).replace(',', '.');
             onChange(decimal ? (parseFloat(raw) || 0) : (parseInt(raw, 10) || 0));
           }}
-          className="w-full bg-white ring-1 p-3.5 pr-10 rounded-2xl outline-none font-bold text-[15px] focus:ring-2 focus:ring-orange/30 transition tabular-nums"
+          className="w-full bg-surface ring-1 p-3.5 pr-10 rounded-2xl outline-none font-bold text-[15px] focus:ring-2 focus:ring-orange/30 transition tabular-nums"
         />
         <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-medium text-ink-muted">{unit}</span>
       </div>
@@ -166,13 +166,13 @@ function Field({ label, unit, value, onChange, decimal }) {
 
 function Choice({ active, onClick, title, sub }) {
   return (
-    <button onClick={onClick} className={`w-full text-left p-4 rounded-2xl ring-1 transition active:scale-[0.98] ${active ? 'bg-orange-soft ring-orange/40' : 'bg-white ring-cream-deep hover:bg-cream-soft'}`}>
+    <button onClick={onClick} className={`w-full text-left p-4 rounded-2xl ring-1 transition active:scale-[0.98] ${active ? 'bg-orange-soft ring-orange/40' : 'bg-surface ring-cream-deep hover:bg-cream-soft'}`}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[14px] font-bold text-ink">{title}</p>
           <p className="text-[11px] text-ink-muted mt-0.5">{sub}</p>
         </div>
-        <span className={`grid h-5 w-5 place-items-center rounded-full ring-1 transition ${active ? 'bg-orange text-white ring-orange-deep/20' : 'ring-cream-deep'}`}>
+        <span className={`grid h-5 w-5 place-items-center rounded-full ring-1 transition ${active ? 'bg-orange text-onaccent ring-orange-deep/20' : 'ring-cream-deep'}`}>
           {active && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
         </span>
       </div>

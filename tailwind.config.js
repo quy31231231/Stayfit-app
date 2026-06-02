@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './app/**/*.{js,ts,jsx,tsx}',
     './pages/**/*.{js,ts,jsx,tsx}',
@@ -7,25 +8,29 @@ module.exports = {
   ],
   theme: {
     extend: {
+      // Token màu = CSS variable → đổi theme bằng class `dark` trên <html>, không sửa từng class.
+      // Dạng rgb(var(--x) / <alpha-value>) để giữ opacity modifier (bg-cream/40, ring-orange-deep/20...).
       colors: {
-        cream:  { DEFAULT: '#FBF8F2', soft: '#F4EFE6', deep: '#EBE3D2' },
-        ink:    { DEFAULT: '#2D2620', muted: '#7A7066', faint: '#B8AFA4' },
-        orange: { DEFAULT: '#D97757', soft: '#F7E8DC', deep: '#7A3318' },
-        clay:   { DEFAULT: '#C49A4A', soft: '#F0E5CC', deep: '#5C4015' },
-        sage:   { DEFAULT: '#5F8266', soft: '#DDE7DC', deep: '#2D4632' },
-        lilac:  { DEFAULT: '#9B8AB8', soft: '#E5DDED', deep: '#3F2F5C' },
-        mist:   { DEFAULT: '#6B95AB', soft: '#DDE8EF', deep: '#3D5A6B' },
+        cream:  { DEFAULT: 'rgb(var(--cream) / <alpha-value>)',  soft: 'rgb(var(--cream-soft) / <alpha-value>)',  deep: 'rgb(var(--cream-deep) / <alpha-value>)' },
+        ink:    { DEFAULT: 'rgb(var(--ink) / <alpha-value>)',    muted: 'rgb(var(--ink-muted) / <alpha-value>)',  faint: 'rgb(var(--ink-faint) / <alpha-value>)' },
+        orange: { DEFAULT: 'rgb(var(--orange) / <alpha-value>)', soft: 'rgb(var(--orange-soft) / <alpha-value>)', deep: 'rgb(var(--orange-deep) / <alpha-value>)' },
+        clay:   { DEFAULT: 'rgb(var(--clay) / <alpha-value>)',   soft: 'rgb(var(--clay-soft) / <alpha-value>)',   deep: 'rgb(var(--clay-deep) / <alpha-value>)' },
+        sage:   { DEFAULT: 'rgb(var(--sage) / <alpha-value>)',   soft: 'rgb(var(--sage-soft) / <alpha-value>)',   deep: 'rgb(var(--sage-deep) / <alpha-value>)' },
+        lilac:  { DEFAULT: 'rgb(var(--lilac) / <alpha-value>)',  soft: 'rgb(var(--lilac-soft) / <alpha-value>)',  deep: 'rgb(var(--lilac-deep) / <alpha-value>)' },
+        mist:   { DEFAULT: 'rgb(var(--mist) / <alpha-value>)',   soft: 'rgb(var(--mist-soft) / <alpha-value>)',   deep: 'rgb(var(--mist-deep) / <alpha-value>)' },
+        surface:{ DEFAULT: 'rgb(var(--surface) / <alpha-value>)', soft: 'rgb(var(--surface-soft) / <alpha-value>)' },
+        onaccent: 'rgb(var(--on-accent) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['var(--font-jakarta)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       ringColor: {
-        DEFAULT: 'rgba(60, 145, 100, 0.22)',
+        DEFAULT: 'var(--ring)',
       },
       boxShadow: {
-        soft: '0 1px 2px rgba(45, 38, 32, 0.04), 0 8px 24px -12px rgba(45, 38, 32, 0.08)',
-        lift: '0 4px 12px -4px rgba(45, 38, 32, 0.12), 0 16px 40px -16px rgba(45, 38, 32, 0.20)',
-        ring: 'inset 0 0 0 1px rgba(45, 38, 32, 0.06)',
+        soft: '0 1px 2px rgb(var(--shadow) / 0.04), 0 8px 24px -12px rgb(var(--shadow) / 0.08)',
+        lift: '0 4px 12px -4px rgb(var(--shadow) / 0.12), 0 16px 40px -16px rgb(var(--shadow) / 0.20)',
+        ring: 'inset 0 0 0 1px rgb(var(--shadow) / 0.06)',
       },
     },
   },

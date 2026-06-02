@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StayFit — App UI Kit</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: var(--font-sans);
+    background: #E9E4DA;
+    display: grid; place-items: center;
+    min-height: 100vh; padding: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.bg-dark { background: #0A0A0A; }
+
+  /* Phone frame */
+  .phone {
+    position: relative;
+    width: 390px; height: 800px; max-height: calc(100vh - 48px);
+    background: var(--cream);
+    background-image: var(--bg-atmosphere, none);
+    color: var(--ink);
+    border-radius: 44px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -24px rgba(0,0,0,0.45), 0 0 0 10px #1c1c1c, 0 0 0 12px #2c2c2c;
+  }
+  .scroll {
+    position: absolute; inset: 0;
+    overflow-y: auto;
+    padding-bottom: 100px;
+  }
+  .screen {
+    padding: 24px 16px 8px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .rise { animation: rise .5s ease-out backwards; }
+  @keyframes gp { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  .pulse { animation: gp 4s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { .rise, .pulse { animation: none; } }
+
+  input::placeholder { color: rgba(255,255,255,0.6); }
+  .phone .scroll input::placeholder { color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail" data-bg-color="#E9E4DA">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#E89B7B"/><stop offset="100%" stop-color="#D97757"/>
+      </linearGradient>
+    </defs>
+    <!-- calorie ring -->
+    <circle cx="600" cy="400" r="220" fill="none" stroke="#F4EFE6" stroke-width="36"/>
+    <circle cx="600" cy="400" r="220" fill="none" stroke="url(#g)" stroke-width="36"
+      stroke-linecap="round" stroke-dasharray="1382" stroke-dashoffset="220"
+      transform="rotate(-90 600 400)"/>
+    <!-- brand "S" mark, centered -->
+    <text x="600" y="400" text-anchor="middle" dominant-baseline="central"
+      font-family="ui-rounded, system-ui, sans-serif" font-size="240" font-weight="800"
+      fill="#2D2620" letter-spacing="-12">S</text>
+  </svg>
+</template>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="Icons.jsx"></script>
+<script type="text/babel" src="Primitives.jsx"></script>
+<script type="text/babel" src="Data.jsx"></script>
+<script type="text/babel" src="Journal.jsx"></script>
+<script type="text/babel" src="AddFood.jsx"></script>
+<script type="text/babel" src="Secondary.jsx"></script>
+<script type="text/babel" src="Tweaks.jsx"></script>
+<script type="text/babel" src="App.jsx"></script>
+</body>
+</html>

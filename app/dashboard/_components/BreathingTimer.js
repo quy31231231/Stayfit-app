@@ -76,7 +76,7 @@ export default function BreathingTimer({ onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="mt-8 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-ink ring-1 ring-cream-deep shadow-soft transition hover:bg-cream-soft"
+          className="mt-8 rounded-full bg-surface px-6 py-2.5 text-sm font-semibold text-ink ring-1 ring-cream-deep shadow-soft transition hover:bg-cream-soft"
         >
           Dừng lại
         </button>

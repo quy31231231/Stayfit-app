@@ -53,10 +53,10 @@ export default function GreetingHeader({ userName = "bạn", avatarUrl = null, n
 
       <button
         type="button"
-        className="flex items-center gap-3 self-start rounded-2xl bg-white p-2 pr-4 transition hover:bg-cream-soft sm:self-auto"
+        className="flex items-center gap-3 self-start rounded-2xl bg-surface p-2 pr-4 transition hover:bg-cream-soft sm:self-auto"
         aria-label="Hồ sơ"
       >
-        <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-2xl bg-orange text-lg font-bold text-white">
+        <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-2xl bg-orange text-lg font-bold text-onaccent">
           {avatarUrl
             ? (/* eslint-disable-next-line @next/next/no-img-element */ <img src={avatarUrl} alt="" className="h-full w-full object-cover" />)
             : initial}
