@@ -2020,19 +2020,22 @@ export default function App() {
                                 className="w-full bg-cream-soft ring-1 p-3 rounded-2xl outline-none font-semibold text-[14px] text-ink focus:ring-2 focus:ring-orange/30 transition placeholder:text-ink-faint"
                             />
                         </div>
-                        {/* GIAO DIỆN — chuyển sáng / tối (dưới Đăng xuất) */}
+                        {/* GIAO DIỆN — nút icon chuyển sáng/tối (moon ↔ sun) */}
                         <div className="mt-4">
                             <label className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider block mb-1.5">Giao diện</label>
-                            <div className="flex gap-1.5 p-1 bg-cream-soft rounded-2xl ring-1">
-                                <button type="button" onClick={() => setTheme('light')} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition inline-flex items-center justify-center gap-1.5 ${theme === 'light' ? 'bg-surface text-orange-deep shadow-soft ring-1' : 'text-ink-muted hover:text-ink'}`}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-                                    Sáng
-                                </button>
-                                <button type="button" onClick={() => setTheme('dark')} className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition inline-flex items-center justify-center gap-1.5 ${theme === 'dark' ? 'bg-surface text-orange-deep shadow-soft ring-1' : 'text-ink-muted hover:text-ink'}`}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-                                    Tối
-                                </button>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                                className="grid h-11 w-11 place-items-center rounded-2xl bg-cream-soft text-ink ring-1 shadow-soft hover:bg-cream-deep active:scale-95 transition-transform"
+                                aria-label={theme === 'dark' ? 'Chuyển giao diện sáng' : 'Chuyển giao diện tối'}
+                                title={theme === 'dark' ? 'Giao diện tối · Nike' : 'Giao diện sáng'}
+                            >
+                                {theme === 'dark' ? (
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                                ) : (
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                                )}
+                            </button>
                         </div>
                     </section>
 
