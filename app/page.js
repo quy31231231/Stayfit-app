@@ -375,7 +375,14 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                 return target; // Nếu trống hoàn toàn thì lấy mặc định
             });
 
-            kcalChartInstance.current = new Chart(ctx, { 
+            // Chỉ bo góc đỉnh của segment trên cùng (non-zero) mỗi cột → 1 nắp tròn gọn (Apple).
+            const stackData = [dataBreakfast, dataLunch, dataDinner, dataSnack]; // thứ tự đáy → đỉnh
+            const capRadius = (order) => (c) => {
+                for (let k = stackData.length - 1; k > order; k--) if (stackData[k][c.dataIndex] > 0) return 0;
+                return stackData[order][c.dataIndex] > 0 ? { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 } : 0;
+            };
+
+            kcalChartInstance.current = new Chart(ctx, {
                 type: 'bar', 
                 data: { 
                     labels: labels, 
@@ -384,18 +391,18 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                         { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: inkColor, font: { weight: '800', size: 11 }, padding: { bottom: 2 }, formatter: (val) => val > 0 ? val.toLocaleString('vi-VN') : '' } },
                         { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: isDark ? 'rgba(137,243,54,0.45)' : '#C7BCA8', borderWidth: 1.5, borderDash: [3, 5], borderCapStyle: 'round', pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
 
-                        // 4 bữa — tile bo góc nổi, gradient kính-mờ, khe ngăn mảnh theo nền (Apple Activity)
-                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: barGrad(meal.sang), borderColor: sepColor, borderWidth: 1.5, borderRadius: 5, borderSkipped: false, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: barGrad(meal.trua), borderColor: sepColor, borderWidth: 1.5, borderRadius: 5, borderSkipped: false, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: barGrad(meal.toi), borderColor: sepColor, borderWidth: 1.5, borderRadius: 5, borderSkipped: false, datalabels: { display: false } },
-                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: barGrad(meal.vat), borderColor: sepColor, borderWidth: 1.5, borderRadius: 5, borderSkipped: false, datalabels: { display: false } }
+                        // 4 bữa — một sắc độ (dải emerald/cam), không khe ngăn, 1 nắp tròn mỗi cột
+                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: meal.sang, borderWidth: 0, borderRadius: capRadius(0), borderSkipped: false, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: meal.trua, borderWidth: 0, borderRadius: capRadius(1), borderSkipped: false, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: meal.toi, borderWidth: 0, borderRadius: capRadius(2), borderSkipped: false, datalabels: { display: false } },
+                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: meal.vat, borderWidth: 0, borderRadius: capRadius(3), borderSkipped: false, datalabels: { display: false } }
                     ]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 28 } },
                     onClick: handleChartClick, onHover: handleChartHover,
                     categoryPercentage: 0.85,
-                    barPercentage: 0.75,
+                    barPercentage: 0.6,
                     plugins: {
                         legend: { display: false },
                         tooltip: {
