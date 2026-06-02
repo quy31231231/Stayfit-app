@@ -345,16 +345,11 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
             const ctx = kcalChartRef.current.getContext('2d');
             const labels = currentChartDates.map(d => getWeekLabel(d));
 
-            // Gradient dọc kính-mờ kiểu Apple Health: đỉnh sáng → đáy đậm.
-            const barGrad = ([top, bottom]) => {
-                const g = ctx.createLinearGradient(0, 0, 0, 190);
-                g.addColorStop(0, top); g.addColorStop(1, bottom);
-                return g;
-            };
-            // Bảng màu năng động (Nike): rực hơn trên near-black, ấm-tươi trên cream.
+            // Một sắc độ duy nhất (Nike/Apple): cột là dải emerald/Volt trên near-black,
+            // dải cam thương hiệu trên cream. Đáy đậm → đỉnh sáng để tip phát sáng.
             const meal = isDark
-                ? { sang: ['#F0D98C', '#D9B25A'], trua: ['#5CE38A', '#22C55E'], toi: ['#CDB8EC', '#A988D8'], vat: ['#FFB089', '#FF7A4D'] }
-                : { sang: ['#F2CE84', '#E0AE4E'], trua: ['#86C497', '#5C9E73'], toi: ['#C0AAE0', '#9D86C0'], vat: ['#F2A883', '#E07A50'] };
+                ? { sang: '#166534', trua: '#22C55E', toi: '#34D77F', vat: '#6EE7A8' }
+                : { sang: '#B5532B', trua: '#D97757', toi: '#E89B7B', vat: '#F2C2A5' };
             
             // Hàm tính tổng Calo theo từng bữa ăn
             const sumMealKcal = (dayLog, mealName) => { 
