@@ -348,7 +348,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
             // Một sắc độ duy nhất (Nike/Apple): cột là dải emerald/Volt trên near-black,
             // dải cam thương hiệu trên cream. Đáy đậm → đỉnh sáng để tip phát sáng.
             const meal = isDark
-                ? { sang: '#166534', trua: '#22C55E', toi: '#34D77F', vat: '#6EE7A8' }
+                ? { sang: '#13532C', trua: '#2A8F54', toi: '#3FA968', vat: '#62C089' }
                 : { sang: '#B5532B', trua: '#D97757', toi: '#E89B7B', vat: '#F2C2A5' };
             
             // Hàm tính tổng Calo theo từng bữa ăn
