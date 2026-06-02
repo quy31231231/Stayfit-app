@@ -336,10 +336,25 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
             });
         }
 
+        // Hex → rgba (dùng cho gradient line/area). Tái sử dụng cả 2 biểu đồ.
+        const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`; };
+        const sepColor = isDark ? '#1A1A1A' : '#FFFFFF';   // khe ngăn giữa các tile / lõi điểm
+
         if (kcalChartInstance.current) kcalChartInstance.current.destroy();
         if (kcalChartRef.current) {
             const ctx = kcalChartRef.current.getContext('2d');
             const labels = currentChartDates.map(d => getWeekLabel(d));
+
+            // Gradient dọc kính-mờ kiểu Apple Health: đỉnh sáng → đáy đậm.
+            const barGrad = ([top, bottom]) => {
+                const g = ctx.createLinearGradient(0, 0, 0, 190);
+                g.addColorStop(0, top); g.addColorStop(1, bottom);
+                return g;
+            };
+            // Bảng màu năng động (Nike): rực hơn trên near-black, ấm-tươi trên cream.
+            const meal = isDark
+                ? { sang: ['#F0D98C', '#D9B25A'], trua: ['#5CE38A', '#22C55E'], toi: ['#CDB8EC', '#A988D8'], vat: ['#FFB089', '#FF7A4D'] }
+                : { sang: ['#F2CE84', '#E0AE4E'], trua: ['#86C497', '#5C9E73'], toi: ['#C0AAE0', '#9D86C0'], vat: ['#F2A883', '#E07A50'] };
             
             // Hàm tính tổng Calo theo từng bữa ăn
             const sumMealKcal = (dayLog, mealName) => { 
@@ -371,14 +386,14 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                     labels: labels, 
                     datasets: [
                         // Đặt stack riêng rẽ cho các đường line để chúng không bị cộng dồn
-                        { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: inkColor, font: { weight: '600', size: 10 }, formatter: (val) => val > 0 ? val.toLocaleString('vi-VN') : '' } },
-                        { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#B8AFA4', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
+                        { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: inkColor, font: { weight: '800', size: 11 }, padding: { bottom: 2 }, formatter: (val) => val > 0 ? val.toLocaleString('vi-VN') : '' } },
+                        { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: isDark ? 'rgba(137,243,54,0.45)' : '#C7BCA8', borderWidth: 1.5, borderDash: [3, 5], borderCapStyle: 'round', pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
 
-                        // 4 bữa ăn — pastel match meal accent của journal, đậm hơn 1 notch
-                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: '#DCBE85', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: '#A8C29D', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
-                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: '#C0AFD3', borderWidth: 0, borderRadius: 4, datalabels: { display: false } },
-                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: '#ECA890', borderWidth: 0, borderRadius: 4, datalabels: { display: false } }
+                        // 4 bữa — tile bo góc nổi, gradient kính-mờ, khe ngăn mảnh theo nền (Apple Activity)
+                        { type: 'bar', label: 'Bữa sáng', data: dataBreakfast, stack: 'bars', backgroundColor: barGrad(meal.sang), borderColor: sepColor, borderWidth: 1.5, borderRadius: 5, borderSkipped: false, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa trưa', data: dataLunch, stack: 'bars', backgroundColor: barGrad(meal.trua), borderColor: sepColor, borderWidth: 1.5, borderRadius: 5, borderSkipped: false, datalabels: { display: false } },
+                        { type: 'bar', label: 'Bữa tối', data: dataDinner, stack: 'bars', backgroundColor: barGrad(meal.toi), borderColor: sepColor, borderWidth: 1.5, borderRadius: 5, borderSkipped: false, datalabels: { display: false } },
+                        { type: 'bar', label: 'Ăn vặt', data: dataSnack, stack: 'bars', backgroundColor: barGrad(meal.vat), borderColor: sepColor, borderWidth: 1.5, borderRadius: 5, borderSkipped: false, datalabels: { display: false } }
                     ]
                 },
                 options: {
@@ -428,12 +443,29 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
             const dataCarb = currentChartDates.map(d => Math.round(sumDayMacro(history[d], 'carb')));
             const dataFat = currentChartDates.map(d => Math.round(sumDayMacro(history[d], 'fat')));
 
+            // Màu macro năng động: rực trên near-black (Volt), trầm-ấm trên cream.
+            const macro = isDark
+                ? { protein: '#34D36B', carb: '#E0C064', fat: '#B49AE0' }
+                : { protein: '#5F8266', carb: '#C49A4A', fat: '#9B8AB8' };
+            // Dataset macro: đường mượt + nền gradient tan dần + điểm lõi trắng phát sáng (Apple Health).
+            const macroSet = (label, data, color) => ({
+                label, data,
+                borderColor: color,
+                backgroundColor: (() => { const g = ctx.createLinearGradient(0, 0, 0, 190); g.addColorStop(0, hexA(color, 0.16)); g.addColorStop(1, hexA(color, 0)); return g; })(),
+                borderWidth: 3, tension: 0.4, fill: true,
+                borderCapStyle: 'round', borderJoinStyle: 'round',
+                pointBackgroundColor: sepColor, pointBorderColor: color, pointBorderWidth: 2,
+                pointRadius: 3, pointHoverRadius: 6, pointHoverBorderWidth: 3,
+                pointHoverBackgroundColor: sepColor,
+                datalabels: { display: false },
+            });
+
            macroChartInstance.current = new Chart(ctx, {
                 type: 'line',
                 data: { labels: labels, datasets: [
-                    { label: 'Protein', data: dataProtein, borderColor: '#7E9D88', backgroundColor: '#7E9D88', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } },
-                    { label: 'Carb',    data: dataCarb,    borderColor: '#CFA75A', backgroundColor: '#CFA75A', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } },
-                    { label: 'Fat',     data: dataFat,     borderColor: '#A998C0', backgroundColor: '#A998C0', borderWidth: 2.5, tension: 0.4, pointRadius: 3, pointHoverRadius: 5, datalabels: { display: false } }
+                    macroSet('Protein', dataProtein, macro.protein),
+                    macroSet('Carb',    dataCarb,    macro.carb),
+                    macroSet('Fat',     dataFat,     macro.fat),
                 ]},
                 options: {
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25, bottom: 15 } },
