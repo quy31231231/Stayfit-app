@@ -1,9 +1,9 @@
 "use client";
 
 const TONE = {
-  protein: { ring: "#5F8266", track: "#DDE7DC", label: "Protein", unit: "g" },
-  carb:    { ring: "#C49A4A", track: "#F0E5CC", label: "Carb",    unit: "g" },
-  fat:     { ring: "#9B8AB8", track: "#E5DDED", label: "Fat",     unit: "g" },
+  protein: { ring: "rgb(var(--sage))",  track: "rgb(var(--sage-soft))",  label: "Protein", unit: "g" },
+  carb:    { ring: "rgb(var(--clay))",  track: "rgb(var(--clay-soft))",  label: "Carb",    unit: "g" },
+  fat:     { ring: "rgb(var(--lilac))", track: "rgb(var(--lilac-soft))", label: "Fat",     unit: "g" },
 };
 
 export default function MacroDonut({ kind = "protein", value = 0, target = 0, size = 88 }) {
@@ -18,7 +18,7 @@ export default function MacroDonut({ kind = "protein", value = 0, target = 0, si
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - ratio);
 
-  const ringStroke = isOver ? "#C94040" : tone.ring;
+  const ringStroke = isOver ? "rgb(var(--ring-over-to))" : tone.ring;
 
   return (
     <div className="flex flex-col items-center">

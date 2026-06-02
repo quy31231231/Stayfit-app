@@ -13,19 +13,31 @@
   --mist: 107 149 171; --mist-soft: 221 232 239; --mist-deep: 61 90 107;
   --surface: 255 255 255; --surface-soft: 244 239 230; --on-accent: 255 255 255;
   --ring: rgba(60, 145, 100, 0.22); --shadow: 45 38 32; --focus: 217 119 87;
+  /* Vòng tròn calo — gradient + track (SVG đọc qua rgb(var(--x))) */
+  --ring-cal-from: 232 155 123; --ring-cal-to: 217 119 87;   /* #E89B7B → #D97757 */
+  --ring-track: 244 239 230;                                  /* #F4EFE6 */
+  --ring-over-from: 224 112 112; --ring-over-to: 201 64 64;   /* #E07070 → #C94040 */
 }
 
-/* DARK = Nike monochrome trung tính + accent VOLT */
+/* DARK = "Volt" — near-black + emerald fill / lime text (theo colors_and_type.css) */
 html.dark {
-  --cream: 17 17 17; --cream-soft: 31 31 31; --cream-deep: 51 51 51;        /* #111 nền / #1F1F1F input / #333 viền-hover */
-  --ink: 245 245 245; --ink-muted: 158 158 158; --ink-faint: 94 94 94;      /* text trung tính (Nike) */
-  --orange: 198 242 78; --orange-soft: 32 38 18; --orange-deep: 214 255 102; /* VOLT: fill / tint nền / text-border sáng */
-  --clay: 224 178 86; --clay-soft: 46 38 18; --clay-deep: 240 205 130;       /* carb vàng */
-  --sage: 70 196 178; --sage-soft: 14 40 38; --sage-deep: 122 224 208;       /* protein TEAL (lệch khỏi volt) */
-  --lilac: 178 158 224; --lilac-soft: 36 30 52; --lilac-deep: 200 184 240;   /* fat tím */
-  --mist: 110 178 214; --mist-soft: 16 34 44; --mist-deep: 150 206 236;      /* nước cyan */
-  --surface: 26 26 26; --surface-soft: 38 38 38; --on-accent: 17 17 17;      /* card #1A1A1A / chữ trên volt = Nike ink #111 */
-  --ring: rgba(255, 255, 255, 0.12); --shadow: 0 0 0; --focus: 198 242 78;
+  --cream: 14 14 14; --cream-soft: 31 31 31; --cream-deep: 42 42 42;         /* #0E0E0E nền / #1F1F1F input / #2A2A2A viền */
+  --ink: 245 245 245; --ink-muted: 158 158 158; --ink-faint: 107 107 107;    /* text trung tính */
+  --orange: 34 197 94; --orange-soft: 14 42 26; --orange-deep: 137 243 54;   /* emerald FILL / tint nền / lime TEXT */
+  --clay: 201 172 116; --clay-soft: 38 32 15; --clay-deep: 201 172 116;      /* carb — muted clay */
+  --sage: 126 154 132; --sage-soft: 24 35 32; --sage-deep: 126 154 132;      /* protein — muted sage */
+  --lilac: 169 156 194; --lilac-soft: 31 27 42; --lilac-deep: 169 156 194;   /* fat — muted lilac */
+  --mist: 140 169 186; --mist-soft: 21 32 42; --mist-deep: 140 169 186;      /* nước — muted mist */
+  --surface: 26 26 26; --surface-soft: 38 38 38; --on-accent: 10 10 10;      /* card #1A1A1A / chữ trên emerald = #0A0A0A */
+  --ring: rgba(255, 255, 255, 0.12); --shadow: 0 0 0; --focus: 137 243 54;
+  /* Vòng tròn calo — lime gradient, track chìm vào nền */
+  --ring-cal-from: 137 243 54; --ring-cal-to: 91 184 32;     /* #89F336 → #5BB820 */
+  --ring-track: 31 31 31;                                     /* #1F1F1F */
+  --ring-over-from: 224 112 112; --ring-over-to: 201 64 64;
+  /* Atmospheric glow — ánh lime rơi từ trên, chìm xuống đen tuyền */
+  --bg-atmosphere:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(137,243,54,0.10), transparent 70%),
+    radial-gradient(ellipse 80% 100% at 50% 100%, #050505, transparent 60%);
 }
 
 body {
@@ -38,6 +50,11 @@ body {
   background-color: rgb(var(--cream));
   color: rgb(var(--ink));
   overscroll-behavior-y: contain;
+}
+
+html.dark body {
+  background-image: var(--bg-atmosphere);
+  background-attachment: fixed;
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }

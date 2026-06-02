@@ -18,7 +18,7 @@ import {
 
 import DashboardCard from './dashboard/_components/DashboardCard';
 import CalorieCircle from './dashboard/_components/CalorieCircle';
-import MacroDonut from './dashboard/_components/MacroDonut';
+import MacroBar from './dashboard/_components/MacroBar';
 import FoodLogSection from './dashboard/_components/FoodLogSection';
 import GreetingHeader from './dashboard/_components/GreetingHeader';
 import BreathingTimer from './dashboard/_components/BreathingTimer';
@@ -214,13 +214,13 @@ function MacroProgressBar({ label, current, target, colorClass }) {
                 <span className="text-ink">{current}g <span className="opacity-40">/ {target}g</span></span>
             </div>
             <div className="w-full bg-cream-deep rounded-full h-1.5 overflow-hidden">
-                <div className={`h-full ${colorClass} transition-all duration-700 ease-out`} style={{ width: `${pct}%` }}></div>
+                <div className={`h-full ${colorClass} transition-[width] duration-700 ease-out`} style={{ width: `${pct}%` }}></div>
             </div>
         </div>
     );
 }
 
-function StatsView({ history, profile, setProfile, target, targetLog, setView, view, setCurrentDate, userId, password, pendingChangeRef }) {
+function StatsView({ history, profile, setProfile, target, targetLog, setView, view, setCurrentDate, userId, password, pendingChangeRef, theme }) {
     const [weightLog, setWeightLog] = useState(() => {
         if (typeof window !== "undefined") {
             const s = localStorage.getItem('stayfit_weight_log'); return s ? JSON.parse(s) : {};
@@ -307,7 +307,10 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     };
 
     useEffect(() => {
-        Chart.defaults.font.family = "'Inter', sans-serif"; Chart.defaults.color = '#7A7066';
+        const isDark = theme === 'dark';
+        const axisColor = isDark ? '#9E9E9E' : '#7A7066';   // ticks / default text
+        const inkColor  = isDark ? '#F5F5F5' : '#2D2620';   // datalabel / legend ink
+        Chart.defaults.font.family = "'Inter', sans-serif"; Chart.defaults.color = axisColor;
 
         if (weightChartInstance.current) weightChartInstance.current.destroy();
         const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(a) - new Date(b)).slice(-14);
@@ -368,7 +371,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                     labels: labels, 
                     datasets: [
                         // Đặt stack riêng rẽ cho các đường line để chúng không bị cộng dồn
-                        { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: '#2D2620', font: { weight: '600', size: 10 }, formatter: (val) => val > 0 ? val.toLocaleString('vi-VN') : '' } },
+                        { type: 'line', label: 'Tổng', data: dataTotal, stack: 'lineTotal', borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, datalabels: { align: 'end', anchor: 'end', color: inkColor, font: { weight: '600', size: 10 }, formatter: (val) => val > 0 ? val.toLocaleString('vi-VN') : '' } },
                         { type: 'line', label: 'Mục tiêu', data: targetLine, stack: 'lineTarget', borderColor: '#B8AFA4', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, tension: 0, datalabels: { display: false } },
 
                         // 4 bữa ăn — pastel match meal accent của journal, đậm hơn 1 notch
@@ -410,7 +413,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                         }
                     },
                     scales: {
-                        x: { stacked: true, display: true, grid: { display: false, drawBorder: false }, ticks: { font: { weight: '500', size: 10 }, color: '#7A7066' } },
+                        x: { stacked: true, display: true, grid: { display: false, drawBorder: false }, ticks: { font: { weight: '500', size: 10 }, color: axisColor } },
                         y: { stacked: true, display: true, beginAtZero: true, grid: { color: 'rgba(45, 38, 32, 0.06)', drawBorder: false }, ticks: { display: false } }
                     }
                 }
@@ -436,7 +439,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                     responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25, bottom: 15 } },
                     onClick: handleChartClick, onHover: handleChartHover,
                     plugins: {
-                        legend: { display: true, position: 'top', labels: { boxWidth: 8, boxHeight: 8, usePointStyle: true, pointStyle: 'circle', font: { size: 11, weight: '500' }, color: '#2D2620', padding: 12 } },
+                        legend: { display: true, position: 'top', labels: { boxWidth: 8, boxHeight: 8, usePointStyle: true, pointStyle: 'circle', font: { size: 11, weight: '500' }, color: inkColor, padding: 12 } },
                         tooltip: {
                             enabled: true,
                             backgroundColor: 'rgba(45, 38, 32, 0.95)',
@@ -456,7 +459,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                     },
                     scales: {
                         y: { display: true, beginAtZero: true, grid: { color: 'rgba(45, 38, 32, 0.06)', drawBorder: false }, ticks: { display: false } },
-                        x: { display: true, grid: { display: false, drawBorder: false }, ticks: { font: { weight: '500', size: 10 }, color: '#7A7066' } }
+                        x: { display: true, grid: { display: false, drawBorder: false }, ticks: { font: { weight: '500', size: 10 }, color: axisColor } }
                     }
                 }
             });
@@ -467,7 +470,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
             if (kcalChartInstance.current) kcalChartInstance.current.destroy(); 
             if (macroChartInstance.current) macroChartInstance.current.destroy(); 
         };
-    }, [history, weightLog, target, targetLog, currentChartDates]);
+    }, [history, weightLog, target, targetLog, currentChartDates, theme]);
 
     const sortedDates = Object.keys(weightLog).sort((a, b) => new Date(b) - new Date(a));
 
@@ -580,15 +583,15 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                 <div
                                     className="relative h-5 rounded-full ring-1 overflow-hidden"
                                     style={{
-                                        backgroundImage: 'repeating-linear-gradient(135deg, #F4EFE6 0 8px, #EBE3D2 8px 16px)',
+                                        backgroundImage: 'repeating-linear-gradient(135deg, rgb(var(--cream-soft)) 0 8px, rgb(var(--cream-deep)) 8px 16px)',
                                     }}
                                 >
                                     {hasGoal && progressPct > 0 && (
                                         <div
-                                            className="absolute inset-y-0 left-0 rounded-full transition-all"
+                                            className="absolute inset-y-0 left-0 rounded-full transition-[width]"
                                             style={{
                                                 width: `${progressPct}%`,
-                                                backgroundImage: 'repeating-linear-gradient(135deg, #D97757 0 8px, #C56A4A 8px 16px)',
+                                                backgroundImage: 'repeating-linear-gradient(135deg, rgb(var(--orange)) 0 8px, rgb(var(--orange-deep)) 8px 16px)',
                                             }}
                                         />
                                     )}
@@ -838,13 +841,13 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
 function BottomNav({view, setView}) {
     return (
         <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-xl border-t border-cream-deep p-4 z-40 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] max-w-md mx-auto">
-            <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='journal' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
+            <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-transform duration-300 w-1/3 ${view==='journal' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
                 <IconJournal /><span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
             </button>
-            <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='stats' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
+            <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-transform duration-300 w-1/3 ${view==='stats' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
                 <IconStats /><span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
             </button>
-            <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-1/3 ${view==='profile' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
+            <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-transform duration-300 w-1/3 ${view==='profile' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
                 <IconUser /><span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
             </button>
         </div>
@@ -866,7 +869,7 @@ export default function App() {
         document.documentElement.classList.toggle("dark", theme === "dark");
         try { localStorage.setItem("stayfit_theme", theme); } catch {}
         const m = document.querySelector('meta[name="theme-color"]');
-        if (m) m.setAttribute("content", theme === "dark" ? "#111111" : "#FBF8F2");
+        if (m) m.setAttribute("content", theme === "dark" ? "#0E0E0E" : "#FBF8F2");
     }, [theme]);
     const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
     const [isDietModalOpen, setIsDietModalOpen] = useState(false);
@@ -1912,17 +1915,20 @@ export default function App() {
 
     if (!userId || !password) {
         return (
-            <div className="max-w-md mx-auto min-h-screen bg-[#D97757] flex flex-col items-center justify-center p-8 text-white relative overflow-hidden font-sans">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#D97757] rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#7A3318] rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/3"></div>
-                <div className="bg-white/10 p-8 rounded-[2.5rem] w-full backdrop-blur-xl border border-white/20 text-center shadow-2xl relative z-10">
+            <div className="max-w-md mx-auto min-h-screen bg-[#D97757] dark:bg-[#0A0A0A] flex flex-col items-center justify-center p-8 text-white relative overflow-hidden font-sans">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#D97757] dark:bg-[#89F336] rounded-full blur-3xl opacity-50 dark:opacity-35 -translate-y-1/2 translate-x-1/3"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#7A3318] dark:bg-[#22C55E] rounded-full blur-3xl opacity-50 dark:opacity-30 translate-y-1/3 -translate-x-1/3"></div>
+                <div className="bg-white/10 dark:bg-white/[0.04] p-8 rounded-[2.5rem] w-full backdrop-blur-xl border border-white/20 dark:border-white/10 text-center shadow-2xl relative z-10">
                     <h1 className="text-4xl font-black tracking-tighter italic mb-2">STAYFIT</h1>
-                    <p className="text-[11px] text-white/70 font-semibold mb-7">Đăng nhập để đồng bộ dữ liệu của bạn</p>
+                    <p className="text-[11px] text-white/70 font-semibold mb-7">
+                        <span className="dark:hidden">Đăng nhập để đồng bộ dữ liệu của bạn</span>
+                        <span className="hidden dark:inline">Sẵn sàng cho buổi tập tiếp theo.</span>
+                    </p>
 
                     {/* Google */}
                     {isSupabaseConfigured && (
                         <>
-                            <button onClick={handleGoogleLogin} disabled={loginLoading} className="w-full py-3.5 bg-white text-ink rounded-2xl font-bold flex items-center justify-center gap-2.5 active:scale-[0.98] transition shadow-xl disabled:opacity-50">
+                            <button onClick={handleGoogleLogin} disabled={loginLoading} className="w-full py-3.5 bg-white text-[#2D2620] rounded-2xl font-bold flex items-center justify-center gap-2.5 active:scale-[0.98] transition shadow-xl disabled:opacity-50">
                                 <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5 43.5 34.8 43.5 24c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 16.3 4.5 9.7 8.9 6.3 14.7z"/><path fill="#4CAF50" d="M24 43.5c5.4 0 10.3-2 14-5.3l-6.5-5.5c-2 1.5-4.6 2.3-7.5 2.3-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.6 39 16.2 43.5 24 43.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.5l6.5 5.5c-.5.4 7-5 7-15 0-1.2-.1-2.4-.4-3.5z"/></svg>
                                 Tiếp tục với Google
                             </button>
@@ -1937,7 +1943,7 @@ export default function App() {
                         <input type="tel" inputMode="numeric" value={phoneInput} onChange={e=>setPhoneInput(e.target.value)} placeholder="Số điện thoại" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" />
                         <input type="password" value={phonePass} onChange={e=>setPhonePass(e.target.value)} placeholder="Mật khẩu" className="w-full bg-white/20 text-white placeholder:text-white/60 p-4 rounded-2xl outline-none font-bold text-center focus:ring-2 focus:ring-white transition-all" onKeyDown={e => { if (e.key === 'Enter') handlePhoneAuth(); }} />
                     </div>
-                    <button onClick={handlePhoneAuth} disabled={loginLoading} className="w-full mt-3 py-4 bg-white text-orange rounded-2xl font-black uppercase tracking-widest active:scale-95 transition shadow-xl disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng ký / Đăng nhập"}</button>
+                    <button onClick={handlePhoneAuth} disabled={loginLoading} className="w-full mt-3 py-4 bg-white text-[#D97757] dark:bg-[#22C55E] dark:text-[#0A0A0A] rounded-2xl font-black uppercase tracking-widest active:scale-95 transition shadow-xl dark:shadow-[0_12px_30px_-8px_rgba(34,197,94,0.5)] disabled:opacity-50">{loginLoading ? "Đang kết nối..." : "Đăng ký / Đăng nhập"}</button>
                     <p className="text-[9px] text-white/50 font-bold mt-3 px-4 leading-relaxed">Chưa có tài khoản? Nhập SĐT + mật khẩu mới để tự động đăng ký.</p>
                 </div>
             </div>
@@ -1951,7 +1957,7 @@ export default function App() {
     }
 
     if (view === "stats") {
-        return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} targetLog={targetLog} setView={setView} view={view} setCurrentDate={setCurrentDate} userId={userId} password={password} pendingChangeRef={pendingChangeRef} />;
+        return <StatsView history={history} profile={profile} setProfile={setProfile} target={target} targetLog={targetLog} setView={setView} view={view} setCurrentDate={setCurrentDate} userId={userId} password={password} pendingChangeRef={pendingChangeRef} theme={theme} />;
     }
     
     if (view === "profile") {
@@ -2252,23 +2258,42 @@ export default function App() {
                     {/* GREETING */}
                     <GreetingHeader userName={profile.nickname?.trim() || "bạn"} avatarUrl={profile.avatarKey ? imgUrls[profile.avatarKey] : null} />
 
-                    {/* CALORIE HERO — vòng tròn + 3 macro donuts + Eq row */}
+                    {/* CALORIE HERO — vòng tròn + hàng 2 cột (Đã nạp / Còn dư) + 3 macro bar */}
                     <DashboardCard tone="white" padding="lg" className="overflow-hidden">
-                        <div className="flex flex-col items-center gap-6">
+                        {/* Ring zone */}
+                        <div className="flex justify-center">
                             <CalorieCircle consumed={dailyKcal} target={target} />
-                            <div className="grid grid-cols-3 gap-3 w-full">
-                                <MacroDonut kind="protein" value={dailyProtein} target={targetProtein} />
-                                <MacroDonut kind="carb"    value={dailyCarb}    target={targetCarb} />
-                                <MacroDonut kind="fat"     value={dailyFat}     target={targetFat} />
+                        </div>
+
+                        {/* Data row — Đã nạp / Còn dư (hoặc Vượt) */}
+                        <div className="mt-5 grid grid-cols-2 gap-4 border-t border-cream-deep/50 pt-4">
+                            <div>
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">Đã nạp</span>
+                                <p className="mt-1.5 flex items-baseline gap-1">
+                                    <span className="text-[22px] font-extrabold leading-none tracking-tight text-ink tabular-nums">{Math.round(dailyKcal).toLocaleString("vi-VN")}</span>
+                                    <span className="text-[11px] font-medium text-ink-faint tabular-nums">/ {Number(target).toLocaleString("vi-VN")} kcal</span>
+                                </p>
+                            </div>
+                            <div className="text-right">
+                                <span className={`text-[10px] font-semibold uppercase tracking-[0.16em] ${dailyKcal > target ? "text-red-500" : "text-orange-deep"}`}>
+                                    {dailyKcal > target ? "Vượt" : "Còn dư"}
+                                </span>
+                                <p className="mt-1.5 flex items-baseline justify-end gap-1">
+                                    <span className={`text-[22px] font-extrabold leading-none tracking-tight tabular-nums ${dailyKcal > target ? "text-red-500" : "text-orange-deep"}`}>
+                                        {dailyKcal > target
+                                            ? `+${Math.round(dailyKcal - target).toLocaleString("vi-VN")}`
+                                            : Math.max(0, Math.round(target - dailyKcal)).toLocaleString("vi-VN")}
+                                    </span>
+                                    <span className="text-[11px] font-medium text-ink-faint tabular-nums">kcal</span>
+                                </p>
                             </div>
                         </div>
 
-                        <div className="mt-6 flex items-stretch gap-1 border-t border-cream-deep/50 pt-5 text-center">
-                            <EqCell label="Cần khoảng" value={Number(target).toLocaleString("vi-VN")} tone="neutral" />
-                            <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">−</span>
-                            <EqCell label="Đã nạp" value={Math.round(dailyKcal).toLocaleString("vi-VN")} tone="sage" />
-                            <span className="flex items-center text-sm font-light text-ink-faint shrink-0 px-0.5">=</span>
-                            <EqCell label="Còn dư" value={Math.max(0, Math.round(target - dailyKcal)).toLocaleString("vi-VN")} tone="orange" highlight />
+                        {/* Macro zone — 3 thanh ngang */}
+                        <div className="mt-4 flex gap-4 border-t border-cream-deep/50 pt-4">
+                            <MacroBar kind="protein" value={dailyProtein} target={targetProtein} />
+                            <MacroBar kind="carb"    value={dailyCarb}    target={targetCarb} />
+                            <MacroBar kind="fat"     value={dailyFat}     target={targetFat} />
                         </div>
                     </DashboardCard>
 
@@ -3292,22 +3317,6 @@ export default function App() {
 /* ────────────────────────────────────────────────────────────── */
 /*  HELPER COMPONENTS — dùng trong dashboard layout của Nhật ký   */
 /* ────────────────────────────────────────────────────────────── */
-
-function EqCell({ label, value, tone = "neutral", highlight = false }) {
-    const toneClass = {
-        neutral: "bg-cream-soft text-ink",
-        sage:    "bg-sage-soft text-sage-deep",
-        clay:    "bg-clay-soft text-clay-deep",
-        orange:  "bg-orange text-onaccent shadow-soft ring-1 ring-orange-deep/20",
-    }[tone];
-
-    return (
-        <div className={`flex-1 min-w-0 rounded-2xl py-2.5 px-1 ${toneClass}`}>
-            <p className="text-base font-bold leading-none tracking-tight tabular-nums">{value}</p>
-            <p className={`mt-1 text-[9px] font-semibold uppercase tracking-wide whitespace-nowrap ${highlight ? "text-onaccent/80" : "opacity-70"}`}>{label}</p>
-        </div>
-    );
-}
 
 function MindfulCard() {
     const [breathing, setBreathing] = useState(false);

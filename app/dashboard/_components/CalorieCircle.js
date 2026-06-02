@@ -1,6 +1,6 @@
 "use client";
 
-export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 }) {
+export default function CalorieCircle({ consumed = 0, target = 2000, size = 208 }) {
   const isOver = consumed > target;
   const ratio = Math.min(1, target > 0 ? consumed / target : 0);
   const remaining = Math.max(0, target - consumed);
@@ -19,19 +19,19 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id="calorieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#E89B7B" />
-            <stop offset="100%" stopColor="#D97757" />
+            <stop offset="0%" stopColor="rgb(var(--ring-cal-from))" />
+            <stop offset="100%" stopColor="rgb(var(--ring-cal-to))" />
           </linearGradient>
           <linearGradient id="overGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#E07070" />
-            <stop offset="100%" stopColor="#C94040" />
+            <stop offset="0%" stopColor="rgb(var(--ring-over-from))" />
+            <stop offset="100%" stopColor="rgb(var(--ring-over-to))" />
           </linearGradient>
         </defs>
 
         {/* Track */}
         <circle
           cx={size / 2} cy={size / 2} r={radius}
-          fill="none" stroke="#F4EFE6" strokeWidth={stroke}
+          fill="none" stroke="rgb(var(--ring-track))" strokeWidth={stroke}
         />
 
         {/* Progress */}
@@ -60,9 +60,6 @@ export default function CalorieCircle({ consumed = 0, target = 2000, size = 220 
         </span>
         <span className="text-[11px] font-medium text-ink-muted tabular-nums">
           / {target.toLocaleString("vi-VN")} kcal
-        </span>
-        <span className="mt-1.5 text-[11px] font-medium text-ink-faint tabular-nums">
-          đã nạp {Math.round(consumed).toLocaleString("vi-VN")}
         </span>
       </div>
     </div>

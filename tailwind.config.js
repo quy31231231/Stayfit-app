@@ -20,6 +20,9 @@ module.exports = {
         mist:   { DEFAULT: 'rgb(var(--mist) / <alpha-value>)',   soft: 'rgb(var(--mist-soft) / <alpha-value>)',   deep: 'rgb(var(--mist-deep) / <alpha-value>)' },
         surface:{ DEFAULT: 'rgb(var(--surface) / <alpha-value>)', soft: 'rgb(var(--surface-soft) / <alpha-value>)' },
         onaccent: 'rgb(var(--on-accent) / <alpha-value>)',
+        ringcal:{ from: 'rgb(var(--ring-cal-from) / <alpha-value>)', to: 'rgb(var(--ring-cal-to) / <alpha-value>)',
+                  track: 'rgb(var(--ring-track) / <alpha-value>)',
+                  'over-from': 'rgb(var(--ring-over-from) / <alpha-value>)', 'over-to': 'rgb(var(--ring-over-to) / <alpha-value>)' },
       },
       fontFamily: {
         sans: ['var(--font-jakarta)', 'ui-sans-serif', 'system-ui', 'sans-serif'],

@@ -37,7 +37,7 @@ export default function WeeklyTrendCard({ data = [], target = 2000 }) {
               <div key={i} className="flex flex-1 flex-col items-center gap-2">
                 <div className="relative flex w-full justify-center" style={{ height: "100%" }}>
                   <div
-                    className={`w-full max-w-[22px] rounded-t-lg rounded-b-md ${barColor} transition-all duration-500`}
+                    className={`w-full max-w-[22px] rounded-t-lg rounded-b-md ${barColor} transition-[height] duration-500`}
                     style={{ height: `${Math.max(heightPct, 3)}%`, alignSelf: "flex-end" }}
                     title={`${d.kcal} kcal`}
                   />
