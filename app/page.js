@@ -177,16 +177,21 @@ export default function App() {
         }
     }, []);
 
-    // Cache cục bộ (offline) — debounce để không serialize toàn bộ history trên render path mỗi lần state đổi.
-    // Dữ liệu thật vẫn được đẩy lên Supabase (effect persist riêng); cache trễ vài trăm ms là vô hại.
+    // Cache cục bộ (offline) — debounce + chỉ ghi key khi giá trị của NÓ thực sự đổi
+    // (đổi tab/state khác không serialize lại history). Dữ liệu thật vẫn đẩy lên Supabase.
+    const lastCacheRef = useRef({});
     useEffect(() => {
         if (!isClient) return;
         const id = setTimeout(() => {
-            localStorage.setItem('stayfit_profile', JSON.stringify(profile));
-            localStorage.setItem('stayfit_history', JSON.stringify(history));
-            localStorage.setItem('stayfit_custom_foods', JSON.stringify(customFoodList));
-            localStorage.setItem('stayfit_deleted_common', JSON.stringify(deletedCommonFoods));
-            localStorage.setItem('stayfit_dismissed_suggestions', JSON.stringify(dismissedSuggestions));
+            const writeIfChanged = (key, value) => {
+                const s = JSON.stringify(value);
+                if (lastCacheRef.current[key] !== s) { localStorage.setItem(key, s); lastCacheRef.current[key] = s; }
+            };
+            writeIfChanged('stayfit_profile', profile);
+            writeIfChanged('stayfit_history', history);
+            writeIfChanged('stayfit_custom_foods', customFoodList);
+            writeIfChanged('stayfit_deleted_common', deletedCommonFoods);
+            writeIfChanged('stayfit_dismissed_suggestions', dismissedSuggestions);
             if (view !== "profile" && userId) localStorage.setItem('stayfit_setup', 'done');
         }, 400);
         return () => clearTimeout(id);
