@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 
 import { COMMON_FOODS } from './_data/common-foods';
 import { formatDate, calcMacro } from './_lib/format';
+import { computeStreak } from './_lib/streak';
 import { normalizeFoodLookup, normalizeFoodGroupKey, suggestQty, unitToGrams } from './_lib/food';
 import { isValidGtin, gs1Country } from './_lib/barcode';
 import { getMealByHour, mentionsMealInText, normPhone, generateUniqueTimestamp } from './_lib/misc';
@@ -31,6 +32,7 @@ import CalorieCircle from './dashboard/_components/CalorieCircle';
 import MacroBar from './dashboard/_components/MacroBar';
 import FoodLogSection from './dashboard/_components/FoodLogSection';
 import GreetingHeader from './dashboard/_components/GreetingHeader';
+import StreakBadge from './dashboard/_components/StreakBadge';
 import BottomNav from './dashboard/_components/BottomNav';
 // MacroProgressBar & MindfulCard đã tách ra file riêng nhưng KHÔNG dùng trong page.js
 // (dead code cũ — app dùng MacroBar; MindfulCard chưa được gắn vào dashboard). Giữ file để Phase 2 dùng lại.
@@ -393,6 +395,7 @@ function AppInner() {
     }, [password, currentDate, history, profile.avatarKey]);
 
     const [recipeListRef] = useAutoAnimate();
+    const streak = useMemo(() => computeStreak(history, formatDate(new Date())), [history]);
     const dailyKcal = Math.round(dailyLog.reduce((s, i) => s + (i.kcal || 0), 0) * 10) / 10;
     const dailyProtein = Math.round(dailyLog.reduce((s, i) => s + (i.protein || 0), 0) * 10) / 10;
     const dailyCarb = Math.round(dailyLog.reduce((s, i) => s + (i.carb || 0), 0) * 10) / 10;
@@ -1488,6 +1491,7 @@ function AppInner() {
                 <main className="p-4 space-y-5">
                     {/* GREETING */}
                     <GreetingHeader userName={profile.nickname?.trim() || "bạn"} avatarUrl={profile.avatarKey ? imgUrls[profile.avatarKey] : null} />
+                    <StreakBadge current={streak.current} longest={streak.longest} />
 
                     {/* CALORIE HERO — vòng tròn + hàng 2 cột (Đã nạp / Còn dư) + 3 macro bar */}
                     <DashboardCard tone="white" padding="lg" className="overflow-hidden">
