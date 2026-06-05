@@ -170,7 +170,7 @@ function AppInner() {
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, foodToDelete: null, alertMessage: "" });
     const [phoneInput, setPhoneInput] = useState("");
     const [phonePass, setPhonePass] = useState("");
-    const [authMode, setAuthMode] = useState("register"); // 'register' | 'login'
+    const [authMode, setAuthMode] = useState("login"); // 'login' | 'register' — mặc định Đăng nhập
     const [authName, setAuthName] = useState("");          // Họ và tên → gợi ý nickname onboarding
     const [authConfirmPass, setAuthConfirmPass] = useState("");
     const [showPass, setShowPass] = useState(false);
@@ -303,7 +303,7 @@ function AppInner() {
         return () => { active = false; sub.subscription.unsubscribe(); };
     }, [isClient]);
 
-    // SĐT làm username: dùng email tổng hợp <sđt>@phone.stayfit.app (không OTP). Thử login → chưa có thì đăng ký.
+    // SĐT làm username: email tổng hợp <sđt>@phone.stayfit.app (không OTP). Đăng nhập / Đăng ký tách theo authMode.
     const handlePhoneAuth = async () => {
         const phone = normPhone(phoneInput); const pwd = phonePass.trim();
         if (!phone || phone.length < 8) { toast.error("Số điện thoại không hợp lệ!"); return; }
@@ -316,15 +316,15 @@ function AppInner() {
             const email = `${phone}@phone.stayfit.app`;
             if (authMode === "login") {
                 const { error } = await supa.auth.signInWithPassword({ email, password: pwd });
-                if (error) throw new Error("Sai SĐT hoặc mật khẩu (hoặc tài khoản chưa tồn tại).");
+                if (error) throw new Error("Sai số điện thoại hoặc mật khẩu.");
             } else {
-                const { error } = await supa.auth.signInWithPassword({ email, password: pwd });
-                if (error) {
-                    const up = await supa.auth.signUp({ email, password: pwd });
-                    if (up.error) throw up.error;
-                    if (!up.data.session) {
-                        toast.info("Đã tạo tài khoản. Nếu chưa vào được, kiểm tra Supabase đã TẮT 'Confirm email'.");
-                    }
+                const { data, error } = await supa.auth.signUp({ email, password: pwd });
+                const exists = (error && /registered|already|exists/i.test(error.message))
+                    || (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0);
+                if (exists) { toast.error("Số điện thoại này đã có tài khoản — hãy Đăng nhập."); setAuthMode("login"); return; }
+                if (error) throw error;
+                if (!data.session) {
+                    toast.info("Đã tạo tài khoản. Nếu chưa vào được, kiểm tra Supabase đã TẮT 'Confirm email'.");
                 }
             }
             // Session effect tự nạp dữ liệu + vào app.
