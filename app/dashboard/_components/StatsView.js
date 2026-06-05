@@ -662,4 +662,4 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     );
 }
 
-export default StatsView;
+export default React.memo(StatsView);
