@@ -28,7 +28,9 @@ import CalorieCircle from './dashboard/_components/CalorieCircle';
 import MacroBar from './dashboard/_components/MacroBar';
 import FoodLogSection from './dashboard/_components/FoodLogSection';
 import GreetingHeader from './dashboard/_components/GreetingHeader';
-import BreathingTimer from './dashboard/_components/BreathingTimer';
+import BottomNav from './dashboard/_components/BottomNav';
+// MacroProgressBar & MindfulCard đã tách ra file riêng nhưng KHÔNG dùng trong page.js
+// (dead code cũ — app dùng MacroBar; MindfulCard chưa được gắn vào dashboard). Giữ file để Phase 2 dùng lại.
 import { getSupabaseBrowser, isSupabaseConfigured } from '../lib/supabase/client';
 import { loadUserData, saveSnapshot, upsertWeight as sbUpsertWeight, deleteWeight as sbDeleteWeight, addScanFeedback } from '../lib/supabase/data';
 import { uploadImage, signGets } from '../lib/r2/upload';
@@ -48,20 +50,6 @@ Chart.register(ChartDataLabels);
 // Helper thuần đã tách sang app/_lib/* (format, food, barcode, misc).
 
 // --- COMPONENTS ---
-function MacroProgressBar({ label, current, target, colorClass }) {
-    const pct = Math.min((current / target) * 100, 100) || 0;
-    return (
-        <div className="w-full">
-            <div className="flex justify-between text-[10px] font-black uppercase mb-1.5">
-                <span className="text-ink-muted">{label}</span>
-                <span className="text-ink">{current}g <span className="opacity-40">/ {target}g</span></span>
-            </div>
-            <div className="w-full bg-cream-deep rounded-full h-1.5 overflow-hidden">
-                <div className={`h-full ${colorClass} transition-[width] duration-700 ease-out`} style={{ width: `${pct}%` }}></div>
-            </div>
-        </div>
-    );
-}
 
 function StatsView({ history, profile, setProfile, target, targetLog, setView, view, setCurrentDate, userId, password, pendingChangeRef, theme }) {
     const [weightLog, setWeightLog] = useState(() => {
@@ -715,21 +703,6 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
     );
 }
 
-function BottomNav({view, setView}) {
-    return (
-        <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-xl border-t border-cream-deep p-4 z-40 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] max-w-md mx-auto">
-            <button onClick={() => setView("journal")} className={`flex flex-col items-center gap-1.5 transition-transform duration-300 w-1/3 ${view==='journal' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
-                <IconJournal /><span className="text-[9px] uppercase font-bold tracking-tighter">Nhật ký</span>
-            </button>
-            <button onClick={() => setView("stats")} className={`flex flex-col items-center gap-1.5 transition-transform duration-300 w-1/3 ${view==='stats' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
-                <IconStats /><span className="text-[9px] uppercase font-bold tracking-tighter">Thống kê</span>
-            </button>
-            <button onClick={() => setView("profile")} className={`flex flex-col items-center gap-1.5 transition-transform duration-300 w-1/3 ${view==='profile' ? 'text-orange scale-110 font-black':'text-ink-faint opacity-60'}`}>
-                <IconUser /><span className="text-[9px] uppercase font-bold tracking-tighter">Hồ sơ</span>
-            </button>
-        </div>
-    );
-}
 
 // --- MAIN APP EXPORT ---
 export default function App() {
@@ -3204,22 +3177,3 @@ export default function App() {
 /*  HELPER COMPONENTS — dùng trong dashboard layout của Nhật ký   */
 /* ────────────────────────────────────────────────────────────── */
 
-function MindfulCard() {
-    const [breathing, setBreathing] = useState(false);
-    return (
-        <>
-            <DashboardCard tone="sage" padding="lg">
-                <div className="flex items-start gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-surface text-xl shadow-soft animate-gentle-pulse" style={{ animationDuration: "6s" }}>🧘</span>
-                    <div className="min-w-0">
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sage-deep">Mindful</span>
-                        <h3 className="mt-1 text-[15px] font-bold tracking-tight text-ink">Thư giãn 2 phút</h3>
-                        <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">Hít sâu, thở chậm. Sức khoẻ tinh thần cũng quan trọng như dinh dưỡng.</p>
-                        <button type="button" onClick={() => setBreathing(true)} className="mt-3 rounded-full bg-surface px-4 py-1.5 text-[11px] font-semibold text-sage-deep ring-1 ring-sage/15 transition hover:bg-sage hover:text-white">Bắt đầu thở</button>
-                    </div>
-                </div>
-            </DashboardCard>
-            {breathing && <BreathingTimer onClose={() => setBreathing(false)} />}
-        </>
-    );
-}
