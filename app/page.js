@@ -12,6 +12,7 @@ import { ACTIVITY_LEVELS, GOALS, MEAL_TYPES, TEXT_SUGGESTIONS } from './_data/co
 import { DIET_MODES } from './_data/diet-modes';
 import { IconTrash, IconPlus, IconSearch, IconEdit, IconUndo } from './_components/icons';
 import { toast, Toaster } from './_components/Toast';
+import { ChartSkeleton, DashboardSkeleton } from './_components/Skeleton';
 
 import {
     DndContext,
@@ -41,7 +42,7 @@ const OnboardingWizard = dynamic(() => import('./_components/OnboardingWizard'),
 // Lazy: tab Thống kê (chart.js) chỉ tải khi mở → chart.js rời khỏi bundle ban đầu.
 const StatsView = dynamic(() => import('./dashboard/_components/StatsView'), {
     ssr: false,
-    loading: () => <div className="p-10 text-center text-ink-faint text-sm">Đang tải biểu đồ…</div>,
+    loading: () => <ChartSkeleton />,
 });
 
 // --- ICONS (SVG) ---
@@ -59,6 +60,7 @@ function AppInner() {
     const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
     const [displayName, setDisplayName] = useState(""); // tên hiển thị (email/SĐT) — userId giờ là uuid
+    const [dataLoaded, setDataLoaded] = useState(false); // cờ đã nạp xong dữ liệu (cho skeleton lần đầu)
     const [showOnboarding, setShowOnboarding] = useState(false); // wizard lần đầu đăng nhập
     const [view, setView] = useState("profile");
     // Theme sáng/tối — mặc định sáng, lưu localStorage theo thiết bị (không sync Supabase).
@@ -233,6 +235,7 @@ function AppInner() {
             localStorage.setItem("stayfit_weight_log", JSON.stringify(d.weightLog));
             setDisplayName(email || "");
             dataLoadedRef.current = true;
+            setDataLoaded(true);
             // Lần đầu (chưa có biệt danh & chưa hoàn tất setup) → mở onboarding wizard.
             if (!d.profile.nickname && !localStorage.getItem('stayfit_setup')) {
                 setShowOnboarding(true);
@@ -1451,6 +1454,15 @@ function AppInner() {
     }
 
     if (view === "journal") {
+        // Skeleton lần nạp đầu (chưa có cache lẫn dữ liệu remote) → tránh màn trống nhấp nháy.
+        if (userId && !dataLoaded && Object.keys(history).length === 0) {
+            return (
+                <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 relative font-sans text-ink">
+                    <main className="p-4"><DashboardSkeleton /></main>
+                    <BottomNav view={view} setView={setView} />
+                </div>
+            );
+        }
         return (
             <div className="max-w-md mx-auto min-h-screen bg-cream pb-28 relative font-sans text-ink">
                 {/* DATE NAV — slim sticky bar */}
