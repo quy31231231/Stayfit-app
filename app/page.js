@@ -11,6 +11,7 @@ import { getMealByHour, mentionsMealInText, normPhone, generateUniqueTimestamp }
 import { ACTIVITY_LEVELS, GOALS, MEAL_TYPES, TEXT_SUGGESTIONS } from './_data/constants';
 import { DIET_MODES } from './_data/diet-modes';
 import { IconTrash, IconPlus, IconSearch, IconEdit, IconUndo } from './_components/icons';
+import { Toaster } from './_components/Toast';
 
 import {
     DndContext,
@@ -54,7 +55,7 @@ const StatsView = dynamic(() => import('./dashboard/_components/StatsView'), {
 
 
 // --- MAIN APP EXPORT ---
-export default function App() {
+function AppInner() {
     const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
     const [displayName, setDisplayName] = useState(""); // tên hiển thị (email/SĐT) — userId giờ là uuid
@@ -2531,3 +2532,13 @@ export default function App() {
 /*  HELPER COMPONENTS — dùng trong dashboard layout của Nhật ký   */
 /* ────────────────────────────────────────────────────────────── */
 
+
+// Bọc App để <Toaster/> luôn mount (mọi nhánh return: login / nhật ký / thống kê).
+export default function App() {
+    return (
+        <>
+            <AppInner />
+            <Toaster />
+        </>
+    );
+}
