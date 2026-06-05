@@ -986,11 +986,13 @@ export default function App() {
         setIsClient(true);
         if (typeof window !== "undefined") {
             // userId/password giờ lấy từ session Supabase (xem effect bên dưới), không đọc localStorage nữa.
-            const p = localStorage.getItem('stayfit_profile'); if(p) setProfile({...profile, ...JSON.parse(p)});
-            const tl = localStorage.getItem('stayfit_target_log'); if(tl) setTargetLog(JSON.parse(tl));
-            const h = localStorage.getItem('stayfit_history'); if(h) setHistory(JSON.parse(h));
-            const c = localStorage.getItem('stayfit_custom_foods'); if(c) setCustomFoodList(JSON.parse(c));
-            const d = localStorage.getItem('stayfit_deleted_common'); if(d) setDeletedCommonFoods(JSON.parse(d));
+            // Đọc cache cục bộ an toàn: nếu localStorage hỏng/không hợp lệ → bỏ qua thay vì làm vỡ app lúc khởi tạo.
+            const readJSON = (key) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; } };
+            const p = readJSON('stayfit_profile'); if (p) setProfile(prev => ({ ...prev, ...p }));
+            const tl = readJSON('stayfit_target_log'); if (tl) setTargetLog(tl);
+            const h = readJSON('stayfit_history'); if (h) setHistory(h);
+            const c = readJSON('stayfit_custom_foods'); if (c) setCustomFoodList(c);
+            const d = readJSON('stayfit_deleted_common'); if (d) setDeletedCommonFoods(d);
             try {
                 const fb = localStorage.getItem('stayfit_scan_feedback');
                 if (fb) {
@@ -1010,15 +1012,19 @@ export default function App() {
         }
     }, []);
 
+    // Cache cục bộ (offline) — debounce để không serialize toàn bộ history trên render path mỗi lần state đổi.
+    // Dữ liệu thật vẫn được đẩy lên Supabase (effect persist riêng); cache trễ vài trăm ms là vô hại.
     useEffect(() => {
-        if (isClient) {
+        if (!isClient) return;
+        const id = setTimeout(() => {
             localStorage.setItem('stayfit_profile', JSON.stringify(profile));
             localStorage.setItem('stayfit_history', JSON.stringify(history));
             localStorage.setItem('stayfit_custom_foods', JSON.stringify(customFoodList));
             localStorage.setItem('stayfit_deleted_common', JSON.stringify(deletedCommonFoods));
             localStorage.setItem('stayfit_dismissed_suggestions', JSON.stringify(dismissedSuggestions));
             if (view !== "profile" && userId) localStorage.setItem('stayfit_setup', 'done');
-        }
+        }, 400);
+        return () => clearTimeout(id);
     }, [profile, history, customFoodList, deletedCommonFoods, dismissedSuggestions, view, userId, isClient]);
 
     // Refs giữ lại để các tham chiếu khác (StatsView, removeFood...) không vỡ — native không cần chống echo Sheets nữa.
