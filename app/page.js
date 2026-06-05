@@ -6,6 +6,10 @@ import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { COMMON_FOODS } from './_data/common-foods';
+import { formatDate, calcMacro } from './_lib/format';
+import { normalizeFoodLookup, normalizeFoodGroupKey, suggestQty, unitToGrams } from './_lib/food';
+import { isValidGtin, gs1Country } from './_lib/barcode';
+import { getMealByHour, mentionsMealInText, normPhone, generateUniqueTimestamp } from './_lib/misc';
 
 import {
     DndContext,
@@ -52,21 +56,6 @@ const GOALS = [
     { label: "Duy trì", value: 0 }, { label: "Tăng cân", value: 300 }
 ];
 const MEAL_TYPES = ["Bữa sáng", "Bữa trưa", "Bữa tối", "Ăn vặt"];
-const getMealByHour = () => {
-    const h = new Date().getHours();
-    if (h >= 4 && h < 10) return "Bữa sáng";
-    if (h >= 10 && h < 14) return "Bữa trưa";
-    if (h >= 14 && h < 17) return "Ăn vặt";
-    if (h >= 17 && h < 21) return "Bữa tối";
-    return "Ăn vặt";
-};
-// Check user has explicitly mention meal type in their description.
-// Strip diacritics for robust match.
-const mentionsMealInText = (text) => {
-    if (!text) return false;
-    const t = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-    return /\b(bua\s*sang|bua\s*trua|bua\s*toi|an\s*vat|an\s*nhe|sang\s*nay|trua\s*nay|toi\s*nay|sang\s*som|toi\s*muon)\b/.test(t);
-};
 const TEXT_SUGGESTIONS = [
     "Bữa sáng tôi ăn 2 quả trứng luộc với 1 bát salad rau trộn",
     "Bữa tối tôi ăn 150g bò bít tết nướng với rau củ hấp",
@@ -105,104 +94,7 @@ const DIET_MODES = [
     }
 ];
 
-const formatDate = (date) => {
-    const d = new Date(date);
-    const vietnamDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
-    return `${vietnamDate.getFullYear()}-${String(vietnamDate.getMonth() + 1).padStart(2, '0')}-${String(vietnamDate.getDate()).padStart(2, '0')}`;
-};
-const calcMacro = (val, per, q) => Math.round((val / per) * q * 10) / 10;
-
-// Chuẩn hóa số điện thoại → userId (chỉ chữ số, +84/84 → 0...).
-const normPhone = (p) => {
-    let d = (p || "").replace(/\D/g, "");
-    if (d.startsWith("84")) d = "0" + d.slice(2);
-    return d;
-};
-
-// Kiểm tra check digit GTIN (EAN-13/EAN-8/UPC-A/GTIN-14) — thuần tính, offline.
-const isValidGtin = (code) => {
-    const s = String(code || "").trim();
-    if (!/^\d{8}$|^\d{12,14}$/.test(s)) return false;
-    const digits = s.split("").map(Number);
-    const check = digits.pop();
-    let sum = 0;
-    // Trọng số 3/1 xen kẽ, tính từ phải qua trái (ngay trước check digit).
-    for (let i = digits.length - 1, w = 3; i >= 0; i--, w = w === 3 ? 1 : 3) sum += digits[i] * w;
-    return (10 - (sum % 10)) % 10 === check;
-};
-
-// Bảng prefix GS1 (3 số đầu EAN-13) → quốc gia đăng ký mã. Tập phổ biến + VN.
-const GS1_PREFIXES = [
-    [[0, 19], "Mỹ / Canada"], [[30, 39], "Mỹ"], [[60, 139], "Mỹ / Canada"],
-    [[300, 379], "Pháp"], [[380, 380], "Bulgaria"], [[400, 440], "Đức"],
-    [[450, 459], "Nhật Bản"], [[460, 469], "Nga"], [[471, 471], "Đài Loan"],
-    [[480, 480], "Philippines"], [[489, 489], "Hong Kong"], [[490, 499], "Nhật Bản"],
-    [[500, 509], "Anh"], [[690, 699], "Trung Quốc"], [[729, 729], "Israel"],
-    [[760, 769], "Thụy Sĩ"], [[800, 839], "Ý"], [[840, 849], "Tây Ban Nha"],
-    [[871, 871], "Hà Lan"], [[880, 880], "Hàn Quốc"], [[885, 885], "Thái Lan"],
-    [[888, 888], "Singapore"], [[890, 890], "Ấn Độ"], [[893, 893], "Việt Nam"],
-    [[899, 899], "Indonesia"], [[930, 939], "Úc"], [[955, 955], "Malaysia"],
-];
-const gs1Country = (code) => {
-    const s = String(code || "").trim();
-    if (!/^\d{12,14}$/.test(s)) return null; // chỉ EAN-13/UPC mới có prefix vùng
-    const ean13 = s.length === 12 ? "0" + s : s.slice(-13); // UPC-A → thêm 0 đầu
-    const p = parseInt(ean13.slice(0, 3), 10);
-    for (const [[lo, hi], name] of GS1_PREFIXES) if (p >= lo && p <= hi) return name;
-    return "Không rõ";
-};
-
-const generateUniqueTimestamp = () => {
-  const now = new Date();
-  const svSE = now.toLocaleString("sv-SE", { timeZone: "Asia/Ho_Chi_Minh" });
-  const ms = String(now.getMilliseconds()).padStart(3, "0");
-  const rand = Math.random().toString(36).slice(2, 7);
-  return `${svSE}.${ms}-${rand}`;
-};
-const removeAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
-const normalizeFoodLookup = (value) => removeAccents(String(value || "").toLowerCase()).replace(/\s+/g, " ").trim();
-const normalizeFoodGroupKey = (value) => normalizeFoodLookup(value)
-    .replace(/\bphan\s+nac\b/g, "nac")
-    .replace(/[()]/g, " ")
-    .replace(/[\/,;:.-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-// Gợi ý định lượng từ lịch sử: trả về quantity hay dùng nhất cho món `foodName` (cùng `unit`).
-// Hòa số lần → lấy lần ghi gần đây nhất. Không có dữ liệu → null.
-const suggestQty = (history, foodName, unit) => {
-    const targetName = normalizeFoodLookup(foodName);
-    const targetUnit = (unit || "g").toLowerCase();
-    if (!targetName) return null;
-    const stats = new Map(); // quantity -> { count, recency }
-    let order = 0;
-    for (const date of Object.keys(history || {}).sort()) {
-        for (const item of history[date] || []) {
-            if (normalizeFoodLookup(item.name) !== targetName) continue;
-            if ((item.unit || "g").toLowerCase() !== targetUnit) continue;
-            const q = Number(item.quantity);
-            if (!(q > 0)) continue;
-            const prev = stats.get(q);
-            if (prev) { prev.count++; prev.recency = order; }
-            else stats.set(q, { count: 1, recency: order });
-            order++;
-        }
-    }
-    let best = null, bestStat = null;
-    for (const [q, s] of stats) {
-        if (!bestStat || s.count > bestStat.count || (s.count === bestStat.count && s.recency > bestStat.recency)) {
-            best = q; bestStat = s;
-        }
-    }
-    return best;
-};
-const UNIT_GRAM_WEIGHTS = { 'tô': 400, 'bát': 200, 'ly': 250, 'quả': 100, 'cái': 100, 'chiếc': 100, 'chén': 70, 'đĩa': 350, 'cuốn': 80, 'ổ': 80, 'suất': 350, 'gói': 75, 'miếng': 80, 'phần': 300 };
-// Quy đổi số lượng + đơn vị sang gram (ml tính tương đương gram). Đơn vị đếm dùng bảng ước lượng.
-const unitToGrams = (qty, unit) => {
-    const u = (unit || "g").toLowerCase();
-    if (['kg', 'l', 'lít'].includes(u)) return qty * 1000;
-    if (['ml', 'g', 'gram'].includes(u)) return qty;
-    return qty * (UNIT_GRAM_WEIGHTS[u] || 100);
-};
+// Helper thuần đã tách sang app/_lib/* (format, food, barcode, misc).
 
 // --- COMPONENTS ---
 function MacroProgressBar({ label, current, target, colorClass }) {
