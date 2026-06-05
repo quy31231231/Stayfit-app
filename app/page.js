@@ -13,6 +13,7 @@ import { ACTIVITY_LEVELS, GOALS, MEAL_TYPES, TEXT_SUGGESTIONS } from './_data/co
 import { DIET_MODES } from './_data/diet-modes';
 import { IconUser, IconPhone, IconLock, IconEye, IconEyeOff, IconTrash, IconPlus, IconSearch, IconEdit, IconUndo } from './_components/icons';
 import { toast, Toaster } from './_components/Toast';
+import ErrorBoundary from './_components/ErrorBoundary';
 import { ChartSkeleton, DashboardSkeleton } from './_components/Skeleton';
 import EmptyState from './_components/EmptyState';
 import AnimatedNumber from './_components/AnimatedNumber';
@@ -229,10 +230,8 @@ function AppInner() {
     }, [profile, history, customFoodList, deletedCommonFoods, dismissedSuggestions, view, userId, isClient]);
 
     // Refs giữ lại để các tham chiếu khác (StatsView, removeFood...) không vỡ — native không cần chống echo Sheets nữa.
-    const lastPullAtRef = useRef(0);
-    const pullingRef = useRef(false);
-    const pendingChangeRef = useRef(false);
-    const pendingDeleteCountRef = useRef(0);
+    const pendingChangeRef = useRef(false);   // dùng ở StatsView (chặn pull khi đang ghi cân)
+    const saveErrorShownRef = useRef(false);  // chỉ báo lỗi lưu 1 lần / chuỗi thất bại
     // Chỉ cho phép lưu (persist) SAU khi đã load xong — chống ghi đè/xóa-trắng dữ liệu khi state còn rỗng.
     const dataLoadedRef = useRef(false);
 
@@ -247,7 +246,11 @@ function AppInner() {
                 customFoods: customFoodList,
                 deletedCommonFoods,
             });
-        } catch (err) { console.error("Lỗi lưu Supabase:", err.message); }
+            saveErrorShownRef.current = false;
+        } catch (err) {
+            console.error("Lỗi lưu Supabase:", err.message);
+            if (!saveErrorShownRef.current) { toast.error("Lưu dữ liệu thất bại — kiểm tra kết nối."); saveErrorShownRef.current = true; }
+        }
     };
 
     // Nạp dữ liệu của user (gọi NGOÀI callback onAuthStateChange để tránh deadlock auth lock).
@@ -2644,12 +2647,12 @@ function AppInner() {
 /* ────────────────────────────────────────────────────────────── */
 
 
-// Bọc App để <Toaster/> luôn mount (mọi nhánh return: login / nhật ký / thống kê).
+// Bọc App: ErrorBoundary chặn lỗi render trắng app; <Toaster/> luôn mount (mọi nhánh return).
 export default function App() {
     return (
-        <>
+        <ErrorBoundary>
             <AppInner />
             <Toaster />
-        </>
+        </ErrorBoundary>
     );
 }
