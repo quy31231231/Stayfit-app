@@ -6,6 +6,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { formatDate } from '../../_lib/format';
 import { upsertWeight as sbUpsertWeight, deleteWeight as sbDeleteWeight } from '../../../lib/supabase/data';
 import { IconTrash } from '../../_components/icons';
+import { toast } from '../../_components/Toast';
 import BottomNav from './BottomNav';
 
 Chart.register(ChartDataLabels);
@@ -59,7 +60,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
         // Hỗ trợ cả "79.5" và "79,5" (kiểu VN với dấu phẩy thập phân)
         const normalizedInput = String(weightInput || "").replace(',', '.');
         const inputVal = parseFloat(normalizedInput);
-        if (!inputVal || inputVal <= 0) return alert("Vui lòng nhập số kg hợp lệ!");
+        if (!inputVal || inputVal <= 0) { toast.error("Vui lòng nhập số kg hợp lệ!"); return; }
         const newLog = { ...weightLog, [weightDate]: inputVal };
         setWeightLog(newLog);
         localStorage.setItem('stayfit_weight_log', JSON.stringify(newLog));
@@ -493,7 +494,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                                     onClick={() => {
                                         const start = parseFloat(goalDraft.start);
                                         const tgt = parseFloat(goalDraft.target);
-                                        if (!start || !tgt || start <= 0 || tgt <= 0) { alert("Vui lòng nhập số kg hợp lệ!"); return; }
+                                        if (!start || !tgt || start <= 0 || tgt <= 0) { toast.error("Vui lòng nhập số kg hợp lệ!"); return; }
                                         setProfile({ ...profile, startWeight: start, targetWeight: tgt });
                                         setWeightModal(null);
                                         // App tự persist profile (start_weight/target_weight) qua saveSnapshot.

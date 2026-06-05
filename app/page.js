@@ -11,7 +11,7 @@ import { getMealByHour, mentionsMealInText, normPhone, generateUniqueTimestamp }
 import { ACTIVITY_LEVELS, GOALS, MEAL_TYPES, TEXT_SUGGESTIONS } from './_data/constants';
 import { DIET_MODES } from './_data/diet-modes';
 import { IconTrash, IconPlus, IconSearch, IconEdit, IconUndo } from './_components/icons';
-import { Toaster } from './_components/Toast';
+import { toast, Toaster } from './_components/Toast';
 
 import {
     DndContext,
@@ -275,10 +275,10 @@ function AppInner() {
     // SĐT làm username: dùng email tổng hợp <sđt>@phone.stayfit.app (không OTP). Thử login → chưa có thì đăng ký.
     const handlePhoneAuth = async () => {
         const phone = normPhone(phoneInput); const pwd = phonePass.trim();
-        if (!phone || phone.length < 8) return alert("Số điện thoại không hợp lệ!");
-        if (pwd.length < 6) return alert("Mật khẩu tối thiểu 6 ký tự!");
+        if (!phone || phone.length < 8) { toast.error("Số điện thoại không hợp lệ!"); return; }
+        if (pwd.length < 6) { toast.error("Mật khẩu tối thiểu 6 ký tự!"); return; }
         const supa = getSupabaseBrowser();
-        if (!supa) return alert("Chưa cấu hình Supabase.");
+        if (!supa) { toast.error("Chưa cấu hình Supabase."); return; }
         setLoginLoading(true);
         try {
             const email = `${phone}@phone.stayfit.app`;
@@ -287,17 +287,17 @@ function AppInner() {
                 const up = await supa.auth.signUp({ email, password: pwd });
                 if (up.error) throw up.error;
                 if (!up.data.session) {
-                    alert("Đã tạo tài khoản. Nếu chưa vào được, kiểm tra Supabase đã TẮT 'Confirm email'.");
+                    toast.info("Đã tạo tài khoản. Nếu chưa vào được, kiểm tra Supabase đã TẮT 'Confirm email'.");
                 }
             }
             // Session effect tự nạp dữ liệu + vào app.
-        } catch (e) { alert("❌ " + (e.message || "Lỗi đăng nhập")); }
+        } catch (e) { toast.error(e.message || "Lỗi đăng nhập"); }
         finally { setLoginLoading(false); }
     };
 
     const handleGoogleLogin = async () => {
         const supa = getSupabaseBrowser();
-        if (!supa) return alert("Đăng nhập Google chưa được cấu hình (thiếu Supabase env).");
+        if (!supa) { toast.error("Đăng nhập Google chưa được cấu hình (thiếu Supabase env)."); return; }
         await supa.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo: window.location.origin + '/auth/callback' },
@@ -473,6 +473,7 @@ function AppInner() {
             meal: selectedMeal, id: crypto.randomUUID(), timestamp: generateUniqueTimestamp()
         };
         setHistory(prev => ({ ...prev, [currentDate]: [...(prev[currentDate] || []), newItem] }));
+        toast.success(`Đã thêm ${newItem.name}`);
         setSelectedFood(null); setSearchQuery(""); setQty(1);
     };
 
@@ -1085,7 +1086,7 @@ function AppInner() {
     // HÀM MỚI: Lưu thông tin sau khi chỉnh sửa vào THƯ VIỆN
     const saveLibraryEdit = () => {
         if (!libraryEditForm.name || libraryEditForm.kcal === "") {
-            alert("Vui lòng nhập đủ tên và số Kcal.");
+            toast.error("Vui lòng nhập đủ tên và số Kcal.");
             return;
         }
 
