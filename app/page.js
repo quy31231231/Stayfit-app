@@ -263,12 +263,13 @@ function AppInner() {
             localStorage.setItem("stayfit_weight_log", JSON.stringify(d.weightLog));
             setDisplayName(email || "");
             dataLoadedRef.current = true;
-            setDataLoaded(true);
             // Lần đầu (chưa có biệt danh & chưa hoàn tất setup) → mở onboarding wizard.
             if (!d.profile.nickname && !localStorage.getItem('stayfit_setup')) {
                 setShowOnboarding(true);
             }
         } catch (err) { console.error("Lỗi nạp dữ liệu:", err.message); }
+        // Dù thành công hay lỗi: tắt skeleton để không kẹt màn chờ (ref vẫn cho retry khi lỗi).
+        finally { setDataLoaded(true); }
     };
 
     // Hoàn tất onboarding: merge profile + đánh dấu đã setup + vào Nhật ký.
@@ -316,7 +317,7 @@ function AppInner() {
             const email = `${phone}@phone.stayfit.app`;
             if (authMode === "login") {
                 const { error } = await supa.auth.signInWithPassword({ email, password: pwd });
-                if (error) throw new Error("Sai số điện thoại hoặc mật khẩu.");
+                if (error) throw new Error(/invalid|credential/i.test(error.message) ? "Sai số điện thoại hoặc mật khẩu." : (error.message || "Lỗi đăng nhập"));
             } else {
                 const { data, error } = await supa.auth.signUp({ email, password: pwd });
                 const exists = (error && /registered|already|exists/i.test(error.message))
