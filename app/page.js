@@ -13,6 +13,7 @@ import { DIET_MODES } from './_data/diet-modes';
 import { IconTrash, IconPlus, IconSearch, IconEdit, IconUndo } from './_components/icons';
 import { toast, Toaster } from './_components/Toast';
 import { ChartSkeleton, DashboardSkeleton } from './_components/Skeleton';
+import EmptyState from './_components/EmptyState';
 
 import {
     DndContext,
@@ -1611,7 +1612,9 @@ function AppInner() {
                                         </div>
                                     ))}
                                     {filteredFoods.length === 0 && (
-                                        <p className="col-span-2 text-center py-6 text-ink-muted text-[12px] italic">Không tìm thấy món ăn</p>
+                                        <div className="col-span-2">
+                                            <EmptyState icon="🔍" title="Không tìm thấy món" subtitle={searchQuery.trim() ? `Không có kết quả cho "${searchQuery.trim()}"` : "Thử từ khóa khác"} />
+                                        </div>
                                     )}
                                 </div>
 

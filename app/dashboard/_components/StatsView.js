@@ -7,6 +7,7 @@ import { formatDate } from '../../_lib/format';
 import { upsertWeight as sbUpsertWeight, deleteWeight as sbDeleteWeight } from '../../../lib/supabase/data';
 import { IconTrash } from '../../_components/icons';
 import { toast } from '../../_components/Toast';
+import EmptyState from '../../_components/EmptyState';
 import BottomNav from './BottomNav';
 
 Chart.register(ChartDataLabels);
@@ -520,7 +521,7 @@ function StatsView({ history, profile, setProfile, target, targetLog, setView, v
                             </div>
                             <div className="flex-1 overflow-y-auto no-scrollbar bg-cream-soft rounded-2xl p-2 ring-1">
                                 {sortedDates.length === 0 ? (
-                                    <p className="text-center text-ink-faint text-[12px] italic font-medium py-8">Chưa có bản ghi nào</p>
+                                    <EmptyState icon="⚖️" title="Chưa có dữ liệu cân nặng" subtitle="Ghi cân nặng đầu tiên để xem biểu đồ" />
                                 ) : (
                                     sortedDates.map(date => (
                                         <div key={date} className="flex justify-between items-center p-3 bg-surface rounded-xl mb-1.5 last:mb-0 ring-1 ring-cream-deep/40">
