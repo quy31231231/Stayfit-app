@@ -14,6 +14,8 @@ import { IconTrash, IconPlus, IconSearch, IconEdit, IconUndo } from './_componen
 import { toast, Toaster } from './_components/Toast';
 import { ChartSkeleton, DashboardSkeleton } from './_components/Skeleton';
 import EmptyState from './_components/EmptyState';
+import AnimatedNumber from './_components/AnimatedNumber';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 import {
     DndContext,
@@ -390,6 +392,7 @@ function AppInner() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [password, currentDate, history, profile.avatarKey]);
 
+    const [recipeListRef] = useAutoAnimate();
     const dailyKcal = Math.round(dailyLog.reduce((s, i) => s + (i.kcal || 0), 0) * 10) / 10;
     const dailyProtein = Math.round(dailyLog.reduce((s, i) => s + (i.protein || 0), 0) * 10) / 10;
     const dailyCarb = Math.round(dailyLog.reduce((s, i) => s + (i.carb || 0), 0) * 10) / 10;
@@ -1498,7 +1501,7 @@ function AppInner() {
                             <div>
                                 <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">Đã nạp</span>
                                 <p className="mt-1.5 flex items-baseline gap-1">
-                                    <span className="text-[22px] font-extrabold leading-none tracking-tight text-ink tabular-nums">{Math.round(dailyKcal).toLocaleString("vi-VN")}</span>
+                                    <AnimatedNumber value={Math.round(dailyKcal)} className="text-[22px] font-extrabold leading-none tracking-tight text-ink tabular-nums" />
                                     <span className="text-[11px] font-medium text-ink-faint tabular-nums">/ {Number(target).toLocaleString("vi-VN")} kcal</span>
                                 </p>
                             </div>
@@ -1765,7 +1768,7 @@ function AppInner() {
                                 {recipe.ingredients.length === 0 ? (
                                     <p className="text-center py-6 text-ink-muted text-[12px] italic">Tìm và thêm nguyên liệu để ghép thành món mới</p>
                                 ) : (
-                                    <div className="space-y-2">
+                                    <div ref={recipeListRef} className="space-y-2">
                                         {recipe.ingredients.map((ing, idx) => (
                                             <div key={idx} className="flex items-center gap-2 bg-cream-soft ring-1 rounded-2xl p-2.5">
                                                 <div className="min-w-0 flex-1">
