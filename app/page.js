@@ -10,6 +10,8 @@ import { formatDate, calcMacro } from './_lib/format';
 import { normalizeFoodLookup, normalizeFoodGroupKey, suggestQty, unitToGrams } from './_lib/food';
 import { isValidGtin, gs1Country } from './_lib/barcode';
 import { getMealByHour, mentionsMealInText, normPhone, generateUniqueTimestamp } from './_lib/misc';
+import { ACTIVITY_LEVELS, GOALS, MEAL_TYPES, TEXT_SUGGESTIONS } from './_data/constants';
+import { DIET_MODES } from './_data/diet-modes';
 
 import {
     DndContext,
@@ -47,52 +49,7 @@ const IconSearch = () => (<svg xmlns="http://www.w3.org/2000/svg" width="16" hei
 const IconStats = () => (<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>);
 const IconEdit = () => (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>);
 const IconUndo = () => (<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>);
-const ACTIVITY_LEVELS = [
-    { label: "Ít vận động", value: 1.2 }, { label: "Nhẹ (1-3 buổi/tuần)", value: 1.375 }, 
-    { label: "Vừa (3-5 buổi/tuần)", value: 1.55 }, { label: "Nhiều (6-7 buổi/tuần)", value: 1.725 }
-];
-const GOALS = [
-    { label: "Giảm cân nhanh", value: -500 }, { label: "Giảm cân nhẹ", value: -250 }, 
-    { label: "Duy trì", value: 0 }, { label: "Tăng cân", value: 300 }
-];
-const MEAL_TYPES = ["Bữa sáng", "Bữa trưa", "Bữa tối", "Ăn vặt"];
-const TEXT_SUGGESTIONS = [
-    "Bữa sáng tôi ăn 2 quả trứng luộc với 1 bát salad rau trộn",
-    "Bữa tối tôi ăn 150g bò bít tết nướng với rau củ hấp",
-    "Tôi ăn nhẹ với 200g sữa chua Hy Lạp không đường và các loại hạt",
-];
-const DIET_MODES = [
-    {
-        category: "1. Cân bằng & Lành mạnh",
-        items: [
-            { id: 'standard', name: "Tiêu chuẩn (Standard)", desc: "Duy trì năng lượng ổn định cho người trưởng thành khỏe mạnh.", carb: 0.50, pro: 0.20, fat: 0.30, label: "50C - 20P - 30F" },
-            { id: 'mediterranean', name: "Địa Trung Hải", desc: "Tập trung chất béo không bão hòa từ dầu ô liu và cá béo.", carb: 0.50, pro: 0.15, fat: 0.35, label: "50C - 15P - 35F" },
-            { id: 'dash', name: "DASH", desc: "Giảm muối, tăng kali, canxi để kiểm soát huyết áp.", carb: 0.55, pro: 0.18, fat: 0.27, label: "55C - 18P - 27F" }
-        ]
-    },
-    {
-        category: "2. Giảm cân & Chuyển hóa mỡ",
-        items: [
-            { id: 'keto', name: "Keto (Ketogenic)", desc: "Cắt giảm tinh bột tối đa để đốt mỡ làm năng lượng chính.", carb: 0.05, pro: 0.20, fat: 0.75, label: "5C - 20P - 75F" },
-            { id: 'lowcarb', name: "Low Carb (Ít tinh bột)", desc: "Linh hoạt hơn Keto nhưng vẫn ưu tiên protein và chất béo.", carb: 0.25, pro: 0.30, fat: 0.45, label: "25C - 30P - 45F" },
-            { id: 'zone', name: "Zone (40:30:30)", desc: "Tỷ lệ vàng để kiểm soát insulin và giảm viêm.", carb: 0.40, pro: 0.30, fat: 0.30, label: "40C - 30P - 30F" }
-        ]
-    },
-    {
-        category: "3. Các chế độ ăn đặc thù khác",
-        items: [
-            { id: 'paleo', name: "Paleo", desc: "Ăn theo thực phẩm tự nhiên, loại bỏ ngũ cốc và sữa.", carb: 0.30, pro: 0.30, fat: 0.40, label: "30C - 30P - 40F" },
-            { id: 'bodybuilding', name: "Tăng cơ - Giảm mỡ", desc: "Yêu cầu lượng Protein cao để xây dựng cơ bắp.", carb: 0.45, pro: 0.35, fat: 0.20, label: "45C - 35P - 20F" },
-            { id: 'lowfat', name: "Low Fat (Ít béo)", desc: "Hạn chế tối đa chất béo để giảm tổng lượng calo nạp vào.", carb: 0.60, pro: 0.25, fat: 0.15, label: "60C - 25P - 15F" }
-        ]
-    },
-    {
-        category: "4. Tùy chỉnh",
-        items: [
-            { id: 'custom', name: "Tự nhập tay (Custom)", desc: "Cho phép bạn tự thay đổi thông số Gram theo ý muốn.", carb: 0, pro: 0, fat: 0, label: "Tùy chọn" }
-        ]
-    }
-];
+// Hằng số & chế độ ăn đã tách sang app/_data/constants.js + diet-modes.js.
 
 // Helper thuần đã tách sang app/_lib/* (format, food, barcode, misc).
 
